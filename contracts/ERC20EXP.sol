@@ -356,12 +356,17 @@ contract ERC20Expirable is ERC20 {
             }
         } else  {
         // uint256 _startBlockInBufferSlot = _calcurateBlockNumber(era, slot);
-        //     @TODO
+        //    @TODO
         //    loop select nearly expire first 
         //    move to next slot if nearly expire slot not cover the value
         //    move to next block if block are zero balance
-        //    _retailBalances[from][fromEra][fromSlot].slotBalance -= value;
-        //    _retailBalances[from][fromEra][fromSlot].blockBalances[blockNumber] -= value;
+        //    if transfer equal or greater than slot balance move entrie slot {
+        //    Slot storage sform  = retailBalances[from][fromEra][fromSlot];
+        //    Slot storage sto = retailBalances[to][fromEra][fromSlot];
+        //    sfrom.slotBalance -= value;
+        //    sto.slotBalnce += value;
+        //    sto.blockIndexed = sfrom.
+        //    loop mapping
         //    if (txTypes == TRANSCTION_TYPES.DEFAULT) {
         //    _retailBalances[from][fromEra][fromSlot].slotBalance += value;
         //    _retailBalances[from][fromEra][fromSlot].blockBalances[blockNumber] += value;
