@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
+/// @author Sirawit Techavanitch <sirawitt42@gmail.com>
+/// @author <name> <email>
+
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 // import "./interfaces/IERC20EXP.sol";
 
