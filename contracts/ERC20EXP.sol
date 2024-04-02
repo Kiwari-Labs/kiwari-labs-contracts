@@ -355,25 +355,50 @@ contract ERC20Expirable is ERC20 {
                 slot.blockIndexed.push(blockNumberCache);
             }
         } else  {
-        // uint256 _startBlockInBufferSlot = _calcurateBlockNumber(era, slot);
-        //    @TODO
-        //    loop select nearly expire first 
-        //    move to next slot if nearly expire slot not cover the value
-        //    move to next block if block are zero balance
-        //    if transfer equal or greater than slot balance move entrie slot {
-        //    Slot storage sform  = retailBalances[from][fromEra][fromSlot];
-        //    Slot storage sto = retailBalances[to][fromEra][fromSlot];
-        //    sfrom.slotBalance -= value;
-        //    sto.slotBalnce += value;
-        //    sto.blockIndexed = sfrom.
-        //    loop mapping
-        //    if (txTypes == TRANSCTION_TYPES.DEFAULT) {
-        //    _retailBalances[from][fromEra][fromSlot].slotBalance += value;
-        //    _retailBalances[from][fromEra][fromSlot].blockBalances[blockNumber] += value;
-        //    } 
-           if (txTypes == TRANSCTION_TYPES.BURN) {
-               // do nothing
-           }
+            uint256 balanceCache = balanceOf(from);
+            if (balanceCache < value) {
+                revert ();
+            }
+           if (txTypes == TRANSCTION_TYPES.DEFAULT) {
+            // for (fromEra; fromEra < toEra; i++) {                
+            //     Slot storage sform  = retailBalances[from][fromEra][fromSlot];
+            //     Slot storage sloto = retailBalances[to][fromEra][fromSlot];
+                // MUST BE first in first out (FIFO)
+                // if buffer slot cant contain value and not move to next slot or next era {
+                //  sfrom.slotBalance -= value;
+                //  sto.slotBalnce += value;
+                //  sto.blockIndexed[index] = sfrom.blockIndexed[index];
+                // }
+                // if buffer slot can't contain all value move to next slot or next era {
+                    // sfrom.slotBalance -= value;
+                    // sto.slotBalnce += value;
+                    // move entrie slot if consume all slot balance
+                    // sto.blockIndexed= sfrom.blockIndexed;
+                // }
+            // }
+            //    _retailBalances[from][fromEra][fromSlot].slotBalance += value;
+            //    _retailBalances[from][fromEra][fromSlot].blockBalances[blockNumber] += value;
+            } 
+            if (txTypes == TRANSCTION_TYPES.BURN) {
+                // Loop through eras and slots
+                for (uint256 era = fromEra; era <= toEra; era++) {
+                    // every era contain 4 slots start slot is 0 and end slot is 3
+                    for (uint8 slot = fromSlot; slot < 3; slot++) {
+                        Slot storage slotFrom = _retailBalances[from][era][slot];
+                        Slot storage slotTo = _retailBalances[to][era][slot];
+                        // @todo find first valid balance then action
+                        // Deduct balance from `from` and add to `to`
+                        // slotFrom.slotBalance is all balance including valid and invalid balance
+                        if (slotFrom.slotBalance >= value) {
+                            slotFrom.slotBalance -= value;
+                        } else {
+                            value -= slotFrom.slotBalance;
+                            slotFrom.slotBalance = 0; // consume all slot balance
+                            /// @custom:dataIntegrityErrorAppetite ignore to move blockIndexed to address(0) for saving gas
+                        }
+                    }
+                }
+            }
         }
         emit Transfer(from, to, value);
     }
