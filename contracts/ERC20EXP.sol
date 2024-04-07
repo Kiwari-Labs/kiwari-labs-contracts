@@ -363,6 +363,8 @@ contract ERC20Expirable is ERC20 {
                 revert ();
             }
            if (txTypes == TRANSCTION_TYPES.DEFAULT) {
+            // @TODO search for first usable balance
+            // @TODO sort index at to address 
             // for (fromEra; fromEra < toEra; i++) {                
             //     Slot storage sform  = retailBalances[from][fromEra][fromSlot];
             //     Slot storage sloto = retailBalances[to][fromEra][fromSlot];
