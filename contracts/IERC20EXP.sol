@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.5.0 <0.8.0;
 
+/// @title ERC20EXP Interface
+/// @author ERC20EXP <erc20exp@protonmail.com>
+
 interface IERC20EXP {
     // ERC20-Expirable Specification
     // Struct 
@@ -24,9 +27,11 @@ interface IERC20EXP {
     // error notRetail(address account);
 
     // Function
+    function blockTime() external returns (uint16);
     function blockPerEra() external returns (uint256);
     function blockPerSlot() external returns (uint256);
     function blockExpireLength() external returns (uint256);
+    function blockNumberProvider() external returns (uint256);
 
     /// @dev overloading balanceOf function.
     function balanceOf(address account,

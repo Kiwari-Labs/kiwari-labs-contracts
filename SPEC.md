@@ -28,7 +28,7 @@ challege due to the limitation of smart contract concept that every block has bl
 ##### Rational
 - [ ] This contract provide loyalty reward like, it's expirable so it's not suitable to have `MAX_SUPPLY`.
 - [ ] This contract have `gasUsed` per interaction higher than original ERC20.
-- [ ] This contract rely on `block.number` rather than `block.timestamp`
+- [ ] This contract rely on `block.number` rather than `block.timestamp` so whatever happen that make network halt asset will be safe.
 
 #### Era and Slot Conceptual
 
@@ -70,3 +70,16 @@ similar idea of index in each page of pagination
     */
 ```
 
+```
+        // 7889231 index if blocktime is 1 and expire period is 1 slot receive token every 1 second
+        // 1577846 index if blocktime is 5 and expire period is 1 slot receive token every 5 second
+        // 788923 index if blocktime is 10 and expire period is 1 slot receive token every 10 second
+        // 91 index if blocktime 1 is and expire period is 1 slot receive token every 84600 second (1day)
+        // 18 index if blocktime 5 is and expire period is 1 slot receive token every 84600 second (1day)
+        // 9 index if blocktime 10 is and expire period is 1 slot receive token every 84600 second (1day)
+        // dynamic adjust number slot per era from given blockperiod
+        // if short blockperiod increase slot per era 
+        // if long blockperiod decrease slot per era
+        // how ever buffer slot still 1 even slot increase or decrease
+        // @note if wanted to reduce size in each slot reduce the frequent of receive token
+```

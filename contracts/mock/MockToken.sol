@@ -3,10 +3,10 @@ pragma solidity 0.8.14;
 
 import "./ERC20EXP.sol";
 
-contract Point is ERC20Expirable {
+contract MockToken is ERC20Expirable {
 
     constructor() 
-        ERC20UTXO("Example","EXP") 
+        ERC20UTXO("Mock","Mock") 
         ERC20Expirable(4, 4) { 
     }
 }

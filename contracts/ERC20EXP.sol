@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
-/// @author Sirawit Techavanitch <sirawitt42@gmail.com>
-/// @author <name> <email>
+/// @title ERC20EXP abstract contract
+/// @author ERC20EXP <erc20exp@protonmail.com>
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 // import "./interfaces/IERC20EXP.sol";
@@ -22,11 +22,13 @@ contract ERC20Expirable is ERC20 {
     enum TRANSCTION_TYPES { DEFAULT, MINT, BURN }
 
     // contract constant variables.
+    // @TODO change from 4 to 8 will be more horizontal scaling mean start from 0 to 7.
+    // uint8 private constant SLOT_PER_ERA = 8;
     uint8 private constant MINIMUM_EXPIRE_PERIOD_SLOT = 1;
     uint8 private constant MAXIMUM_EXPIRE_PERIOD_SLOT = 8;
-    uint16 private constant MINIMUM_BLOCKTIME_IN_SEC = 1;
-    uint16 private constant MAXIMUM_BLOCKTIME_IN_SEC = 600; // bitcoin have longest blocktime.
-    uint32 private constant YEAR_IN_SECONDS = 31_556_926;
+    uint16 private constant MINIMUM_BLOCKTIME_IN_MILLI_SECONDS = 1;        // 1 milliseconds.
+    uint16 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000 ; // 10 minutes.
+    uint32 private constant YEAR_IN_MILLI_SECONDS = 31_556_926_000;
 
     // contract global variables.
     uint256 private immutable _startBlockNumber;
@@ -40,26 +42,26 @@ contract ERC20Expirable is ERC20 {
     uint8 private _expirePeriod;
     uint256 private _blockPerYear;
 
-    constructor(uint16 blockPeriod, uint8 expirePeriod, string memory name_, string memory symbol_)
+    constructor(uint16 blockTime_, uint8 expirePeriod_, string memory name_, string memory symbol_)
         ERC20(name_, symbol_) {
-        _startBlockNumber = block.number;  // initialize contract
-        _updateBlockPerYear(blockPeriod);  // block time
-        _updateExpirePeriod(expirePeriod); // expire window
+        _startBlockNumber = blockNumberProvider();  // initialize contract
+        _updateBlockPerYear(blockTime_);            // block time
+        _updateExpirePeriod(expirePeriod_);         // expiration window
     }
 
     // ################################ private function ################################
 
-    /// @param blockPeriod description
-    function _updateBlockPerYear(uint16 blockPeriod) private {
+    /// @param blockTime description
+    function _updateBlockPerYear(uint16 blockTime) private {
         // @TODO uncomment
-        // if (blockPeriod < MINIMUM_EXPIRE_PERIOD_SLOT || 
-        //         blockPeriod > MAXIMUM_EXPIRE_PERIOD_SLOT) {
+        // if (blockTime < MINIMUM_BLOCKTIME_IN_MILLI_SECONDS || 
+        //         blockTime > MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS) {
         //     revert InvalidBlockPeriod();
         // }
         uint256 blockPerYearCache = _blockPerYear;
-        _blockPerYear = YEAR_IN_SECONDS / blockPeriod;
+        _blockPerYear = YEAR_IN_MILLI_SECONDS / blockTime;
         // @TODO uncomment
-        // emit BlockProducedPerYearUpdated(blockPerYearCache, blockPeriod);
+        // emit BlockProducedPerYearUpdated(blockPerYearCache, blockTime);
     }
 
     /// @param expirePeriod description
@@ -109,6 +111,12 @@ contract ERC20Expirable is ERC20 {
         }
     }
 
+    function _calculateEraAndSlot(uint256 blockNumber) public view returns (uint256 era, uint8 slot) {
+        era = _calculateEra(blockNumber);
+        slot = _calculateSlot(slot);
+        return (era, slot);
+    }
+
     /// @notice always return 0 for non-wholesael account.
     /// @dev return available balance from given account.
     /// @param account The address of the account for which the balance is being queried.
@@ -142,9 +150,23 @@ contract ERC20Expirable is ERC20 {
             return _totalBlockBalance(account, 0, 0);
         } else {
             uint256 _balanceCache;
-            _balanceCache += _totalBlockBalance(account, fromEra, fromSlot);
+            // totalBlockBalance calcurate only buffer era/slot
+            for (uint8 slot = fromSlot; fromSlot <= 3; era++) {
+                if (slot == fromSlot) {
+                    _balanceCache += _totalBlockBalance(account, formEra, slot);
+                } else {
+                    _balanceCache += _retailBalances[account][formEra][slot].slotBalance;
+                }
+            }
+            // calculate diff
             // @TODO gap between fromEra, toEra sum all slot determistic size 0-4
-            _balanceCache += _retailBalances[account][toEra][toSlot].slotBalance;
+            uint8 temp = toEra - fromEra;
+            // for () {
+
+            // }
+            for (uint8 slot = 0; slot <= toSlot; slot++) {
+                _balanceCache += _retailBalances[account][formEra][slot].slotBalance;
+            }
             return _balanceCache;
         }
     }
@@ -158,7 +180,7 @@ contract ERC20Expirable is ERC20 {
             return 0;
         }
 
-        uint256 blockNumberCache = block.number;
+        uint256 blockNumberCache = blockNumberProvider();
         uint256 lastestBlockCache = s.blockIndexed[blockIndexedLength - 1];
 
         // If the latest block is outside the expiration period, skip entrie slot return 0.
@@ -186,17 +208,6 @@ contract ERC20Expirable is ERC20 {
             balanceCache += s.blockBalances[s.blockIndexed[i]];
         }
         /// @custom:inefficientGasUsedAppetite heavy loop through array of blockIndexed in wrostcase
-        // 7889231 index if blocktime is 1 and expire period is 1 slot receive token every 1 second
-        // 1577846 index if blocktime is 5 and expire period is 1 slot receive token every 5 second
-        // 788923 index if blocktime is 10 and expire period is 1 slot receive token every 10 second
-        // 91 index if blocktime 1 is and expire period is 1 slot receive token every 84600 second (1day)
-        // 18 index if blocktime 5 is and expire period is 1 slot receive token every 84600 second (1day)
-        // 9 index if blocktime 10 is and expire period is 1 slot receive token every 84600 second (1day)
-        // dynamic adjust number slot per era from given blockperiod
-        // if short blockperiod increase slot per era 
-        // if long blockperiod decrease slot per era
-        // how ever buffer slot still 1 even slot increase or decrease
-        // @note if wanted to reduce size in each slot reduce the frequent of receive token
         return balanceCache;
     }
 
@@ -207,9 +218,8 @@ contract ERC20Expirable is ERC20 {
     /// @return fromSlot The starting slot within the starting era for the balance lookup.
     /// @return toSlot The ending slot within the ending era for the balance lookup.
     function _safePagination() public view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
-        uint256 blockNumberCache = block.number;
-        toEra = _calculateEra(blockNumberCache);
-        toSlot = _calculateSlot(blockNumberCache);
+        uint256 blockNumberCache = blockNumberProvider();
+        (toEra, toSlot) = _calculateEraAndSlot(blockNumberCache);
         
         // Calculate the expiration period in blocks
         uint256 expirePeriodInBlockLength = expirationPeriodInBlockLength();
@@ -226,8 +236,7 @@ contract ERC20Expirable is ERC20 {
 
         // Determine the starting era and slot based on the expiration start block
         if (expirationStartBlock >= blockPerEra()) {
-            fromEra = _calculateEra(expirationStartBlock);
-            fromSlot = _calculateSlot(expirationStartBlock);
+            (fromEra, fromSlot) = _calculateEraAndSlot(expirationStartBlock);
         } else {
             fromEra = 0;
             fromSlot = uint8(expirationStartBlock % blockPerEra());
@@ -294,9 +303,8 @@ contract ERC20Expirable is ERC20 {
         // if (!wholeSale[to]) {
         //  revert notRetail(to);
         // }
-        uint256 blockNumberCache = block.number;
-        uint256 _currentEra = _calculateEra(blockNumberCache);
-        uint8 _currentSlot = _calculateSlot(blockNumberCache);
+        uint256 blockNumberCache = blockNumberProvider();
+        (uint256 _currentEra, uint8 _currentSlot) = _calculateEraAndSlot(blockNumberCache);
         _updateRetailBalance(address(0), to, value, 0  , _currentEra, 0, _currentSlot, TRANSCTION_TYPES.MINT) ;
     }
 
@@ -350,7 +358,7 @@ contract ERC20Expirable is ERC20 {
         TRANSCTION_TYPES txTypes
     ) internal virtual {
         if (txTypes == TRANSCTION_TYPES.MINT) {
-            uint256 blockNumberCache = block.number;
+            uint256 blockNumberCache = blockNumberProvider();
             Slot storage slot = _retailBalances[to][toEra][toSlot];
             {
                 slot.slotBalance += value;
@@ -388,7 +396,7 @@ contract ERC20Expirable is ERC20 {
                 // Loop through eras and slots
                 for (uint256 era = fromEra; era <= toEra; era++) {
                     // every era contain 4 slots start slot is 0 and end slot is 3
-                    for (uint8 slot = fromSlot; slot < 3; slot++) {
+                    for (uint8 slot = fromSlot; slot <= 3; slot++) {
                         Slot storage slotFrom = _retailBalances[from][era][slot];
                         Slot storage slotTo = _retailBalances[to][era][slot];
                         // @todo find first valid balance then action
@@ -538,6 +546,12 @@ contract ERC20Expirable is ERC20 {
         * totalSupply will only counting spendable balance of all wholeSale account.
         */
         return 0;
+    }
+    
+    /// @notice blockNunber provider can be override in case using L2 solution that block time is sub seconds.
+    /// @return uint256 current blocknumber.
+    function blockNumberProvider() public view virtual override returns  (uint256) {
+        return block.number;
     }
 
     /// @return uint256 amount of blocks per era.
