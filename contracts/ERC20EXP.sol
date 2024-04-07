@@ -11,8 +11,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 // @TODO uncomment to  make it to abstract contract
 // abstract contract ERC20Expirable is ERC20, IERC20EXP {
 contract ERC20Expirable is ERC20 {
-    // struct
-    // can move to declare in interface file.
+
     struct Slot {
         uint256 slotBalance;
         mapping(uint256 => uint256) blockBalances;
@@ -22,13 +21,13 @@ contract ERC20Expirable is ERC20 {
     enum TRANSCTION_TYPES { DEFAULT, MINT, BURN }
 
     // contract constant variables.
-    // @TODO change from 4 to 8 will be more horizontal scaling mean start from 0 to 7.
-    // uint8 private constant SLOT_PER_ERA = 8;
+    // 18 bytes for constant variables
+    uint8 private constant SLOT_PER_ERA = 8;
     uint8 private constant MINIMUM_EXPIRE_PERIOD_SLOT = 1;
-    uint8 private constant MAXIMUM_EXPIRE_PERIOD_SLOT = 8;
+    uint16 private constant MAXIMUM_EXPIRE_PERIOD_SLOT = 16;
     uint16 private constant MINIMUM_BLOCKTIME_IN_MILLI_SECONDS = 1;        // 1 milliseconds.
-    uint16 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000 ; // 10 minutes.
-    uint32 private constant YEAR_IN_MILLI_SECONDS = 31_556_926_000;
+    uint32 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000 ; // 10 minutes.
+    uint64 private constant YEAR_IN_MILLI_SECONDS = 31_556_926_000;
 
     // contract global variables.
     uint256 private immutable _startBlockNumber;
@@ -40,6 +39,7 @@ contract ERC20Expirable is ERC20 {
 
     // contract configuration variables.
     uint8 private _expirePeriod;
+    // @TODO uint64 is enough cause it can fit wrost case 1 ms 31,556,926,000 block per year.
     uint256 private _blockPerYear;
 
     constructor(uint16 blockTime_, uint8 expirePeriod_, string memory name_, string memory symbol_)
@@ -104,7 +104,7 @@ contract ERC20Expirable is ERC20 {
             return
                 uint8(
                     ((blockNumber - _startBlockNumber) % _blockPerYear) /
-                        (_blockPerYear / 4)
+                        (_blockPerYear / SLOT_PER_ERA)
                 );
         } else {
             return 0;
@@ -151,21 +151,21 @@ contract ERC20Expirable is ERC20 {
         } else {
             uint256 _balanceCache;
             // totalBlockBalance calcurate only buffer era/slot
-            for (uint8 slot = fromSlot; fromSlot <= 3; era++) {
+            for (uint8 slot = fromSlot; fromSlot <= 7; slot++) {
                 if (slot == fromSlot) {
-                    _balanceCache += _totalBlockBalance(account, formEra, slot);
+                    _balanceCache += _totalBlockBalance(account, fromEra, slot);
                 } else {
-                    _balanceCache += _retailBalances[account][formEra][slot].slotBalance;
+                    _balanceCache += _retailBalances[account][fromEra][slot].slotBalance;
                 }
             }
             // calculate diff
             // @TODO gap between fromEra, toEra sum all slot determistic size 0-4
-            uint8 temp = toEra - fromEra;
+            // uint8 temp = toEra - fromEra;
             // for () {
 
             // }
             for (uint8 slot = 0; slot <= toSlot; slot++) {
-                _balanceCache += _retailBalances[account][formEra][slot].slotBalance;
+                _balanceCache += _retailBalances[account][toEra][slot].slotBalance;
             }
             return _balanceCache;
         }
@@ -248,7 +248,7 @@ contract ERC20Expirable is ERC20 {
                 fromSlot--;
             } else {
                 fromEra--;
-                fromSlot = 3;
+                fromSlot = 7;
             }
         }
 
@@ -396,7 +396,7 @@ contract ERC20Expirable is ERC20 {
                 // Loop through eras and slots
                 for (uint256 era = fromEra; era <= toEra; era++) {
                     // every era contain 4 slots start slot is 0 and end slot is 3
-                    for (uint8 slot = fromSlot; slot <= 3; slot++) {
+                    for (uint8 slot = fromSlot; slot <= 7; slot++) {
                         Slot storage slotFrom = _retailBalances[from][era][slot];
                         Slot storage slotTo = _retailBalances[to][era][slot];
                         // @todo find first valid balance then action
@@ -550,7 +550,7 @@ contract ERC20Expirable is ERC20 {
     
     /// @notice blockNunber provider can be override in case using L2 solution that block time is sub seconds.
     /// @return uint256 current blocknumber.
-    function blockNumberProvider() public view virtual override returns  (uint256) {
+    function blockNumberProvider() public view virtual returns  (uint256) {
         return block.number;
     }
 
@@ -561,7 +561,7 @@ contract ERC20Expirable is ERC20 {
 
     /// @return uint256 amount of blocks per slot.
     function blockPerSlot() public view returns (uint256) {
-        return _blockPerYear / 4;
+        return _blockPerYear / SLOT_PER_ERA;
     }
 
     /// @return uint8 length of blocks.
@@ -577,12 +577,12 @@ contract ERC20Expirable is ERC20 {
     /// @return era cycle.
     /// @return slot of slot.
     function expirationPeriodInEraLength() public view returns (uint8 era, uint8 slot) {
-        if (_expirePeriod <= 4) {
+        if (_expirePeriod <= SLOT_PER_ERA) {
             era = 0;
             slot = uint8(_expirePeriod);
         } else {
-            era = uint8(_expirePeriod / 4);
-            slot = uint8(_expirePeriod % 4);
+            era = uint8(_expirePeriod / SLOT_PER_ERA);
+            slot = uint8(_expirePeriod % SLOT_PER_ERA);
         }
         return (era, slot);
     }

@@ -47,18 +47,26 @@ similar idea of index in each page of pagination
     * support extensible hook logic beforeTransfer, AfterTransfer if use @openzeppelin v4.x and above.
     * smart contract address can be grant as wholesale account so token in contract are non-expirable
     * ExpirePeriod to ERA-SLOT Mapping.
-    *┌─────────┬─────────────────────────┐
-    *│   SLOT  │         ERA cycle       │
-    *├─────────┼─────────────────────────┤
-    *│    1    │   0 ERA cycle, 1 SLOT   │
-    *│    2    │   0 ERA cycle, 2 SLOT   │
-    *│    3    │   0 ERA cycle, 3 SLOT   │
-    *│    4    │   1 ERA cycle, 0 SLOT   │
-    *│    5    │   1 ERA cycle, 1 SLOT   │
-    *│    6    │   1 ERA cycle, 2 SLOT   │
-    *│    7    │   1 ERA cycle, 3 SLOT   │
-    *│    8    │   2 ERA cycle, 0 SLOT   │
-    *└─────────┴─────────────────────────┘
+    *   ┌─────────┬──────────────────────────┐
+    *   │   SLOT  │         ERA cycle        │
+    *   ├─────────┼──────────────────────────┤
+    *   │    1    │   0 ERA cycle, 1 SLOT    │
+    *   │    2    │   0 ERA cycle, 2 SLOT    │
+    *   │    3    │   0 ERA cycle, 3 SLOT    │
+    *   │    4    │   0 ERA cycle, 4 SLOT    │
+    *   │    5    │   0 ERA cycle, 5 SLOT    │
+    *   │    6    │   0 ERA cycle, 6 SLOT    │
+    *   │    7    │   0 ERA cycle, 7 SLOT    │
+    *   │    8    │   1 ERA cycle, 0 SLOT    │
+    *   │    9    │   1 ERA cycle, 1 SLOT    │
+    *   │   10    │   1 ERA cycle, 2 SLOT    │
+    *   │   11    │   1 ERA cycle, 3 SLOT    │
+    *   │   12    │   1 ERA cycle, 4 SLOT    │
+    *   │   13    │   1 ERA cycle, 5 SLOT    │
+    *   │   14    │   1 ERA cycle, 6 SLOT    │
+    *   │   15    │   1 ERA cycle, 7 SLOT    │
+    *   │   16    │   2 ERA cycle, 0 SLOT    │
+    *   └─────────┴──────────────────────────┘
     * ** to ensure balance correctness it's need to buffer 1 slot for looback.
     * ** Warning: avoid to use in sub-zero blocktime network.
     *    31,556,952,000 are year in milliseconds
