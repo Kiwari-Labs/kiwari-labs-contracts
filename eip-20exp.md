@@ -30,7 +30,6 @@ challege due to the limitation of smart contract concept that every block has bl
 
 ##### Era and Slot Conceptual
 
-
 This contract creates an abstract implementation that adopts the sliding window algorithm to maintain a window over a period of time (block height). This efficient approach allows for the lookback and calculation of usable balances for each account within that window period. With this approach, the contract does not require a variable acting as a "counter" to keep updating the latest state (current period), nor does it need any interaction calls to keep updating the current period, which is an effortful and costly design.
 
 ``` markdown
