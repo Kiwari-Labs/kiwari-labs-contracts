@@ -6,10 +6,11 @@ pragma solidity ^0.8.15;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 // import "./interfaces/IERC20EXP.sol";
+// import  "./abstracts/Calendar.sol';
 
 // @note Change to abstract class so it's can be re-use.
 // @TODO uncomment to  make it to abstract contract
-// abstract contract ERC20Expirable is ERC20, IERC20EXP {
+// abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
 contract ERC20Expirable is ERC20 {
 
     struct Slot {
