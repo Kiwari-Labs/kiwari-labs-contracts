@@ -26,13 +26,6 @@ interface IERC20EXP {
     // error notWholeSale(address account);
     // error notRetail(address account);
 
-    // Function
-    function blockTime() external returns (uint16);
-    function blockPerEra() external returns (uint256);
-    function blockPerSlot() external returns (uint256);
-    function blockExpireLength() external returns (uint256);
-    function blockNumberProvider() external returns (uint256);
-
     /// @dev overloading balanceOf function.
     function balanceOf(address account,
         uint256 fromEra,

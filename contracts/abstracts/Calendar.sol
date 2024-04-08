@@ -21,7 +21,7 @@ abstract contract Calendar is ICanlendar {
 
     uint256 private immutable _startBlockNumber;
 
-    constructor (uint16 blockTime_, uint256 blockNumber_, uint8 expirePeriod_) {
+    constructor (uint256 blockNumber_, uint16 blockTime_, uint8 expirePeriod_) {
         _startBlockNumber = blockNumber_;
         _updateBlockPerYear(blockTime_);
         _updateExpirePeriod(expirePeriod_);
