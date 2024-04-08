@@ -50,7 +50,7 @@ abstract contract Calendar is ICanlendar {
         uint8 _expirePeriodCache = _expirePeriod;
         _expirePeriod = expirePeriod;
         // @TODO uncomment
-        // emit TokenExpiryPeriodUpdated(periodCache, expirePeriod);
+        // emit ExpirationPeriodUpdated(periodCache, expirePeriod);
     }
 
     /// @notice If there is no start block defined or blockNumber is before the contract start, return 0 era.
@@ -92,7 +92,7 @@ abstract contract Calendar is ICanlendar {
     }
 
     function _calculateBlockDifferent(uint256 blockNumber) internal view returns (uint64) {
-        uint64 expirePeriodInBlockLength = expirationPeriodInBlockLength();
+        uint40 expirePeriodInBlockLength = expirationPeriodInBlockLength();
         if (blockNumber >= expirePeriodInBlockLength) {
             // If the current block is beyond the expiration period
             return blockNumber - expirePeriodInBlockLength;
