@@ -1,29 +1,41 @@
 {
+  "license": "No-License",
   "scripts": {
     "clean": "npx hardhat clean && rm -rf cache coverage coverage.json",
-    "compile": "npx hardhat compile",
-    "test:utxo": "npx hardhat test ./test/UTXO.test.js",
-    "test:rpc": "npx hardhat node",
-    "deploy:hardhat": "npx hardhat run scripts/deploy-local.js --network localhost"
-  },
-  "dependencies": {
-    "@openzeppelin/contracts": "^4.8.2",
-    "hardhat": "^2.13.0"
+    "compile": "npm run clean && npx hardhat compile --force",
+    "coverage": "npx hardhat coverage --solcoverjs ./.solcover.js",
+    "coverage:clean": "npm run clean && npx hardhat coverage --solcoverjs ./.solcover.js",
+    "lint": "prettier --list-different --plugin=prettier-plugin-solidity '**/*.sol'",
+    "prettier": "prettier --write --plugin=prettier-plugin-solidity '**/*.sol'",
+    "run:node": "npx hardhat node",
+    "test": "npx hardhat test",
+    "test:clean": "npm run clean && npx hardhat test"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.4.7",
     "@ethersproject/providers": "^5.4.7",
-    "@nomicfoundation/hardhat-chai-matchers": "^1.0.0",
-    "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.9",
     "@nomicfoundation/hardhat-toolbox": "^2.0.0",
-    "@nomiclabs/hardhat-ethers": "^2.0.0",
-    "@nomiclabs/hardhat-etherscan": "^3.0.0",
-    "@typechain/ethers-v5": "^10.1.0",
-    "@typechain/hardhat": "^6.1.2",
-    "chai": "^4.2.0",
-    "ethers": "^5.4.7",
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
+    "@openzeppelin/contracts": "^4.8.2",
+    "@typechain/ethers-v5": "^10.2.1",
+    "@typechain/hardhat": "^6.1.6",
+    "@types/chai": "^4.3.3",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.19.2",
+    "chai": "^4.3.4",
+    "dotenv": "^16.3.1",
+    "ethers": "^5.7.2",
+    "hardhat": "^2.13.0",
+    "hardhat-deploy": "^0.11.44",
     "hardhat-gas-reporter": "^1.0.9",
-    "solidity-coverage": "^0.8.0",
-    "typechain": "^8.1.0"
+    "prettier": "^3.1.0",
+    "prettier-plugin-solidity": "^1.2.0",
+    "solidity-coverage": "^0.8.5",
+    "ts-node": "^10.9.1",
+    "typechain": "^8.3.2",
+    "typescript": "^5.2.2"
   }
 }
