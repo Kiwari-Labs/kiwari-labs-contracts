@@ -151,6 +151,8 @@ contract ERC20Expirable is ERC20 {
         } else {
             uint256 _balanceCache;
             // totalBlockBalance calcurate only buffer era/slot
+            // KISS keep it simple stupid first
+            // calulate balance at fromEra
             for (uint8 slot = fromSlot; fromSlot <= 7; slot++) {
                 if (slot == fromSlot) {
                     _balanceCache += _totalBlockBalance(account, fromEra, slot);
@@ -158,15 +160,17 @@ contract ERC20Expirable is ERC20 {
                     _balanceCache += _retailBalances[account][fromEra][slot].slotBalance;
                 }
             }
-            // calculate diff
-            // @TODO gap between fromEra, toEra sum all slot determistic size 0-4
-            // uint8 temp = toEra - fromEra;
-            // for () {
-
-            // }
+            // calulate balance betaween fromEra and toEra
+            for (uint256 era = fromEra + 1; era < toEra; slot++) {
+                for (uint8 slot = 0; slot <= 7; slot++) {
+                    _balanceCache += _retailBalances[account][era][slot].slotBalance;
+                }
+            }
+            // calulate balance at toEra
             for (uint8 slot = 0; slot <= toSlot; slot++) {
                 _balanceCache += _retailBalances[account][toEra][slot].slotBalance;
             }
+            /// @custom:inefficientGasUsedAppetite heavy loop through array of blockIndexed in wrostcase
             return _balanceCache;
         }
     }
