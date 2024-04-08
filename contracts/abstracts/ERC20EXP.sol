@@ -23,14 +23,10 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
     mapping(address => mapping(uint256 => mapping(uint8 => Slot)))
         private _retailBalances;
 
-    constructor(uint16 blockTime_, ,uint8 expirePeriod_, uint256 blockNumber_, string memory name_, string memory symbol_)
+    constructor(string memory name_, string memory symbol_, uint256 blockNumber_, uint16 blockTime_, uint8 expirePeriod_)
         ERC20(name_, symbol_) 
         Calendar(blockNumber_, blockTime_, expirePeriod_) {
     }
-
-    // ################################ private function ################################
-
-    // ################################ internal function ################################
 
     /// @notice always return 0 for non-wholesael account.
     /// @dev return available balance from given account.
@@ -289,12 +285,6 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         }
         emit Transfer(from, to, value);
     }
-
-    // ################################ external function ################################
-
-    // not exist yet
-
-    // ################################ public function ################################
 
     /// @notice clear existing balance before, always perform force set receive balance to zero.
     /// @param to description
