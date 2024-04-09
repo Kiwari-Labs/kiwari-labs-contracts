@@ -1,5 +1,3 @@
 module.exports = {
-    skipFiles: [
-        "library"
-    ],
+  skipFiles: ["library"],
 };
