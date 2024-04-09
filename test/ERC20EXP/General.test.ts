@@ -15,5 +15,12 @@ export const run = async () => {
 
       expect(await erc20exp.symbol()).to.equal(ERC20_EXP_SYMBOL);
     });
+
+    it("[HAPPY] correct symbol", async function () {
+      const { erc20exp } = await deployERC20EXP();
+
+      // due to token can expiration there is no actual totalSupply.
+      expect(await erc20exp.totalSupply()).to.equal(0);
+    });
   });
 };
