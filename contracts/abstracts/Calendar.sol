@@ -6,22 +6,21 @@ pragma solidity >=0.5.0 <0.8.0;
 import "../interfaces/ICalendar.sol";
 
 abstract contract Calendar is ICanlendar {
-
     // 49 bytes allocated for global variables
     uint8 private constant SLOT_PER_ERA = 8;
     uint8 private constant MINIMUM_EXPIRE_PERIOD_SLOT = 1;
     uint8 private constant MAXIMUM_EXPIRE_PERIOD_SLOT = 16;
-    uint8 private constant MINIMUM_BLOCKTIME_IN_MILLI_SECONDS = 1;         // 1 milliseconds.
+    uint8 private constant MINIMUM_BLOCKTIME_IN_MILLI_SECONDS = 1; // 1 milliseconds.
 
-    uint16 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000 ; // 10 minutes.
+    uint16 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000; // 10 minutes.
     uint40 private constant YEAR_IN_MILLI_SECONDS = 31_556_926_000;
 
     uint8 private _expirePeriod;
-    uint40 private _blockPerYear;  // uint40 is enough cause it can fit wrost case 1 ms 31,556,926,000 block per year.
+    uint40 private _blockPerYear; // uint40 is enough cause it can fit wrost case 1 ms 31,556,926,000 block per year.
 
     uint256 private immutable _startBlockNumber;
 
-    constructor (uint256 blockNumber_, uint16 blockTime_, uint8 expirePeriod_) {
+    constructor(uint256 blockNumber_, uint16 blockTime_, uint8 expirePeriod_) {
         _startBlockNumber = blockNumber_;
         _updateBlockPerYear(blockTime_);
         _updateExpirePeriod(expirePeriod_);
@@ -30,7 +29,7 @@ abstract contract Calendar is ICanlendar {
     /// @param blockTime description
     function _updateBlockPerYear(uint16 blockTime) internal {
         // @TODO uncomment
-        // if (blockTime < MINIMUM_BLOCKTIME_IN_MILLI_SECONDS || 
+        // if (blockTime < MINIMUM_BLOCKTIME_IN_MILLI_SECONDS ||
         //         blockTime > MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS) {
         //     revert InvalidBlockPeriod();
         // }
@@ -43,7 +42,7 @@ abstract contract Calendar is ICanlendar {
     /// @param expirePeriod description
     function _updateExpirePeriod(uint8 expirePeriod) internal {
         // @TODO uncomment
-        // if (expirePeriod < MINIMUM_EXPIRE_PERIOD_SLOT || 
+        // if (expirePeriod < MINIMUM_EXPIRE_PERIOD_SLOT ||
         //         expirePeriod > MAXIMUM_EXPIRE_PERIOD_SLOT) {
         //     revert InvalidExpirePeriod();
         // }
@@ -57,9 +56,7 @@ abstract contract Calendar is ICanlendar {
     /// @dev calcuate era from given blockNumber.
     /// @param blockNumber description
     /// @return uint256 return era
-    function _calculateEra(
-        uint256 blockNumber
-    ) public view returns (uint256) {
+    function _calculateEra(uint256 blockNumber) public view returns (uint256) {
         if (_startBlockNumber != 0 || blockNumber > _startBlockNumber) {
             // Calculate era based on the difference between the current block and start block
             return (blockNumber - _startBlockNumber) / _blockPerYear;
@@ -71,15 +68,9 @@ abstract contract Calendar is ICanlendar {
     /// @dev calcuate slot from given blockNumber.
     /// @param blockNumber description
     /// @return uint256 return slot
-    function _calculateSlot(
-        uint256 blockNumber
-    ) internal view returns (uint8) {
+    function _calculateSlot(uint256 blockNumber) internal view returns (uint8) {
         if (blockNumber > _startBlockNumber) {
-            return
-                uint8(
-                    ((blockNumber - _startBlockNumber) % _blockPerYear) /
-                        (_blockPerYear / SLOT_PER_ERA)
-                );
+            return uint8(((blockNumber - _startBlockNumber) % _blockPerYear) / (_blockPerYear / SLOT_PER_ERA));
         } else {
             return 0;
         }
@@ -114,7 +105,7 @@ abstract contract Calendar is ICanlendar {
         return (fromEra, fromSlot);
     }
 
-    function _addingBuffer(uint256 era, uint8 slot) private view returns (uint256 , uint8) {
+    function _addingBuffer(uint256 era, uint8 slot) private view returns (uint256, uint8) {
         // Add buffer slot
         if (era != 0 && slot != 0) {
             if (slot > 0) {
@@ -169,11 +160,11 @@ abstract contract Calendar is ICanlendar {
         return _blockPerYear / SLOT_PER_ERA;
     }
 
-    function slotPerEra() pulbic view override returns (uint8) {
+    function slotPerEra() view override pulbic returns (uint8) {
         return SLOT_PER_ERA;
     }
 
-     /// @return uint40 length of blocks.
+    /// @return uint40 length of blocks.
     function expirationPeriodInBlockLength() public view override returns (uint40) {
         return blockPerSlot() * _expirePeriod;
     }
@@ -195,5 +186,4 @@ abstract contract Calendar is ICanlendar {
         }
         return (era, slot);
     }
-
-} 
+}

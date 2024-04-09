@@ -12,22 +12,25 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 // @TODO uncomment to  make it to abstract contract
 // abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
 contract ERC20Expirable is ERC20 {
-
     struct Slot {
         uint256 slotBalance;
         mapping(uint256 => uint256) blockBalances;
-        uint256 [] blockIndexed;
+        uint256[] blockIndexed;
     }
 
-    enum TRANSCTION_TYPES { DEFAULT, MINT, BURN }
+    enum TRANSCTION_TYPES {
+        DEFAULT,
+        MINT,
+        BURN
+    }
 
     // contract constant variables.
     // 18 bytes for constant variables
     uint8 private constant SLOT_PER_ERA = 8;
     uint8 private constant MINIMUM_EXPIRE_PERIOD_SLOT = 1;
     uint16 private constant MAXIMUM_EXPIRE_PERIOD_SLOT = 16;
-    uint16 private constant MINIMUM_BLOCKTIME_IN_MILLI_SECONDS = 1;        // 1 milliseconds.
-    uint32 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000 ; // 10 minutes.
+    uint16 private constant MINIMUM_BLOCKTIME_IN_MILLI_SECONDS = 1; // 1 milliseconds.
+    uint32 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000; // 10 minutes.
     uint64 private constant YEAR_IN_MILLI_SECONDS = 31_556_926_000;
 
     // contract global variables.
@@ -35,19 +38,22 @@ contract ERC20Expirable is ERC20 {
 
     mapping(address => bool) private _wholeSale;
     mapping(address => uint256) private _receiveBalances;
-    mapping(address => mapping(uint256 => mapping(uint8 => Slot)))
-        private _retailBalances;
+    mapping(address => mapping(uint256 => mapping(uint8 => Slot))) private _retailBalances;
 
     // contract configuration variables.
     uint8 private _expirePeriod;
     // @TODO uint64 is enough cause it can fit wrost case 1 ms 31,556,926,000 block per year.
     uint256 private _blockPerYear;
 
-    constructor(uint16 blockTime_, uint8 expirePeriod_, string memory name_, string memory symbol_)
-        ERC20(name_, symbol_) {
-        _startBlockNumber = blockNumberProvider();  // initialize contract
-        _updateBlockPerYear(blockTime_);            // block time
-        _updateExpirePeriod(expirePeriod_);         // expiration window
+    constructor(
+        uint16 blockTime_,
+        uint8 expirePeriod_,
+        string memory name_,
+        string memory symbol_
+    ) ERC20(name_, symbol_) {
+        _startBlockNumber = blockNumberProvider(); // initialize contract
+        _updateBlockPerYear(blockTime_); // block time
+        _updateExpirePeriod(expirePeriod_); // expiration window
     }
 
     // ################################ private function ################################
@@ -55,7 +61,7 @@ contract ERC20Expirable is ERC20 {
     /// @param blockTime description
     function _updateBlockPerYear(uint16 blockTime) private {
         // @TODO uncomment
-        // if (blockTime < MINIMUM_BLOCKTIME_IN_MILLI_SECONDS || 
+        // if (blockTime < MINIMUM_BLOCKTIME_IN_MILLI_SECONDS ||
         //         blockTime > MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS) {
         //     revert InvalidBlockPeriod();
         // }
@@ -68,7 +74,7 @@ contract ERC20Expirable is ERC20 {
     /// @param expirePeriod description
     function _updateExpirePeriod(uint8 expirePeriod) private {
         // @TODO uncomment
-        // if (expirePeriod < MINIMUM_EXPIRE_PERIOD_SLOT || 
+        // if (expirePeriod < MINIMUM_EXPIRE_PERIOD_SLOT ||
         //         expirePeriod > MAXIMUM_EXPIRE_PERIOD_SLOT) {
         //     revert InvalidExpirePeriod();
         // }
@@ -84,9 +90,7 @@ contract ERC20Expirable is ERC20 {
     /// @dev calcuate era from given blockNumber.
     /// @param blockNumber description
     /// @return uint256 return era
-    function _calculateEra(
-        uint256 blockNumber
-    ) public view virtual returns (uint256) {
+    function _calculateEra(uint256 blockNumber) public view virtual returns (uint256) {
         if (_startBlockNumber != 0 || blockNumber > _startBlockNumber) {
             // Calculate era based on the difference between the current block and start block
             return (blockNumber - _startBlockNumber) / _blockPerYear;
@@ -98,15 +102,9 @@ contract ERC20Expirable is ERC20 {
     /// @dev calcuate slot from given blockNumber.
     /// @param blockNumber description
     /// @return uint256 return slot
-    function _calculateSlot(
-        uint256 blockNumber
-    ) public view virtual returns (uint8) {
+    function _calculateSlot(uint256 blockNumber) public view virtual returns (uint8) {
         if (blockNumber > _startBlockNumber) {
-            return
-                uint8(
-                    ((blockNumber - _startBlockNumber) % _blockPerYear) /
-                        (_blockPerYear / SLOT_PER_ERA)
-                );
+            return uint8(((blockNumber - _startBlockNumber) % _blockPerYear) / (_blockPerYear / SLOT_PER_ERA));
         } else {
             return 0;
         }
@@ -123,9 +121,9 @@ contract ERC20Expirable is ERC20 {
     /// @param account The address of the account for which the balance is being queried.
     /// @param unsafe The boolean flag for select which balance type is being queried.
     /// @return uint256 return available balance.
-    function _unSafeBalanceOf(address account, bool unsafe) internal virtual view returns (uint256) {
+    function _unSafeBalanceOf(address account, bool unsafe) internal view virtual returns (uint256) {
         if (unsafe) {
-            return _receiveBalances[account] + super.balanceOf(account) ;
+            return _receiveBalances[account] + super.balanceOf(account);
         } else {
             return super.balanceOf(account);
         }
@@ -216,7 +214,6 @@ contract ERC20Expirable is ERC20 {
         return balanceCache;
     }
 
-
     /// @dev return available balance from given account, eras, and slots.
     /// @return fromEra The starting era for the balance lookup.
     /// @return toEra The ending era for the balance lookup.
@@ -225,7 +222,7 @@ contract ERC20Expirable is ERC20 {
     function _safePagination() public view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
         uint256 blockNumberCache = blockNumberProvider();
         (toEra, toSlot) = _calculateEraAndSlot(blockNumberCache);
-        
+
         // Calculate the expiration period in blocks
         uint256 expirePeriodInBlockLength = expirationPeriodInBlockLength();
 
@@ -310,7 +307,7 @@ contract ERC20Expirable is ERC20 {
         // }
         uint256 blockNumberCache = blockNumberProvider();
         (uint256 _currentEra, uint8 _currentSlot) = _calculateEraAndSlot(blockNumberCache);
-        _updateRetailBalance(address(0), to, value, 0  , _currentEra, 0, _currentSlot, TRANSCTION_TYPES.MINT) ;
+        _updateRetailBalance(address(0), to, value, 0, _currentEra, 0, _currentSlot, TRANSCTION_TYPES.MINT);
     }
 
     /// @notice can't mint expirable token to wholesale account.
@@ -324,18 +321,14 @@ contract ERC20Expirable is ERC20 {
         //  revert notRetail(to);
         // }
         (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safePagination();
-        _updateRetailBalance(to, address(0), value, fromEra , toEra , fromSlot, toSlot, TRANSCTION_TYPES.BURN);
+        _updateRetailBalance(to, address(0), value, fromEra, toEra, fromSlot, toSlot, TRANSCTION_TYPES.BURN);
     }
-    
+
     /// @notice _receiveBalances[] can't use be same as spendable balance.
     /// @param from description
     /// @param to description
     /// @param value description
-    function _updateReceiveBalance(
-        address from,
-        address to,
-        uint256 value
-    ) internal virtual {
+    function _updateReceiveBalance(address from, address to, uint256 value) internal virtual {
         if (from == address(0)) {
             // mint
             _receiveBalances[to] += value;
@@ -370,17 +363,17 @@ contract ERC20Expirable is ERC20 {
                 slot.blockBalances[blockNumberCache] += value;
                 slot.blockIndexed.push(blockNumberCache);
             }
-        } else  {
+        } else {
             uint256 balanceCache = balanceOf(from);
             if (balanceCache < value) {
-                revert ();
+                revert();
             }
-           if (txTypes == TRANSCTION_TYPES.DEFAULT) {
-            // @TODO search for first usable balance
-            // @TODO sort index at to address 
-            // for (fromEra; fromEra < toEra; i++) {                
-            //     Slot storage sform  = retailBalances[from][fromEra][fromSlot];
-            //     Slot storage sloto = retailBalances[to][fromEra][fromSlot];
+            if (txTypes == TRANSCTION_TYPES.DEFAULT) {
+                // @TODO search for first usable balance
+                // @TODO sort index at to address
+                // for (fromEra; fromEra < toEra; i++) {
+                //     Slot storage sform  = retailBalances[from][fromEra][fromSlot];
+                //     Slot storage sloto = retailBalances[to][fromEra][fromSlot];
                 // MUST BE first in first out (FIFO)
                 // if buffer slot cant contain value and not move to next slot or next era {
                 //  sfrom.slotBalance -= value;
@@ -388,15 +381,15 @@ contract ERC20Expirable is ERC20 {
                 //  sto.blockIndexed[index] = sfrom.blockIndexed[index];
                 // }
                 // if buffer slot can't contain all value move to next slot or next era {
-                    // sfrom.slotBalance -= value;
-                    // sto.slotBalnce += value;
-                    // move entrie slot if consume all slot balance
-                    // sto.blockIndexed= sfrom.blockIndexed;
+                // sfrom.slotBalance -= value;
+                // sto.slotBalnce += value;
+                // move entrie slot if consume all slot balance
+                // sto.blockIndexed= sfrom.blockIndexed;
                 // }
-            // }
-            //    _retailBalances[from][fromEra][fromSlot].slotBalance += value;
-            //    _retailBalances[from][fromEra][fromSlot].blockBalances[blockNumber] += value;
-            } 
+                // }
+                //    _retailBalances[from][fromEra][fromSlot].slotBalance += value;
+                //    _retailBalances[from][fromEra][fromSlot].blockBalances[blockNumber] += value;
+            }
             if (txTypes == TRANSCTION_TYPES.BURN) {
                 // Loop through eras and slots
                 for (uint256 era = fromEra; era <= toEra; era++) {
@@ -435,7 +428,7 @@ contract ERC20Expirable is ERC20 {
         require(_wholeSale[to] != auth, "Wholesale status unchanged");
         _wholeSale[to] = auth;
         uint256 spendableBalance = super.balanceOf(to);
-        uint256 receiveBalance =_receiveBalances[to];
+        uint256 receiveBalance = _receiveBalances[to];
         if (spendableBalance != 0) {
             // clean spendable balance
             _burn(to, spendableBalance);
@@ -493,10 +486,7 @@ contract ERC20Expirable is ERC20 {
     /// @notice transfer use safe balanceOf for lookback available balance.
     /// @param to description
     /// @return value description
-    function transfer(
-        address to,
-        uint256 value
-    ) public virtual override returns (bool) {
+    function transfer(address to, uint256 value) public virtual override returns (bool) {
         address from = msg.sender;
         // @TODO _beforeTransfer(from, to, amount);
         if (_wholeSale[from] && _wholeSale[to]) {
@@ -547,15 +537,15 @@ contract ERC20Expirable is ERC20 {
     /// @notice due to token can expiration there is no actaul totalSupply.
     /// @return uint256 ZERO value.
     function totalSupply() public pure override returns (uint256) {
-        /* @note if not override totalSupply, 
-        * totalSupply will only counting spendable balance of all wholeSale account.
-        */
+        /* @note if not override totalSupply,
+         * totalSupply will only counting spendable balance of all wholeSale account.
+         */
         return 0;
     }
-    
+
     /// @notice blockNunber provider can be override in case using L2 solution that block time is sub seconds.
     /// @return uint256 current blocknumber.
-    function blockNumberProvider() public view virtual returns  (uint256) {
+    function blockNumberProvider() public view virtual returns (uint256) {
         return block.number;
     }
 
@@ -591,5 +581,4 @@ contract ERC20Expirable is ERC20 {
         }
         return (era, slot);
     }
-
 }
