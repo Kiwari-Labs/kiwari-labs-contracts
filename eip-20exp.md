@@ -1,0 +1,127 @@
+
+
+
+## Simple Summary
+
+An expiration token extension standard interface for ERC20 tokens
+
+## Abstract
+
+This extenstion standard provides expiration feature.
+
+## Motivation
+
+An extension standard allows to create tokens with expiration date like loyalty that backward complatibitie with ERC20 interface.
+
+## Specification
+
+To create fungible tokens that have abilities to expiration like loyalty reward is 
+challege due to the limitation of smart contract concept that every block has block gas limit how to preventing the transaction of   contract hits the block gas limit while compatible with existing ERC20 standard interface.
+
+##### Requirement: 
+- [ ] Compatible with existing ERC20 standard.
+- [ ] Configurable expiration period can be change.
+- [ ] Configurable block period (blocktime) can be change.
+- [ ] Auto select nearly expiration token when transfer as default (FIFO).
+- [ ] Auto look back spendable balance.
+- [ ] Whitelist account holding non-expriable balance.
+- [ ] Separate spending and receiving balance on whitelist account.
+- [ ] Extensible design for fit the business use case.
+
+##### Era and Slot Conceptual
+
+This contract creates an abstract implementation that adopts the sliding window algorithm to maintain a window over a period of time (block height). This efficient approach allows for the lookback and calculation of usable balances for each account within that window period. With this approach, the contract does not require a variable acting as a "counter" to keep updating the latest state (current period), nor does it need any interaction calls to keep updating the current period, which is an effortful and costly design.
+
+``` markdown
+ ExpirePeriod to ERA-SLOT Mapping.
+ ┌─────────┬──────────────────────────┐
+ │   SLOT  │         ERA cycle        │
+ ├─────────┼──────────────────────────┤
+ │    1    │   0 ERA cycle, 1 SLOT    │
+ │    2    │   0 ERA cycle, 2 SLOT    │
+ │    3    │   0 ERA cycle, 3 SLOT    │
+ │    4    │   0 ERA cycle, 4 SLOT    │
+ │    5    │   0 ERA cycle, 5 SLOT    │
+ │    6    │   0 ERA cycle, 6 SLOT    │
+ │    7    │   0 ERA cycle, 7 SLOT    │
+ │    8    │   1 ERA cycle, 0 SLOT    │
+ │    9    │   1 ERA cycle, 1 SLOT    │
+ │   10    │   1 ERA cycle, 2 SLOT    │
+ │   11    │   1 ERA cycle, 3 SLOT    │
+ │   12    │   1 ERA cycle, 4 SLOT    │
+ │   13    │   1 ERA cycle, 5 SLOT    │
+ │   14    │   1 ERA cycle, 6 SLOT    │
+ │   15    │   1 ERA cycle, 7 SLOT    │
+ │   16    │   2 ERA cycle, 0 SLOT    │
+ └─────────┴──────────────────────────┘
+```
+
+##### Vertical and Horizontal Scaling
+
+``` solidity
+    Struct Slot {
+        uint256 slotBalance;
+        mapping(uint256 => uint256) blockBalances;
+        uint256 [] indexedBlock;
+    }
+    
+    mapping(address => mapping(uint256 => 
+        mapping(uint8 => Slot))) private _balances;
+```
+Which this struct it's providing abstract loop in horizaontal way more efficient to calculate usable balance of the account because
+you don't need to get to iterate in indexedBlock for each slot to calculate the entire slot balance if the slot can presume not expire.
+
+##### Buffer Slot
+
+In the design sliding window algorithm need to be couarse because it's determistic and fiexed size to ensure that usable balance that nearly expire will be include in usable balance of the account it's need to buffered one slot
+
+#### Rational
+- [ ] This contract provide loyalty reward like, it's expirable so it's not suitable to have `MAX_SUPPLY`.
+- [ ] This contract have `gasUsed` per interaction higher than original ERC20.
+- [ ] This contract rely on `block.number` rather than `block.timestamp` so whatever happen that make network halt asset will be safe.
+- [ ] This contract can have scenario that expiration block are shorten than actual true expiration block, due to `blockPerYear` and `blockPerSlot * slotperear` output from calculate can be different.
+
+``` text
+    /* @note Motiviation
+    * avoid to change ERC20 Interface Standard, support most ERC20 Interface Standard as much as possible.
+    * avoid to declaration ERA or SLOT as global variable and maintaining the counter style as much as possible.
+    * support configurable expiration period change.
+    * support configurable block produce per year of the network are change.
+    * support extensible hook logic beforeTransfer, AfterTransfer if use @openzeppelin v4.x and above.
+    * smart contract address can be grant as wholesale account so token in contract are non-expirable
+    * ** to ensure balance correctness it's need to buffer 1 slot for looback.
+    * ** Warning: avoid to use in sub-zero blocktime network.
+    *    31,556,952,000 are year in milliseconds
+    * ** Warning: avoid to combine this contract with other ERC20 extension,
+    *    due it's can cause unexpected behavior.
+    * ** Warning: this rely on blocknumber more than block.timestamp
+    *    in some scenario expiration block are shorten than actual true expiration block
+    *
+    */
+```
+
+```
+7889231 index if blocktime is 1 and expire period is 1 slot receive token every 1 second
+1577846 index if blocktime is 5 and expire period is 1 slot receive token every 5 second
+788923 index if blocktime is 10 and expire period is 1 slot receive token every 10 second
+91 index if blocktime 1 is and expire period is 1 slot receive token every 84600 second (1day)
+18 index if blocktime 5 is and expire period is 1 slot receive token every 84600 second (1day)
+9 index if blocktime 10 is and expire period is 1 slot receive token every 84600 second (1day)
+dynamic adjust number slot per era from given blockperiod
+if short blockperiod increase slot per era 
+if long blockperiod decrease slot per era
+how ever buffer slot still 1 even slot increase or decrease
+if wanted to reduce size in each slot reduce the frequent of receive token
+```
+
+#### Appendix
+
+`Era` defination  
+similar idea fo page in pagination
+
+`FIFO` defination
+Frist In Frist Out
+
+`Slot` defination
+similar idea of index in each page of pagination
+** frist index of slot is 0
