@@ -7,9 +7,9 @@ import "../interfaces/ICalendar.sol";
 
 abstract contract Calendar is ICanlendar {
     // 49 bytes allocated for global variables
-    uint8 private constant SLOT_PER_ERA = 8;
+    uint8 private constant SLOT_PER_ERA = 4;
     uint8 private constant MINIMUM_EXPIRE_PERIOD_SLOT = 1;
-    uint8 private constant MAXIMUM_EXPIRE_PERIOD_SLOT = 16;
+    uint8 private constant MAXIMUM_EXPIRE_PERIOD_SLOT = 8;
     uint8 private constant MINIMUM_BLOCKTIME_IN_MILLI_SECONDS = 1; // 1 milliseconds.
 
     uint16 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000; // 10 minutes.
@@ -112,7 +112,7 @@ abstract contract Calendar is ICanlendar {
                 slot--;
             } else {
                 era--;
-                slot = 7;
+                slot = (SLOT_PER_ERA - 1);
             }
         }
         return (era, slot);
