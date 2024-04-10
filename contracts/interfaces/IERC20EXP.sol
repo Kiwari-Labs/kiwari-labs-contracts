@@ -19,12 +19,12 @@ interface IERC20EXP {
         BURN
     }
 
-    // Events
+    // events
     event BlockProducedPerYearUpdated(uint256 oldValue, uint256 newValue);
     event TokenExpiryPeriodUpdated(uint8 oldValue, uint8 newValue);
     event GrantWholeSale(address index, bool auth);
 
-    // Errors
+    // errors
     // error InvalidBlockPeriod();
     // error InvalidExpirePeriod();
     // error notWholeSale(address account);
