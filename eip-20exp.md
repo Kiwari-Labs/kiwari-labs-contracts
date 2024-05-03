@@ -1,5 +1,14 @@
-
-
+---
+title: <The EIP title is a few words, not a complete sentence>
+description: <Description is one full (short) sentence>
+author: <a comma separated list of the author's or authors' name + GitHub username (in parenthesis), or name and email (in angle brackets).  Example, FirstName LastName (@GitHubUsername), FirstName LastName <foo@bar.com>, FirstName (@GitHubUsername) and GitHubUsername (@GitHubUsername)>
+discussions-to: https://ethereum-magicians.org/t/
+status: Draft
+type: Standards Track
+category: ERC
+created: 2024-mm-dd
+requires: <EIP number(s)> # Only required when you reference an EIP in the `Specification` section. Otherwise, remove this field.
+---
 
 ## Simple Summary
 
