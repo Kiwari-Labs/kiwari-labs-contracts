@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.5.0 <0.8.0;
+pragma solidity >=0.5.0 <0.9.0;
 
 /// @author ERC20EXP <erc20exp@protonmail.com>
 
 import "../interfaces/ICalendar.sol";
 
-abstract contract Calendar is ICanlendar {
+abstract contract Calendar is ICalendar {
     // 49 bytes allocated for global variables
     uint8 private constant SLOT_PER_ERA = 4;
     uint8 private constant MINIMUM_EXPIRE_PERIOD_SLOT = 1;
     uint8 private constant MAXIMUM_EXPIRE_PERIOD_SLOT = 8;
     uint8 private constant MINIMUM_BLOCKTIME_IN_MILLI_SECONDS = 100; // 100 milliseconds.
 
-    uint16 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000; // 10 minutes.
+    uint24 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000; // 10 minutes.
     uint40 private constant YEAR_IN_MILLI_SECONDS = 31_556_926_000;
 
     uint8 private _expirePeriod;
@@ -86,7 +86,7 @@ abstract contract Calendar is ICanlendar {
         uint40 expirePeriodInBlockLength = expirationPeriodInBlockLength();
         if (blockNumber >= expirePeriodInBlockLength) {
             // If the current block is beyond the expiration period
-            return blockNumber - expirePeriodInBlockLength;
+            return uint64(blockNumber - expirePeriodInBlockLength);
         } else {
             // If the current block is within the expiration period
             return 0;
@@ -105,7 +105,7 @@ abstract contract Calendar is ICanlendar {
         return (fromEra, fromSlot);
     }
 
-    function _addingBuffer(uint256 era, uint8 slot) private view returns (uint256, uint8) {
+    function _addingBuffer(uint256 era, uint8 slot) private pure returns (uint256, uint8) {
         // Add buffer slot
         if (era != 0 && slot != 0) {
             if (slot > 0) {
@@ -119,7 +119,7 @@ abstract contract Calendar is ICanlendar {
     }
 
     function _safePagination() public view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
-        uint256 blockNumberCache = blockNumberProvider();
+        uint256 blockNumberCache = _blockNumberProvider();
         (toEra, toSlot) = _calculateEraAndSlot(blockNumberCache);
         // Calculate the starting block for the expiration period
         uint256 fromBlock = _calculateBlockDifferent(blockNumberCache);
@@ -128,7 +128,7 @@ abstract contract Calendar is ICanlendar {
         return (fromEra, toEra, fromSlot, toSlot);
     }
 
-    function _blockNumberProvider() internal view virtual override returns (uint256) {
+    function _blockNumberProvider() internal view virtual returns (uint256) {
         return block.number;
     }
 
@@ -160,7 +160,7 @@ abstract contract Calendar is ICanlendar {
         return _blockPerYear / SLOT_PER_ERA;
     }
 
-    function slotPerEra() view override pulbic returns (uint8) {
+    function slotPerEra() public pure override returns (uint8) {
         return SLOT_PER_ERA;
     }
 

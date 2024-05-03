@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.15;
+pragma solidity >=0.5.0 <0.9.0;
 
 /// @title ERC20EXP abstract contract
 /// @author ERC20EXP <erc20exp@protonmail.com>
@@ -10,13 +10,13 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
 
-    struct Slot {
-        uint256 slotBalance;
-        mapping(uint256 => uint256) blockBalances;
-        uint256 [] blockIndexed;
-    }
+    // struct Slot {
+    //     uint256 slotBalance;
+    //     mapping(uint256 => uint256) blockBalances;
+    //     uint256 [] blockIndexed;
+    // }
 
-    enum TRANSCTION_TYPES { DEFAULT, MINT, BURN }
+    // enum TRANSCTION_TYPES { DEFAULT, MINT, BURN }
 
     mapping(address => bool) private _wholeSale;
     mapping(address => uint256) private _receiveBalances;
@@ -72,7 +72,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
                 }
             }
             // calulate balance betaween fromEra and toEra
-            for (uint256 era = fromEra + 1; era < toEra; slot++) {
+            for (uint256 era = fromEra + 1; era < toEra; era++) {
                 for (uint8 slot = 0; slot <= 7; slot++) {
                     _balanceCache += _retailBalances[account][era][slot].slotBalance;
                 }
@@ -85,7 +85,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         }
     }
 
-    /// @custom:inefficientGasUsedAppetite heavy loop through array of blockIndexed in wrostcase
+    /// @custom:inefficientgasusedappetite heavy loop through array of blockindexed in wrostcase
     function _totalBlockBalance(address account, uint256 era, uint8 slot) public view returns (uint256) {
         Slot storage s = _retailBalances[account][era][slot];
         uint256 blockIndexedLength = s.blockIndexed.length;
@@ -95,7 +95,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             return 0;
         }
 
-        uint256 blockNumberCache = blockNumberProvider();
+        uint256 blockNumberCache = _blockNumberProvider();
         uint256 lastestBlockCache = s.blockIndexed[blockIndexedLength - 1];
 
         // If the latest block is outside the expiration period, skip entrie slot return 0.
@@ -173,9 +173,9 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         // if (!wholeSale[to]) {
         //  revert notRetail(to);
         // }
-        uint256 blockNumberCache = blockNumberProvider();
+        uint256 blockNumberCache = _blockNumberProvider();
         (uint256 _currentEra, uint8 _currentSlot) = _calculateEraAndSlot(blockNumberCache);
-        _updateRetailBalance(address(0), to, value, 0  , _currentEra, 0, _currentSlot, TRANSCTION_TYPES.MINT) ;
+        _updateRetailBalance(address(0), to, value, 0  , _currentEra, 0, _currentSlot, TRANSCTION_TYPES.MINT);
     }
 
     /// @notice can't mint expirable token to wholesale account.
@@ -217,7 +217,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         emit Transfer(from, to, value);
     }
 
-    /// @custom:dataIntegrityErrorAppetite ignore to move blockIndexed to address(0) for saving gas
+    /// @custom:dataintegrityerrorappetite ignore to move blockIndexed to address(0) for saving gas
     function _updateRetailBalance(
         address from,
         address to,
@@ -229,7 +229,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         TRANSCTION_TYPES txTypes
     ) internal virtual {
         if (txTypes == TRANSCTION_TYPES.MINT) {
-            uint256 blockNumberCache = blockNumberProvider();
+            uint256 blockNumberCache = _blockNumberProvider();
             Slot storage slot = _retailBalances[to][toEra][toSlot];
             {
                 slot.slotBalance += value;
@@ -238,10 +238,10 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             }
         } else  {
             uint256 balanceCache = balanceOf(from);
-            if (balanceCache < value) {
-                revert ();
-            }
-           if (txTypes == TRANSCTION_TYPES.DEFAULT) {
+            // if (balanceCache < value) {
+            //     revert ();
+            // }
+            if (txTypes == TRANSCTION_TYPES.DEFAULT) {
             // @TODO search for first usable balance
             // @TODO sort index at to address 
             // for (fromEra; fromEra < toEra; i++) {                
@@ -352,8 +352,8 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
     /// @notice transfer use safe balanceOf for lookback available balance.
     /// @param to description
     /// @return value description
-    /// @custom:inefficientGasUsedAppetite emit 2 transfer events inefficient gas.
-    /// @custom:inefficientGasUsedAppetite heavy check condition.
+    /// @custom:inefficientgasusedappetite emit 2 transfer events inefficient gas.
+    /// @custom:inefficientgasusedappetite heavy check condition.
     function transfer(
         address to,
         uint256 value
@@ -383,6 +383,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             }
         }
         // @TODO _afterTransfer(from, to, value);
+        }
         return true;
     }
 

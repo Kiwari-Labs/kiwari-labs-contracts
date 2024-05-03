@@ -1,13 +1,13 @@
 ---
 title: ERC20 Expirable Extension
 description: An expirable extension for make expirable fungible token.
-author: sirawt (@MASDXI), Adisak ADISAKBOONMARK (@ADISAKBOONMARK)
+author: sirawt (@MASDXI), ADISAKBOONMARK (@ADISAKBOONMARK)
 discussions-to: https://ethereum-magicians.org/t/eip-number-name/number
 status: Draft
 type: Standards Track
 category: ERC
 created: 2024-mm-dd
-requires: 20, 165 # Only required when you reference an EIP in the `Specification` section. Otherwise, remove this field.
+requires: 20, 165
 ---
 
 ## Simple Summary
@@ -27,6 +27,7 @@ An extension standard allows to create tokens with expiration date like loyalty 
 To create fungible tokens that have abilities to expiration like loyalty reward is 
 challege due to the limitation of smart contract concept that every block has block gas limit how to preventing the transaction of   contract hits the block gas limit while compatible with existing ERC20 standard interface.
 
+## Rationale
 ##### Requirement: 
 - [ ] Compatible with existing ERC20 standard.
 - [ ] Configurable expiration period can be change.
@@ -84,7 +85,6 @@ you don't need to get to iterate in indexedBlock for each slot to calculate the 
 
 In the design sliding window algorithm need to be couarse because it's determistic and fiexed size to ensure that usable balance that nearly expire will be include in usable balance of the account it's need to buffered one slot
 
-#### Rational
 - [ ] This contract provide loyalty reward like, it's expirable so it's not suitable to have `MAX_SUPPLY`.
 - [ ] This contract have `gasUsed` per interaction higher than original ERC20.
 - [ ] This contract rely on `block.number` rather than `block.timestamp` so whatever happen that make network halt asset will be safe.
@@ -134,3 +134,13 @@ Frist In Frist Out
 `Slot` defination
 similar idea of index in each page of pagination
 ** frist index of slot is 0
+
+## Security Considerations
+all address that not registered as whitelist address will be use sliding window algorithm by default
+
+Sliding window algorithm is not update the 
+
+
+## Copyright
+
+Copyright and related rights waived via [CC0](../LICENSE.md).

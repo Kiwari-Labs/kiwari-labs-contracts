@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.15;
+pragma solidity >=0.5.0 <0.9.0;
 
 /// @title ERC20EXP abstract contract
 /// @author ERC20EXP <erc20exp@protonmail.com>
@@ -160,7 +160,7 @@ contract ERC20Expirable is ERC20 {
                 }
             }
             // calulate balance betaween fromEra and toEra
-            for (uint256 era = fromEra + 1; era < toEra; slot++) {
+            for (uint256 era = fromEra + 1; era < toEra; era++) {
                 for (uint8 slot = 0; slot <= 7; slot++) {
                     _balanceCache += _retailBalances[account][era][slot].slotBalance;
                 }

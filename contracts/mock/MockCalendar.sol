@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.14;
+pragma solidity >=0.5.0 <0.9.0;
 
 import "../abstracts/Calendar.sol";
 
