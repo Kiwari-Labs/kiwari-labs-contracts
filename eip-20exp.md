@@ -50,19 +50,19 @@ This contract creates an abstract implementation that adopts the sliding window 
  │    1    │   0 ERA cycle, 1 SLOT    │
  │    2    │   0 ERA cycle, 2 SLOT    │
  │    3    │   0 ERA cycle, 3 SLOT    │
- │    4    │   0 ERA cycle, 4 SLOT    │
- │    5    │   0 ERA cycle, 5 SLOT    │
- │    6    │   0 ERA cycle, 6 SLOT    │
- │    7    │   0 ERA cycle, 7 SLOT    │
- │    8    │   1 ERA cycle, 0 SLOT    │
- │    9    │   1 ERA cycle, 1 SLOT    │
- │   10    │   1 ERA cycle, 2 SLOT    │
- │   11    │   1 ERA cycle, 3 SLOT    │
- │   12    │   1 ERA cycle, 4 SLOT    │
- │   13    │   1 ERA cycle, 5 SLOT    │
- │   14    │   1 ERA cycle, 6 SLOT    │
- │   15    │   1 ERA cycle, 7 SLOT    │
- │   16    │   2 ERA cycle, 0 SLOT    │
+ │    4    │   1 ERA cycle, 0 SLOT    │
+ │    5    │   1 ERA cycle, 1 SLOT    │
+ │    6    │   1 ERA cycle, 2 SLOT    │
+ │    7    │   1 ERA cycle, 3 SLOT    │
+ │    8    │   2 ERA cycle, 0 SLOT    │
+ │    9    │   2 ERA cycle, 1 SLOT    │
+ │   10    │   2 ERA cycle, 2 SLOT    │
+ │   11    │   2 ERA cycle, 3 SLOT    │
+ │   12    │   3 ERA cycle, 0 SLOT    │
+ │   13    │   3 ERA cycle, 1 SLOT    │
+ │   14    │   3 ERA cycle, 2 SLOT    │
+ │   15    │   3 ERA cycle, 3 SLOT    │
+ │   16    │   4 ERA cycle, 0 SLOT    │
  └─────────┴──────────────────────────┘
 ```
 
