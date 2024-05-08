@@ -1,7 +1,6 @@
 pragma solidity >0.8.0;
 
 contract DataStructure {
-
     struct List {
         uint256 prev;
         uint256 next;
@@ -12,49 +11,48 @@ contract DataStructure {
     uint256 public tail;
 
     mapping(uint256 => List) private _list;
-    uint256 private constant _safe = 0;
+    uint8 private constant SAFE = 0;
 
     function insert(uint256 value) public {
-        if (head == _safe && tail == _safe) {
-            // intialize list
+        uint256 tempHead = head;
+        uint256 tempTail = tail;
+        uint256 tempPivot = pivot;
+        if (tempHead == SAFE && tempTail == SAFE) {
             head = value;
             tail = value;
-            // can be ingore cause _list[value].prev and _list[value].next are equal to _safe by default
             pivot = value;
         } else {
-            if (value < head) {
-                _list[head].prev = value;
-                _list[value].next = head;
-                // _list[value].prev is equal to _safe by default
+            if (value < tempHead) {
+                _list[tempHead].prev = value;
+                _list[value].next = tempHead;
                 head = value;
             }
-            if (value > tail) {
-                _list[tail].next = value;
-                _list[value].prev = tail;
-                // _list[value].next is equa; to _safe by default
+            if (value > tempTail) {
+                _list[tempTail].next = value;
+                _list[value].prev = tempTail;
                 tail = value;
             }
             // first partition
-            if (value < pivot && value > head) {
-                // use pivot as temporary tail
-                uint256 tempHead = head;
-                while(_list[tempHead].next < pivot) {
+            if (value < tempPivot && value > tempHead) {
+                // use tempPivot as temporary tail
+                // TODO code flaw?
+                while (_list[tempHead].next < tempPivot) {
                     tempHead = _list[tempHead].next;
                 }
                 _list[tempHead].next = value;
                 _list[value].prev = tempHead;
-                _list[value].next = pivot;
+                _list[value].next = tempPivot;
             }
             // update second partition
-            if (value > pivot && value < head) {
-                // use pivot as temporary head
-                uint256 tempTail = tail;
-                while(_list[tempTail].prev > pivot) {
+            if (value > tempPivot && value < tempTail) {
+                // use tempPivot as temporary head
+                // TODO code flaw?
+                while (_list[tempTail].prev > tempPivot) {
                     tempTail = _list[tempTail].prev;
                 }
                 _list[tempTail].prev = value;
                 _list[value].next = tempTail;
-                _list[value].prev = pivot;
+                _list[value].prev = tempPivot;
             }
             pivot = value;
         }
@@ -65,10 +63,9 @@ contract DataStructure {
     }
 
     /// @custom:overloading method
-    function insert(uint256 [] memory value) public {
-        for(uint i = 0; i < value.length; i++) {
+    function insert(uint256[] memory value) public {
+        for (uint i = 0; i < value.length; i++) {
             insert(value[i]);
         }
     }
-
 }
