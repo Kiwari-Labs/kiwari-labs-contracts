@@ -12,6 +12,37 @@ contract DataStructure {
 
     mapping(uint256 => List) private _list;
 
+    function _updatePrev(uint256 value, uint256 newPrev) internal {
+        _list[value].prev = newPrev;
+    }
+
+    function _updateNext(uint256 value, uint256 newNext) internal {
+        _list[value].next = newNext;
+    }
+
+    function _updatePivot(uint256 value) internal {
+        pivot = value;
+    }
+
+    function _insertNewValue(uint256 value, uint256 prev, uint256 next) internal {
+        _list[value].prev = prev;
+        _list[value].next = next;
+    }
+
+    function _insertHead(uint256 value) internal {
+        _list[head].prev = value;
+        _list[value].prev = 0;
+        _list[value].next = head;
+        head = value;
+    }
+
+    function _insertTail(uint256 value) internal {
+        _list[tail].next = value;
+        _list[value].prev = tail;
+        _list[value].next = 0;
+        tail = value;
+    }
+
     function insert(uint256 value) public {
         uint256 tempHead = head;
         uint256 tempTail = tail;
@@ -44,37 +75,6 @@ contract DataStructure {
                 pivot = value;
             }
         }
-    }
-
-    function _insertHead(uint256 value) internal {
-        _list[head].prev = value;
-        _list[value].prev = 0;
-        _list[value].next = head;
-        head = value;
-    }
-
-    function _insertTail(uint256 value) internal {
-        _list[tail].next = value;
-        _list[value].prev = tail;
-        _list[value].next = 0;
-        tail = value;
-    }
-
-    function _insertNewValue(uint256 value, uint256 prev, uint256 next) internal {
-        _list[value].prev = prev;
-        _list[value].next = next;
-    }
-
-    function _updatePrev(uint256 value, uint256 newPrev) internal {
-        _list[value].prev = newPrev;
-    }
-
-    function _updateNext(uint256 value, uint256 newNext) internal {
-        _list[value].next = newNext;
-    }
-
-    function _updatePivot(uint256 value) internal {
-        pivot = value;
     }
 
     function query(uint256 value) public view returns (List memory) {
