@@ -13,55 +13,52 @@ contract DataStructure {
     uint256 public tail;
 
     mapping(uint256 => List) private _list;
-    uint8 private constant SAFE = 0;
 
     function insert(uint256 value) public {
         uint256 tempHead = head;
         uint256 tempTail = tail;
         uint256 tempPivot = pivot;
-        if (tempHead == SAFE && tempTail == SAFE) {
+        if (tempHead == 0) {
             _insertHead(value);
             _insertTail(value);
-            pivot = value;
-        } else {
-            if (value < tempHead) {
-                _insertHead(value);
-            }
-            if (value > tempTail) {
-                _insertTail(value);
-            }
-            // logic bug
-            // first partition
-            // if (value < tempPivot && value > tempHead) {
-            //     // use tempPivot as temporary tail
-            //     while (_list[tempHead].next < tempPivot) {
-            //         tempHead = _list[tempHead].next;
-            //     }
-            //     _updateNext(tempHead, value);
-            //     _insertNewValue(value, tempHead, tempPivot);
-            // }
-            // // update second partition
-            // if (value > tempPivot && value < tempTail) {
-            //     // use tempPivot as temporary head
-            //     while (_list[tempTail].prev > tempPivot) {
-            //         tempTail = _list[tempTail].prev;
-            //     }
-            //     _updatePrev(tempTail, value);
-            //     _insertNewValue(value, tempPivot, tempHead);
-            // }
-            pivot = value;
         }
+        else if (value < tempHead) {
+            _insertHead(value);
+        }
+        else if (value > tempTail) {
+            _insertTail(value);
+        }
+        // logic bug
+        // first partition
+        // if (value < tempPivot && value > tempHead) {
+        //     // use tempPivot as temporary tail
+        //     while (_list[tempHead].next < tempPivot) {
+        //         tempHead = _list[tempHead].next;
+        //     }
+        //     _updateNext(tempHead, value);
+        //     _insertNewValue(value, tempHead, tempPivot);
+        // }
+        // // update second partition
+        // if (value > tempPivot && value < tempTail) {
+        //     // use tempPivot as temporary head
+        //     while (_list[tempTail].prev > tempPivot) {
+        //         tempTail = _list[tempTail].prev;
+        //     }
+        //     _updatePrev(tempTail, value);
+        //     _insertNewValue(value, tempPivot, tempHead);
+        // }
+        pivot = value;
     }
 
     function _insertHead(uint256 value) internal {
         _list[head].prev = value;
-        _list[value].next = head;
+        _list[value].prev = 0;
         head = value;
     }
 
     function _insertTail(uint256 value) internal {
-        _list[tail].prev = value;
-        _list[value].next = tail;
+        _list[tail].next = value;
+        _list[value].next = 0;
         tail = value;
     }
 
