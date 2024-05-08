@@ -18,19 +18,15 @@ contract DataStructure {
         uint256 tempTail = tail;
         uint256 tempPivot = pivot;
         if (tempHead == SAFE && tempTail == SAFE) {
-            head = value;
-            tail = value;
+            _insertHead(value);
+            _insertTail(value);
             pivot = value;
         } else {
             if (value < tempHead) {
-                _list[tempHead].prev = value;
-                _list[value].next = tempHead;
-                head = value;
+                _insertHead(value);
             }
             if (value > tempTail) {
-                _list[tempTail].next = value;
-                _list[value].prev = tempTail;
-                tail = value;
+                _insertTail(value);
             }
             // first partition
             if (value < tempPivot && value > tempHead) {
@@ -56,6 +52,18 @@ contract DataStructure {
             }
             pivot = value;
         }
+    }
+
+    function _insertHead(uint256 value) internal {
+        _list[head].prev = value;
+        _list[value].next = head;
+        head = value;
+    }
+
+    function _insertTail(uint256 value) internal {
+        _list[tail].prev = value;
+        _list[value].next = tail;
+        head = value;
     }
 
     function query(uint256 value) public view returns (List memory) {
