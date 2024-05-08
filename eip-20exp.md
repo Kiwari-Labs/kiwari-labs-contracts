@@ -136,10 +136,8 @@ similar idea of index in each page of pagination
 ** frist index of slot is 0
 
 ## Security Considerations
-all address that not registered as whitelist address will be use sliding window algorithm by default
-
+all address that not registered as whitelist address will be use sliding window algorithm by default.
 Sliding window algorithm is not update the 
-
 
 ## Copyright
 
