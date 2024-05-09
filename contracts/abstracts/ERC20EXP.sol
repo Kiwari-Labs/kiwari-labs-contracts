@@ -6,14 +6,27 @@ pragma solidity >=0.5.0 <0.9.0;
 
 import "../abstracts/Calendar.sol";
 import "../interfaces/IERC20EXP.sol";
+// import "../libraries/CircularDoublyLinkedList.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
+    // @TODO make CDLLS into lib
+    // using CircularDoublyLinkedList for CircularDoublyLinkedList;
+
+    // struct CDLLS  {
+    //     mapping(uint256 => Node) nodes;
+    //     uint256 head;
+    //     uint256 middle;
+    //     uint256 tail;
+    //     uint256 size;
+    // }
 
     // struct Slot {
     //     uint256 slotBalance;
     //     mapping(uint256 => uint256) blockBalances;
-    //     uint256 [] blockIndexed;
+    //     uint256[] blockIndexed;
+    //     // @TODO use list instead of array;
+    //     CDLLS list;
     // }
 
     // enum TRANSCTION_TYPES { DEFAULT, MINT, BURN }
@@ -23,6 +36,8 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
     mapping(address => mapping(uint256 => mapping(uint8 => Slot)))
         private _retailBalances;
 
+    // @TODO Change expirePeriod from length of slot into length of blocks
+    // url: https://github.com/MASDXI/ERC20EXP/issues/4#issue-2234558942
     constructor(string memory name_, string memory symbol_, uint256 blockNumber_, uint16 blockTime_, uint8 expirePeriod_)
         ERC20(name_, symbol_) 
         Calendar(blockNumber_, blockTime_, expirePeriod_) {
@@ -88,6 +103,9 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
     /// @custom:inefficientgasusedappetite heavy loop through array of blockindexed in wrostcase
     function _totalBlockBalance(address account, uint256 era, uint8 slot) public view returns (uint256) {
         Slot storage s = _retailBalances[account][era][slot];
+        // @TODO
+        // CDLL Change length fron array length into size of list
+        // uint256 blockIndexedLength = s.list.size;
         uint256 blockIndexedLength = s.blockIndexed.length;
 
         // If the length is equal to zero then skip the entire slot and return zero as output.
@@ -96,6 +114,9 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         }
 
         uint256 blockNumberCache = _blockNumberProvider();
+        // @TODO
+        // CDLLS change to check tail instead of last index
+        // uint256 lastestBlockCache = s.list.tail;
         uint256 lastestBlockCache = s.blockIndexed[blockIndexedLength - 1];
 
         // If the latest block is outside the expiration period, skip entrie slot return 0.
@@ -117,11 +138,39 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
                 low = mid + 1;
             }
         }
-        // // Calculate the total balance using only the valid blocks.
+        // @TODO
+        // CDLLS Perform change search to find the index of the fisrst expire block.
+        // uint256 low = s.list.head;
+        // uint256 high = s.list.tail;
+        // uint256 mid = s.list.middle;
+        // uint256 tmpSize = 0;
+        // while (low <= high) {
+        //     mid = (low + high) / 2;
+        //     if (blockNumberCache - s.blockIndexed[middle] <= expirationPeriodInBlockLength()) {
+        //         if (mid == 0) {
+        //             break; // Stop the loop if mid is already zero
+        //         }
+        //         high = mid - 1;
+        //     } else {
+        //         low = mid + 1;
+        //     }
+        //     tmpSize++;
+        // }
+
+        // Calculate the total balance using only the valid blocks.
         uint256 balanceCache = 0;
         for (uint256 i = high + 1; i < blockIndexedLength; i++) {
             balanceCache += s.blockBalances[s.blockIndexed[i]];
         }
+
+        // @TODO
+        // CDLLS Calculate the total balance using only the valid blocks.
+        // uint256 index = <start>;
+        // uint256 tmpSize = _size;
+        // for (uint256 i = 0; i < tmpSize; i++) {
+        //     balanceCache += _nodes[index].next;
+        //     index = _nodes[index].next;
+        // }
         return balanceCache;
     }
 
@@ -235,6 +284,10 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
                 slot.slotBalance += value;
                 slot.blockBalances[blockNumberCache] += value;
                 slot.blockIndexed.push(blockNumberCache);
+                // @TODO
+                // CDLLS
+                // insert(blockNumberCache);
+                // slot.list.nodes[blockNumbeCache];
             }
         } else  {
             uint256 balanceCache = balanceOf(from);
@@ -244,20 +297,24 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             if (txTypes == TRANSCTION_TYPES.DEFAULT) {
             // @TODO search for first usable balance
             // @TODO sort index at to address 
+            // CDLLS MUST BE first in first out (FIFO) and utilizing sorted list
             // for (fromEra; fromEra < toEra; i++) {                
-            //     Slot storage sform  = retailBalances[from][fromEra][fromSlot];
-            //     Slot storage sloto = retailBalances[to][fromEra][fromSlot];
-                // MUST BE first in first out (FIFO)
-                // if buffer slot cant contain value and not move to next slot or next era {
-                //  sfrom.slotBalance -= value;
-                //  sto.slotBalnce += value;
-                //  sto.blockIndexed[index] = sfrom.blockIndexed[index];
+                // Slot storage sForm  = retailBalances[from][fromEra][fromSlot];
+                // Slot storage sTo = retailBalances[to][fromEra][fromSlot];
+                // if buffer slot can contain value and not move to next slot or next era {
+                //  sFrom.slotBalance -= value;
+                //  sTo.slotBalance += value;
+                //  sTo.blockIndexed[index] = sfrom.blockIndexed[index];
+                //  delete sfrom.list.nodes[index];
+                //  sTo.list.nodes[index];
                 // }
                 // if buffer slot can't contain all value move to next slot or next era {
                     // sfrom.slotBalance -= value;
-                    // sto.slotBalnce += value;
+                    // sto.slotBalance += value;
                     // move entrie slot if consume all slot balance
                     // sto.blockIndexed= sfrom.blockIndexed;
+                    // move to next
+                    // sfrom.list.nodes[index].next;
                 // }
             // }
             //    _retailBalances[from][fromEra][fromSlot].slotBalance += value;
@@ -268,16 +325,25 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
                 for (uint256 era = fromEra; era <= toEra; era++) {
                     // every era contain 4 slots start slot is 0 and end slot is 3
                     for (uint8 slot = fromSlot; slot <= 7; slot++) {
-                        Slot storage slotFrom = _retailBalances[from][era][slot];
-                        Slot storage slotTo = _retailBalances[to][era][slot];
-                        // @todo find first valid balance then action
+                        Slot storage sFrom = _retailBalances[from][era][slot];
+                        Slot storage sTo = _retailBalances[to][era][slot];
+                        // @TODO search for first usable balance
+                        // @TODO sort index at to address 
+                        // CDLLS MUST BE first in first out (FIFO) and utilizing sorted list
                         // Deduct balance from `from` and add to `to`
-                        // slotFrom.slotBalance is all balance including valid and invalid balance
-                        if (slotFrom.slotBalance >= value) {
-                            slotFrom.slotBalance -= value;
+                        // sFrom.slotBalance is all balance including valid and invalid balance
+                        if (sFrom.slotBalance >= value) {
+                            sFrom.slotBalance -= value; // deduct balance
+                            sTo.slotBalance += value;   // addition balance
+                            // deduct balance of block balance 
+                            // if current valid blockNumber not cover the value
+                            // delete empty blockBalance then move to next bloackBalance till match value
+                            // sFrom.blockBalances[] -= value;
                         } else {
-                            value -= slotFrom.slotBalance;
-                            slotFrom.slotBalance = 0; // consume all slot balance
+                            value -= sFrom.slotBalance;
+                            sFrom.slotBalance = 0;    // consume all slot balance
+                            sTo.slotBalance += value; // addition balance
+                            // delete node in list.
                         }
                     }
                 }
@@ -359,7 +425,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         uint256 value
     ) public virtual override returns (bool) {
         address from = msg.sender;
-        // @TODO _beforeTransfer(from, to, amount);
+        // _beforeTokenTransfer(from, to, amount);
         if (_wholeSale[from] && _wholeSale[to]) {
             // wholesale to wholesale transfer.
             _transfer(from, to, value);
@@ -377,13 +443,13 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
                 // consolidate by burning retail balance and mint non-expirable to whole receive balance.
                 _updateRetailBalance(from, address(0), value, fromEra, toEra, fromSlot, toSlot, TRANSCTION_TYPES.BURN);
                 _updateReceiveBalance(from, to, value);
-            // @TODO retail to retail transfer.
-            if (!_wholeSale[from] && !_wholeSale[to]) {
-                _updateRetailBalance(from, to, value, fromEra, toEra, fromSlot, toSlot, TRANSCTION_TYPES.DEFAULT);
+                // @TODO retail to retail transfer.
+                if (!_wholeSale[from] && !_wholeSale[to]) {
+                    _updateRetailBalance(from, to, value, fromEra, toEra, fromSlot, toSlot, TRANSCTION_TYPES.DEFAULT);
+                }
             }
         }
-        // @TODO _afterTransfer(from, to, value);
-        }
+        // _afterTokenTransfer(from, to, value);
         return true;
     }
 
@@ -410,5 +476,9 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         */
         return 0;
     }
+
+    // function _beforeTokenTransfer(address from, address to, uint amount) internal virtual {};
+
+    // function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual {};
 
 }

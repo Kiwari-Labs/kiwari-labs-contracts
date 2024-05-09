@@ -126,6 +126,17 @@ contract DoublyLinkedListWithSentinel {
         return _nodes[index];
     }
 
+    function ascendingList(uint256 index) public view returns (uint256[] memory) {
+        uint256 tmpIndex = index;
+        uint256 tmpSize = _size;
+        uint256[] memory asd = new uint256[](tmpSize);
+        for (uint256 i = 0; i < tmpSize; i++) {
+            asd[i] = _nodes[tmpIndex].next;
+            tmpIndex = _nodes[tmpIndex].next;
+        }
+        return asd;
+    }
+
     function ascendingList() public view returns (uint256[] memory) {
         uint256 index = _sentinel;
         uint256 tmpSize = _size;
@@ -135,6 +146,17 @@ contract DoublyLinkedListWithSentinel {
             index = _nodes[index].next;
         }
         return asd;
+    }
+
+    function descendingList(uint256 index) public view returns (uint256[] memory) {
+        uint256 tmpIndex = index;
+        uint256 tmpSize = _size;
+        uint256[] memory des = new uint256[](tmpSize);
+        for (uint256 i = 0; i < tmpSize; i++) {
+            des[i] = _nodes[tmpIndex].prev;
+            tmpIndex = _nodes[tmpIndex].prev;
+        }
+        return des;
     }
 
     function descendingList() public view returns (uint256[] memory) {
