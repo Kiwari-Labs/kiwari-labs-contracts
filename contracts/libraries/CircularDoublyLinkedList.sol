@@ -2,199 +2,198 @@
 pragma solidity >=0.5.0 <0.9.0;
 
 library CircularDoublyLinkedList {
-     struct Node {
+    struct Node {
         uint256 prev;
         uint256 next;
         // bytes data; // reserve
     }
 
+    struct List {
+        mapping(uint256 => Node) nodes;
+        uint256 head;
+        uint256 middle;
+        uint256 tail;
+        uint256 size;
+    }
+
     uint8 private constant _sentinel = 0;
 
-    // Library cannot have non-constant state variables
-    uint256 private _head;
-    uint256 private _middle;
-    uint256 private _tail;
-    uint256 private _size;
-
-    // Library cannot have non-constant state variables
-    mapping(uint256 => Node) private _nodes;
-
-    function _insertNode(uint256 index, uint256 prev, uint256 next) private {
-        _nodes[index] = Node(prev, next);
+    function _insertNode(List storage list, uint256 index, uint256 prev, uint256 next) private {
+        list.nodes[index] = Node(prev, next);
     }
 
-    function _updatePrev(uint256 index, uint256 newPrev) internal {
-        _nodes[index].prev = newPrev;
+    function _updatePrev(List storage list, uint256 index, uint256 newPrev) internal {
+        list.nodes[index].prev = newPrev;
     }
 
-    function _updateNext(uint256 index, uint256 newNext) internal {
-        _nodes[index].next = newNext;
+    function _updateNext(List storage list, uint256 index, uint256 newNext) internal {
+        list.nodes[index].next = newNext;
     }
 
     // TODO maintain middle
-    function _insertMiddle(uint256 index) internal {
-        _middle = index;
+    function _insertMiddle(List storage list, uint256 index) internal {
+        list.middle = index;
     }
 
-    function _insertHead(uint256 index) internal {
-        _updateNext(_sentinel, index);
-        _updatePrev(_head, index);
-        _insertNode(index, _sentinel, _head);
-        _head = index;
+    function _insertHead(List storage list, uint256 index) internal {
+        _updateNext(list, _sentinel, index);
+        _updatePrev(list, list.head, index);
+        _insertNode(list, index, _sentinel, list.head);
+        list.head = index;
     }
 
-    function _insertTail(uint256 index) internal {
-        _updatePrev(_sentinel, index);
-        _updateNext(_tail, index);
-        _insertNode(index, _tail, _sentinel);
-        _tail = index;
+    function _insertTail(List storage list, uint256 index) internal {
+        _updatePrev(list, _sentinel, index);
+        _updateNext(list, list.tail, index);
+        _insertNode(list, index, list.tail, _sentinel);
+        list.tail = index;
     }
 
-    function _removeHead() internal {
-        _updateNext(_sentinel, _nodes[_head].next);
-        _head = _nodes[_head].next;
-        _updateNext(_sentinel, _head);
-        _size--;
+    function _removeHead(List storage list) internal {
+        _updateNext(list, _sentinel, list.nodes[list.head].next);
+        list.head = list.nodes[list.head].next;
+        _updateNext(list, _sentinel, list.head);
+        list.size--;
     }
 
-    function _removeTail() internal {
-        _updatePrev(_sentinel, _nodes[_tail].prev);
-        _tail = _nodes[_tail].prev;
-        _updateNext(_tail, _sentinel);
-        _size--;
+    function _removeTail(List storage list) internal {
+        _updatePrev(list, _sentinel, list.nodes[list.tail].prev);
+        list.tail = list.nodes[list.tail].prev;
+        _updateNext(list, list.tail, _sentinel);
+        list.size--;
     }
 
     /// @custom:overloading-method remove multiple index
-    function remove(uint256[] memory indexes) internal {
+    function remove(List storage list, uint256[] memory indexes) internal {
         for (uint i = 0; i < indexes.length; i++) {
-            remove(indexes[i]);
+            remove(list, indexes[i]);
         }
     }
 
     /// @custom:overloading-method remove single index
-    function remove(uint256 value) internal {
-        if (_size == 0) {
+    function remove(List storage list, uint256 value) internal {
+        if (list.size == 0) {
             // Handle If the list is empty?
-        } else if (value == _head) {
-            _removeHead();
-        } else if (value == _tail) {
-            _removeTail();
+        } else if (value == list.head) {
+            _removeHead(list);
+        } else if (value == list.tail) {
+            _removeTail(list);
         } else {
             // TODO
         }
     }
 
     /// @custom:overloading-method add multiple index
-    function insert(uint256[] memory indexes) internal {
+    function insert(List storage list, uint256[] memory indexes) internal {
         for (uint i = 0; i < indexes.length; i++) {
-            insert(indexes[i]);
+            insert(list, indexes[i]);
         }
     }
 
     /// @custom:overloading-method add single index
-    function insert(uint256 value) internal {
-        if (_size == 0) {
+    function insert(List storage list, uint256 value) internal {
+        if (list.size == 0) {
             // If the list is empty, insert at head
-            _insertHead(value);
-            _insertTail(value);
-            _insertMiddle(value);
-            _size++;
-        } else if (value <= _head) {
+            _insertHead(list, value);
+            _insertTail(list, value);
+            _insertMiddle(list, value);
+            list.size++;
+        } else if (value <= list.head) {
             // If the value is less than or equal to the head, insert at head
-            if (_head != value) {
-                _insertHead(value);
-                _size++;
+            if (list.head != value) {
+                _insertHead(list, value);
+                list.size++;
             }
-        } else if (value >= _tail) {
+        } else if (value >= list.tail) {
             // If the value is greater than or equal to the tail, insert at tail
-            if (_tail != value) {
-                _insertTail(value);
-                _size++;
+            if (list.tail != value) {
+                _insertTail(list, value);
+                list.size++;
             }
         } else {
             // Inserting the value in between existing nodes
-            uint256 current = _head;
+            uint256 current = list.head;
             while (current != _sentinel && value > current) {
                 if (current == value) {
                     // If value already exists, do not insert
                     return;
                 }
-                current = _nodes[current].next;
+                current = list.nodes[current].next;
             }
             if (current != value) {
-                _insertNode(value, _nodes[current].prev, current);
-                _updateNext(_nodes[current].prev, value);
-                _updatePrev(current, value);
-                _size++;
+                _insertNode(list, value, list.nodes[current].prev, current);
+                _updateNext(list, list.nodes[current].prev, value);
+                _updatePrev(list, current, value);
+                list.size++;
             }
         }
     }
 
-    function head() internal view returns (uint256) {
-        return _head;
+    function head(List storage list) internal view returns (uint256) {
+        return list.head;
     }
 
-    function middle() internal view returns (uint256) {
-        return _middle;
+    function middle(List storage list) internal view returns (uint256) {
+        return list.middle;
     }
 
-    function tail() internal view returns (uint256) {
-        return _tail;
+    function tail(List storage list) internal view returns (uint256) {
+        return list.tail;
     }
 
-    function sentinel() internal view returns (Node memory) {
-        return _nodes[_sentinel];
+    function sentinel(List storage list) internal view returns (Node memory) {
+        return list.nodes[_sentinel];
     }
 
-    function node(uint256 index) internal view returns (Node memory) {
-        return _nodes[index];
+    function node(List storage list, uint256 index) internal view returns (Node memory) {
+        return list.nodes[index];
     }
 
-    function ascendingList() internal view returns (uint256[] memory) {
+    function ascendingList(List storage list) internal view returns (uint256[] memory) {
         uint256 index = _sentinel;
-        uint256 tmpSize = _size;
+        uint256 tmpSize = list.size;
         uint256[] memory asd = new uint256[](tmpSize);
         for (uint256 i = 0; i < tmpSize; i++) {
-            asd[i] = _nodes[index].next;
-            index = _nodes[index].next;
+            asd[i] = list.nodes[index].next;
+            index = list.nodes[index].next;
         }
         return asd;
     }
 
-    function descendingList() internal view returns (uint256[] memory) {
+    function descendingList(List storage list) internal view returns (uint256[] memory) {
         uint256 index = _sentinel;
-        uint256 tmpSize = _size;
+        uint256 tmpSize = list.size;
         uint256[] memory des = new uint256[](tmpSize);
         for (uint256 i = 0; i < tmpSize; i++) {
-            des[i] = _nodes[index].prev;
-            index = _nodes[index].prev;
+            des[i] = list.nodes[index].prev;
+            index = list.nodes[index].prev;
         }
         return des;
     }
 
-    function firstParitionList() internal view returns (uint256[] memory) {
+    function firstParitionList(List storage list) internal view returns (uint256[] memory) {
         uint256 index = _sentinel;
-        uint256 tmpSize = _size/2;
+        uint256 tmpSize = list.size/2;
         uint256[] memory part = new uint256[](tmpSize);
         for (uint256 i = 0; i < tmpSize; i++) {
-            part[i] = _nodes[index].prev;
-            index = _nodes[index].prev;
+            part[i] = list.nodes[index].prev;
+            index = list.nodes[index].prev;
         }
         return part;
     }
 
-    function secondPartitionList() internal view returns (uint256[] memory) {
+    function secondPartitionList(List storage list) internal view returns (uint256[] memory) {
         uint256 index = _sentinel;
-        uint256 tmpSize = _size/2;
+        uint256 tmpSize = list.size/2;
         uint256[] memory part = new uint256[](tmpSize);
         for (uint256 i = 0; i < tmpSize; i++) {
-            part[i] = _nodes[index].prev;
-            index = _nodes[index].prev;
+            part[i] = list.nodes[index].prev;
+            index = list.nodes[index].prev;
         }
         return part;
     }
 
-    function size() internal view returns (uint256) {
-        return _size;
+    function size(List storage list) internal view returns (uint256) {
+        return list.size;
     }
 }
