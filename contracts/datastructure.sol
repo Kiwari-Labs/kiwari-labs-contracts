@@ -1,20 +1,33 @@
 pragma solidity >0.8.0;
 
-contract DoublyLinkedList {
+contract DoublyLinkedListWithSentinel {
     struct Node {
         uint256 prev;
         uint256 next;
     }
+
+    uint8 private constant _sentinel = 0;
 
     uint256 private _head;
     uint256 private _middle;
     uint256 private _tail;
     uint256 private _size;
 
+    // make mapping into list
     mapping(uint256 => Node) private _nodes;
 
-    // function _insertNode(uint256 index, uint256 prev, uint256 next) private {
-    //     _nodes[index] = Node(prev, next);
+    function _insertNode(uint256 index, uint256 prev, uint256 next) private {
+        _nodes[index] = Node(prev, next);
+    }
+
+    // TODO
+    // function _insertAfter() private {
+    //
+    // }
+
+    // TODO
+    // function _insertBefore() private {
+    //
     // }
 
     function _updatePrev(uint256 value, uint256 newPrev) internal {
@@ -29,22 +42,15 @@ contract DoublyLinkedList {
         _middle = value;
     }
 
-    function _insertNewValue(uint256 value, uint256 prev, uint256 next) internal {
-        _nodes[value].prev = prev;
-        _nodes[value].next = next;
-    }
-
     function _insertHead(uint256 value) internal {
-        _nodes[_head].prev = value;
-        _nodes[value].prev = 0;
-        _nodes[value].next = _head;
+        _updatePrev(_head, value);
+        _insertNode(value, _sentinel, _head);
         _head = value;
     }
 
     function _insertTail(uint256 value) internal {
-        _nodes[_tail].next = value;
-        _nodes[value].prev = _tail;
-        _nodes[value].next = 0;
+        _updateNext(_tail, value);
+        _insertNode(value, _tail, _sentinel);
         _tail = value;
     }
 
@@ -77,7 +83,7 @@ contract DoublyLinkedList {
                     tempHead = _nodes[tempHead].next;
                 }
                 _updateNext(tempHead, value);
-                _insertNewValue(value, tempHead, tempmiddle);
+                _insertNode(value, tempHead, tempmiddle);
                 _middle = value;
             }
             if (value < tempTail && value > tempmiddle) {
@@ -85,7 +91,7 @@ contract DoublyLinkedList {
                     tempTail = _nodes[tempTail].prev;
                 }
                 _updatePrev(tempTail, value);
-                _insertNewValue(value, tempmiddle, tempHead);
+                _insertNode(value, tempmiddle, tempHead);
                 _middle = value;
             }
         }
@@ -97,27 +103,43 @@ contract DoublyLinkedList {
         return _head;
     }
 
+    function middle() public view returns (uint256) {
+        return _middle;
+    }
+
     function tail() public view returns (uint256) {
         return _tail;
     }
 
-    function middle() public view returns (uint256) {
-        return _middle;
+    function sentinel() public view returns (Node memory) {
+        return _nodes[_sentinel];
     }
 
     function get(uint256 index) public view returns (Node memory) {
         return _nodes[index];
     }
 
-    function getSortedList() public view returns (uint256 [] memory) {
-        uint256[] memory sorted = new uint256[](_size);
-        uint256 index = _head;
-        for (uint256 i = 0; i < _size; i++) {
-            sorted[i] = _nodes[index].next;
+    function getAscendingList() public view returns (uint256 [] memory) {
+        uint256 index = _sentinel;
+        uint256 size = _size;
+        uint256[] memory asd = new uint256[](size);
+        for (uint256 i = 0; i < size; i++) {
+            asd[i] = _nodes[index].next;
             index = _nodes[index].next;
         }
-        return sorted;
+        return asd;
     }
+
+    function getDescendingList() public view  returns (uint256 [] memory) {
+        uint256 index = _sentinel;
+        uint256 size = _size;
+        uint256[] memory des = new uint256[](size);
+        for (uint256 i = 0; i < _size; i++) {
+            des[i] = _nodes[index].prev;
+            index = _nodes[index].prev;
+        }
+        return des;
+    } 
 
     function getSize() public view returns (uint256) {
         return _size;
