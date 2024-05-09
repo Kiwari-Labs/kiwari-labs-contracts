@@ -29,8 +29,8 @@ contract DoublyLinkedListWithSentinel {
         _nodes[index].next = newNext;
     }
 
+    // TODO maintain middle
     function _insertMiddle(uint256 index) internal {
-        // TODO maintain middle
         _middle = index;
     }
 
@@ -49,15 +49,37 @@ contract DoublyLinkedListWithSentinel {
     }
 
     function _removeHead() internal {
-        // TODO
+        _updateNext(_sentinel, _nodes[_head].next);
+        _head = _nodes[_head].next;
+        _updateNext(_sentinel, _head);
+        _size--;
     }
 
     function _removeTail() internal {
-        // TODO
+        _updatePrev(_sentinel, _nodes[_tail].prev);
+        _tail = _nodes[_tail].prev;
+        _updateNext(_tail, _sentinel);
+        _size--;
     }
 
-    function _remove(uint256 index) internal {
-        // TODO
+    /// @custom:overloading-method remove multiple index
+    function remove(uint256[] memory indexes) public {
+        for (uint i = 0; i < indexes.length; i++) {
+            remove(indexes[i]);
+        }
+    }
+
+    /// @custom:overloading-method remove single index
+    function remove(uint256 value) internal {
+        if (_size == 0) {
+            // Handle If the list is empty?
+        } else if (value == _head) {
+            _removeHead();
+        } else if (value == _tail) {
+            _removeTail();
+        } else {
+            // TODO
+        }
     }
 
     /// @custom:overloading-method add multiple index
@@ -126,17 +148,6 @@ contract DoublyLinkedListWithSentinel {
         return _nodes[index];
     }
 
-    function ascendingList(uint256 index) public view returns (uint256[] memory) {
-        uint256 tmpIndex = index;
-        uint256 tmpSize = _size;
-        uint256[] memory asd = new uint256[](tmpSize);
-        for (uint256 i = 0; i < tmpSize; i++) {
-            asd[i] = _nodes[tmpIndex].next;
-            tmpIndex = _nodes[tmpIndex].next;
-        }
-        return asd;
-    }
-
     function ascendingList() public view returns (uint256[] memory) {
         uint256 index = _sentinel;
         uint256 tmpSize = _size;
@@ -146,17 +157,6 @@ contract DoublyLinkedListWithSentinel {
             index = _nodes[index].next;
         }
         return asd;
-    }
-
-    function descendingList(uint256 index) public view returns (uint256[] memory) {
-        uint256 tmpIndex = index;
-        uint256 tmpSize = _size;
-        uint256[] memory des = new uint256[](tmpSize);
-        for (uint256 i = 0; i < tmpSize; i++) {
-            des[i] = _nodes[tmpIndex].prev;
-            tmpIndex = _nodes[tmpIndex].prev;
-        }
-        return des;
     }
 
     function descendingList() public view returns (uint256[] memory) {
@@ -173,23 +173,23 @@ contract DoublyLinkedListWithSentinel {
     function firstParitionList() public view returns (uint256[] memory) {
         uint256 index = _sentinel;
         uint256 tmpSize = _size/2;
-        uint256[] memory des = new uint256[](tmpSize);
+        uint256[] memory part = new uint256[](tmpSize);
         for (uint256 i = 0; i < tmpSize; i++) {
-            des[i] = _nodes[index].prev;
+            part[i] = _nodes[index].prev;
             index = _nodes[index].prev;
         }
-        return des;
+        return part;
     }
 
     function secondPartitionList() public view returns (uint256[] memory) {
         uint256 index = _sentinel;
         uint256 tmpSize = _size/2;
-        uint256[] memory des = new uint256[](tmpSize);
+        uint256[] memory part = new uint256[](tmpSize);
         for (uint256 i = 0; i < tmpSize; i++) {
-            des[i] = _nodes[index].prev;
+            part[i] = _nodes[index].prev;
             index = _nodes[index].prev;
         }
-        return des;
+        return part;
     }
 
     function size() public view returns (uint256) {

@@ -104,7 +104,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
     function _totalBlockBalance(address account, uint256 era, uint8 slot) public view returns (uint256) {
         Slot storage s = _retailBalances[account][era][slot];
         // @TODO
-        // CDLL Change length fron array length into size of list
+        // CDLLS Change length fron array length into size of list
         // uint256 blockIndexedLength = s.list.size;
         uint256 blockIndexedLength = s.blockIndexed.length;
 

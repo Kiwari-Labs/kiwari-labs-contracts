@@ -109,13 +109,14 @@ In the design sliding window algorithm need to be couarse because it's determist
     */
 ```
 
-```
+``` 
 7889231 index if blocktime is 1 and expire period is 1 slot receive token every 1 second
 1577846 index if blocktime is 5 and expire period is 1 slot receive token every 5 second
 788923 index if blocktime is 10 and expire period is 1 slot receive token every 10 second
-91 index if blocktime 1 is and expire period is 1 slot receive token every 84600 second (1day)
-18 index if blocktime 5 is and expire period is 1 slot receive token every 84600 second (1day)
-9 index if blocktime 10 is and expire period is 1 slot receive token every 84600 second (1day)
+273 index if blocktime 1 is and expire period is 1 slot receive token every 28200 second (3tx/day)
+91 index if blocktime 1 is and expire period is 1 slot receive token every 84600 second (1tx/1day)
+18 index if blocktime 5 is and expire period is 1 slot receive token every 84600 second (1tx/1day)
+9 index if blocktime 10 is and expire period is 1 slot receive token every 84600 second (1tx/1day)
 dynamic adjust number slot per era from given blockperiod
 if short blockperiod increase slot per era 
 if long blockperiod decrease slot per era
