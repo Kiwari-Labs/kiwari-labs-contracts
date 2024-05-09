@@ -46,12 +46,14 @@ contract DoublyLinkedListWithSentinel {
         _updatePrev(_head, value);
         _insertNode(value, _sentinel, _head);
         _head = value;
+        _size++;
     }
 
     function _insertTail(uint256 value) internal {
         _updateNext(_tail, value);
         _insertNode(value, _tail, _sentinel);
         _tail = value;
+        _size++;
     }
 
     /// @custom:overloading-method add multiple index
@@ -63,10 +65,11 @@ contract DoublyLinkedListWithSentinel {
 
     /// @custom:overloading-method add single index
     function insert(uint256 value) public {
+        uint256 tmpSize = _size;
         uint256 tempHead = _head;
         uint256 tempTail = _tail;
         uint256 tempmiddle = _middle;
-        if (tempHead == 0 && tempTail == 0) {
+        if (tmpSize == 0) {
             _insertHead(value);
             _insertTail(value);
             _middle = value;
@@ -115,33 +118,59 @@ contract DoublyLinkedListWithSentinel {
         return _nodes[_sentinel];
     }
 
-    function get(uint256 index) public view returns (Node memory) {
+    function node(uint256 index) public view returns (Node memory) {
         return _nodes[index];
     }
 
-    function getAscendingList() public view returns (uint256 [] memory) {
+    function ascendingList() public view returns (uint256 [] memory) {
         uint256 index = _sentinel;
-        uint256 size = _size;
-        uint256[] memory asd = new uint256[](size);
-        for (uint256 i = 0; i < size; i++) {
+        uint256 tmpSize = _size;
+        uint256[] memory asd = new uint256[](tmpSize);
+        for (uint256 i = 0; i < tmpSize; i++) {
             asd[i] = _nodes[index].next;
             index = _nodes[index].next;
         }
         return asd;
     }
 
-    function getDescendingList() public view  returns (uint256 [] memory) {
+    function descendingList() public view  returns (uint256 [] memory) {
         uint256 index = _sentinel;
-        uint256 size = _size;
-        uint256[] memory des = new uint256[](size);
-        for (uint256 i = 0; i < _size; i++) {
+        uint256 tmpSize = _size;
+        uint256[] memory des = new uint256[](tmpSize);
+        for (uint256 i = 0; i < tmpSize; i++) {
             des[i] = _nodes[index].prev;
             index = _nodes[index].prev;
         }
         return des;
-    } 
+    }
 
-    function getSize() public view returns (uint256) {
+    // TODO refactor to determistic size array would be greate.
+    function firstParitionList() public view returns (uint256 [] memory) {
+       uint256 index = _sentinel;
+       uint256[] memory part;
+       uint256 i;
+       while (_nodes[index].next != _middle) {
+            part[i] = index;
+            index = _nodes[index].next;
+            i++;
+       }
+       return part;
+    }
+
+    // TODO refactor to determistic size array would be greate.
+    function secondPartitionList() public view returns (uint256 [] memory) {
+        uint256 index = _sentinel;
+        uint256[] memory part;
+        uint256 i;
+        while (_nodes[index].prev != _middle) {
+            part[i] = index;
+            index = _nodes[index].prev;
+            i++;
+        }
+        return part;
+    }
+
+    function size() public view returns (uint256) {
         return _size;
     }
 }
