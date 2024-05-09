@@ -32,17 +32,15 @@ contract DoublyLinkedListWithSentinel {
     }
 
     function _insertHead(uint256 index) private {
-        _updateNext(_SENTINEL, index);
-        _updatePrev(index, _SENTINEL); // Update previous of index to sentinel
         _updatePrev(_head, index);
+        _updateNext(_SENTINEL, index);
         _insertNode(index, _SENTINEL, _head);
         _head = index;
     }
 
     function _insertTail(uint256 index) private {
-        _updatePrev(_SENTINEL, index);
-        _updateNext(index, _SENTINEL); // Update next of index to sentinel
         _updateNext(_tail, index);
+        _updatePrev(_SENTINEL, index);
         _insertNode(index, _tail, _SENTINEL);
         _tail = index;
     }
