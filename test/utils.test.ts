@@ -24,10 +24,10 @@ export const deployERC20EXP = async function () {
     deployer,
   );
   const erc20exp = await ERC20EXP.deploy(
-    ERC20_EXP_BLOCK_PERIOD,
-    ERC20_EXP_EXPIRE_PERIOD,
     ERC20_EXP_NAME,
     ERC20_EXP_SYMBOL,
+    ERC20_EXP_BLOCK_PERIOD,
+    ERC20_EXP_EXPIRE_PERIOD
   );
   await erc20exp.deployed();
 
