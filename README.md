@@ -39,3 +39,14 @@ Run the tests:
 ```
 yarn test
 ```
+
+### TODO
+
+- [] maintain middle in CDLLS
+- [] remove single node in CDLLS
+- [] remove multiple node in CDLLS
+- [] case block per era more than or less than block per slot * slot per era (rounding error)
+- [] [improvement](https://github.com/MASDXI/ERC20EXP/issues/4#issue-2234558942)
+- [] unit test all function
+- [] acceptance/e2e test
+- [] gas optimize when all function are done
