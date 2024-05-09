@@ -185,6 +185,9 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         // if (!wholeSale[to]) {
         //  revert notWholeSale(to);
         // }
+        // if (value == 0) {
+        //  revert mintZero(to);
+        // }
         // @TODO not let to mint zero value
         if (spendable) {
             _mint(to, value);
@@ -204,6 +207,9 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         // if (!wholeSale[to]) {
         //  revert notWholeSale(to);
         // }
+        // if (value == 0) {
+        //  revert burnZero(to);
+        // }
         // @TODO not let to burn zero value
         if (spendable) {
             _burn(to, value);
@@ -222,6 +228,9 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         // if (!wholeSale[to]) {
         //  revert notRetail(to);
         // }
+        // if (value == 0) {
+        //  revert mintZero(to);
+        // }
         uint256 blockNumberCache = _blockNumberProvider();
         (uint256 _currentEra, uint8 _currentSlot) = _calculateEraAndSlot(blockNumberCache);
         _updateRetailBalance(address(0), to, value, 0  , _currentEra, 0, _currentSlot, TRANSCTION_TYPES.MINT);
@@ -236,6 +245,9 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         // @TODO uncomment
         // if (!wholeSale[to]) {
         //  revert notRetail(to);
+        // }
+        // if (value == 0) {
+        //  revert burnZero(to);
         // }
         (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safePagination();
         _updateRetailBalance(to, address(0), value, fromEra , toEra , fromSlot, toSlot, TRANSCTION_TYPES.BURN);
@@ -292,7 +304,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         } else  {
             uint256 balanceCache = balanceOf(from);
             // if (balanceCache < value) {
-            //     revert ();
+            //     revert ERC20InsufficientBalance();
             // }
             if (txTypes == TRANSCTION_TYPES.DEFAULT) {
             // @TODO search for first usable balance
@@ -425,6 +437,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         uint256 value
     ) public virtual override returns (bool) {
         address from = msg.sender;
+        // hook before transfer
         // _beforeTokenTransfer(from, to, amount);
         if (_wholeSale[from] && _wholeSale[to]) {
             // wholesale to wholesale transfer.
@@ -449,18 +462,19 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
                 }
             }
         }
+        // hook after transfer
         // _afterTokenTransfer(from, to, value);
         return true;
     }
 
-    /// @notice overriding function balanceOf
-    // function transferFrom(address from, address to, uint256 value) public override return (bool) {
-    //     address spender = msg.sender;
-    //     _spendAllowance(from, spender, value);
-    //     @TODO check who is msg.sender
-    //     transfer(to, value);
-    //     return true;
-    // }
+    /// @notice overriding function transferFrom
+    function transferFrom(address from, address to, uint256 value) public override returns (bool) {
+        address spender = msg.sender;
+        _spendAllowance(from, spender, value);
+        // @TODO check who is msg.sender
+        transfer(to, value);
+        return true;
+    }
 
     /// @dev return is given address is whole sale address.
     /// @return bool return boolean.
@@ -477,8 +491,10 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         return 0;
     }
 
+    /// @notice abstract function
     // function _beforeTokenTransfer(address from, address to, uint amount) internal virtual {};
 
+    /// @notice abstract function
     // function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual {};
 
 }
