@@ -2,6 +2,7 @@
 pragma solidity >=0.5.0 <0.9.0;
 
 /// @author ERC20EXP <erc20exp@protonmail.com>
+/// @notice Calendar are abstract contract due to block.number should be overwrite to compatibility with EVM that blocktime under 1 second.
 
 import "../interfaces/ICalendar.sol";
 
@@ -35,8 +36,7 @@ abstract contract Calendar is ICalendar {
         // }
         uint40 blockPerYearCache = _blockPerYear;
         _blockPerYear = YEAR_IN_MILLI_SECONDS / blockTime;
-        // @TODO uncomment
-        // emit BlockProducedPerYearUpdated(blockPerYearCache, blockTime);
+        emit BlockProducedPerYearUpdated(blockPerYearCache, _blockPerYear);
     }
 
     /// @param expirePeriod description
@@ -46,10 +46,9 @@ abstract contract Calendar is ICalendar {
         //         expirePeriod > MAXIMUM_EXPIRE_PERIOD_SLOT) {
         //     revert InvalidExpirePeriod();
         // }
-        uint8 _expirePeriodCache = _expirePeriod;
+        uint8 expirePeriodCache = _expirePeriod;
         _expirePeriod = expirePeriod;
-        // @TODO uncomment
-        // emit ExpirationPeriodUpdated(periodCache, expirePeriod);
+        emit ExpirationPeriodUpdated(expirePeriodCache, _expirePeriod);
     }
 
     /// @notice If there is no start block defined or blockNumber is before the contract start, return 0 era.

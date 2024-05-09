@@ -22,41 +22,41 @@ library CircularDoublyLinkedList {
         list.nodes[index] = Node(prev, next);
     }
 
-    function _updatePrev(List storage list, uint256 index, uint256 newPrev) internal {
+    function _updatePrev(List storage list, uint256 index, uint256 newPrev) private {
         list.nodes[index].prev = newPrev;
     }
 
-    function _updateNext(List storage list, uint256 index, uint256 newNext) internal {
+    function _updateNext(List storage list, uint256 index, uint256 newNext) private {
         list.nodes[index].next = newNext;
     }
 
-    // TODO maintain middle
-    function _insertMiddle(List storage list, uint256 index) internal {
+    function _insertMiddle(List storage list, uint256 index) private {
+        // @TODO maintain middle
         list.middle = index;
     }
 
-    function _insertHead(List storage list, uint256 index) internal {
+    function _insertHead(List storage list, uint256 index) private {
         _updateNext(list, _sentinel, index);
         _updatePrev(list, list.head, index);
         _insertNode(list, index, _sentinel, list.head);
         list.head = index;
     }
 
-    function _insertTail(List storage list, uint256 index) internal {
+    function _insertTail(List storage list, uint256 index) private {
         _updatePrev(list, _sentinel, index);
         _updateNext(list, list.tail, index);
         _insertNode(list, index, list.tail, _sentinel);
         list.tail = index;
     }
 
-    function _removeHead(List storage list) internal {
+    function _removeHead(List storage list) private {
         _updateNext(list, _sentinel, list.nodes[list.head].next);
         list.head = list.nodes[list.head].next;
         _updateNext(list, _sentinel, list.head);
         list.size--;
     }
 
-    function _removeTail(List storage list) internal {
+    function _removeTail(List storage list) private {
         _updatePrev(list, _sentinel, list.nodes[list.tail].prev);
         list.tail = list.nodes[list.tail].prev;
         _updateNext(list, list.tail, _sentinel);
@@ -70,6 +70,7 @@ library CircularDoublyLinkedList {
         }
     }
 
+    // @TODO maintain middle
     /// @custom:overloading-method remove single index
     function remove(List storage list, uint256 value) internal {
         if (list.size == 0) {
@@ -79,7 +80,7 @@ library CircularDoublyLinkedList {
         } else if (value == list.tail) {
             _removeTail(list);
         } else {
-            // TODO
+            // @TODO
         }
     }
 
@@ -90,6 +91,7 @@ library CircularDoublyLinkedList {
         }
     }
 
+    // @TODO maintain middle
     /// @custom:overloading-method add single index
     function insert(List storage list, uint256 value) internal {
         if (list.size == 0) {
@@ -129,19 +131,19 @@ library CircularDoublyLinkedList {
         }
     }
 
-    function head(List storage list) internal view returns (uint256) {
+    function first(List storage list) internal view returns (uint256) {
         return list.head;
     }
 
-    function middle(List storage list) internal view returns (uint256) {
+    function mid(List storage list) internal view returns (uint256) {
         return list.middle;
     }
 
-    function tail(List storage list) internal view returns (uint256) {
+    function last(List storage list) internal view returns (uint256) {
         return list.tail;
     }
 
-    function sentinel(List storage list) internal view returns (Node memory) {
+    function guard(List storage list) internal view returns (Node memory) {
         return list.nodes[_sentinel];
     }
 
@@ -193,7 +195,7 @@ library CircularDoublyLinkedList {
         return part;
     }
 
-    function size(List storage list) internal view returns (uint256) {
+    function length(List storage list) internal view returns (uint256) {
         return list.size;
     }
 }

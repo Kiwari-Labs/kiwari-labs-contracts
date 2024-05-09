@@ -6,22 +6,8 @@ pragma solidity >=0.5.0 <0.9.0;
 
 interface IERC20EXP {
     // ERC20-Expirable Specification
-    // Struct
-    struct Slot {
-        uint256 slotBalance;
-        mapping(uint256 => uint256) blockBalances;
-        uint256[] blockIndexed;
-    }
-
-    enum TRANSCTION_TYPES {
-        DEFAULT,
-        MINT,
-        BURN
-    }
 
     // events
-    event BlockProducedPerYearUpdated(uint256 oldValue, uint256 newValue);
-    event TokenExpiryPeriodUpdated(uint8 oldValue, uint8 newValue);
     event GrantWholeSale(address index, bool auth);
 
     // errors
