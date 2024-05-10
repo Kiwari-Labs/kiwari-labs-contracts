@@ -76,7 +76,12 @@ library CircularDoublyLinkedList {
     /// @custom:overloading-method remove single index
     function remove(List storage list, uint256 index) internal {
         if (exist(list, index)) {
-            if (index == list.head) {
+            if (list.size == 1) {
+                list.head = _sentinel;
+                list.tail = _sentinel;
+                delete list.nodes[index];
+                list.size--;
+            } else if (index == list.head) {
                 _removeHead(list);
             } else if (index == list.tail) {
                 _removeTail(list);
