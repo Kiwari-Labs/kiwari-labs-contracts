@@ -61,10 +61,13 @@ library CircularDoublyLinkedList {
     }
 
     function exist(List storage list, uint256 index) internal view returns (bool) {
-        if ((list.nodes[index].next == _sentinel) && (list.nodes[index].prev == _sentinel) && list.size > 0) {
-            return false;
-        } else {
+        if (list.size > 0) {
+            if ((list.nodes[index].next == _sentinel) && (list.nodes[index].prev == _sentinel)) {
+                return false;
+            }
             return true;
+        } else {
+            return false;
         }
     }
 
