@@ -153,10 +153,8 @@ library CircularDoublyLinkedList {
     }
 
     function mid(List storage list) internal view returns (uint256) {
-        // can we use last index of first partition as the middle of list?
-        // cause it's simple to implement
-        // maybe insufficient in large list
-        return list.middle;
+        uint256 [] memory tmpList = ascendingList(list);
+        return tmpList[tmpList.length - 1];
     }
 
     function last(List storage list) internal view returns (uint256) {
