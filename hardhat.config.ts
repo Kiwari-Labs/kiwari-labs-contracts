@@ -23,6 +23,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       gas: 2200000,
       gasPrice: 9000000000,
+      blockGasLimit: 0x1fffffffffffff
     },
     localhost: {
       url: "http://127.0.0.1:8545",
