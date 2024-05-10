@@ -9,11 +9,11 @@ library CircularDoublyLinkedList {
     }
 
     struct List {
-        mapping(uint256 => Node) nodes;
         uint256 head;
         uint256 middle;
         uint256 tail;
         uint256 size;
+        mapping(uint256 => Node) nodes;
     }
 
     uint8 private constant _sentinel = 0;
@@ -136,6 +136,9 @@ library CircularDoublyLinkedList {
     }
 
     function mid(List storage list) internal view returns (uint256) {
+        // can we use last index of first partition as the middle of list?
+        // cause it's simple to implement
+        // maybe insufficient in large list
         return list.middle;
     }
 
@@ -175,7 +178,7 @@ library CircularDoublyLinkedList {
 
     function firstParitionList(List storage list) internal view returns (uint256[] memory) {
         uint256 index = _sentinel;
-        uint256 tmpSize = list.size/2;
+        uint256 tmpSize = list.size / 2;
         uint256[] memory part = new uint256[](tmpSize);
         for (uint256 i = 0; i < tmpSize; i++) {
             part[i] = list.nodes[index].prev;
@@ -186,13 +189,25 @@ library CircularDoublyLinkedList {
 
     function secondPartitionList(List storage list) internal view returns (uint256[] memory) {
         uint256 index = _sentinel;
-        uint256 tmpSize = list.size/2;
+        uint256 tmpSize = list.size / 2;
         uint256[] memory part = new uint256[](tmpSize);
         for (uint256 i = 0; i < tmpSize; i++) {
             part[i] = list.nodes[index].prev;
             index = list.nodes[index].prev;
         }
         return part;
+    }
+
+    function partition(List storage list, uint256 start, uint256 end) internal view returns (uint256[] memory) {
+        uint256 index = start;
+        uint256[] memory chunk;
+        uint256 i;
+        while (index != end) {
+            index = list.nodes[start].next;
+            chunk[i] = index;
+            i++;
+        }
+        return chunk;
     }
 
     function length(List storage list) internal view returns (uint256) {
