@@ -5,7 +5,7 @@ library CircularDoublyLinkedList {
     struct Node {
         uint256 prev;
         uint256 next;
-        // bytes data; // reserve
+        // bytes data; // reserve for data
     }
 
     struct List {

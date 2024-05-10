@@ -114,38 +114,27 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             return 0;
         }
         // @TODO
-        // Perform binary search to find the index of the first expired block.
-        uint256 [] memory tmp = l.ascendingList();
-        uint256 low = 0;
-        uint256 high = tmp.length - 1;
-        uint256 mid;
-        while (low <= high) {
-            mid = (low + high) / 2;
-            if (blockNumberCache - tmp[mid] <= expirationPeriodInBlockLengthCache) {
-                if (mid == 0) {
-                    break; // Stop the loop if mid is already zero
-                }
-                high = mid - 1;
-            } else {
-                low = mid + 1;
+        // Perform naive search O(n) first
+        uint256 [] memory ascList = l.ascendingList();
+        uint256 offset = blockIndexedLength;
+        uint256 key;
+        for (uint256 i = 0; i < blockIndexedLength; i++) {
+            if (blockNumberCache - ascList[i] >= expirationPeriodInBlockLengthCache) {
+                key = ascList[i];
             }
+            offset--;
         }
 
         // @TODO remove when CDLLS done
-        // Calculate the total balance using only the valid blocks.
-        uint256 balanceCache = 0;
-        for (uint256 i = high + 1; i < blockIndexedLength; i++) {
-            // balanceCache += s.blockBalances[s.blockIndexed[i]];
-        }
-
-        // @TODO
         // CDLLS Calculate the total balance using only the valid blocks.
-        // uint256 index = <start>;
-        // uint256 tmpSize = _size;
-        // for (uint256 i = 0; i < tmpSize; i++) {
-        //     balanceCache += s.blockBalances[l.nodes[index].next];
-        //     index = l.nodes[index].next;
-        // }
+        // Calculate the total balance using only the valid blocks.
+        // @TODO create function that perform page search in list
+        uint256 [] memory tmpList = l.searchList(key);
+        uint256 balanceCache = 0;
+        for (uint256 i = 0; i < offset; i++) {
+            balanceCache += s.blockBalances[key];
+            key = l.node(key).next;
+        }
         return balanceCache;
     }
 
