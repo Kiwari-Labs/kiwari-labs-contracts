@@ -20,55 +20,49 @@ library CircularDoublyLinkedList {
 
     function _insertNode(List storage list, uint256 index, uint256 prev, uint256 next, bytes memory data) private {
         list.nodes[index] = Node(prev, next, data);
+        list.size++;
     }
 
-    function _updatePrev(List storage list, uint256 index, uint256 newPrev) private {
-        list.nodes[index].prev = newPrev;
-    }
-
-    function _updateNext(List storage list, uint256 index, uint256 newNext) private {
-        list.nodes[index].next = newNext;
+    function _removeNode(List storage list, uint256 index) private {
+        list.nodes[list.nodes[index].prev].next = list.nodes[index].next;
+        list.nodes[list.nodes[index].next].prev = list.nodes[index].prev;
+        delete list.nodes[index];
+        list.size--;
     }
 
     function _insertHead(List storage list, uint256 index, bytes memory data) private {
-        _updateNext(list, _sentinel, index);
-        _updatePrev(list, list.head, index);
         _insertNode(list, index, _sentinel, list.head, data);
+        list.nodes[_sentinel].next = index;
         list.head = index;
     }
 
     function _insertTail(List storage list, uint256 index, bytes memory data) private {
-        _updatePrev(list, _sentinel, index);
-        _updateNext(list, list.tail, index);
         _insertNode(list, index, list.tail, _sentinel, data);
+        list.nodes[_sentinel].prev = index;
         list.tail = index;
     }
 
     function _removeHead(List storage list) private {
-        _updateNext(list, _sentinel, list.nodes[list.head].next);
-        list.head = list.nodes[list.head].next;
-        updateNodeData(list, list.head, "");
-        _updateNext(list, _sentinel, list.head);
+        uint256 newHead = list.nodes[list.head].next;
+        delete list.nodes[list.head];
+        list.head = newHead;
+        list.nodes[_sentinel].next = newHead;
         list.size--;
     }
 
     function _removeTail(List storage list) private {
-        _updatePrev(list, _sentinel, list.nodes[list.tail].prev);
-        list.tail = list.nodes[list.tail].prev;
-        updateNodeData(list, list.tail, "");
-        _updateNext(list, list.tail, _sentinel);
+        uint256 newTail = list.nodes[list.tail].prev;
+        delete list.nodes[list.tail];
+        list.tail = newTail;
+        list.nodes[_sentinel].prev = newTail;
         list.size--;
     }
 
     function exist(List storage list, uint256 index) internal view returns (bool) {
-        if (list.size > 0) {
-            if ((list.nodes[index].next == _sentinel) && (list.nodes[index].prev == _sentinel)) {
-                return false;
-            }
-            return true;
-        } else {
-            return false;
+        if (list.size == 1) {
+            return index == list.head;
         }
+        return list.nodes[index].next != _sentinel || list.nodes[index].prev != _sentinel;
     }
 
     /// @custom:overloading-method remove multiple index
@@ -81,17 +75,14 @@ library CircularDoublyLinkedList {
     // @TODO maintain middle
     /// @custom:overloading-method remove single index
     function remove(List storage list, uint256 index) internal {
-        if (!exist(list, index)) {
-            return;
-        }
-        if (list.size == 0) {
-            // Handle If the list is empty?
-        } else if (index == list.head) {
-            _removeHead(list);
-        } else if (index == list.tail) {
-            _removeTail(list);
-        } else {
-            // @TODO
+        if (exist(list, index)) {
+            if (index == list.head) {
+                _removeHead(list);
+            } else if (index == list.tail) {
+                _removeTail(list);
+            } else {
+                _removeNode(list, index);
+            }
         }
     }
 
@@ -110,43 +101,26 @@ library CircularDoublyLinkedList {
     /// @custom:overloading-method add single index
     function insert(List storage list, uint256 index, bytes memory data) internal {
         if (!exist(list, index)) {
-            return;
-        }
-        if (list.size == 0) {
-            // If the list is empty, insert at head
-            list.head = index;
-            list.tail = index;
-            list.nodes[_sentinel].next = index;
-            list.nodes[_sentinel].prev = index;
-            list.nodes[index].data = data;
-            list.size++;
-        } else if (index <= list.head) {
-            // If the index is less than or equal to the head, insert at head
-            if (list.head != index) {
+            if (list.size == 0) {
+                // init list
+                list.head = index;
+                list.tail = index;
+                list.nodes[_sentinel].next = index;
+                list.nodes[_sentinel].prev = index;
+                list.nodes[index].data = data;
+                list.size++;
+            } else if (index < list.head) {
                 _insertHead(list, index, data);
-                list.size++;
-            }
-        } else if (index >= list.tail) {
-            // If the index is greater than or equal to the tail, insert at tail
-            if (list.tail != index) {
+            } else if (index > list.tail) {
                 _insertTail(list, index, data);
-                list.size++;
-            }
-        } else {
-            // Inserting the index in between existing nodes
-            uint256 current = list.head;
-            while (current != _sentinel && index > current) {
-                if (current == index) {
-                    // If index already exists, do not insert
-                    return;
+            } else {
+                uint256 current = list.head;
+                while (current != _sentinel && index > current) {
+                    current = list.nodes[current].next;
                 }
-                current = list.nodes[current].next;
-            }
-            if (current != index) {
                 _insertNode(list, index, list.nodes[current].prev, current, data);
-                _updateNext(list, list.nodes[current].prev, index);
-                _updatePrev(list, current, index);
-                list.size++;
+                list.nodes[list.nodes[current].prev].next = index;
+                list.nodes[current].prev = index;
             }
         }
     }
