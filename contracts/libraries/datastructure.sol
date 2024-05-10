@@ -1,198 +1,219 @@
-pragma solidity >0.8.0;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity >=0.5.0 <0.9.0;
 
-contract DoublyLinkedListWithSentinel {
-    struct Node {
-        uint256 prev;
-        uint256 next;
-        // bytes data; // reserve
+// @TODO auto selective direction ordered list
+// revised insert and remove
+// 
+// https://github.com/o0ragman0o/LibCLL/blob/master/LibCLL.sol
+// https://github.com/vittominacori/solidity-linked-list/blob/master/contracts/StructuredLinkedList.sol
+
+library CircularDoublyLinkedList {
+    struct List {
+        uint256 head;
+        uint256 middle;
+        uint256 tail;
+        uint256 size;
+        mapping(uint256 => mapping(bool => uint256)) list;
+        mapping(uint256 => bytes) data;
     }
 
-    uint8 private constant _sentinel = 0;
+    uint8 private constant _SENTINEL = 0;
+    bool private constant _PREV = false;
+    bool private constant _NEXT = true;
 
-    uint256 private _head;
-    uint256 private _middle;
-    uint256 private _tail;
-    uint256 private _size;
-
-    // make mapping into list
-    mapping(uint256 => Node) private _nodes;
-
-    function _insertNode(uint256 index, uint256 prev, uint256 next) private {
-        _nodes[index] = Node(prev, next);
+    function _insertNode(List storage self, uint256 index, uint256 prev, uint256 next, bytes memory data) private {
+        self.nodes[index] = Node(prev, next, data);
+        self.size++;
     }
 
-    function _updatePrev(uint256 index, uint256 newPrev) internal {
-        _nodes[index].prev = newPrev;
+    function _removeNode(List storage self, uint256 index) private {
+        self.nodes[self.nodes[index].prev].next = self.nodes[index].next;
+        self.nodes[self.nodes[index].next].prev = self.nodes[index].prev;
+        delete self.nodes[index];
+        self.size--;
     }
 
-    function _updateNext(uint256 index, uint256 newNext) internal {
-        _nodes[index].next = newNext;
+    function _updatePrev(List storage self, uint256 index, uint256 newPrev) private {
+        self.nodes[index].prev = newPrev;
     }
 
-    // TODO maintain middle
-    function _insertMiddle(uint256 index) internal {
-        _middle = index;
+    function _updateNext(List storage self, uint256 index, uint256 newNext) private {
+        self.nodes[index].next = newNext;
     }
 
-    function _insertHead(uint256 index) internal {
-        _updateNext(_sentinel, index);
-        _updatePrev(_head, index);
-        _insertNode(index, _sentinel, _head);
-        _head = index;
+    function _insertHead(List storage self, uint256 index, bytes memory data) private {
+        self.nodes[_sentinel].next = index;
+        self.nodes[self.head].prev = index;
+        _insertNode(self, index, _sentinel, self.head, data);
+        self.head = index;
     }
 
-    function _insertTail(uint256 index) internal {
-        _updatePrev(_sentinel, index);
-        _updateNext(_tail, index);
-        _insertNode(index, _tail, _sentinel);
-        _tail = index;
+    function _insertTail(List storage self, uint256 index, bytes memory data) private {
+        self.nodes[_sentinel].prev = index;
+        self.nodes[self.tail].next = index;
+        _insertNode(self, index, self.tail, _sentinel, data);
+        self.tail = index;
     }
 
-    function _removeHead() internal {
-        _updateNext(_sentinel, _nodes[_head].next);
-        _head = _nodes[_head].next;
-        _updateNext(_sentinel, _head);
-        _size--;
+    function _removeHead(List storage self) private {
+        uint256 newHead = self.nodes[self.head].next;
+        self.nodes[_sentinel].next = newHead;
+        self.nodes[newHead].prev = _sentinel;
+        delete self.nodes[self.head];
+        self.head = newHead;
+        self.size--;
     }
 
-    function _removeTail() internal {
-        _updatePrev(_sentinel, _nodes[_tail].prev);
-        _tail = _nodes[_tail].prev;
-        _updateNext(_tail, _sentinel);
-        _size--;
+    function _removeTail(List storage self) private {
+        uint256 newTail = self.nodes[self.tail].prev;
+        self.nodes[_sentinel].prev = newTail;
+        self.nodes[newTail].next = _sentinel;
+        delete self.nodes[self.tail];
+        self.tail = newTail;
+        self.size--;
     }
 
-    /// @custom:overloading-method remove multiple index
-    function remove(uint256[] memory indexes) public {
-        for (uint i = 0; i < indexes.length; i++) {
-            remove(indexes[i]);
-        }
-    }
-
-    /// @custom:overloading-method remove single index
-    function remove(uint256 value) internal {
-        if (_size == 0) {
-            // Handle If the list is empty?
-        } else if (value == _head) {
-            _removeHead();
-        } else if (value == _tail) {
-            _removeTail();
+    function exist(List storage self, uint256 index) internal view returns (bool) {
+        if ((index > 0) && (index == self.head || index == self.tail)) {
+            return true;
         } else {
-            // TODO
+            return self.nodes[index].prev != _sentinel && self.nodes[index].next != _sentinel;
         }
     }
 
-    /// @custom:overloading-method add multiple index
-    function insert(uint256[] memory indexes) public {
+    function remove(List storage self, uint256[] memory indexes) internal {
         for (uint i = 0; i < indexes.length; i++) {
-            insert(indexes[i]);
+            remove(self, indexes[i]);
         }
     }
 
-    /// @custom:overloading-method add single index
-    function insert(uint256 value) public {
-        if (_size == 0) {
-            // If the list is empty, insert at head
-            _insertHead(value);
-            _insertTail(value);
-            _insertMiddle(value);
-            _size++;
-        } else if (value <= _head) {
-            // If the value is less than or equal to the head, insert at head
-            if (_head != value) {
-                _insertHead(value);
-                _size++;
+    function remove(List storage self, uint256 index) internal {
+        if (exist(self, index) && index > 0) {
+            if (index == self.head) {
+                _removeHead(self);
+            } else if (index == self.tail) {
+                _removeTail(self);
+            } else {
+                _removeNode(self, index);
             }
-        } else if (value >= _tail) {
-            // If the value is greater than or equal to the tail, insert at tail
-            if (_tail != value) {
-                _insertTail(value);
-                _size++;
-            }
-        } else {
-            // Inserting the value in between existing nodes
-            uint256 current = _head;
-            while (current != _sentinel && value > current) {
-                if (current == value) {
-                    // If value already exists, do not insert
-                    return;
+        }
+    }
+
+    function updateNodeData(List storage self, uint256 index, bytes memory data) internal {
+        self[index] = data;
+    }
+
+    function insert(List storage self, uint256[] memory indexes, bytes[] memory data) internal {
+        for (uint i = 0; i < indexes.length; i++) {
+            insert(self, indexes[i], data[i]);
+        }
+    }
+
+    function insert(List storage self, uint256 index, bytes memory data) internal {
+        if (!exist(self, index) && index > 0) {
+            if (self.size == 0) {
+                // If the list is empty, insert at head
+                self.head = index;
+                self.tail = index;
+                self.nodes[_sentinel].next = index;
+                self.nodes[_sentinel].prev = index;
+                self.nodes[index].data = data;
+                self.size++;
+            } else if (index < self.head) {
+                _insertHead(self, index, data);
+            } else if (index > self.tail) {
+                _insertTail(self, index, data);
+            } else {
+                // Inserting the index in between existing nodes
+                uint256 current = self.head;
+                while (index > current) {
+                    current = self.nodes[current].next;
                 }
-                current = _nodes[current].next;
-            }
-            if (current != value) {
-                _insertNode(value, _nodes[current].prev, current);
-                _updateNext(_nodes[current].prev, value);
-                _updatePrev(current, value);
-                _size++;
+                _insertNode(self, index, self.nodes[current].prev, current, data);
+                self.nodes[self.nodes[current].prev].next = index;
+                self.nodes[current].prev = index;
             }
         }
     }
 
-    function head() public view returns (uint256) {
-        return _head;
+    function first(List storage self) internal view returns (uint256) {
+        return self.head;
     }
 
-    function middle() public view returns (uint256) {
-        return _middle;
+    function mid(List storage self) internal view returns (uint256) {
+        uint256[] memory tmpList = firstParitionList(self);
+        return tmpList[tmpList.length - 1];
     }
 
-    function tail() public view returns (uint256) {
-        return _tail;
+    function last(List storage self) internal view returns (uint256) {
+        return self.tail;
     }
 
-    function sentinel() public view returns (Node memory) {
-        return _nodes[_sentinel];
+    function guard(List storage self) internal view returns (uint256 [2]) {
+        return [self.nodes[_sentinel][_PREV],self.nodes[_sentinel][_NEXT]];
     }
 
-    function node(uint256 index) public view returns (Node memory) {
-        return _nodes[index];
+    function node(List storage self, uint256 index) internal view returns (Node memory) {
+        return self.nodes[index];
     }
 
-    function ascendingList() public view returns (uint256[] memory) {
+    function ascendingList(List storage self) internal view returns (uint256[] memory) {
         uint256 index = _sentinel;
-        uint256 tmpSize = _size;
+        uint256 tmpSize = self.size;
         uint256[] memory asd = new uint256[](tmpSize);
         for (uint256 i = 0; i < tmpSize; i++) {
-            asd[i] = _nodes[index].next;
-            index = _nodes[index].next;
+            asd[i] = self.list[index][_NEXT];
+            index = self.list[_NEXT].next;
         }
         return asd;
     }
 
-    function descendingList() public view returns (uint256[] memory) {
+    function descendingList(List storage self) internal view returns (uint256[] memory) {
         uint256 index = _sentinel;
-        uint256 tmpSize = _size;
+        uint256 tmpSize = self.size;
         uint256[] memory des = new uint256[](tmpSize);
         for (uint256 i = 0; i < tmpSize; i++) {
-            des[i] = _nodes[index].prev;
-            index = _nodes[index].prev;
+            des[i] = self.list[index][_PREV];
+            index = self.list[index][_PREV];
         }
         return des;
     }
 
-    function firstParitionList() public view returns (uint256[] memory) {
+    function firstParitionList(List storage self) internal view returns (uint256[] memory) {
         uint256 index = _sentinel;
-        uint256 tmpSize = _size/2;
+        uint256 tmpSize = self.size / 2;
         uint256[] memory part = new uint256[](tmpSize);
         for (uint256 i = 0; i < tmpSize; i++) {
-            part[i] = _nodes[index].prev;
-            index = _nodes[index].prev;
+            part[i] = self.list[index][_NEXT];
+            index = self.list[index][_NEXT];
         }
         return part;
     }
 
-    function secondPartitionList() public view returns (uint256[] memory) {
+    function secondPartitionList(List storage self) internal view returns (uint256[] memory) {
         uint256 index = _sentinel;
-        uint256 tmpSize = _size/2;
+        uint256 tmpSize = self.size / 2;
         uint256[] memory part = new uint256[](tmpSize);
         for (uint256 i = 0; i < tmpSize; i++) {
-            part[i] = _nodes[index].prev;
-            index = _nodes[index].prev;
+            part[i] = self.list[index][_PREV];
+            index = self.list[index][_PREV];
         }
         return part;
     }
 
-    function size() public view returns (uint256) {
-        return _size;
+    function partition(List storage self, uint256 start, uint256 end) internal view returns (uint256[] memory) {
+        uint256 index = start;
+        uint256[] memory chunk;
+        uint256 i;
+        while (index != end) {
+            index = self.nodes[start].next;
+            chunk[i] = index;
+            i++;
+        }
+        return chunk;
+    }
+
+    function length(List storage self) internal view returns (uint256) {
+        return self.size;
     }
 }

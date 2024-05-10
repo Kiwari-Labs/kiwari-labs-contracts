@@ -71,13 +71,12 @@ library CircularDoublyLinkedList {
     }
 
     function exist(List storage list, uint256 index) internal view returns (bool) {
-        if ((index > 0 ) && (index == list.head || index == list.tail)) {
+        if ((index > 0) && (index == list.head || index == list.tail)) {
             return true;
         } else {
             return list.nodes[index].prev != _sentinel && list.nodes[index].next != _sentinel;
         }
     }
-
 
     function remove(List storage list, uint256[] memory indexes) internal {
         for (uint i = 0; i < indexes.length; i++) {
@@ -92,7 +91,7 @@ library CircularDoublyLinkedList {
             } else if (index == list.tail) {
                 _removeTail(list);
             } else {
-               _removeNode(list, index);
+                _removeNode(list, index);
             }
         }
     }
