@@ -5,7 +5,7 @@ library CircularDoublyLinkedList {
     struct Node {
         uint256 prev;
         uint256 next;
-        // bytes data; // reserve for data
+        bytes data;
     }
 
     struct List {
@@ -18,8 +18,8 @@ library CircularDoublyLinkedList {
 
     uint8 private constant _sentinel = 0;
 
-    function _insertNode(List storage list, uint256 index, uint256 prev, uint256 next) private {
-        list.nodes[index] = Node(prev, next);
+    function _insertNode(List storage list, uint256 index, uint256 prev, uint256 next, bytes memory data) private {
+        list.nodes[index] = Node(prev, next, data);
     }
 
     function _updatePrev(List storage list, uint256 index, uint256 newPrev) private {
@@ -30,28 +30,24 @@ library CircularDoublyLinkedList {
         list.nodes[index].next = newNext;
     }
 
-    function _insertMiddle(List storage list, uint256 index) private {
-        // @TODO maintain middle
-        list.middle = index;
-    }
-
-    function _insertHead(List storage list, uint256 index) private {
+    function _insertHead(List storage list, uint256 index, bytes memory data) private {
         _updateNext(list, _sentinel, index);
         _updatePrev(list, list.head, index);
-        _insertNode(list, index, _sentinel, list.head);
+        _insertNode(list, index, _sentinel, list.head, data);
         list.head = index;
     }
 
-    function _insertTail(List storage list, uint256 index) private {
+    function _insertTail(List storage list, uint256 index, bytes memory data) private {
         _updatePrev(list, _sentinel, index);
         _updateNext(list, list.tail, index);
-        _insertNode(list, index, list.tail, _sentinel);
+        _insertNode(list, index, list.tail, _sentinel, data);
         list.tail = index;
     }
 
     function _removeHead(List storage list) private {
         _updateNext(list, _sentinel, list.nodes[list.head].next);
         list.head = list.nodes[list.head].next;
+        updateNodeData(list, list.head, "");
         _updateNext(list, _sentinel, list.head);
         list.size--;
     }
@@ -59,8 +55,17 @@ library CircularDoublyLinkedList {
     function _removeTail(List storage list) private {
         _updatePrev(list, _sentinel, list.nodes[list.tail].prev);
         list.tail = list.nodes[list.tail].prev;
+        updateNodeData(list, list.tail, "");
         _updateNext(list, list.tail, _sentinel);
         list.size--;
+    }
+
+    function exist(List storage list, uint256 index) internal view returns (bool) {
+        if ((list.nodes[index].next == _sentinel) && (list.nodes[index].prev == _sentinel) && list.size > 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /// @custom:overloading-method remove multiple index
@@ -72,60 +77,72 @@ library CircularDoublyLinkedList {
 
     // @TODO maintain middle
     /// @custom:overloading-method remove single index
-    function remove(List storage list, uint256 value) internal {
+    function remove(List storage list, uint256 index) internal {
+        if (!exist(list, index)) {
+            return;
+        }
         if (list.size == 0) {
             // Handle If the list is empty?
-        } else if (value == list.head) {
+        } else if (index == list.head) {
             _removeHead(list);
-        } else if (value == list.tail) {
+        } else if (index == list.tail) {
             _removeTail(list);
         } else {
             // @TODO
         }
     }
 
+    function updateNodeData(List storage list, uint256 index, bytes memory data) internal {
+        list.nodes[index].data = data;
+    }
+
     /// @custom:overloading-method add multiple index
-    function insert(List storage list, uint256[] memory indexes) internal {
+    function insert(List storage list, uint256[] memory indexes, bytes[] memory data) internal {
         for (uint i = 0; i < indexes.length; i++) {
-            insert(list, indexes[i]);
+            insert(list, indexes[i], data[i]);
         }
     }
 
     // @TODO maintain middle
     /// @custom:overloading-method add single index
-    function insert(List storage list, uint256 value) internal {
+    function insert(List storage list, uint256 index, bytes memory data) internal {
+        if (!exist(list, index)) {
+            return;
+        }
         if (list.size == 0) {
             // If the list is empty, insert at head
-            _insertHead(list, value);
-            _insertTail(list, value);
-            _insertMiddle(list, value);
+            list.head = index;
+            list.tail = index;
+            list.nodes[_sentinel].next = index;
+            list.nodes[_sentinel].prev = index;
+            list.nodes[index].data = data;
             list.size++;
-        } else if (value <= list.head) {
-            // If the value is less than or equal to the head, insert at head
-            if (list.head != value) {
-                _insertHead(list, value);
+        } else if (index <= list.head) {
+            // If the index is less than or equal to the head, insert at head
+            if (list.head != index) {
+                _insertHead(list, index, data);
                 list.size++;
             }
-        } else if (value >= list.tail) {
-            // If the value is greater than or equal to the tail, insert at tail
-            if (list.tail != value) {
-                _insertTail(list, value);
+        } else if (index >= list.tail) {
+            // If the index is greater than or equal to the tail, insert at tail
+            if (list.tail != index) {
+                _insertTail(list, index, data);
                 list.size++;
             }
         } else {
-            // Inserting the value in between existing nodes
+            // Inserting the index in between existing nodes
             uint256 current = list.head;
-            while (current != _sentinel && value > current) {
-                if (current == value) {
-                    // If value already exists, do not insert
+            while (current != _sentinel && index > current) {
+                if (current == index) {
+                    // If index already exists, do not insert
                     return;
                 }
                 current = list.nodes[current].next;
             }
-            if (current != value) {
-                _insertNode(list, value, list.nodes[current].prev, current);
-                _updateNext(list, list.nodes[current].prev, value);
-                _updatePrev(list, current, value);
+            if (current != index) {
+                _insertNode(list, index, list.nodes[current].prev, current, data);
+                _updateNext(list, list.nodes[current].prev, index);
+                _updatePrev(list, current, index);
                 list.size++;
             }
         }
