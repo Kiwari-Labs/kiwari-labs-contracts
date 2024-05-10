@@ -30,39 +30,50 @@ library CircularDoublyLinkedList {
         list.size--;
     }
 
+    function _updatePrev(List storage list, uint256 index, uint256 newPrev) private {
+        list.nodes[index].prev = newPrev;
+    }
+
+    function _updateNext(List storage list, uint256 index, uint256 newNext) private {
+        list.nodes[index].next = newNext;
+    }
+
     function _insertHead(List storage list, uint256 index, bytes memory data) private {
+        _updateNext(list, _sentinel, index);
+        _updatePrev(list, list.head, index);
         _insertNode(list, index, _sentinel, list.head, data);
-        list.nodes[_sentinel].next = index;
         list.head = index;
     }
 
     function _insertTail(List storage list, uint256 index, bytes memory data) private {
+        _updatePrev(list, _sentinel, index);
+        _updateNext(list, list.tail, index);
         _insertNode(list, index, list.tail, _sentinel, data);
-        list.nodes[_sentinel].prev = index;
         list.tail = index;
     }
 
     function _removeHead(List storage list) private {
-        uint256 newHead = list.nodes[list.head].next;
-        delete list.nodes[list.head];
-        list.head = newHead;
-        list.nodes[_sentinel].next = newHead;
+        _updateNext(list, _sentinel, list.nodes[list.head].next);
+        list.head = list.nodes[list.head].next;
+        updateNodeData(list, list.head, "");
+        _updateNext(list, _sentinel, list.head);
         list.size--;
     }
 
     function _removeTail(List storage list) private {
-        uint256 newTail = list.nodes[list.tail].prev;
-        delete list.nodes[list.tail];
-        list.tail = newTail;
-        list.nodes[_sentinel].prev = newTail;
+        _updatePrev(list, _sentinel, list.nodes[list.tail].prev);
+        list.tail = list.nodes[list.tail].prev;
+        updateNodeData(list, list.tail, "");
+        _updateNext(list, list.tail, _sentinel);
         list.size--;
     }
 
     function exist(List storage list, uint256 index) internal view returns (bool) {
         if (list.size == 1) {
             return index == list.head;
+        } else {
+            return (list.nodes[index].next != _sentinel) && (list.nodes[index].prev != _sentinel);
         }
-        return list.nodes[index].next != _sentinel || list.nodes[index].prev != _sentinel;
     }
 
     /// @custom:overloading-method remove multiple index
@@ -75,18 +86,13 @@ library CircularDoublyLinkedList {
     // @TODO maintain middle
     /// @custom:overloading-method remove single index
     function remove(List storage list, uint256 index) internal {
-        if (exist(list, index)) {
-            if (list.size == 1) {
-                list.head = _sentinel;
-                list.tail = _sentinel;
-                delete list.nodes[index];
-                list.size--;
-            } else if (index == list.head) {
+        if (exist(list, index) && index > 0) {
+            if (index == list.head) {
                 _removeHead(list);
             } else if (index == list.tail) {
                 _removeTail(list);
             } else {
-                _removeNode(list, index);
+               _removeNode(list, index);
             }
         }
     }
@@ -105,9 +111,9 @@ library CircularDoublyLinkedList {
     // @TODO maintain middle
     /// @custom:overloading-method add single index
     function insert(List storage list, uint256 index, bytes memory data) internal {
-        if (!exist(list, index)) {
+        if (!exist(list, index) && index > 0) {
             if (list.size == 0) {
-                // init list
+                // If the list is empty, insert at head
                 list.head = index;
                 list.tail = index;
                 list.nodes[_sentinel].next = index;
@@ -119,13 +125,20 @@ library CircularDoublyLinkedList {
             } else if (index > list.tail) {
                 _insertTail(list, index, data);
             } else {
+                // Inserting the index in between existing nodes
                 uint256 current = list.head;
                 while (current != _sentinel && index > current) {
+                    if (current == index) {
+                        // If index already exists, do not insert
+                        return;
+                    }
                     current = list.nodes[current].next;
                 }
-                _insertNode(list, index, list.nodes[current].prev, current, data);
-                list.nodes[list.nodes[current].prev].next = index;
-                list.nodes[current].prev = index;
+                if (current != index) {
+                    _insertNode(list, index, list.nodes[current].prev, current, data);
+                    _updateNext(list, list.nodes[current].prev, index);
+                    _updatePrev(list, current, index);
+                }
             }
         }
     }
@@ -135,7 +148,7 @@ library CircularDoublyLinkedList {
     }
 
     function mid(List storage list) internal view returns (uint256) {
-        uint256 [] memory tmpList = ascendingList(list);
+        uint256[] memory tmpList = ascendingList(list);
         return tmpList[tmpList.length - 1];
     }
 
