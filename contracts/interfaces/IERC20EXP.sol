@@ -17,13 +17,13 @@ interface IERC20EXP {
     // error notRetail(address account);
 
     /// @dev overloading balanceOf function.
-    function balanceOf(
-        address account,
-        uint256 fromEra,
-        uint8 fromSlot,
-        uint256 toEra,
-        uint8 toSlot
-    ) external returns (uint256);
+    // function balanceOf(
+    //     address account,
+    //     uint256 fromEra,
+    //     uint8 fromSlot,
+    //     uint256 toEra,
+    //     uint8 toSlot
+    // ) external returns (uint256);
 
     /// @dev overloading transfer function use for specific era and slot.
     // function transfer(

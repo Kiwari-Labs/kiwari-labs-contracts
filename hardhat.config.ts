@@ -21,7 +21,7 @@ const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      gas: 2200000,
+      gas: "auto",
       gasPrice: 9000000000,
       blockGasLimit: 0x1fffffffffffff
     },
@@ -40,7 +40,7 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 450,
+        runs: 384,
       },
     },
   },

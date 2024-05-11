@@ -120,19 +120,22 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             return 0;
         }
         uint256[] memory ascList = s.list.ascendingList();
+        // @TODO should fix offset size
         (uint256 key, uint256 offset) = _getFirstValidOfList(
             ascList,
             blockNumberCache,
             expirationPeriodInBlockLengthCache
         );
         // Calculate the total balance using only the valid blocks.
-        uint256[] memory usableList = s.list.partition(key, lastestBlockCache);
-        uint256 balanceCache = 0;
-        for (uint256 i = 0; i < offset; i++) {
-            balanceCache += s.blockBalances[key];
-            key = usableList[i];
-        }
-        return balanceCache;
+        // @TODO should fix outbound index out of length
+        // uint256[] memory usableList = s.list.partition(key);
+        // uint256 balanceCache = 0;
+        // for (uint256 i = 0; i <= offset; i++) {
+        //     balanceCache += s.blockBalances[key];
+        //     key = usableList[i];
+        // }
+        return _slotBalance(account, era, slot, slot);
+        // return offset;
     }
 
     // if first index valid and return offset of usable key entire list are valid return first index as key offset.
@@ -145,10 +148,12 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         uint256 offset = list.length;
         uint256 key;
         for (uint256 i = 0; i < list.length; i++) {
-            if (blockNumberCache - list[i] >= expirationPeriodInBlockLengthCache) {
-                key = list[i];
+            uint256 value = list[i];
+            if (blockNumberCache - value <= expirationPeriodInBlockLengthCache) {
+                key = value;
+                break;
             }
-            offset--;
+            // @TODO should fix offset size
         }
         return (key, offset);
     }
@@ -269,11 +274,11 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         if (txTypes == TRANSCTION_TYPES.MINT) {
             // uint256 blockNumberCache = _blockNumberProvider();
             Slot storage slot = _retailBalances[to][toEra][toSlot]; // storage pointer 1
-            {
-                slot.slotBalance += value;
-                slot.blockBalances[blockNumberCache] += value;
-                slot.list.insert(blockNumberCache, "");
-            }
+            // {
+            slot.slotBalance += value;
+            slot.blockBalances[blockNumberCache] += value;
+            slot.list.insert(blockNumberCache, abi.encodePacked(""));
+            // }
         } else {
             uint256 balanceCache = balanceOf(from);
             if (balanceCache < value) {
@@ -340,7 +345,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
                         // deduct slot balance
                         sFrom.blockBalances[key] -= value;
                         sTo.blockBalances[key] += value;
-                        sTo.list.insert(key, "");
+                        sTo.list.insert(key, abi.encodePacked(""));
                     }
                 }
                 // if (value < _bufferSlotBalance(to, fromEra, fromSlot)) {
