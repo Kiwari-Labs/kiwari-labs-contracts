@@ -156,14 +156,18 @@ library CircularDoublyLinkedList {
         return [self.list[index][_PREV], self.list[index][_NEXT]];
     }
 
-    function ascendingList(List storage self) internal view returns (uint256[] memory) {
+    // example reverse for loop in action
+    function ascendingList(List storage self) internal view returns (uint256[] memory asd) {
         uint256 index;
         uint256 tmpSize = self.size;
-        uint256[] memory asd = new uint256[](tmpSize);
-        unchecked {
-            for (uint256 i = 0; i < tmpSize; i++) {
-                asd[i] = self.list[index][_NEXT];
-                index = self.list[index][_NEXT];
+        if (tmpSize > 0) {
+            asd = new uint256[](tmpSize);
+            asd[0] = self.list[index][_PREV];
+            unchecked {
+                for (uint256 i = tmpSize-1; i > 0; i--) {
+                    asd[i] = self.list[index][_NEXT];
+                    index = self.list[index][_NEXT];
+                }
             }
         }
         return asd;
@@ -203,6 +207,7 @@ library CircularDoublyLinkedList {
         }
         return part;
     }
+
     // @TODO fix the potential issue
     function partition(List storage self, uint256 start) internal view returns (uint256[] memory) {
         uint256 index = start;
