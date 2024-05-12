@@ -156,9 +156,11 @@ library CircularDoublyLinkedList {
         uint256 index;
         uint256 tmpSize = self.size;
         uint256[] memory asd = new uint256[](tmpSize);
-        for (uint256 i = 0; i < tmpSize; i++) {
-            asd[i] = self.list[index][_NEXT];
-            index = self.list[index][_NEXT];
+        unchecked {
+            for (uint256 i = tmpSize - 1; i > 0; i++) {
+                asd[i] = self.list[index][_NEXT];
+                index = self.list[index][_NEXT];
+            }
         }
         return asd;
     }
@@ -167,9 +169,11 @@ library CircularDoublyLinkedList {
         uint256 index;
         uint256 tmpSize = self.size;
         uint256[] memory des = new uint256[](tmpSize);
-        for (uint256 i = 0; i < tmpSize; i++) {
-            des[i] = self.list[index][_PREV];
-            index = self.list[index][_PREV];
+        unchecked {
+            for (uint256 i = tmpSize - 1; i > 0; i++) {
+                des[i] = self.list[index][_PREV];
+                index = self.list[index][_PREV];
+            }
         }
         return des;
     }
@@ -178,9 +182,11 @@ library CircularDoublyLinkedList {
         uint256 index;
         uint256 tmpSize = self.size / 2;
         uint256[] memory part = new uint256[](tmpSize);
-        for (uint256 i = 0; i < tmpSize; i++) {
-            part[i] = self.list[index][_NEXT];
-            index = self.list[index][_NEXT];
+        unchecked {
+            for (uint256 i = tmpSize - 1; i > 0; i++) {
+                part[i] = self.list[index][_NEXT];
+                index = self.list[index][_NEXT];
+            }
         }
         return part;
     }
@@ -189,13 +195,16 @@ library CircularDoublyLinkedList {
         uint256 index;
         uint256 tmpSize = self.size / 2;
         uint256[] memory part = new uint256[](tmpSize);
-        for (uint256 i = 0; i < tmpSize; i++) {
-            part[i] = self.list[index][_PREV];
-            index = self.list[index][_PREV];
+        unchecked {
+            for (uint256 i = tmpSize - 1; i > 0; i++) {
+                part[i] = self.list[index][_PREV];
+                index = self.list[index][_PREV];
+            }
         }
         return part;
     }
 
+    // @TODO fix the potential issue
     function partition(List storage self, uint256 start) internal view returns (uint256[] memory) {
         uint256 index = start;
         // uint256[] memory chunk;
