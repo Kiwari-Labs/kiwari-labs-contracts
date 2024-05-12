@@ -5,6 +5,7 @@ pragma solidity >=0.5.0 <0.9.0;
 // https://github.com/o0ragman0o/LibCLL/blob/master/LibCLL.sol
 // https://github.com/vittominacori/solidity-linked-list/blob/master/contracts/StructuredLinkedList.sol
 
+/// @title Sorted Circular Doubly Linked List with Sentinel node.
 library CircularDoublyLinkedList {
     struct List {
         uint256 head;
