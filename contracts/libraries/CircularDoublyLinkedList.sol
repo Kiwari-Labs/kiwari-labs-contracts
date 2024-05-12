@@ -72,11 +72,21 @@ library CircularDoublyLinkedList {
         }
     }
 
-    function remove(List storage self, uint256[] memory indexes) internal {
-        for (uint i = 0; i < indexes.length; i++) {
-            remove(self, indexes[i]);
-        }
-    }
+    // function remove(List storage self, uint256[] memory indexes) internal {
+    //     unchecked {
+    //         for (uint i = 0; i < indexes.length; i++) {
+    //             remove(self, indexes[i]);
+    //         }
+    //     }
+    // }
+
+    // function insert(List storage self, uint256[] memory indexes, bytes[] memory data) internal {
+    //     unchecked {
+    //         for (uint i = 0; i < indexes.length; i++) {
+    //             insert(self, indexes[i], data[i]);
+    //         }
+    //     }
+    // }
 
     function remove(List storage self, uint256 index) internal {
         if (exist(self, index) && index > 0) {
@@ -94,12 +104,6 @@ library CircularDoublyLinkedList {
     function updateNodeData(List storage self, uint256 index, bytes memory data) internal {
         self.data[index] = data;
     }
-
-    // function insert(List storage self, uint256[] memory indexes, bytes[] memory data) internal {
-    //     for (uint i = 0; i < indexes.length; i++) {
-    //         insert(self, indexes[i], data[i]);
-    //     }
-    // }
 
     function insert(List storage self, uint256 index, bytes memory data) internal {
         if (!exist(self, index) && index > 0) {
@@ -157,7 +161,7 @@ library CircularDoublyLinkedList {
         uint256 tmpSize = self.size;
         uint256[] memory asd = new uint256[](tmpSize);
         unchecked {
-            for (uint256 i = tmpSize - 1; i > 0; i++) {
+            for (uint256 i = 0; i < tmpSize; i++) {
                 asd[i] = self.list[index][_NEXT];
                 index = self.list[index][_NEXT];
             }
@@ -170,7 +174,7 @@ library CircularDoublyLinkedList {
         uint256 tmpSize = self.size;
         uint256[] memory des = new uint256[](tmpSize);
         unchecked {
-            for (uint256 i = tmpSize - 1; i > 0; i++) {
+            for (uint256 i = 0; i < tmpSize; i++) {
                 des[i] = self.list[index][_PREV];
                 index = self.list[index][_PREV];
             }
@@ -182,11 +186,9 @@ library CircularDoublyLinkedList {
         uint256 index;
         uint256 tmpSize = self.size / 2;
         uint256[] memory part = new uint256[](tmpSize);
-        unchecked {
-            for (uint256 i = tmpSize - 1; i > 0; i++) {
-                part[i] = self.list[index][_NEXT];
-                index = self.list[index][_NEXT];
-            }
+        for (uint256 i = 0; i < tmpSize; i++) {
+            part[i] = self.list[index][_NEXT];
+            index = self.list[index][_NEXT];
         }
         return part;
     }
@@ -195,15 +197,12 @@ library CircularDoublyLinkedList {
         uint256 index;
         uint256 tmpSize = self.size / 2;
         uint256[] memory part = new uint256[](tmpSize);
-        unchecked {
-            for (uint256 i = tmpSize - 1; i > 0; i++) {
-                part[i] = self.list[index][_PREV];
-                index = self.list[index][_PREV];
-            }
+        for (uint256 i = 0; i < tmpSize; i++) {
+            part[i] = self.list[index][_PREV];
+            index = self.list[index][_PREV];
         }
         return part;
     }
-
     // @TODO fix the potential issue
     function partition(List storage self, uint256 start) internal view returns (uint256[] memory) {
         uint256 index = start;
