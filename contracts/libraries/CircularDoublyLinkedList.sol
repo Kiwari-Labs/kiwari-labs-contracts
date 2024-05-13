@@ -212,20 +212,13 @@ library CircularDoublyLinkedList {
     // @TODO fix the potential issue
     function partition(List storage self, uint256 start) internal view returns (uint256[] memory) {
         uint256 index = start;
-        // uint256[] memory chunk;
-        uint256 counter;
-        while (index != _SENTINEL) {
-            index = self.list[start][_NEXT];
-            // chunk[i] = index;
-            counter++;
-        }
-        index = start;
-        uint256[] memory chunk = new uint256[](counter);
-        for (uint256 i = 0; i < counter; i++) {
-            chunk[i] = self.list[index][_NEXT];
+         uint256 tmpSize = self.size;
+        uint256[] memory part = new uint[](tmpSize);
+         for (uint256 i = 0; i < tmpSize; i++) {
+            part[i] = self.list[start][_NEXT];
             index = self.list[index][_NEXT];
         }
-        return chunk;
+        return part;
     }
 
     function length(List storage self) internal view returns (uint256) {
