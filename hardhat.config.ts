@@ -21,7 +21,7 @@ const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      gas: "auto",
+      gas: 2000000,
       gasPrice: 9000000000,
       blockGasLimit: 0x1fffffffffffff
     },

@@ -18,6 +18,10 @@ abstract contract Calendar is ICalendar {
 
     uint8 private _expirePeriod;
     uint40 private _blockPerYear; // uint40 is enough cause it can fit wrost case 1 ms 31,556,926,000 block per year.
+    // @TODO avoid re-calculate everytime when call read from storage without calculate may cheaper
+    // uint40 private _blockPerSlot;
+    // uint40 prvate _expirationPeriodInBlockLength;
+    // uint8 private _expirationPeriodInEraLength; // Struct to store era and slot or array size[2]
 
     uint256 private immutable _startBlockNumber;
 
@@ -56,7 +60,7 @@ abstract contract Calendar is ICalendar {
     /// @param blockNumber description
     /// @return uint256 return era
     function _calculateEra(uint256 blockNumber) public view returns (uint256) {
-        if (_startBlockNumber != 0 || blockNumber > _startBlockNumber) {
+        if (_startBlockNumber != 0 && blockNumber > _startBlockNumber) {
             // Calculate era based on the difference between the current block and start block
             return (blockNumber - _startBlockNumber) / _blockPerYear;
         } else {
@@ -67,7 +71,7 @@ abstract contract Calendar is ICalendar {
     /// @dev calcuate slot from given blockNumber.
     /// @param blockNumber description
     /// @return uint256 return slot
-    function _calculateSlot(uint256 blockNumber) internal view returns (uint8) {
+    function _calculateSlot(uint256 blockNumber) public view returns (uint8) {
         if (blockNumber > _startBlockNumber) {
             return uint8(((blockNumber - _startBlockNumber) % _blockPerYear) / (_blockPerYear / SLOT_PER_ERA));
         } else {
@@ -75,39 +79,27 @@ abstract contract Calendar is ICalendar {
         }
     }
 
-    function _calculateEraAndSlot(uint256 blockNumber) internal view returns (uint256 era, uint8 slot) {
+    function _calculateEraAndSlot(uint256 blockNumber) public view returns (uint256 era, uint8 slot) {
         era = _calculateEra(blockNumber);
         slot = _calculateSlot(blockNumber);
         return (era, slot);
     }
 
-    function _calculateBlockDifferent(uint256 blockNumber) internal view returns (uint64) {
-        uint40 expirePeriodInBlockLength = expirationPeriodInBlockLength();
+    function _calculateBlockDifferent(uint256 blockNumber) public view returns (uint256) {
+        uint256 expirePeriodInBlockLength = expirationPeriodInBlockLength();
         if (blockNumber >= expirePeriodInBlockLength) {
             // If the current block is beyond the expiration period
-            return uint64(blockNumber - expirePeriodInBlockLength);
+            return blockNumber - expirePeriodInBlockLength;
         } else {
             // If the current block is within the expiration period
-            return 0;
+            return blockNumber;
         }
     }
 
-    function _calulateFromEraAndFromSlot(uint256 startBlock) internal view returns (uint256 fromEra, uint8 fromSlot) {
-        // Determine the starting era and slot based on the expiration start block
-        if (startBlock >= _blockPerYear) {
-            (fromEra, fromSlot) = _calculateEraAndSlot(startBlock);
-        } else {
-            fromEra = 0;
-            fromSlot = _calculateSlot(startBlock);
-        }
-        (fromEra, fromSlot) = _addingBuffer(fromEra, fromSlot);
-        return (fromEra, fromSlot);
-    }
-
-    function _addingBuffer(uint256 era, uint8 slot) private pure returns (uint256, uint8) {
+    function _addingBuffer(uint256 era, uint8 slot) public pure returns (uint256, uint8) {
         // Add buffer slot
         if (era != 0 && slot != 0) {
-            if (slot > 0) {
+            if (slot < 3) {
                 slot--;
             } else {
                 era--;
@@ -122,8 +114,9 @@ abstract contract Calendar is ICalendar {
         (toEra, toSlot) = _calculateEraAndSlot(blockNumberCache);
         // Calculate the starting block for the expiration period
         uint256 fromBlock = _calculateBlockDifferent(blockNumberCache);
-        // Buffering for ensure
-        (fromEra, fromSlot) = _calulateFromEraAndFromSlot(fromBlock);
+        // Always buffering for 1 slot ensure
+        (fromEra, fromSlot) = _calculateEraAndSlot(fromBlock);
+        (fromEra, fromSlot) = _addingBuffer(fromEra, fromSlot);
         return (fromEra, toEra, fromSlot, toSlot);
     }
 
@@ -150,11 +143,13 @@ abstract contract Calendar is ICalendar {
     }
 
     /// @return uint40 amount of blocks per era.
+    // TODO avoid re-calculate everytime when call read from storage without calculate may cheaper
     function blockPerEra() public view override returns (uint40) {
         return _blockPerYear;
     }
 
     /// @return uint40 amount of blocks per slot.
+    // TODO avoid re-calculate everytime when call read from storage without calculate may cheaper
     function blockPerSlot() public view override returns (uint40) {
         return _blockPerYear / SLOT_PER_ERA;
     }
@@ -164,6 +159,7 @@ abstract contract Calendar is ICalendar {
     }
 
     /// @return uint40 length of blocks.
+    // TODO avoid re-calculate everytime when call read from storage without calculate may cheaper
     function expirationPeriodInBlockLength() public view override returns (uint40) {
         return blockPerSlot() * _expirePeriod;
     }
@@ -175,7 +171,7 @@ abstract contract Calendar is ICalendar {
 
     /// @return era cycle.
     /// @return slot of slot.
-    // TODO avoid recalculate everytime when call
+    // TODO avoid re-calculate everytime when call read from storage without calculate may cheaper
     function expirationPeriodInEraLength() public view override returns (uint8 era, uint8 slot) {
         if (_expirePeriod <= SLOT_PER_ERA) {
             era = 0;
