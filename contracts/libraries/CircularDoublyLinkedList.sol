@@ -157,17 +157,16 @@ library CircularDoublyLinkedList {
         return [self.list[index][_PREV], self.list[index][_NEXT]];
     }
 
-    // example reverse for loop in action
     function ascendingList(List storage self) internal view returns (uint256[] memory asd) {
         uint256 index;
         uint256 tmpSize = self.size;
         if (tmpSize > 0) {
             asd = new uint256[](tmpSize);
-            asd[0] = self.list[index][_PREV];
+            asd[0] = self.list[index][_NEXT];
             unchecked {
-                for (uint256 i = tmpSize-1; i > 0; i--) {
-                    asd[i] = self.list[index][_NEXT];
-                    index = self.list[index][_NEXT];
+                for (uint256 i = tmpSize - 1; i > 0; i--) {
+                    asd[i] = self.list[index][_PREV];
+                    index = self.list[index][_PREV];
                 }
             }
         }
@@ -177,57 +176,66 @@ library CircularDoublyLinkedList {
     function descendingList(List storage self) internal view returns (uint256[] memory) {
         uint256 index;
         uint256 tmpSize = self.size;
-        uint256[] memory des = new uint256[](tmpSize);
-        unchecked {
-            for (uint256 i = 0; i < tmpSize; i++) {
-                des[i] = self.list[index][_PREV];
-                index = self.list[index][_PREV];
+        if (tmpSize > 0) {
+            asd = new uint256[](tmpSize);
+            asd[0] = self.list[index][_PREV];
+            unchecked {
+                for (uint256 i = tmpSize - 1; i > 0; i--) {
+                    asd[i] = self.list[index][_NEXT];
+                    index = self.list[index][_NEXT];
+                }
             }
         }
         return des;
     }
 
-    function firstParitionList(List storage self) internal view returns (uint256[] memory) {
-        uint256 index;
-        uint256 tmpSize = self.size / 2;
-        uint256[] memory part = new uint256[](tmpSize);
-        for (uint256 i = 0; i < tmpSize; i++) {
-            part[i] = self.list[index][_NEXT];
-            index = self.list[index][_NEXT];
-        }
-        return part;
-    }
-
-    function secondPartitionList(List storage self) internal view returns (uint256[] memory) {
-        uint256 index;
-        uint256 tmpSize = self.size / 2;
-        uint256[] memory part = new uint256[](tmpSize);
-        for (uint256 i = 0; i < tmpSize; i++) {
-            part[i] = self.list[index][_PREV];
-            index = self.list[index][_PREV];
-        }
-        return part;
-    }
-    
-    // @TODO fix the potential issue
-    function partition(List storage self, uint256 start) internal view returns (uint256[] memory) {
-        uint256 index = start;
+    function firstParitionList(List storage self) internal view returns (uint256[] memory part) {
         uint256 tmpSize = self.size;
-        uint256[] memory part = new uint[](tmpSize);
-         for (uint256 i = 0; i < tmpSize; i++) {
-            // if next == sentinel it's should break the loop
+        if (tmpSize > 0) {
+            uint256 index;
+            tmpSize = tmpSize/ 2;
+            part = new uint256[](tmpSize);
+            for (uint256 i = 0; i < tmpSize; i++) {
+                part[i] = self.list[index][_NEXT];
+                index = self.list[index][_NEXT];
+            }
+            return part;
         }
         return part;
     }
 
-    // @TODO fix the potential issue
-    function partition(List storage self, uint256 start) internal view returns (uint256[] memory) {
+    function secondPartitionList(List storage self) internal view returns (uint256[] memory part) {
+        uint256 tmpSize = self.size;
+        if (tmpSize > 0) {
+            uint256 index;
+            tmpSize = self.size / 2;
+            part = new uint256[](tmpSize);
+            for (uint256 i = 0; i < tmpSize; i++) {
+                part[i] = self.list[index][_PREV];
+                index = self.list[index][_PREV];
+            }
+            return part;
+        }
+        return part;
+    }
+
+    function partitionList(List storage self, uint256 start) internal view returns (uint256[] memory part) {
+        uint256 tmpSize = self.size;
+        if (tmpSize == 0 || !exist(self, start)) {
+            return part;
+        }
         uint256 index = start;
-         uint256 tmpSize = self.size;
-        uint256[] memory part = new uint[](tmpSize);
-         for (uint256 i = 0; i < tmpSize; i++) {
-            part[i] = self.list[start][_NEXT];
-            index = self.list[index][_NEXT];
+        part = new uint[](tmpSize);
+        uint256 count = 0;
+        // Traverse the list starting from the given index
+        while (count < tmpSize) {
+            part[count] = index; // Add the current index to the partition
+            count++;
+            index = self.list[index][_NEXT]; // Move to the next node
+        }
+        // Resize the array to the actual count of elements using inline assembly
+        assembly {
+            mstore(part, count) // Set the array length to the actual count
         }
         return part;
     }
