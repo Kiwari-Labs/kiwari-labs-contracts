@@ -60,11 +60,13 @@ abstract contract Calendar is ICalendar {
     /// @param blockNumber description
     /// @return uint256 return era
     function _calculateEra(uint256 blockNumber) public view returns (uint256) {
-        if (_startBlockNumber != 0 && blockNumber > _startBlockNumber) {
-            // Calculate era based on the difference between the current block and start block
-            return (blockNumber - _startBlockNumber) / _blockPerYear;
-        } else {
-            return 0;
+        unchecked {
+            if (_startBlockNumber != 0 && blockNumber > _startBlockNumber) {
+                // Calculate era based on the difference between the current block and start block
+                return (blockNumber - _startBlockNumber) / _blockPerYear;
+            } else {
+                return 0;
+            }
         }
     }
 
@@ -72,10 +74,12 @@ abstract contract Calendar is ICalendar {
     /// @param blockNumber description
     /// @return uint256 return slot
     function _calculateSlot(uint256 blockNumber) public view returns (uint8) {
-        if (blockNumber > _startBlockNumber) {
-            return uint8(((blockNumber - _startBlockNumber) % _blockPerYear) / (_blockPerYear / SLOT_PER_ERA));
-        } else {
-            return 0;
+        unchecked {
+            if (blockNumber > _startBlockNumber) {
+                return uint8(((blockNumber - _startBlockNumber) % _blockPerYear) / (_blockPerYear / SLOT_PER_ERA));
+            } else {
+                return 0;
+            }
         }
     }
 

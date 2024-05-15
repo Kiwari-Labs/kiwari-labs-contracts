@@ -74,16 +74,20 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             // totalBlockBalance calcurate only buffer era/slot.
             // keep it simple stupid first by spliting into 3 part then sum.
             // part1: calulate balance at fromEra in naive in naive way O(n)
-            for (uint8 slot = fromSlot; slot < 4; slot++) {
-                if (slot == fromSlot) {
-                    _balanceCache += _bufferSlotBalance(account, fromEra, slot);
-                } else {
-                    _balanceCache += _retailBalances[account][fromEra][slot].slotBalance;
+            unchecked {
+                for (uint8 slot = fromSlot; slot < 4; slot++) {
+                    if (slot == fromSlot) {
+                        _balanceCache += _bufferSlotBalance(account, fromEra, slot);
+                    } else {
+                        _balanceCache += _retailBalances[account][fromEra][slot].slotBalance;
+                    }
                 }
             }
             // part2: calulate balance betaween fromEra and toEra in naive way O(n)
-            for (uint256 era = fromEra + 1; era < toEra; era++) {
-                _balanceCache += _slotBalance(account, era, 0, 4);
+            unchecked {
+                for (uint256 era = fromEra + 1; era < toEra; era++) {
+                    _balanceCache += _slotBalance(account, era, 0, 4);
+                }
             }
             // part3:calulate balance at toEra in navie way O(n)
             _balanceCache += _slotBalance(account, toEra, 0, toSlot);
@@ -98,8 +102,11 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         uint8 endSlot
     ) internal view returns (uint256) {
         uint256 _balanceCache;
-        for (uint8 slot = startSlot; slot <= endSlot; slot++) {
-            _balanceCache += _retailBalances[account][era][slot].slotBalance;
+        unchecked {
+            while(startSlot <= endSlot) {
+                _balanceCache += _retailBalances[account][era][startSlot].slotBalance;
+                startSlot++;
+            }
         }
         return _balanceCache;
     }
@@ -131,9 +138,11 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             return 0;
         }
         uint256 balanceCache;
-        for (uint256 i = 0; i < tmpList.length; i++) {
-            key = tmpList[i];
-            balanceCache += s.blockBalances[key];
+        unchecked {
+            for (uint256 i = 0; i < tmpList.length; i++) {
+                key = tmpList[i];
+                balanceCache += s.blockBalances[key];
+            }
         }
         return balanceCache;
     }
@@ -145,12 +154,14 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         uint256 expirationPeriodInBlockLengthCache
     ) internal pure returns (uint256) {
         uint256 key;
-        for (uint256 i = 0; i < list.length; i++) {
-            uint256 value = list[i];
-            // stop loop when found. always start form head because list is sorted before.
-            if (blockNumberCache - value <= expirationPeriodInBlockLengthCache) {
-                key = value;
-                break;
+        unchecked {
+            for (uint256 i = 0; i < list.length; i++) {
+                uint256 value = list[i];
+                // stop loop when found. always start form head because list is sorted before.
+                if (blockNumberCache - value <= expirationPeriodInBlockLengthCache) {
+                    key = value;
+                    break;
+                }
             }
         }
         return key;
@@ -441,11 +452,11 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         if (_wholeSale[account]) {
             return _unSafeBalanceOf(account, true);
         } else {
-            if (fromEra <= toEra) {
-                return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot);
-            } else {
+            if (fromEra > toEra) {
                 // handling case given invalid value always return zero.
                 return 0;
+            } else {
+                return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot);
             }
         }
     }
