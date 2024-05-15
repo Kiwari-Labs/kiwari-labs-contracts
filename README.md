@@ -1,5 +1,5 @@
 # ERC20 Expirable Token
-This is a Solidity smart contract that implements an ERC20 token with the CDLLS (Circular Doubly Linked List with Sentinel node) data-structure and sliding window algorithm to enabling the expiration mechanism on ERC20 token. The contract is designed to allow the minting of tokens with an expiration date, after which they become unusable. With sliding window algorithm balance can be change but not dynamic or elastic like in elastic supply token.
+This is a Solidity smart contract that implements an ERC20 token with the SCDLLS (Sorted Circular Doubly Linked List with Sentinel node) data-structure and sliding window algorithm to enabling the expiration mechanism on ERC20 token. The contract is designed to allow the minting of tokens with an expiration date, after which they become unusable. With sliding window algorithm balance can be change but not dynamic or elastic like in elastic supply token.
 
 ## Getting Started
 #### Prerequisites
@@ -42,9 +42,9 @@ yarn test
 
 ### TODO
 
-- [] maintain middle in CDLLS
-- [] remove single node in CDLLS
-- [] remove multiple node in CDLLS
+- [] maintain middle in SCDLLS
+- [] remove single node in SCDLLS
+- [] remove multiple node in SCDLLS
 - [] case block per era more than or less than block per slot * slot per era (rounding error)
 - [] [improvement](https://github.com/MASDXI/ERC20EXP/issues/4#issue-2234558942)
 - [] unit test all function

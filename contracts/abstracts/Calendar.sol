@@ -175,6 +175,7 @@ abstract contract Calendar is ICalendar {
 
     /// @return era cycle.
     /// @return slot of slot.
+    // TODO avoid recalculate everytime when call
     function expirationPeriodInEraLength() public view override returns (uint8 era, uint8 slot) {
         if (_expirePeriod <= SLOT_PER_ERA) {
             era = 0;
