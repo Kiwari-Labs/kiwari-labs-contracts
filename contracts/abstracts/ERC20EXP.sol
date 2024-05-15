@@ -74,7 +74,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             // totalBlockBalance calcurate only buffer era/slot.
             // KISS keep it simple stupid first by spliting into 3 part then sum.
             // part1: calulate balance at fromEra in naive in naive way O(n)
-            for (uint8 slot = fromSlot; fromSlot <= 7; slot++) {
+            for (uint8 slot = fromSlot; slot < 4; slot++) {
                 if (slot == fromSlot) {
                     _balanceCache += _bufferSlotBalance(account, fromEra, slot);
                 } else {
@@ -83,7 +83,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             }
             // part2: calulate balance betaween fromEra and toEra in naive way O(n)
             for (uint256 era = fromEra + 1; era < toEra; era++) {
-                _balanceCache += _slotBalance(account, era, 0, 7);
+                _balanceCache += _slotBalance(account, era, 0, 4);
             }
             // part3:calulate balance at toEra in navie way O(n)
             _balanceCache += _slotBalance(account, toEra, 0, toSlot);
@@ -95,7 +95,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         address account,
         uint256 era,
         uint8 startSlot,
-        uint256 endSlot
+        uint8 endSlot
     ) internal view returns (uint256) {
         uint256 _balanceCache;
         for (uint8 slot = startSlot; slot <= endSlot; slot++) {

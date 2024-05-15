@@ -98,7 +98,7 @@ abstract contract Calendar is ICalendar {
             (fromEra, fromSlot) = _calculateEraAndSlot(startBlock);
         } else {
             fromEra = 0;
-            fromSlot = uint8(startBlock % _blockPerYear);
+            fromSlot = _calculateSlot(startBlock);
         }
         (fromEra, fromSlot) = _addingBuffer(fromEra, fromSlot);
         return (fromEra, fromSlot);
