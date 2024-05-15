@@ -208,6 +208,17 @@ library CircularDoublyLinkedList {
         }
         return part;
     }
+    
+    // @TODO fix the potential issue
+    function partition(List storage self, uint256 start) internal view returns (uint256[] memory) {
+        uint256 index = start;
+        uint256 tmpSize = self.size;
+        uint256[] memory part = new uint[](tmpSize);
+         for (uint256 i = 0; i < tmpSize; i++) {
+            // if next == sentinel it's should break the loop
+        }
+        return part;
+    }
 
     // @TODO fix the potential issue
     function partition(List storage self, uint256 start) internal view returns (uint256[] memory) {
