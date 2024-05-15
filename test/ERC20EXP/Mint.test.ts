@@ -33,6 +33,14 @@ export const run = async () => {
       const after1 = await erc20exp["balanceOf(address)"](aliceAddress);
       console.log("🚀 ~ after:", after1);
       expect(after1).to.equal(1000n);
+
+      await erc20exp.connect(alice).transfer(ZERO_ADDRESS, 1000n);
+      const after2 = await erc20exp["balanceOf(address)"](ZERO_ADDRESS);
+      console.log("🚀 ~ after:", after2);
+      const after3 = await erc20exp["balanceOf(address)"](aliceAddress);
+      console.log("🚀 ~ after:", after3);
+
+
     });
     
 

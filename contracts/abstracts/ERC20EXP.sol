@@ -120,11 +120,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             return 0;
         }
         uint256[] memory tmpList = s.list.ascendingList();
-        uint256 key = _getFirstValidOfList(
-            tmpList,
-            blockNumberCache,
-            expirationPeriodInBlockLengthCache
-        );
+        uint256 key = _getFirstValidOfList(tmpList, blockNumberCache, expirationPeriodInBlockLengthCache);
         // perfrom resize to zero reuse the array memory variable
         assembly {
             mstore(tmpList, 0)
@@ -142,7 +138,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         return balanceCache;
     }
 
-    //  
+    //
     // if first index valid and return offset of usable key entire list are valid return first index as key offset.
     // if first index invalid move next till found valid key return index as key offset.
     function _getFirstValidOfList(
@@ -282,128 +278,130 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             slot.blockBalances[blockNumberCache] += value;
             slot.list.insert(blockNumberCache, abi.encodePacked(""));
             // }
-        } else {
+        }
+        uint256 expirationPeriodInBlockLengthCache = expirationPeriodInBlockLength();
+        if (txTypes == TRANSCTION_TYPES.DEFAULT) {
             uint256 balanceCache = balanceOf(from);
             if (balanceCache < value) {
                 // @TODO uncomment
                 //     revert ERC20InsufficientBalance();
             }
-            uint256 expirationPeriodInBlockLengthCache = expirationPeriodInBlockLength();
-            if (txTypes == TRANSCTION_TYPES.DEFAULT) {
-                // @TODO search for first usable balance
-                // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list
-                // Case
-                // if buffer slot can't contain all value move to next slot or next era
-                // sFrom.slotBalance -= value;
-                // sFrom.list.remove[index];
-                // sTo.slotBalance += value;
-                // if the node from sFrom assume called 'index' not exist in sTo perform sTo.list.insert(index);
-                // move entrie slot if consume all slot balance
-                // sTo.blockIndexed[index] += sFrom.blockIndexed[index];
-                // move to next
-                // sFrom.list.nodes[index].next;
-                Slot storage sFrom; // storage pointer 1
-                Slot storage sTo; // storage pointer 2
-                uint256 bufferSlotBalanceCache = _bufferSlotBalance(to, fromEra, fromSlot);
-                // if buffer slot can't contain all value move to next slot or next era
-                if (bufferSlotBalanceCache < value) {
-                    sFrom = _retailBalances[from][fromEra][fromSlot];
-                    sTo = _retailBalances[to][fromEra][fromSlot];
-                    // lFrom = sFrom.list;
-                    // lTo = sTo.list;
-                    // move era move slot
-                    // for (uint256 i = fromEra; fromEra < toEra; i++) {
-                    //     _bufferSlotBalance(from, fromEra, fromSlot);
-                    //     for (uint8 slot = fromSlot; slot <= 7; slot++) {
-                    //         sFrom = _retailBalances[from][fromEra][fromSlot]; // change pointer of storage pointer 1
-                    //         sTo = _retailBalances[to][fromEra][fromSlot]; // change pointer of storage pointer 2
-                    //         lFrom = sFrom.list; // change pointer of storage pointer 3
-                    //         lTo = sTo.list; // change pointer of storage pointer 4
-                    //         // getKey only in buffer slot
-                    //         (uint256 key, uint256 offset) = _getFirstValidOfList(
-                    //             lFrom.ascendingList(),
-                    //             blockNumberCache,
-                    //             expirationPeriodInBlockLengthCache
-                    //         );
-                    //         // if not buffer slot you can use head -> tail
-                    //     }
-                    // }
-                } else {
-                    // if buffer slot can contain all value not move to next slot or next era
-                    sFrom = _retailBalances[from][fromEra][fromSlot];
-                    sTo = _retailBalances[to][fromEra][fromSlot];
-                    uint256 key = _getFirstValidOfList(
-                        sFrom.list.ascendingList(),
-                        blockNumberCache,
-                        expirationPeriodInBlockLengthCache
-                    );
-                    if (bufferSlotBalanceCache == value) {
-                        // if buffer slot is equal to value
-                        // remove key from sender list
-                        sFrom.blockBalances[key] = 0;
-                        sTo.blockBalances[key] += value;
-                        sFrom.list.remove(key);
-                    } else {
-                        // if buffer slot balance greater than value
-                        // deduct slot balance
-                        sFrom.blockBalances[key] -= value;
-                        sTo.blockBalances[key] += value;
-                        sTo.list.insert(key, abi.encodePacked(""));
-                    }
-                }
-                // if (value < _bufferSlotBalance(to, fromEra, fromSlot)) {
-                //     sFrom = _retailBalances[from][fromEra][fromSlot];
-                //     sTo = _retailBalances[to][fromEra][fromSlot];
-                // }
-                // if buffer slot can't contain all value move to next slot or next era
+            // @TODO search for first usable balance
+            // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list
+            // Case
+            // if buffer slot can't contain all value move to next slot or next era
+            // sFrom.slotBalance -= value;
+            // sFrom.list.remove[index];
+            // sTo.slotBalance += value;
+            // if the node from sFrom assume called 'index' not exist in sTo perform sTo.list.insert(index);
+            // move entrie slot if consume all slot balance
+            // sTo.blockIndexed[index] += sFrom.blockIndexed[index];
+            // move to next
+            // sFrom.list.nodes[index].next;
+            Slot storage sFrom; // storage pointer 1
+            Slot storage sTo; // storage pointer 2
+            uint256 bufferSlotBalanceCache = _bufferSlotBalance(to, fromEra, fromSlot);
+            // if buffer slot can't contain all value move to next slot or next era
+            if (bufferSlotBalanceCache < value) {
+                // lFrom = sFrom.list;
+                // lTo = sTo.list;
+                // move era move slot
+                // for (uint256 i = fromEra; fromEra < toEra; i++) {
+                //     for (uint8 slot = fromSlot; slot <= 7; slot++) {
+                //         sFrom = _retailBalances[from][fromEra][fromSlot]; // change pointer of storage pointer 1
+                //         sTo = _retailBalances[to][fromEra][fromSlot]; // change pointer of storage pointer 2
+                //         lFrom = sFrom.list; // change pointer of storage pointer 3
+                //         lTo = sTo.list; // change pointer of storage pointer 4
+                //         // getKey only in buffer slot
+                //         uint256 key = _getFirstValidOfList(
+                //             lFrom.ascendingList(),
+                //             blockNumberCache,
+                //             expirationPeriodInBlockLengthCache
+                //         );
+                //         // if not buffer slot you can use head -> tail
+                //     }
                 // }
             }
-            if (txTypes == TRANSCTION_TYPES.BURN) {
-                // it's completely black hole when perform burn not update data on address(0)
-                // address(0) not require to insert into list
-                Slot storage sFrom; // storage pointer 1
-                uint256 bufferSlotBalanceCache = _bufferSlotBalance(to, fromEra, fromSlot);
-                if (bufferSlotBalanceCache < value) {
-                    // for (uint256 era = fromEra; era <= toEra; era++) {
-                    //     // every era contain 4 slots start slot is 0 and end slot is 3
-                    //     for (uint8 slot = fromSlot; slot <= 7; slot++) {
-                    //         sFrom = _retailBalances[from][era][slot];
-                    //         sTo = _retailBalances[to][era][slot];
-                    //         // @TODO search for first usable balance of sender
-                    //         // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list
-                    //         // deduct balance from `from` and add to `to` which is address(0)
-                    //         // saving gas used by not to insert block balance to address(0)
-                    //         // while value not equal to 0 move to next of index
-                    //         if (sFrom.slotBalance >= value) {
-                    //             sFrom.slotBalance -= value; // deduct balance
-                    //             sTo.slotBalance += value; // addition balance
-                    //             // deduct balance of block balance
-                    //             // if current valid blockNumber not cover the value
-                    //             // delete empty blockBalance then move to next bloackBalance till match value
-                    //             // sFrom.blockBalances[index] -= value;
-                    //         } else {
-                    //             value -= sFrom.slotBalance;
-                    //             sFrom.slotBalance = 0; // consume all slot balance
-                    //             sTo.slotBalance += value; // addition balance
-                    //             // sFrom.list.remove(index);
-                    //         }
-                    //     }
-                    // }
-                } else {
-                    // if buffer slot can contain all value not move to next slot or next era
-                    sFrom = _retailBalances[from][fromEra][fromSlot];
-                    uint256 key = _getFirstValidOfList(
-                        sFrom.list.ascendingList(),
-                        blockNumberCache,
-                        expirationPeriodInBlockLengthCache
-                    );
-                    if (bufferSlotBalanceCache == value) {
-                        sFrom.blockBalances[key] = 0;
-                        sFrom.list.remove(key);
-                    } else {
-                        sFrom.blockBalances[key] -= value;
-                    }
-                }
+            // if buffer slot greater than value not move to next slot or next era deduct balance
+            if (bufferSlotBalanceCache > value) {
+                sFrom = _retailBalances[from][fromEra][fromSlot];
+                sTo = _retailBalances[to][fromEra][fromSlot];
+                uint256 key = _getFirstValidOfList(
+                    sFrom.list.ascendingList(),
+                    blockNumberCache,
+                    expirationPeriodInBlockLengthCache
+                );
+                sFrom.blockBalances[key] -= value;
+                sTo.blockBalances[key] += value;
+                sTo.list.insert(key, abi.encodePacked(""));
+            }
+            // if buffer slot can contain all value not move to next slot or next era
+            if (bufferSlotBalanceCache == value) {
+                sFrom = _retailBalances[from][fromEra][fromSlot];
+                sTo = _retailBalances[to][fromEra][fromSlot];
+                uint256 key = _getFirstValidOfList(
+                    sFrom.list.ascendingList(),
+                    blockNumberCache,
+                    expirationPeriodInBlockLengthCache
+                );
+                sFrom.blockBalances[key] = 0;
+                sFrom.list.remove(key);
+                sTo.blockBalances[key] += value;
+                sTo.list.insert(key, abi.encodePacked(""));
+            }
+        }
+        if (txTypes == TRANSCTION_TYPES.BURN) {
+            // it's completely black hole when perform burn not update data on address(0)
+            // address(0) not require to insert into list
+            Slot storage sFrom; // storage pointer 1
+            uint256 bufferSlotBalanceCache = _bufferSlotBalance(to, fromEra, fromSlot);
+            if (bufferSlotBalanceCache < value) {
+                // for (uint256 era = fromEra; era <= toEra; era++) {
+                //     // every era contain 4 slots start slot is 0 and end slot is 3
+                //     for (uint8 slot = fromSlot; slot <= 7; slot++) {
+                //         sFrom = _retailBalances[from][era][slot];
+                //         sTo = _retailBalances[to][era][slot];
+                //         // @TODO search for first usable balance of sender
+                //         // @TODO SCDLLS MUST BE first in first out (FIFO) and utilizing sorted list
+                //         // deduct balance from `from` and add to `to` which is address(0)
+                //         // saving gas used by not to insert block balance to address(0)
+                //         // while value not equal to 0 move to next of index
+                //         if (sFrom.slotBalance >= value) {
+                //             sFrom.slotBalance -= value; // deduct balance
+                //             sTo.slotBalance += value; // addition balance
+                //             // deduct balance of block balance
+                //             // if current valid blockNumber not cover the value
+                //             // delete empty blockBalance then move to next bloackBalance till match value
+                //             // sFrom.blockBalances[index] -= value;
+                //         } else {
+                //             value -= sFrom.slotBalance;
+                //             sFrom.slotBalance = 0; // consume all slot balance
+                //             sTo.slotBalance += value; // addition balance
+                //             // sFrom.list.remove(index);
+                //         }
+                //     }
+                // }
+            } 
+            if (bufferSlotBalanceCache > value) {
+                // if buffer slot can contain all value not move to next slot or next era
+                sFrom = _retailBalances[from][fromEra][fromSlot];
+                uint256 key = _getFirstValidOfList(
+                    sFrom.list.ascendingList(),
+                    blockNumberCache,
+                    expirationPeriodInBlockLengthCache
+                );
+                sFrom.blockBalances[key] -= value;
+            }
+            if (bufferSlotBalanceCache == value) {
+                // if buffer slot can contain all value not move to next slot or next era
+                sFrom = _retailBalances[from][fromEra][fromSlot];
+                uint256 key = _getFirstValidOfList(
+                    sFrom.list.ascendingList(),
+                    blockNumberCache,
+                    expirationPeriodInBlockLengthCache
+                );
+                sFrom.blockBalances[key] = 0;
+                sFrom.list.remove(key);
             }
         }
         emit Transfer(from, to, value);
@@ -499,9 +497,9 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
                 // consolidate by burning retail balance and mint non-expirable to whole receive balance.
                 _updateRetailBalance(from, address(0), value, fromEra, toEra, fromSlot, toSlot, TRANSCTION_TYPES.BURN);
                 _updateReceiveBalance(from, to, value);
-                if (!isFromWholeSale && !isToWholeSale) {
-                    _updateRetailBalance(from, to, value, fromEra, toEra, fromSlot, toSlot, TRANSCTION_TYPES.DEFAULT);
-                }
+            }
+            if (!isFromWholeSale && !isToWholeSale) {
+                _updateRetailBalance(from, to, value, fromEra, toEra, fromSlot, toSlot, TRANSCTION_TYPES.DEFAULT);
             }
         }
         // hook after transfer
