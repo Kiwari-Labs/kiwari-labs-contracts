@@ -119,33 +119,37 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         if (blockNumberCache - lastestBlockCache >= expirationPeriodInBlockLengthCache) {
             return 0;
         }
-        uint256[] memory ascList = s.list.ascendingList();
-        // @TODO should fix offset size
-        (uint256 key, uint256 offset) = _getFirstValidOfList(
-            ascList,
+        uint256[] memory tmpList = s.list.ascendingList();
+        uint256 key = _getFirstValidOfList(
+            tmpList,
             blockNumberCache,
             expirationPeriodInBlockLengthCache
         );
+        // perfrom resize to zero reuse the array memory variable
+        assembly {
+            mstore(tmpList, 0)
+        }
         // Calculate the total balance using only the valid blocks.
-        // @TODO should fix outbound index out of length
-        // uint256[] memory usableList = s.list.partition(key);
-        // uint256 balanceCache = 0;
-        // for (uint256 i = 0; i <= offset; i++) {
-        //     balanceCache += s.blockBalances[key];
-        //     key = usableList[i];
-        // }
-        return _slotBalance(account, era, slot, slot);
-        // return offset;
+        tmpList = s.list.partitionListGivenToLast(key);
+        if (tmpList.length == 0) {
+            return 0;
+        }
+        uint256 balanceCache;
+        for (uint256 i = 0; i < tmpList.length; i++) {
+            key = tmpList[i];
+            balanceCache += s.blockBalances[key];
+        }
+        return balanceCache;
     }
 
+    //  
     // if first index valid and return offset of usable key entire list are valid return first index as key offset.
     // if first index invalid move next till found valid key return index as key offset.
     function _getFirstValidOfList(
         uint256[] memory list,
         uint256 blockNumberCache,
         uint256 expirationPeriodInBlockLengthCache
-    ) internal pure returns (uint256, uint256) {
-        uint256 offset = list.length;
+    ) internal pure returns (uint256) {
         uint256 key;
         for (uint256 i = 0; i < list.length; i++) {
             uint256 value = list[i];
@@ -153,9 +157,8 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
                 key = value;
                 break;
             }
-            // @TODO should fix offset size
         }
-        return (key, offset);
+        return key;
     }
 
     /// @notice can't mint non-expirable token to non wholesale account.
@@ -329,7 +332,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
                     // if buffer slot can contain all value not move to next slot or next era
                     sFrom = _retailBalances[from][fromEra][fromSlot];
                     sTo = _retailBalances[to][fromEra][fromSlot];
-                    (uint256 key, ) = _getFirstValidOfList(
+                    uint256 key = _getFirstValidOfList(
                         sFrom.list.ascendingList(),
                         blockNumberCache,
                         expirationPeriodInBlockLengthCache
@@ -389,7 +392,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
                 } else {
                     // if buffer slot can contain all value not move to next slot or next era
                     sFrom = _retailBalances[from][fromEra][fromSlot];
-                    (uint256 key, ) = _getFirstValidOfList(
+                    uint256 key = _getFirstValidOfList(
                         sFrom.list.ascendingList(),
                         blockNumberCache,
                         expirationPeriodInBlockLengthCache

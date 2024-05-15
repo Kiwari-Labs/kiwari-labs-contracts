@@ -10,9 +10,12 @@ export const run = async () => {
       const { erc20exp, alice} = await deployERC20EXP();
       const aliceAddress = await alice.getAddress();
       const before = await erc20exp["balanceOf(address)"](aliceAddress);
-      await expect(await erc20exp._mintRetail(aliceAddress, 10000n))
+      for(let i = 0; i < 10; i++) {
+        await expect(await erc20exp._mintRetail(aliceAddress, 1000n))
         .to.emit(erc20exp, "Transfer")
-        .withArgs(ZERO_ADDRESS, aliceAddress, 10000n);
+        .withArgs(ZERO_ADDRESS, aliceAddress, 1000n);
+      }
+
       const after = await erc20exp["balanceOf(address)"](aliceAddress);
       expect(before).to.equal(0);
       expect(after).to.equal(10000n);

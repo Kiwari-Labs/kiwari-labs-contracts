@@ -173,15 +173,15 @@ library CircularDoublyLinkedList {
         return asd;
     }
 
-    function descendingList(List storage self) internal view returns (uint256[] memory) {
+    function descendingList(List storage self) internal view returns (uint256[] memory des) {
         uint256 index;
         uint256 tmpSize = self.size;
         if (tmpSize > 0) {
-            asd = new uint256[](tmpSize);
-            asd[0] = self.list[index][_PREV];
+            des = new uint256[](tmpSize);
+            des[0] = self.list[index][_PREV];
             unchecked {
                 for (uint256 i = tmpSize - 1; i > 0; i--) {
-                    asd[i] = self.list[index][_NEXT];
+                    des[i] = self.list[index][_NEXT];
                     index = self.list[index][_NEXT];
                 }
             }
@@ -192,12 +192,14 @@ library CircularDoublyLinkedList {
     function firstParitionList(List storage self) internal view returns (uint256[] memory part) {
         uint256 tmpSize = self.size;
         if (tmpSize > 0) {
-            uint256 index;
-            tmpSize = tmpSize/ 2;
+            tmpSize = tmpSize / 2;
             part = new uint256[](tmpSize);
-            for (uint256 i = 0; i < tmpSize; i++) {
-                part[i] = self.list[index][_NEXT];
-                index = self.list[index][_NEXT];
+            uint256 index;
+            unchecked {
+                for (uint256 i = 0; i < tmpSize; i++) {
+                    part[i] = self.list[index][_NEXT];
+                    index = self.list[index][_NEXT];
+                }
             }
             return part;
         }
@@ -207,35 +209,56 @@ library CircularDoublyLinkedList {
     function secondPartitionList(List storage self) internal view returns (uint256[] memory part) {
         uint256 tmpSize = self.size;
         if (tmpSize > 0) {
-            uint256 index;
             tmpSize = self.size / 2;
             part = new uint256[](tmpSize);
-            for (uint256 i = 0; i < tmpSize; i++) {
-                part[i] = self.list[index][_PREV];
-                index = self.list[index][_PREV];
+            uint256 index;
+            unchecked {
+                for (uint256 i = 0; i < tmpSize; i++) {
+                    part[i] = self.list[index][_PREV];
+                    index = self.list[index][_PREV];
+                }
             }
             return part;
         }
         return part;
     }
 
+    function partitionListGivenToLast(List storage self, uint256 start) internal view returns (uint256[] memory part) {
+        uint256 tmpSize = self.size;
+        if (tmpSize == 0 || !exist(self, start)) {
+            return part;
+        }
+        part = new uint[](tmpSize);
+        uint256 index = start;
+        uint256 counter;
+        unchecked {
+            while (index != _SENTINEL && counter < tmpSize) {
+                part[counter] = index; // Add the current index to the partition
+                counter++;
+                index = self.list[index][_NEXT]; // Move to the next node
+            }
+        }
+        // Resize the array to the actual count of elements using inline assembly
+        assembly {
+            mstore(part, counter) // Set the array length to the actual count
+        }
+        return part;
+    }
+    
     function partitionList(List storage self, uint256 start) internal view returns (uint256[] memory part) {
         uint256 tmpSize = self.size;
         if (tmpSize == 0 || !exist(self, start)) {
             return part;
         }
-        uint256 index = start;
         part = new uint[](tmpSize);
-        uint256 count = 0;
-        // Traverse the list starting from the given index
-        while (count < tmpSize) {
-            part[count] = index; // Add the current index to the partition
-            count++;
-            index = self.list[index][_NEXT]; // Move to the next node
-        }
-        // Resize the array to the actual count of elements using inline assembly
-        assembly {
-            mstore(part, count) // Set the array length to the actual count
+        uint256 index = start;
+        uint256 counter;
+        unchecked {
+            while (counter < tmpSize) {
+                part[counter] = index; // Add the current index to the partition
+                counter++;
+                index = self.list[index][_NEXT]; // Move to the next node
+            }
         }
         return part;
     }
