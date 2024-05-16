@@ -21,7 +21,7 @@ abstract contract Calendar is ICalendar {
     // @TODO avoid re-calculate everytime when call read from storage without calculate may cheaper
     // uint40 private _blockPerSlot;
     // uint40 prvate _expirationPeriodInBlockLength;
-    // uint8 private _expirationPeriodInEraLength; // Struct to store era and slot or array size[2]
+    // uint8 [2] private _expirationPeriodInEraLength; // Struct to store era and slot or array size[2]
 
     uint256 private immutable _startBlockNumber;
 
@@ -33,11 +33,10 @@ abstract contract Calendar is ICalendar {
 
     /// @param blockTime description
     function _updateBlockPerYear(uint16 blockTime) internal {
-        // @TODO uncomment
-        // if (blockTime < MINIMUM_BLOCKTIME_IN_MILLI_SECONDS ||
-        //         blockTime > MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS) {
-        //     revert InvalidBlockPeriod();
-        // }
+        require(
+            blockTime >= MINIMUM_BLOCKTIME_IN_MILLI_SECONDS || blockTime <= MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS,
+            "InvalidBlockPeriod"
+        );
         uint40 blockPerYearCache = _blockPerYear;
         _blockPerYear = YEAR_IN_MILLI_SECONDS / blockTime;
         emit BlockProducedPerYearUpdated(blockPerYearCache, _blockPerYear);
@@ -45,11 +44,10 @@ abstract contract Calendar is ICalendar {
 
     /// @param expirePeriod description
     function _updateExpirePeriod(uint8 expirePeriod) internal {
-        // @TODO uncomment
-        // if (expirePeriod < MINIMUM_EXPIRE_PERIOD_SLOT ||
-        //         expirePeriod > MAXIMUM_EXPIRE_PERIOD_SLOT) {
-        //     revert InvalidExpirePeriod();
-        // }
+        require(
+            expirePeriod >= MINIMUM_EXPIRE_PERIOD_SLOT || expirePeriod <= MAXIMUM_EXPIRE_PERIOD_SLOT,
+            "InvalidExpirePeriod"
+        );
         uint8 expirePeriodCache = _expirePeriod;
         _expirePeriod = expirePeriod;
         emit ExpirationPeriodUpdated(expirePeriodCache, _expirePeriod);
