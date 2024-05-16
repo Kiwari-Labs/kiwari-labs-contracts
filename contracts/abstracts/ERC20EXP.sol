@@ -81,7 +81,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             return 0;
         }
         uint256[] memory tmpList = s.list.ascendingList();
-        uint256 key = _getFirstValidOfList(tmpList, blockNumberCache, expirationPeriodInBlockLengthCache);
+        uint256 key = _getFirstUnexpiredBlockBalance(tmpList, blockNumberCache, expirationPeriodInBlockLengthCache);
         // perfrom resize to zero reuse the array memory variable
         assembly {
             mstore(tmpList, 0)
@@ -102,7 +102,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
     }
 
     // if first index invalid move next till found valid key return index as key.
-    function _getFirstValidOfList(
+    function _getFirstUnexpiredBlockBalance(
         uint256[] memory list,
         uint256 blockNumberCache,
         uint256 expirationPeriodInBlockLengthCache
@@ -207,7 +207,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             slot.blockBalances[blockNumberCache] += value;
             slot.list.insert(blockNumberCache, abi.encodePacked(""));
             emit Transfer(from, to, value);
-            return; // exit
+            return;
         }
         uint256 fromBalance = balanceOf(from);
         uint256 expirationPeriodInBlockLengthCache = expirationPeriodInBlockLength();
@@ -218,24 +218,24 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             // @TODO avoid code if possible duplicate in DEFAULT and BURN it's
             // can be refactor to increase maintainability balancing optimization and maintain
             Slot storage sFrom = _retailBalances[from][fromEra][fromSlot];
-            Slot storage sTo = _retailBalances[to][fromEra][fromSlot]; // storage pointer 2
+            Slot storage sTo = _retailBalances[to][fromEra][fromSlot];
             uint256 bufferSlotBalanceCache = _bufferSlotBalance(from, fromEra, fromSlot);
-            // if buffer slot can't contain all value move to next slot or next era
-            uint256 key = _getFirstValidOfList(
+            uint256 key = _getFirstUnexpiredBlockBalance(
                 sFrom.list.ascendingList(),
                 blockNumberCache,
                 expirationPeriodInBlockLengthCache
             );
+            // if buffer slot can't contain all value move to next slot or next era
             if (bufferSlotBalanceCache < value) {
-                // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list
+                // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list.
             }
-            // if buffer slot greater than value not move to next slot or next era deduct balance
+            // if buffer slot greater than value not move to next slot or next era deduct balance.
             if (bufferSlotBalanceCache > value) {
                 sFrom.blockBalances[key] -= value;
                 sTo.blockBalances[key] += value;
                 sTo.list.insert(key, abi.encodePacked(""));
             }
-            // if buffer slot can contain all value not move to next slot or next era
+            // if buffer slot can contain all value not move to next slot or next era.
             if (bufferSlotBalanceCache == value) {
                 sFrom.blockBalances[key] = 0;
                 sFrom.list.remove(key);
@@ -243,7 +243,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
                 sTo.list.insert(key, abi.encodePacked(""));
             }
             emit Transfer(from, to, value);
-            return; // exit
+            return;
         }
         if (txTypes == TRANSCTION_TYPES.BURN) {
             // v4.8 openzeppelin errror msg
@@ -251,31 +251,29 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             require(from != address(0), "ERC20: burn from the zero address");
             // it's completely black hole when perform burn not update data on address(0)
             // address(0) not require to insert into list
-            Slot storage sFrom = _retailBalances[from][fromEra][fromSlot]; // storage pointer 1
-            // retrieve balance from buffer slot
+            Slot storage sFrom = _retailBalances[from][fromEra][fromSlot];
             uint256 bufferSlotBalanceCache = _bufferSlotBalance(to, fromEra, fromSlot);
-            uint256 key = _getFirstValidOfList(
+            uint256 key = _getFirstUnexpiredBlockBalance(
                 sFrom.list.ascendingList(),
                 blockNumberCache,
                 expirationPeriodInBlockLengthCache
             );
             if (bufferSlotBalanceCache < value) {
-                // @TODO
-                // if slot empty move slot when move slot it's can be move to next era
+                // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list.
             }
             if (bufferSlotBalanceCache > value) {
-                // if buffer slot can contain all value not move to next slot or next era
+                // if buffer slot can contain all value not move to next slot or next era.
                 sFrom = _retailBalances[from][fromEra][fromSlot];
                 sFrom.blockBalances[key] -= value;
             }
             if (bufferSlotBalanceCache == value) {
-                // if buffer slot can contain all value not move to next slot or next era
+                // if buffer slot can contain all value not move to next slot or next era.
                 sFrom = _retailBalances[from][fromEra][fromSlot];
                 sFrom.blockBalances[key] = 0;
                 sFrom.list.remove(key);
             }
             emit Transfer(from, to, value);
-            return; // exit
+            return;
         }
     }
 
@@ -322,7 +320,6 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
     /// @dev burn token direct to retail account.
     /// @param to description
     /// @param value description
-    // @TODO change to internal function
     function _burnRetail(address to, uint256 value) internal virtual {
         require(!_wholeSale[to], "can't burn expirable token to non retail account");
         (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safePagination();
