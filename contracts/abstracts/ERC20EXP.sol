@@ -43,55 +43,11 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
     /// @param account The address of the account for which the balance is being queried.
     /// @param unsafe The boolean flag for select which balance type is being queried.
     /// @return uint256 return available balance.
-    function _unSafeBalanceOf(address account, bool unsafe) internal view virtual returns (uint256) {
+    function _unSafeBalanceOf(address account, bool unsafe) private view returns (uint256) {
         if (unsafe) {
             return _receiveBalances[account] + super.balanceOf(account);
         } else {
             return super.balanceOf(account);
-        }
-    }
-
-    /// @notice it's optimized assume fromEra and fromSlot already buffered, gap betaween fromEra to toEra
-    /// use slotBalance and sum to _balanceCache.
-    /// @dev Return available balance from the given account, eras, and slots.
-    /// @param account The address of the account for which the balance is being queried.
-    /// @param fromEra The starting era for the balance lookup.
-    /// @param toEra The ending era for the balance lookup.
-    /// @param fromSlot The starting slot within the starting era for the balance lookup.
-    /// @param toSlot The ending slot within the ending era for the balance lookup.
-    /// @return uint256 The available balance.
-    function _lookBackBalance(
-        address account,
-        uint256 fromEra,
-        uint256 toEra,
-        uint8 fromSlot,
-        uint8 toSlot
-    ) public view returns (uint256) {
-        if (fromEra == 0 && toEra == 0) {
-            return _bufferSlotBalance(account, 0, 0);
-        } else {
-            uint256 _balanceCache;
-            // totalBlockBalance calcurate only buffer era/slot.
-            // keep it simple stupid first by spliting into 3 part then sum.
-            // part1: calulate balance at fromEra in naive in naive way O(n)
-            unchecked {
-                for (uint8 slot = fromSlot; slot < 4; slot++) {
-                    if (slot == fromSlot) {
-                        _balanceCache += _bufferSlotBalance(account, fromEra, slot);
-                    } else {
-                        _balanceCache += _retailBalances[account][fromEra][slot].slotBalance;
-                    }
-                }
-            }
-            // part2: calulate balance betaween fromEra and toEra in naive way O(n)
-            unchecked {
-                for (uint256 era = fromEra + 1; era < toEra; era++) {
-                    _balanceCache += _slotBalance(account, era, 0, 4);
-                }
-            }
-            // part3:calulate balance at toEra in navie way O(n)
-            _balanceCache += _slotBalance(account, toEra, 0, toSlot);
-            return _balanceCache;
         }
     }
 
@@ -100,7 +56,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         uint256 era,
         uint8 startSlot,
         uint8 endSlot
-    ) internal view returns (uint256) {
+    ) private view returns (uint256) {
         uint256 _balanceCache;
         unchecked {
             while (startSlot <= endSlot) {
@@ -112,8 +68,8 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
     }
 
     /// @custom:inefficientgasusedappetite heavy loop through array of blockindexed in wrostcase
-    function _bufferSlotBalance(address account, uint256 era, uint8 slot) public view returns (uint256) {
-        Slot storage s = _retailBalances[account][era][slot]; // storage pointer 1
+    function _bufferSlotBalance(address account, uint256 era, uint8 slot) private view returns (uint256) {
+        Slot storage s = _retailBalances[account][era][slot];
         // If the latest block is zero or outside the expiration period, skip entrie slot return 0.
         uint256 lastestBlockCache = s.list.last();
         if (lastestBlockCache == 0) {
@@ -150,7 +106,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         uint256[] memory list,
         uint256 blockNumberCache,
         uint256 expirationPeriodInBlockLengthCache
-    ) internal pure returns (uint256) {
+    ) private pure returns (uint256) {
         uint256 key;
         unchecked {
             for (uint256 i = 0; i < list.length; i++) {
@@ -165,69 +121,60 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         return key;
     }
 
-    /// @notice can't mint non-expirable token to non wholesale account.
-    /// @dev minting new token direct to wholesale account.
-    /// @param to description
-    /// @param value description
-    /// @param spendable true if want to mint to spendable balance false if want to mint to receive balance
-    // @TODO change to internal function
-    function _mintWholeSale(address to, uint256 value, bool spendable) external {
-        require(!_wholeSale[to], "can't mint non-expirable token to non wholesale account");
-        if (spendable) {
-            _mint(to, value);
+    /// @notice it's optimized assume fromEra and fromSlot already buffered, gap betaween fromEra to toEra
+    /// use slotBalance and sum to _balanceCache.
+    /// @dev Return available balance from the given account, eras, and slots.
+    /// @param account The address of the account for which the balance is being queried.
+    /// @param fromEra The starting era for the balance lookup.
+    /// @param toEra The ending era for the balance lookup.
+    /// @param fromSlot The starting slot within the starting era for the balance lookup.
+    /// @param toSlot The ending slot within the ending era for the balance lookup.
+    /// @return uint256 The available balance.
+    function _lookBackBalance(
+        address account,
+        uint256 fromEra,
+        uint256 toEra,
+        uint8 fromSlot,
+        uint8 toSlot
+    ) internal view returns (uint256) {
+        if (fromEra == 0 && toEra == 0) {
+            return _bufferSlotBalance(account, 0, 0);
         } else {
-            _updateReceiveBalance(address(0), to, value);
+            uint256 _balanceCache;
+            // totalBlockBalance calcurate only buffer era/slot.
+            // keep it simple stupid first by spliting into 3 part then sum.
+            // part1: calulate balance at fromEra in naive in naive way O(n)
+            unchecked {
+                for (uint8 slot = fromSlot; slot < 4; slot++) {
+                    if (slot == fromSlot) {
+                        _balanceCache += _bufferSlotBalance(account, fromEra, slot);
+                    } else {
+                        _balanceCache += _retailBalances[account][fromEra][slot].slotBalance;
+                    }
+                }
+            }
+            // part2: calulate balance betaween fromEra and toEra in naive way O(n)
+            unchecked {
+                for (uint256 era = fromEra + 1; era < toEra; era++) {
+                    _balanceCache += _slotBalance(account, era, 0, 4);
+                }
+            }
+            // part3:calulate balance at toEra in navie way O(n)
+            _balanceCache += _slotBalance(account, toEra, 0, toSlot);
+            return _balanceCache;
         }
-    }
-
-    /// @notice can't burn non-expirable token to non wholesale account.
-    /// @dev direct burn from wholesale account.
-    /// @param to description
-    /// @param value description
-    /// @param spendable true if want to burn from spendable balance false if want to burn from receive balance
-    // @TODO change to internal function
-    function _burnWholeSale(address to, uint256 value, bool spendable) external {
-        require(!_wholeSale[to], "can't burn non-expirable token to non wholesale account");
-        if (spendable) {
-            _burn(to, value);
-        } else {
-            _updateReceiveBalance(to, address(0), value);
-        }
-    }
-
-    /// @notice can't mint expirable token to wholesale account.
-    /// @dev minting new token direct to retail account.
-    /// @param to description
-    /// @param value description
-    // @TODO change to internal function
-    function _mintRetail(address to, uint256 value) public {
-        require(!_wholeSale[to], "can't mint expirable token to non retail account");
-        uint256 blockNumberCache = _blockNumberProvider();
-        (uint256 _currentEra, uint8 _currentSlot) = _calculateEraAndSlot(blockNumberCache);
-        _updateRetailBalance(address(0), to, value, 0, _currentEra, 0, _currentSlot, TRANSCTION_TYPES.MINT);
-    }
-
-    /// @notice can't mint expirable token to wholesale account.
-    /// @dev burn token direct to retail account.
-    /// @param to description
-    /// @param value description
-    // @TODO change to internal function
-    function _burnRetail(address to, uint256 value) public {
-        require(!_wholeSale[to], "can't burn expirable token to non retail account");
-        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safePagination();
-        _updateRetailBalance(to, address(0), value, fromEra, toEra, fromSlot, toSlot, TRANSCTION_TYPES.BURN);
     }
 
     /// @notice _receiveBalances[] can't use be same as spendable balance.
     /// @param from description
     /// @param to description
     /// @param value description
-    function _updateReceiveBalance(address from, address to, uint256 value) internal virtual {
+    function _updateReceiveBalance(address from, address to, uint256 value) private {
         if (from == address(0)) {
             // mint non-expirable token to receive balance.
             _receiveBalances[to] += value;
         } else {
-            // revert if not enough
+            // @TODO handle revert if exceed balance.
             if (to == address(0)) {
                 // burn non-expirable token from receive balance.
                 _receiveBalances[from] -= value;
@@ -250,7 +197,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         uint8 fromSlot,
         uint8 toSlot,
         TRANSCTION_TYPES txTypes
-    ) internal virtual {
+    ) private {
         uint256 blockNumberCache = _blockNumberProvider();
         if (txTypes == TRANSCTION_TYPES.MINT) {
             // v4.8 openzeppelin errror msg
@@ -268,7 +215,8 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             // v4.8 openzeppelin errror msg
             require(fromBalance >= value, "ERC20: transfer amount exceeds balance");
             require(to != address(0), "ERC20: transfer to the zero address");
-            // @TODO avoid code if possible duplicate in DEFAULT and BURN it's can be refactor to increase maintainability balancing optimization and maintain
+            // @TODO avoid code if possible duplicate in DEFAULT and BURN it's
+            // can be refactor to increase maintainability balancing optimization and maintain
             Slot storage sFrom = _retailBalances[from][fromEra][fromSlot];
             Slot storage sTo = _retailBalances[to][fromEra][fromSlot]; // storage pointer 2
             uint256 bufferSlotBalanceCache = _bufferSlotBalance(from, fromEra, fromSlot);
@@ -331,12 +279,67 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         }
     }
 
+    /// @notice can't mint non-expirable token to non wholesale account.
+    /// @dev minting new token direct to wholesale account.
+    /// @param to description
+    /// @param value description
+    /// @param spendable true if want to mint to spendable balance false if want to mint to receive balance
+    function _mintWholeSale(address to, uint256 value, bool spendable) internal virtual {
+        require(!_wholeSale[to], "can't mint non-expirable token to non wholesale account");
+        if (spendable) {
+            _mint(to, value);
+        } else {
+            _updateReceiveBalance(address(0), to, value);
+        }
+    }
+
+    /// @notice can't burn non-expirable token to non wholesale account.
+    /// @dev direct burn from wholesale account.
+    /// @param to description
+    /// @param value description
+    /// @param spendable true if want to burn from spendable balance false if want to burn from receive balance
+    function _burnWholeSale(address to, uint256 value, bool spendable) internal virtual {
+        require(!_wholeSale[to], "can't burn non-expirable token to non wholesale account");
+        if (spendable) {
+            _burn(to, value);
+        } else {
+            _updateReceiveBalance(to, address(0), value);
+        }
+    }
+
+    /// @notice can't mint expirable token to wholesale account.
+    /// @dev minting new token direct to retail account.
+    /// @param to description
+    /// @param value description
+    function _mintRetail(address to, uint256 value) internal virtual {
+        require(!_wholeSale[to], "can't mint expirable token to non retail account");
+        uint256 blockNumberCache = _blockNumberProvider();
+        (uint256 _currentEra, uint8 _currentSlot) = _calculateEraAndSlot(blockNumberCache);
+        _updateRetailBalance(address(0), to, value, 0, _currentEra, 0, _currentSlot, TRANSCTION_TYPES.MINT);
+    }
+
+    /// @notice can't mint expirable token to wholesale account.
+    /// @dev burn token direct to retail account.
+    /// @param to description
+    /// @param value description
+    // @TODO change to internal function
+    function _burnRetail(address to, uint256 value) internal virtual {
+        require(!_wholeSale[to], "can't burn expirable token to non retail account");
+        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safePagination();
+        _updateRetailBalance(to, address(0), value, fromEra, toEra, fromSlot, toSlot, TRANSCTION_TYPES.BURN);
+    }
+
     /// @notice clear existing balance before, always perform force set receive balance to zero.
     /// @param to description
-    /// @param auth description
-    function setWholeSale(address to, bool auth) public virtual {
-        require(_wholeSale[to] != auth, "Wholesale status unchanged");
-        _wholeSale[to] = auth;
+    function grantWholeSale(address to) public virtual {
+        require(!_wholeSale[to], "can't grant exist wholesale");
+        _wholeSale[to] = true;
+        emit GrantWholeSale(to, true);
+    }
+
+    function revokeWholeSale(address to) public virtual {
+        require(_wholeSale[to], "can't revoke non-wholesale");
+        _wholeSale[to] = false;
         uint256 spendableBalance = super.balanceOf(to);
         uint256 receiveBalance = _receiveBalances[to];
         if (spendableBalance > 0) {
@@ -347,7 +350,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             // clean receive balance
             _updateReceiveBalance(to, address(0), receiveBalance);
         }
-        emit GrantWholeSale(to, auth);
+        emit GrantWholeSale(to, false);
     }
 
     /// @notice overriding balanceOf to use as safe balance.
@@ -378,7 +381,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         uint8 fromSlot,
         uint256 toEra,
         uint8 toSlot
-    ) public view returns (uint256) {
+    ) public view override returns (uint256) {
         // for whole account ignore fromEra, fromSlot, toEra and toSlot
         if (_wholeSale[account]) {
             return _unSafeBalanceOf(account, true);

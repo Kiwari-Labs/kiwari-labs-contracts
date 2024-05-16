@@ -13,7 +13,7 @@ export const run = async () => {
       const aliceAddress = await alice.getAddress();
       const bobAddress = await bob.getAddress();
       const balanceAliceBefore = await erc20exp["balanceOf(address)"](aliceAddress);
-      await expect(await erc20exp._mintRetail(aliceAddress, 100n))
+      await expect(await erc20exp.mintRetail(aliceAddress, 100n))
         .to.emit(erc20exp, "Transfer")
         .withArgs(ZERO_ADDRESS, aliceAddress, 100n);
       const balanceAliceAfter = await erc20exp["balanceOf(address)"](aliceAddress);
