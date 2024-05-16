@@ -170,11 +170,14 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             // mint non-expirable token to receive balance.
             _receiveBalances[to] += value;
         } else {
-            // @TODO handle revert if exceed balance.
             if (to == address(0)) {
+                // @TODO handle revert if exceed balance error msg.
+                require(_receiveBalances[to] >= value,"");
                 // burn non-expirable token from receive balance.
                 _receiveBalances[from] -= value;
             } else {
+                // @TODO handle revert if exceed balance error msg.
+                require(_receiveBalances[from] >= value,"");
                 // update non-expirable token from and to receive balance.
                 _receiveBalances[to] += value;
                 _receiveBalances[from] -= value;
