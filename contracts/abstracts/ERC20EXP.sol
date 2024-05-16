@@ -27,9 +27,6 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
     mapping(address => bool) private _wholeSale;
     mapping(address => uint256) private _receiveBalances;
     mapping(address => mapping(uint256 => mapping(uint8 => Slot))) private _retailBalances;
-
-    // @TODO Change expirePeriod from length of slot into length of blocks
-    // https://github.com/MASDXI/ERC20EXP/issues/4#issue-2234558942
     constructor(
         string memory name_,
         string memory symbol_,
