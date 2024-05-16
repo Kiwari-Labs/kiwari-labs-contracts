@@ -268,24 +268,23 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             // v4.8 openzeppelin errror msg
             require(fromBalance >= value, "ERC20: transfer amount exceeds balance");
             require(to != address(0), "ERC20: transfer to the zero address");
-            // @TODO search for first usable balance
-            // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list
             // @TODO avoid code if possible duplicate in DEFAULT and BURN it's can be refactor to increase maintainability balancing optimization and maintain
-            // Case
-            // if buffer slot can't contain all value move to next slot or next era
-            // sFrom.slotBalance -= value;
-            // sFrom.list.remove[index];
-            // sTo.slotBalance += value;
-            // if the node from sFrom assume called 'index' not exist in sTo perform sTo.list.insert(index);
-            // move entrie slot if consume all slot balance
-            // sTo.blockIndexed[index] += sFrom.blockIndexed[index];
-            // move to next
-            // sFrom.list.nodes[index].next;
             Slot storage sFrom; // storage pointer 1
             Slot storage sTo; // storage pointer 2
-            uint256 bufferSlotBalanceCache = _bufferSlotBalance(to, fromEra, fromSlot);
+            uint256 bufferSlotBalanceCache = _bufferSlotBalance(from, fromEra, fromSlot);
             // if buffer slot can't contain all value move to next slot or next era
             if (bufferSlotBalanceCache < value) {
+                // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list
+                // Case
+                // if buffer slot can't contain all value move to next slot or next era
+                // sFrom.slotBalance -= value;
+                // sFrom.list.remove[index];
+                // sTo.slotBalance += value;
+                // if the node from sFrom assume called 'index' not exist in sTo perform sTo.list.insert(index);
+                // move entrie slot if consume all slot balance
+                // sTo.blockIndexed[index] += sFrom.blockIndexed[index];
+                // move to next
+                // sFrom.list.nodes[index].next;
                 // lFrom = sFrom.list;
                 // lTo = sTo.list;
                 // move era move slot
