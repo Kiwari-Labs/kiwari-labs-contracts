@@ -71,7 +71,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
     function _bufferSlotBalance(address account, uint256 era, uint8 slot) private view returns (uint256) {
         Slot storage s = _retailBalances[account][era][slot];
         // If the latest block is zero or outside the expiration period, skip entrie slot return 0.
-        uint256 lastestBlockCache = s.list.last();
+        uint256 lastestBlockCache = s.list.tail();
         if (lastestBlockCache == 0) {
             return 0;
         }

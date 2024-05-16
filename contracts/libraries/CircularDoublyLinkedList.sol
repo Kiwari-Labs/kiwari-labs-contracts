@@ -8,9 +8,9 @@ pragma solidity >=0.5.0 <0.9.0;
 /// @title Sorted Circular Doubly Linked List with Sentinel node.
 library CircularDoublyLinkedList {
     struct List {
-        uint256 head;
-        uint256 tail;
-        uint256 size;
+        uint256 _head;
+        uint256 _tail;
+        uint256 _size;
         mapping(uint256 => mapping(bool => uint256)) list;
         mapping(uint256 => bytes) data;
     }
@@ -28,41 +28,41 @@ library CircularDoublyLinkedList {
     }
 
     function _insertHead(List storage self, uint256 index, bytes memory data) private {
-        uint256 _head = self.head;
+        uint256 _head = self._head;
         self.list[_SENTINEL][_NEXT] = index;
         self.list[_head][_PREV] = index;
         self.list[index][_PREV] = _SENTINEL;
         self.list[index][_NEXT] = _head;
         self.data[index] = data;
-        self.head = index;
+        self._head = index;
     }
 
     function _insertTail(List storage self, uint256 index, bytes memory data) private {
-        uint256 _tail = self.tail;
+        uint256 _tail = self._tail;
         self.list[_SENTINEL][_PREV] = index;
         self.list[_tail][_NEXT] = index;
         self.list[index][_PREV] = _tail;
         self.list[index][_NEXT] = _SENTINEL;
         self.data[index] = data;
-        self.tail = index;
+        self._tail = index;
     }
 
     function _removeHead(List storage self) private {
-        uint256 _head = self.list[self.head][_NEXT];
+        uint256 _head = self.list[self._head][_NEXT];
         delete self.list[_head][_PREV];
         delete self.list[_head][_NEXT];
         self.list[_SENTINEL][_NEXT] = _head;
         self.list[_head][_PREV] = _SENTINEL;
-        self.head = _head;
+        self._head = _head;
     }
 
     function _removeTail(List storage self) private {
-        uint256 _tail = self.list[self.tail][_PREV];
+        uint256 _tail = self.list[self._tail][_PREV];
         delete self.list[_tail][_PREV];
         delete self.list[_tail][_NEXT];
         self.list[_SENTINEL][_PREV] = _tail;
         self.list[_tail][_NEXT] = _SENTINEL;
-        self.tail = _tail;
+        self._tail = _tail;
     }
 
     function exist(List storage self, uint256 index) internal view returns (bool) {
@@ -73,32 +73,32 @@ library CircularDoublyLinkedList {
         }
     }
 
-    // function remove(List storage self, uint256[] memory indexes) internal {
-    //     unchecked {
-    //         for (uint i = 0; i < indexes.length; i++) {
-    //             remove(self, indexes[i]);
-    //         }
-    //     }
-    // }
+    function remove(List storage self, uint256[] memory indexes) internal {
+        unchecked {
+            for (uint i = 0; i < indexes.length; i++) {
+                remove(self, indexes[i]);
+            }
+        }
+    }
 
-    // function insert(List storage self, uint256[] memory indexes, bytes[] memory data) internal {
-    //     unchecked {
-    //         for (uint i = 0; i < indexes.length; i++) {
-    //             insert(self, indexes[i], data[i]);
-    //         }
-    //     }
-    // }
+    function insert(List storage self, uint256[] memory indexes, bytes[] memory data) internal {
+        unchecked {
+            for (uint i = 0; i < indexes.length; i++) {
+                insert(self, indexes[i], data[i]);
+            }
+        }
+    }
 
     function remove(List storage self, uint256 index) internal {
         if (exist(self, index) && index > 0) {
-            if (index == self.head) {
+            if (index == self._head) {
                 _removeHead(self);
-            } else if (index == self.tail) {
+            } else if (index == self._tail) {
                 _removeTail(self);
             } else {
                 _removeNode(self, index);
             }
-            self.size--;
+            self._size--;
         }
     }
 
@@ -108,20 +108,20 @@ library CircularDoublyLinkedList {
 
     function insert(List storage self, uint256 index, bytes memory data) internal {
         if (!exist(self, index) && index > 0) {
-            if (self.size == 0) {
+            if (self._size == 0) {
                 // If the list is empty, insert at head
-                self.head = index;
-                self.tail = index;
+                self._head = index;
+                self._tail = index;
                 self.list[_SENTINEL][_NEXT] = index;
                 self.list[_SENTINEL][_PREV] = index;
                 self.data[index] = data;
-            } else if (index < self.head) {
+            } else if (index < self._head) {
                 _insertHead(self, index, data);
-            } else if (index > self.tail) {
+            } else if (index > self._tail) {
                 _insertTail(self, index, data);
             } else {
                 // Inserting the index in between existing list
-                uint256 current = self.head;
+                uint256 current = self._head;
                 while (index > current) {
                     current = self.list[current][_NEXT];
                 }
@@ -132,21 +132,21 @@ library CircularDoublyLinkedList {
                 self.list[index][_NEXT] = current;
                 self.data[index] = data;
             }
-            self.size++;
+            self._size++;
         }
     }
 
-    function first(List storage self) internal view returns (uint256) {
-        return self.head;
+    function head(List storage self) internal view returns (uint256) {
+        return self._head;
     }
 
-    function mid(List storage self) internal view returns (uint256) {
+    function middle(List storage self) internal view returns (uint256) {
         uint256[] memory tmpList = firstParitionList(self);
         return tmpList[tmpList.length - 1];
     }
 
-    function last(List storage self) internal view returns (uint256) {
-        return self.tail;
+    function tail(List storage self) internal view returns (uint256) {
+        return self._tail;
     }
 
     function guard(List storage self) internal view returns (uint256[2] memory) {
@@ -159,7 +159,7 @@ library CircularDoublyLinkedList {
 
     function ascendingList(List storage self) internal view returns (uint256[] memory asd) {
         uint256 index;
-        uint256 tmpSize = self.size;
+        uint256 tmpSize = self._size;
         if (tmpSize > 0) {
             asd = new uint256[](tmpSize);
             asd[0] = self.list[index][_NEXT];
@@ -175,7 +175,7 @@ library CircularDoublyLinkedList {
 
     function descendingList(List storage self) internal view returns (uint256[] memory des) {
         uint256 index;
-        uint256 tmpSize = self.size;
+        uint256 tmpSize = self._size;
         if (tmpSize > 0) {
             des = new uint256[](tmpSize);
             des[0] = self.list[index][_PREV];
@@ -190,7 +190,7 @@ library CircularDoublyLinkedList {
     }
 
     function firstParitionList(List storage self) internal view returns (uint256[] memory part) {
-        uint256 tmpSize = self.size;
+        uint256 tmpSize = self._size;
         if (tmpSize > 0) {
             tmpSize = tmpSize / 2;
             part = new uint256[](tmpSize);
@@ -207,9 +207,9 @@ library CircularDoublyLinkedList {
     }
 
     function secondPartitionList(List storage self) internal view returns (uint256[] memory part) {
-        uint256 tmpSize = self.size;
+        uint256 tmpSize = self._size;
         if (tmpSize > 0) {
-            tmpSize = self.size / 2;
+            tmpSize = self._size / 2;
             part = new uint256[](tmpSize);
             uint256 index;
             unchecked {
@@ -224,7 +224,7 @@ library CircularDoublyLinkedList {
     }
 
     function partitionListGivenToLast(List storage self, uint256 start) internal view returns (uint256[] memory part) {
-        uint256 tmpSize = self.size;
+        uint256 tmpSize = self._size;
         if (tmpSize == 0 || !exist(self, start)) {
             return part;
         }
@@ -246,7 +246,7 @@ library CircularDoublyLinkedList {
     }
     
     function partitionList(List storage self, uint256 start) internal view returns (uint256[] memory part) {
-        uint256 tmpSize = self.size;
+        uint256 tmpSize = self._size;
         if (tmpSize == 0 || !exist(self, start)) {
             return part;
         }
@@ -263,7 +263,7 @@ library CircularDoublyLinkedList {
         return part;
     }
 
-    function length(List storage self) internal view returns (uint256) {
-        return self.size;
+    function size(List storage self) internal view returns (uint256) {
+        return self._size;
     }
 }
