@@ -48,12 +48,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         }
     }
 
-    function _slotBalance(
-        address account,
-        uint256 era,
-        uint8 startSlot,
-        uint8 endSlot
-    ) private view returns (uint256) {
+    function _slotBalance(address account, uint256 era, uint8 startSlot, uint8 endSlot) private view returns (uint256) {
         uint256 _balanceCache;
         unchecked {
             while (startSlot <= endSlot) {
@@ -85,14 +80,18 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         }
         // Calculate the total balance using only the valid blocks.
         tmpList = s.list.partitionListGivenToLast(key);
-        if (tmpList.length == 0) {
+        uint256 lenght = tmpList.length;
+        if (lenght == 0) {
             return 0;
         }
         uint256 balanceCache;
         unchecked {
-            for (uint256 i = 0; i < tmpList.length; i++) {
+            uint256 i = lenght - 1;
+            balanceCache += s.blockBalances[tmpList[0]];
+            while (i > 0) {
                 key = tmpList[i];
                 balanceCache += s.blockBalances[key];
+                i--;
             }
         }
         return balanceCache;
