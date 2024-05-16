@@ -30,16 +30,9 @@ export const run = async () => {
       await mine(1000);
       await erc20exp.mintRetail(aliceAddress, 1000n)
       await mine((await erc20exp.expirationPeriodInBlockLength()- 1000));
-      const page = await erc20exp.pagination();
-      console.log("🚀 ~ expire:", page.toString())
       const after1 = await erc20exp["balanceOf(address)"](aliceAddress);
-      console.log("🚀 ~ after:", after1);
       expect(after1).to.equal(1000n);
       await erc20exp.connect(alice).transfer(bobAddress, 1000n);
-      const after2 = await erc20exp["balanceOf(address)"](bobAddress);
-      console.log("🚀 ~ after:", after2);
-      const after3 = await erc20exp["balanceOf(address)"](aliceAddress);
-      console.log("🚀 ~ after:", after3);
     });
     
 
