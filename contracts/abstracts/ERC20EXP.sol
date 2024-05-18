@@ -69,8 +69,11 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         }
         uint256 blockNumberCache = _blockNumberProvider();
         uint256 expirationPeriodInBlockLengthCache = expirationPeriodInBlockLength();
-        if (blockNumberCache - lastestBlockCache >= expirationPeriodInBlockLengthCache) {
-            return 0;
+        // If the latest block is outside the expiration period, skip entrie slot return 0.
+        unchecked {
+            if (blockNumberCache - lastestBlockCache >= expirationPeriodInBlockLengthCache) {
+                return 0;
+            }
         }
         uint256[] memory tmpList = s.list.ascendingList();
         uint256 key = _getFirstUnexpiredBlockBalance(tmpList, blockNumberCache, expirationPeriodInBlockLengthCache);
@@ -86,9 +89,9 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         }
         uint256 balanceCache;
         unchecked {
-            uint256 i = lenght - 1;
             balanceCache += s.blockBalances[tmpList[0]];
-            while (i > 0) {
+            uint i = tmpList.length-1;
+            while(i>0) {
                 key = tmpList[i];
                 balanceCache += s.blockBalances[key];
                 i--;
@@ -165,22 +168,21 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
     /// @param from description
     /// @param to description
     /// @param value description
-    function _updateReceiveBalance(address from, address to, uint256 value) private {
-        if (from == address(0)) {
-            // mint non-expirable token to receive balance.
-            _receiveBalances[to] += value;
-        } else {
-            if (to == address(0)) {
-                // @TODO handle revert if exceed balance error msg.
-                require(_receiveBalances[to] >= value,"");
-                // burn non-expirable token from receive balance.
-                _receiveBalances[from] -= value;
-            } else {
-                // @TODO handle revert if exceed balance error msg.
-                require(_receiveBalances[from] >= value,"");
-                // update non-expirable token from and to receive balance.
+    function _updateReceiveBalance(address from, address to, uint256 value) internal virtual {
+        unchecked {
+            if (from == address(0)) {
+                // mint non-expirable token to receive balance.
                 _receiveBalances[to] += value;
-                _receiveBalances[from] -= value;
+            } else {
+                // revert if not enough
+                if (to == address(0)) {
+                    // burn non-expirable token from receive balance.
+                    _receiveBalances[from] -= value;
+                } else {
+                    // update non-expirable token from and to receive balance.
+                    _receiveBalances[to] += value;
+                    _receiveBalances[from] -= value;
+                }
             }
         }
         emit Transfer(from, to, value);
@@ -198,82 +200,134 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         TRANSCTION_TYPES txTypes
     ) private {
         uint256 blockNumberCache = _blockNumberProvider();
+        Slot storage recipient = _retailBalances[to][toEra][toSlot];
+        bytes memory emptyBytes = abi.encodePacked("");
         if (txTypes == TRANSCTION_TYPES.MINT) {
             // v4.8 openzeppelin errror msg
             require(to != address(0), "ERC20: mint to the zero address");
-            Slot storage slot = _retailBalances[to][toEra][toSlot];
-            slot.slotBalance += value;
-            slot.blockBalances[blockNumberCache] += value;
-            slot.list.insert(blockNumberCache, abi.encodePacked(""));
-            emit Transfer(from, to, value);
-            return;
-        }
-        uint256 fromBalance = balanceOf(from);
-        uint256 expirationPeriodInBlockLengthCache = expirationPeriodInBlockLength();
-        if (txTypes == TRANSCTION_TYPES.DEFAULT) {
-            // v4.8 openzeppelin errror msg
-            require(fromBalance >= value, "ERC20: transfer amount exceeds balance");
-            require(to != address(0), "ERC20: transfer to the zero address");
-            // @TODO avoid code if possible duplicate in DEFAULT and BURN it's
-            // can be refactor to increase maintainability balancing optimization and maintain
-            Slot storage sFrom = _retailBalances[from][fromEra][fromSlot];
-            Slot storage sTo = _retailBalances[to][fromEra][fromSlot];
+            unchecked {
+                recipient.slotBalance += value;
+                recipient.blockBalances[blockNumberCache] += value;
+                recipient.list.insert(blockNumberCache, emptyBytes);
+            }
+        } else {
+            Slot storage sender = _retailBalances[from][fromEra][fromSlot];
+            uint256 fromBalance = balanceOf(from);
             uint256 bufferSlotBalanceCache = _bufferSlotBalance(from, fromEra, fromSlot);
             uint256 key = _getFirstUnexpiredBlockBalance(
-                sFrom.list.ascendingList(),
+                sender.list.ascendingList(),
                 blockNumberCache,
-                expirationPeriodInBlockLengthCache
+                expirationPeriodInBlockLength()
             );
-            // if buffer slot can't contain all value move to next slot or next era
-            if (bufferSlotBalanceCache < value) {
-                // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list.
+            if (txTypes == TRANSCTION_TYPES.DEFAULT) {
+                // v4.8 openzeppelin errror msg
+                require(fromBalance >= value, "ERC20: transfer amount exceeds balance");
+                require(to != address(0), "ERC20: transfer to the zero address");
+                // @TODO avoid code if possible duplicate in DEFAULT and BURN it's can be refactor to increase
+                // maintainability balancing optimization and maintain
+                if (bufferSlotBalanceCache < value) {
+                    // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list
+                    // Case
+                    // if buffer slot can't contain all value move to next slot or next era
+                    // sFrom.slotBalance -= value;
+                    // sFrom.list.remove[index];
+                    // sTo.slotBalance += value;
+                    // if the node from sFrom assume called 'index' not exist in sTo perform sTo.list.insert(index);
+                    // move entrie slot if consume all slot balance
+                    // sTo.blockIndexed[index] += sFrom.blockIndexed[index];
+                    // move to next
+                    // sFrom.list.nodes[index].next;
+                    // lFrom = sFrom.list;
+                    // lTo = sTo.list;
+                    // move era move slot
+                    // for (uint256 i = fromEra; fromEra < toEra; i++) {
+                    //     for (uint8 slot = fromSlot; slot <= 7; slot++) {
+                    //         sFrom = _retailBalances[from][fromEra][fromSlot]; // change pointer of storage pointer 1
+                    //         sTo = _retailBalances[to][fromEra][fromSlot]; // change pointer of storage pointer 2
+                    //         lFrom = sFrom.list; // change pointer of storage pointer 3
+                    //         lTo = sTo.list; // change pointer of storage pointer 4
+                    //         // getKey only in buffer slot
+                    //         uint256 key = _getFirstValidOfList(
+                    //             lFrom.ascendingList(),
+                    //             blockNumberCache,
+                    //             expirationPeriodInBlockLengthCache
+                    //         );
+                    //         // if not buffer slot you can use head -> tail
+                    //     }
+                    // }
+                }
+                // if buffer slot greater than value not move to next slot or next era deduct balance
+                if (bufferSlotBalanceCache > value) {
+                    unchecked {
+                        sender.blockBalances[key] -= value;
+                        recipient.blockBalances[key] += value;
+                        recipient.list.insert(key, emptyBytes);
+                    }
+                }
+                // if buffer slot can contain all value not move to next slot or next era
+                if (bufferSlotBalanceCache == value) {
+                    unchecked {
+                        sender.blockBalances[key] = 0;
+                        sender.list.remove(key);
+                        recipient.blockBalances[key] += value;
+                        recipient.list.insert(key, emptyBytes);
+                    }
+                }
             }
-            // if buffer slot greater than value not move to next slot or next era deduct balance.
-            if (bufferSlotBalanceCache > value) {
-                sFrom.blockBalances[key] -= value;
-                sTo.blockBalances[key] += value;
-                sTo.list.insert(key, abi.encodePacked(""));
+            if (txTypes == TRANSCTION_TYPES.BURN) {
+                // v4.8 openzeppelin errror msg
+                require(fromBalance >= value, "ERC20: burn amount exceeds balance");
+                require(from != address(0), "ERC20: burn from the zero address");
+                // it's completely black hole when perform burn not update data on address(0)
+                // address(0) not require to insert into list
+                if (bufferSlotBalanceCache < value) {
+                    // if slot empty move slot when move slot it's can be move to next era
+                    if (bufferSlotBalanceCache == 0) {
+                        // @TODO
+                    }
+                    // for (uint256 era = fromEra; era <= toEra; era++) {
+                    //     // every era contain 4 slots start slot is 0 and end slot is 3
+                    //     for (uint8 slot = fromSlot; slot <= 7; slot++) {
+                    //         sFrom = _retailBalances[from][era][slot];
+                    //         sTo = _retailBalances[to][era][slot];
+                    //         // @TODO search for first usable balance of sender
+                    //         // @TODO SCDLLS MUST BE first in first out (FIFO) and utilizing sorted list
+                    //         // deduct balance from `from` and add to `to` which is address(0)
+                    //         // saving gas used by not to insert block balance to address(0)
+                    //         // while value not equal to 0 move to next of index
+                    //         if (sFrom.slotBalance >= value) {
+                    //             sFrom.slotBalance -= value; // deduct balance
+                    //             sTo.slotBalance += value; // addition balance
+                    //             // deduct balance of block balance
+                    //             // if current valid blockNumber not cover the value
+                    //             // delete empty blockBalance then move to next bloackBalance till match value
+                    //             // sFrom.blockBalances[index] -= value;
+                    //         } else {
+                    //             value -= sFrom.slotBalance;
+                    //             sFrom.slotBalance = 0; // consume all slot balance
+                    //             sTo.slotBalance += value; // addition balance
+                    //             // sFrom.list.remove(index);
+                    //         }
+                    //     }
+                    // }
+                } 
+                if (bufferSlotBalanceCache > value) {
+                    // if buffer slot can contain all value not move to next slot or next era
+                    unchecked {
+                        sender.blockBalances[key] -= value;
+                    }
+                }
+                if (bufferSlotBalanceCache == value) {
+                    // if buffer slot can contain all value not move to next slot or next era
+                    unchecked {
+                        sender.blockBalances[key] = 0;
+                        sender.list.remove(key);
+                    }
+                }
             }
-            // if buffer slot can contain all value not move to next slot or next era.
-            if (bufferSlotBalanceCache == value) {
-                sFrom.blockBalances[key] = 0;
-                sFrom.list.remove(key);
-                sTo.blockBalances[key] += value;
-                sTo.list.insert(key, abi.encodePacked(""));
-            }
-            emit Transfer(from, to, value);
-            return;
+            
         }
-        if (txTypes == TRANSCTION_TYPES.BURN) {
-            // v4.8 openzeppelin errror msg
-            require(fromBalance >= value, "ERC20: burn amount exceeds balance");
-            require(from != address(0), "ERC20: burn from the zero address");
-            // it's completely black hole when perform burn not update data on address(0)
-            // address(0) not require to insert into list
-            Slot storage sFrom = _retailBalances[from][fromEra][fromSlot];
-            uint256 bufferSlotBalanceCache = _bufferSlotBalance(to, fromEra, fromSlot);
-            uint256 key = _getFirstUnexpiredBlockBalance(
-                sFrom.list.ascendingList(),
-                blockNumberCache,
-                expirationPeriodInBlockLengthCache
-            );
-            if (bufferSlotBalanceCache < value) {
-                // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list.
-            }
-            if (bufferSlotBalanceCache > value) {
-                // if buffer slot can contain all value not move to next slot or next era.
-                sFrom = _retailBalances[from][fromEra][fromSlot];
-                sFrom.blockBalances[key] -= value;
-            }
-            if (bufferSlotBalanceCache == value) {
-                // if buffer slot can contain all value not move to next slot or next era.
-                sFrom = _retailBalances[from][fromEra][fromSlot];
-                sFrom.blockBalances[key] = 0;
-                sFrom.list.remove(key);
-            }
-            emit Transfer(from, to, value);
-            return;
-        }
+        emit Transfer(from, to, value);
     }
 
     /// @notice can't mint non-expirable token to non wholesale account.
