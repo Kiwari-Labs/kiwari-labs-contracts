@@ -228,34 +228,10 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
                 // maintainability balancing optimization and maintain
                 if (bufferSlotBalanceCache < value) {
                     // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list
-                    // Case
-                    // if buffer slot can't contain all value move to next slot or next era
-                    // sFrom.slotBalance -= value;
-                    // sFrom.list.remove[index];
-                    // sTo.slotBalance += value;
-                    // if the node from sFrom assume called 'index' not exist in sTo perform sTo.list.insert(index);
-                    // move entrie slot if consume all slot balance
-                    // sTo.blockIndexed[index] += sFrom.blockIndexed[index];
-                    // move to next
-                    // sFrom.list.nodes[index].next;
-                    // lFrom = sFrom.list;
-                    // lTo = sTo.list;
-                    // move era move slot
-                    // for (uint256 i = fromEra; fromEra < toEra; i++) {
-                    //     for (uint8 slot = fromSlot; slot <= 7; slot++) {
-                    //         sFrom = _retailBalances[from][fromEra][fromSlot]; // change pointer of storage pointer 1
-                    //         sTo = _retailBalances[to][fromEra][fromSlot]; // change pointer of storage pointer 2
-                    //         lFrom = sFrom.list; // change pointer of storage pointer 3
-                    //         lTo = sTo.list; // change pointer of storage pointer 4
-                    //         // getKey only in buffer slot
-                    //         uint256 key = _getFirstValidOfList(
-                    //             lFrom.ascendingList(),
-                    //             blockNumberCache,
-                    //             expirationPeriodInBlockLengthCache
-                    //         );
-                    //         // if not buffer slot you can use head -> tail
-                    //     }
-                    // }
+                    // if slot empty move slot when move slot it's can be move to next era
+                    if (bufferSlotBalanceCache == 0) {
+                        // @TODO
+                    }
                 }
                 // if buffer slot greater than value not move to next slot or next era deduct balance
                 if (bufferSlotBalanceCache > value) {
@@ -282,35 +258,11 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
                 // it's completely black hole when perform burn not update data on address(0)
                 // address(0) not require to insert into list
                 if (bufferSlotBalanceCache < value) {
+                    // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list
                     // if slot empty move slot when move slot it's can be move to next era
                     if (bufferSlotBalanceCache == 0) {
                         // @TODO
                     }
-                    // for (uint256 era = fromEra; era <= toEra; era++) {
-                    //     // every era contain 4 slots start slot is 0 and end slot is 3
-                    //     for (uint8 slot = fromSlot; slot <= 7; slot++) {
-                    //         sFrom = _retailBalances[from][era][slot];
-                    //         sTo = _retailBalances[to][era][slot];
-                    //         // @TODO search for first usable balance of sender
-                    //         // @TODO SCDLLS MUST BE first in first out (FIFO) and utilizing sorted list
-                    //         // deduct balance from `from` and add to `to` which is address(0)
-                    //         // saving gas used by not to insert block balance to address(0)
-                    //         // while value not equal to 0 move to next of index
-                    //         if (sFrom.slotBalance >= value) {
-                    //             sFrom.slotBalance -= value; // deduct balance
-                    //             sTo.slotBalance += value; // addition balance
-                    //             // deduct balance of block balance
-                    //             // if current valid blockNumber not cover the value
-                    //             // delete empty blockBalance then move to next bloackBalance till match value
-                    //             // sFrom.blockBalances[index] -= value;
-                    //         } else {
-                    //             value -= sFrom.slotBalance;
-                    //             sFrom.slotBalance = 0; // consume all slot balance
-                    //             sTo.slotBalance += value; // addition balance
-                    //             // sFrom.list.remove(index);
-                    //         }
-                    //     }
-                    // }
                 } 
                 if (bufferSlotBalanceCache > value) {
                     // if buffer slot can contain all value not move to next slot or next era
