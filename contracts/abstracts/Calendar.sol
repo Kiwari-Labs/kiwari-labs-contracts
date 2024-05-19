@@ -38,7 +38,9 @@ abstract contract Calendar is ICalendar {
             "InvalidBlockPeriod"
         );
         uint40 blockPerYearCache = _blockPerYear;
-        _blockPerYear = YEAR_IN_MILLI_SECONDS / blockTime;
+        unchecked {
+            _blockPerYear = YEAR_IN_MILLI_SECONDS / blockTime;
+        }
         emit BlockProducedPerYearUpdated(blockPerYearCache, _blockPerYear);
     }
 
@@ -100,12 +102,14 @@ abstract contract Calendar is ICalendar {
 
     function _addingBuffer(uint256 era, uint8 slot) public pure returns (uint256, uint8) {
         // Add buffer slot
-        if (era != 0 && slot != 0) {
-            if (slot < 3) {
-                slot--;
-            } else {
-                era--;
-                slot = (SLOT_PER_ERA - 1);
+        unchecked {
+            if (era != 0 && slot != 0) {
+                if (slot < 3) {
+                    slot--;
+                } else {
+                    era--;
+                    slot = (SLOT_PER_ERA - 1);
+                }
             }
         }
         return (era, slot);
@@ -153,7 +157,9 @@ abstract contract Calendar is ICalendar {
     /// @return uint40 amount of blocks per slot.
     // TODO avoid re-calculate everytime when call read from storage without calculate may cheaper
     function blockPerSlot() public view override returns (uint40) {
-        return _blockPerYear / SLOT_PER_ERA;
+        unchecked {
+            return _blockPerYear / SLOT_PER_ERA;
+        }
     }
 
     function slotPerEra() public pure override returns (uint8) {
@@ -163,7 +169,9 @@ abstract contract Calendar is ICalendar {
     /// @return uint40 length of blocks.
     // TODO avoid re-calculate everytime when call read from storage without calculate may cheaper
     function expirationPeriodInBlockLength() public view override returns (uint40) {
-        return blockPerSlot() * _expirePeriod;
+        unchecked {
+            return blockPerSlot() * _expirePeriod;
+        }
     }
 
     /// @return uint8 length of slot.
@@ -179,8 +187,10 @@ abstract contract Calendar is ICalendar {
             era = 0;
             slot = uint8(_expirePeriod);
         } else {
-            era = uint8(_expirePeriod / SLOT_PER_ERA);
-            slot = uint8(_expirePeriod % SLOT_PER_ERA);
+            unchecked {
+                era = uint8(_expirePeriod / SLOT_PER_ERA);
+                slot = uint8(_expirePeriod % SLOT_PER_ERA);
+            }
         }
         return (era, slot);
     }

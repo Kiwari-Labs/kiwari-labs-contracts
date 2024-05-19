@@ -18,12 +18,6 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         CircularDoublyLinkedList.List list;
     }
 
-    enum TRANSCTION_TYPES {
-        DEFAULT,
-        MINT,
-        BURN
-    }
-
     mapping(address => bool) private _wholeSale;
     mapping(address => uint256) private _receiveBalances;
     mapping(address => mapping(uint256 => mapping(uint8 => Slot))) private _retailBalances;
@@ -48,25 +42,21 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         }
     }
 
-    function _slotBalance(address account, uint256 era, uint8 startSlot, uint8 endSlot) private view returns (uint256) {
-        uint256 _balanceCache;
+    function _slotBalance(address account, uint256 era, uint8 startSlot, uint8 endSlot) private view returns (uint256 balanceCache) {
         unchecked {
             while (startSlot <= endSlot) {
-                _balanceCache += _retailBalances[account][era][startSlot].slotBalance;
+                balanceCache += _retailBalances[account][era][startSlot].slotBalance;
                 startSlot++;
             }
         }
-        return _balanceCache;
+        return balanceCache;
     }
 
     /// @custom:inefficientgasusedappetite heavy loop through array of blockindexed in wrostcase
-    function _bufferSlotBalance(address account, uint256 era, uint8 slot) private view returns (uint256) {
+    function _bufferSlotBalance(address account, uint256 era, uint8 slot) private view returns (uint256 balanceCache) {
         Slot storage _spender = _retailBalances[account][era][slot];
         // If the latest block is zero or outside the expiration period, skip entrie slot return 0.
         uint256 lastestBlockCache = _spender.list.tail();
-        if (lastestBlockCache == 0) {
-            return 0;
-        }
         uint256 blockNumberCache = _blockNumberProvider();
         uint256 expirationPeriodInBlockLengthCache = expirationPeriodInBlockLength();
         // If the latest block is outside the expiration period, skip entrie slot return 0.
@@ -87,14 +77,13 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         if (lenght == 0) {
             return 0;
         }
-        uint256 balanceCache;
         unchecked {
             balanceCache += _spender.blockBalances[arrayCache[0]];
-            uint i = arrayCache.length - 1;
-            while ( i > 0 ) {
-                key = arrayCache[i];
+            uint index = arrayCache.length - 1;
+            while ( index > 0 ) {
+                key = arrayCache[index];
                 balanceCache += _spender.blockBalances[key];
-                i--;
+                index--;
             }
         }
         return balanceCache;
@@ -108,8 +97,8 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
     ) private pure returns (uint256) {
         uint256 key;
         unchecked {
-            for (uint256 i = 0; i < list.length; i++) {
-                uint256 value = list[i];
+            for (uint256 index = 0; index < list.length; index++) {
+                uint256 value = list[index];
                 // stop loop when found. always start form head because list is sorted before.
                 if (blockNumberCache - value <= expirationPeriodInBlockLengthCache) {
                     key = value;
@@ -140,27 +129,29 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             return _bufferSlotBalance(account, 0, 0);
         } else {
             uint256 balanceCache;
-            uint256 _index;
+            uint256 index;
             // totalBlockBalance calcurate only buffer era/slot.
             // keep it simple stupid first by spliting into 3 part then sum.
             // part1: calulate balance at fromEra in naive in naive way O(n)
             unchecked {
-                for (_index = fromSlot; _index < 4; _index++) {
-                    if (_index == fromSlot) {
-                        balanceCache += _bufferSlotBalance(account, fromEra, uint8(_index));
+                for (index = fromSlot; index < 4; index++) {
+                    if (index == fromSlot) {
+                        balanceCache += _bufferSlotBalance(account, fromEra, uint8(index));
                     } else {
-                        balanceCache += _retailBalances[account][fromEra][uint8(_index)].slotBalance;
+                        balanceCache += _retailBalances[account][fromEra][uint8(index)].slotBalance;
                     }
                 }
             }
             // part2: calulate balance betaween fromEra and toEra in naive way O(n)
             unchecked {
-                for (_index = fromEra + 1; _index < toEra; _index++) {
-                    balanceCache += _slotBalance(account, _index, 0, 4);
+                for (index = fromEra + 1; index < toEra; index++) {
+                    balanceCache += _slotBalance(account, index, 0, 4);
                 }
             }
             // part3:calulate balance at toEra in navie way O(n)
-            balanceCache += _slotBalance(account, toEra, 0, toSlot);
+            unchecked {
+                balanceCache += _slotBalance(account, toEra, 0, toSlot);
+            }
             return balanceCache;
         }
     }
@@ -197,88 +188,47 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         uint256 fromEra,
         uint256 toEra,
         uint8 fromSlot,
-        uint8 toSlot,
-        TRANSCTION_TYPES txTypes
+        uint8 toSlot
     ) private {
         uint256 blockNumberCache = _blockNumberProvider();
         bytes memory emptyBytes = abi.encodePacked("");
         Slot storage _recipient = _retailBalances[to][toEra][toSlot];
-        if (txTypes == TRANSCTION_TYPES.MINT) {
-            // v4.8 openzeppelin errror msg
-            require(to != address(0), "ERC20: mint to the zero address");
+        Slot storage _sender = _retailBalances[from][fromEra][fromSlot];
+        uint256 fromBalance = balanceOf(from);
+        uint256 key = _getFirstUnexpiredBlockBalance(
+            _sender.list.ascendingList(),
+            blockNumberCache,
+            expirationPeriodInBlockLength()
+        );
+        uint256 fristUnexpiredBlockBalance = _sender.blockBalances[key];
+        // v4.8 openzeppelin errror msg
+        require(fromBalance >= value, "ERC20: transfer amount exceeds balance");
+        // @TODO avoid code if possible duplicate in DEFAULT and BURN it's can be refactor to increase
+        // maintainability balancing optimization and maintain
+        if (fristUnexpiredBlockBalance < value) {
+            // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list
+            // if slot empty move slot when move slot it's can be move to next era
+            if (fristUnexpiredBlockBalance == 0) {
+                // @TODO
+            }
+        }
+        // if buffer slot greater than value not move to next slot or next era deduct balance
+        if (fristUnexpiredBlockBalance > value) {
             unchecked {
+                _sender.blockBalances[key] -= value;
+                _recipient.blockBalances[key] += value;
+                _recipient.list.insert(key, emptyBytes);
+            }
+        }
+        // if buffer slot can contain all value not move to next slot or next era
+        if (fristUnexpiredBlockBalance == value) {
+            unchecked {
+                _sender.blockBalances[key] = 0;
+                _sender.list.remove(key);
+                _recipient.blockBalances[key] += value;
                 _recipient.slotBalance += value;
-                _recipient.blockBalances[blockNumberCache] += value;
-                _recipient.list.insert(blockNumberCache, emptyBytes);
+                _recipient.list.insert(key, emptyBytes);
             }
-        } else {
-            Slot storage _sender = _retailBalances[from][fromEra][fromSlot];
-            uint256 fromBalance = balanceOf(from);
-            uint256 bufferSlotBalanceCache = _bufferSlotBalance(from, fromEra, fromSlot);
-            uint256 key = _getFirstUnexpiredBlockBalance(
-                _sender.list.ascendingList(),
-                blockNumberCache,
-                expirationPeriodInBlockLength()
-            );
-            if (txTypes == TRANSCTION_TYPES.DEFAULT) {
-                // v4.8 openzeppelin errror msg
-                require(fromBalance >= value, "ERC20: transfer amount exceeds balance");
-                require(to != address(0), "ERC20: transfer to the zero address");
-                // @TODO avoid code if possible duplicate in DEFAULT and BURN it's can be refactor to increase
-                // maintainability balancing optimization and maintain
-                if (bufferSlotBalanceCache < value) {
-                    // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list
-                    // if slot empty move slot when move slot it's can be move to next era
-                    if (bufferSlotBalanceCache == 0) {
-                        // @TODO
-                    }
-                }
-                // if buffer slot greater than value not move to next slot or next era deduct balance
-                if (bufferSlotBalanceCache > value) {
-                    unchecked {
-                        _sender.blockBalances[key] -= value;
-                        _recipient.blockBalances[key] += value;
-                        _recipient.list.insert(key, emptyBytes);
-                    }
-                }
-                // if buffer slot can contain all value not move to next slot or next era
-                if (bufferSlotBalanceCache == value) {
-                    unchecked {
-                        _sender.blockBalances[key] = 0;
-                        _sender.list.remove(key);
-                        _recipient.blockBalances[key] += value;
-                        _recipient.list.insert(key, emptyBytes);
-                    }
-                }
-            }
-            if (txTypes == TRANSCTION_TYPES.BURN) {
-                // v4.8 openzeppelin errror msg
-                require(fromBalance >= value, "ERC20: burn amount exceeds balance");
-                require(from != address(0), "ERC20: burn from the zero address");
-                // it's completely black hole when perform burn not update data on address(0)
-                // address(0) not require to insert into list
-                if (bufferSlotBalanceCache < value) {
-                    // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list
-                    // if slot empty move slot when move slot it's can be move to next era
-                    if (bufferSlotBalanceCache == 0) {
-                        // @TODO
-                    }
-                } 
-                if (bufferSlotBalanceCache > value) {
-                    // if buffer slot can contain all value not move to next slot or next era
-                    unchecked {
-                        _sender.blockBalances[key] -= value;
-                    }
-                }
-                if (bufferSlotBalanceCache == value) {
-                    // if buffer slot can contain all value not move to next slot or next era
-                    unchecked {
-                        _sender.blockBalances[key] = 0;
-                        _sender.list.remove(key);
-                    }
-                }
-            }
-            
         }
         emit Transfer(from, to, value);
     }
@@ -317,9 +267,19 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
     /// @param value description
     function _mintRetail(address to, uint256 value) internal virtual {
         require(!_wholeSale[to], "can't mint expirable token to non retail account");
+        require(to != address(0), "ERC20: mint to the zero address");
         uint256 blockNumberCache = _blockNumberProvider();
-        (uint256 currentEra, uint8 currentSlot) = _calculateEraAndSlot(blockNumberCache);
-        _updateRetailBalance(address(0), to, value, 0, currentEra, 0, currentSlot, TRANSCTION_TYPES.MINT);
+        {
+            (uint256 currentEra, uint8 currentSlot) = _calculateEraAndSlot(blockNumberCache);
+            bytes memory emptyBytes = abi.encodePacked("");
+            Slot storage _recipient = _retailBalances[to][currentEra][currentSlot];
+            unchecked {
+                _recipient.slotBalance += value;
+                _recipient.blockBalances[blockNumberCache] += value;
+                _recipient.list.insert(blockNumberCache, emptyBytes);
+            }
+        }
+        emit Transfer(address(0), to, value);
     }
 
     /// @notice can't mint expirable token to wholesale account.
@@ -328,8 +288,12 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
     /// @param value description
     function _burnRetail(address to, uint256 value) internal virtual {
         require(!_wholeSale[to], "can't burn expirable token to non retail account");
-        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safePagination();
-        _updateRetailBalance(to, address(0), value, fromEra, toEra, fromSlot, toSlot, TRANSCTION_TYPES.BURN);
+        require(to != address(0), "ERC20: burn from the zero address");
+        require(balanceOf(to) >= value, "ERC20: burn amount exceeds balance");
+        {
+            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safePagination();
+            _updateRetailBalance(to, address(0), value, fromEra, toEra, fromSlot, toSlot);
+        }
     }
 
     /// @notice clear existing balance before, always perform force set receive balance to zero.
@@ -404,6 +368,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
     /// @custom:inefficientgasusedappetite emit 2 transfer events inefficient gas.
     /// @custom:inefficientgasusedappetite heavy check condition.
     function transfer(address to, uint256 value) public virtual override returns (bool) {
+        require(to != address(0), "ERC20: transfer to the zero address");
         address from = msg.sender;
         bool isFromWholeSale = _wholeSale[from];
         bool isToWholeSale = _wholeSale[to];
@@ -418,15 +383,15 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             if (isFromWholeSale && !isToWholeSale) {
                 // consolidate by burning wholesale spendable balance and mint expirable to retail balance.
                 _burn(from, value);
-                _updateRetailBalance(address(0), to, value, fromEra, toEra, fromSlot, toSlot, TRANSCTION_TYPES.MINT);
+                _mintRetail(to, value);
             }
             if (!isFromWholeSale && isToWholeSale) {
                 // consolidate by burning retail balance and mint non-expirable to whole receive balance.
-                _updateRetailBalance(from, address(0), value, fromEra, toEra, fromSlot, toSlot, TRANSCTION_TYPES.BURN);
-                _updateReceiveBalance(from, to, value);
+                _burnRetail(from, value);
+                _mintWholeSale(to, value, false);
             }
             if (!isFromWholeSale && !isToWholeSale) {
-                _updateRetailBalance(from, to, value, fromEra, toEra, fromSlot, toSlot, TRANSCTION_TYPES.DEFAULT);
+                _updateRetailBalance(from, to, value, fromEra, toEra, fromSlot, toSlot);
             }
         }
         // hook after transfer
