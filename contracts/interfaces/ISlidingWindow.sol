@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity >=0.5.0 <0.9.0;
 
 /// @title Interface for working with sliding window algorithm.
-/// @author Kiwar
+/// @author Kiwari
 
 interface ISlidingWindow {
     //events

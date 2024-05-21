@@ -1,11 +1,5 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.5.0 <0.9.0;
-
-/// @title Engawa (縁側) is an implementation of Sorted Circular Doubly Linked SCDLLS with Sentinel node in Solidity.
-/// @author Kiwari
-// inspiration
-// https://github.com/o0ragman0o/LibCLL/blob/master/LibCLL.sol
-// https://github.com/vittominacori/solidity-linked-list/blob/master/contracts/StructuredLinkedList.sol
 
 library CircularDoublyLinkedList {
     struct List {
