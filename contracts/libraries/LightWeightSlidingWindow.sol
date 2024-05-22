@@ -14,13 +14,12 @@ library SlidingWindow {
     uint24 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000; // 10 minutes.
     uint40 private constant YEAR_IN_MILLI_SECONDS = 31_556_926_000;
 
-    // 50 bytes for variables type.
-    struct SlidingWindowInfo {
+    // 49 bytes for variables type.
+    struct SlidingWindowState {
         uint40 _blockPerEra;
         uint40 _blockPerSlot;
-        uint40 _frameSizeInBlockLength;
+        uint40 _frameSizeInBlockLength; 
         uint8[2] _frameSizeInEraAndSlotLength;
-        uint8 _frameSize;
         uint256 _startBlockNumber;
     }
 
@@ -41,7 +40,7 @@ library SlidingWindow {
         return (era, slot);
     }
 
-    function _calculateEra(SlidingWindowInfo storage self, uint256 blockNumber) internal view returns (uint256) {
+    function _calculateEra(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint256) {
         unchecked {
             uint256 startblockNumberCache = self._startBlockNumber;
             // Calculate era based on the difference between the current block and start block
@@ -51,7 +50,7 @@ library SlidingWindow {
         }
     }
 
-    function _calculateSlot(SlidingWindowInfo storage self, uint256 blockNumber) internal view returns (uint8) {
+    function _calculateSlot(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint8) {
         unchecked {
             uint256 startblockNumberCache = self._startBlockNumber;
             uint40 blockPerYearCache = self._blockPerEra;
@@ -64,7 +63,7 @@ library SlidingWindow {
         }
     }
 
-    function _updateSlidingWindow(SlidingWindowInfo storage self, uint24 blockTime, uint8 frameSize) internal {
+    function updateSlidingWindow(SlidingWindowState storage self, uint24 blockTime, uint8 frameSize) internal {
         if (blockTime < MINIMUM_BLOCKTIME_IN_MILLI_SECONDS || blockTime > MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS) {
             revert InvalidBlockTime();
         }
@@ -74,8 +73,7 @@ library SlidingWindow {
         unchecked {
             self._blockPerEra = YEAR_IN_MILLI_SECONDS / blockTime;
             self._blockPerSlot = self._blockPerEra / SLOT_PER_ERA;
-            self._frameSize = frameSize;
-            self._frameSizeInBlockLength = self._blockPerSlot * self._frameSize;
+            self._frameSizeInBlockLength = self._blockPerSlot * frameSize;
             if (frameSize <= SLOT_PER_ERA) {
                 self._frameSizeInEraAndSlotLength[0] = 0;
                 self._frameSizeInEraAndSlotLength[1] = frameSize;
@@ -86,8 +84,8 @@ library SlidingWindow {
         }
     }
 
-    function _calculateEraAndSlot(
-        SlidingWindowInfo storage self,
+    function calculateEraAndSlot(
+        SlidingWindowState storage self,
         uint256 blockNumber
     ) internal view returns (uint256 era, uint8 slot) {
         era = _calculateEra(self, blockNumber);
@@ -95,7 +93,7 @@ library SlidingWindow {
         return (era, slot);
     }
 
-    function _calculateBlockDifferent(SlidingWindowInfo storage self, uint256 blockNumber) internal view returns (uint256) {
+    function calculateBlockDifferent(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint256) {
         uint256 frameSizeInBlockLengthCache = getFrameSizeInBlockLength(self);
         unchecked {
             if (blockNumber < frameSizeInBlockLengthCache) {
@@ -108,46 +106,50 @@ library SlidingWindow {
         }
     }
 
-    function _frame(
-        SlidingWindowInfo storage self,
+    function frame(
+        SlidingWindowState storage self,
         uint256 blockNumber
     ) internal view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
-        (toEra, toSlot) = _calculateEraAndSlot(self, blockNumber);
-        blockNumber = _calculateBlockDifferent(self, blockNumber);
-        (fromEra, fromSlot) = _calculateEraAndSlot(self, blockNumber);
+        (toEra, toSlot) = calculateEraAndSlot(self, blockNumber);
+        blockNumber = calculateBlockDifferent(self, blockNumber);
+        (fromEra, fromSlot) = calculateEraAndSlot(self, blockNumber);
         return (fromEra, toEra, fromSlot, toSlot);
     }
 
-    function _safeFrame(
-        SlidingWindowInfo storage self,
+    function safeFrame(
+        SlidingWindowState storage self,
         uint256 blockNumber
     ) internal view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
-        (fromEra, toEra, fromSlot, toSlot) = _frame(self, blockNumber);
+        (fromEra, toEra, fromSlot, toSlot) = frame(self, blockNumber);
         (fromEra, fromSlot) = _frameBuffer(fromEra, fromSlot);
         return (fromEra, toEra, fromSlot, toSlot);
     }
 
-    function getBlockPerEra(SlidingWindowInfo storage self) public view returns (uint40) {
+    function getBlockPerEra(SlidingWindowState storage self) internal view returns (uint40) {
         return self._blockPerEra;
     }
 
-    function getBlockPerSlot(SlidingWindowInfo storage self) public view returns (uint40) {
+    function getBlockPerSlot(SlidingWindowState storage self) internal view returns (uint40) {
         return self._blockPerSlot;
     }
 
-    function getFrameSizeInBlockLength(SlidingWindowInfo storage self) public view returns (uint40) {
+    function getFrameSizeInBlockLength(SlidingWindowState storage self) internal view returns (uint40) {
         return self._frameSizeInBlockLength;
     }
 
-    function getFrameSizeInSlotLength(SlidingWindowInfo storage self) public view returns (uint8) {
-        return self._frameSize;
+    function getFrameSizeInEraLength(SlidingWindowState storage self) internal view returns (uint8) {
+        return self._frameSizeInEraAndSlotLength[0];
     }
 
-    function getFrameSizeInEraAndSlotLength(SlidingWindowInfo storage self) public view returns (uint8[2] memory) {
+    function getFrameSizeInSlotLength(SlidingWindowState storage self) internal view returns (uint8) {
+        return self._frameSizeInEraAndSlotLength[1];
+    }
+
+    function getFrameSizeInEraAndSlotLength(SlidingWindowState storage self) internal view returns (uint8[2] memory) {
         return self._frameSizeInEraAndSlotLength;
     }
 
-    function getSlotPerEra() public pure returns (uint8) {
+    function getSlotPerEra() internal pure returns (uint8) {
         return SLOT_PER_ERA;
     }
 }

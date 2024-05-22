@@ -4,13 +4,15 @@ pragma solidity >=0.5.0 <0.9.0;
 /// @title ERC20EXP abstract contract
 /// @author ERC20EXP <erc20exp@protonmail.com>
 
-import "../abstracts/Shoji.sol";
-import "../libraries/Engawa.sol";
+import "../libraries/SlidingWindow.sol";
+import "../libraries/SortedCircularDoublyLinkedListNaive.sol";
 import "../interfaces/IERC20EXP.sol";
+import "../interfaces/ISlidingWindow.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
+abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     using CircularDoublyLinkedList for CircularDoublyLinkedList.List;
+    using FullSlidingWindow for FullSlidingWindow.SlidingWindowState;
 
     struct Slot {
         uint256 slotBalance;
@@ -21,13 +23,19 @@ abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
     mapping(address => bool) private _wholeSale;
     mapping(address => uint256) private _receiveBalances;
     mapping(address => mapping(uint256 => mapping(uint8 => Slot))) private _retailBalances;
+
+    FullSlidingWindow.SlidingWindowState private _slidingWindow;
+
     constructor(
         string memory name_,
         string memory symbol_,
         uint256 blockNumber_,
         uint16 blockTime_,
         uint8 expirePeriod_
-    ) ERC20(name_, symbol_) Shoji(blockNumber_, blockTime_, expirePeriod_) {}
+    ) ERC20(name_, symbol_) {
+        _slidingWindow._startBlockNumber = blockNumber_;
+        _slidingWindow.updateSlidingWindow(blockTime_, expirePeriod_, 4);
+    }
 
     /// @notice always return 0 for non-wholesael account.
     /// @dev return available balance from given account.
@@ -52,13 +60,17 @@ abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
         return balanceCache;
     }
 
+    function _blockNumberProvider() internal view virtual returns (uint256) {
+        return block.number;
+    }
+
     /// @custom:inefficientgasusedappetite heavy loop through array of blockindexed in wrostcase
     function _bufferSlotBalance(address account, uint256 era, uint8 slot) private view returns (uint256 balanceCache) {
         Slot storage _spender = _retailBalances[account][era][slot];
         // If the latest block is zero or outside the expiration period, skip entrie slot return 0.
         uint256 lastestBlockCache = _spender.list.tail();
         uint256 blockNumberCache = _blockNumberProvider();
-        uint256 expirationPeriodInBlockLengthCache = getFrameSizeInBlockLength();
+        uint256 expirationPeriodInBlockLengthCache = _slidingWindow.getFrameSizeInBlockLength();
         // If the latest block is outside the expiration period, skip entrie slot return 0.
         unchecked {
             if (blockNumberCache - lastestBlockCache >= expirationPeriodInBlockLengthCache) {
@@ -198,7 +210,7 @@ abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
         uint256 key = _getFirstUnexpiredBlockBalance(
             _sender.list.ascendingList(),
             blockNumberCache,
-            getFrameSizeInBlockLength()
+            _slidingWindow.getFrameSizeInBlockLength()
         );
         uint256 fristUnexpiredBlockBalance = _sender.blockBalances[key];
         // v4.8 openzeppelin errror msg
@@ -270,7 +282,7 @@ abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
         require(to != address(0), "ERC20: mint to the zero address");
         uint256 blockNumberCache = _blockNumberProvider();
         {
-            (uint256 currentEra, uint8 currentSlot) = _calculateEraAndSlot(blockNumberCache);
+            (uint256 currentEra, uint8 currentSlot) = _slidingWindow.calculateEraAndSlot(blockNumberCache);
             bytes memory emptyBytes = abi.encodePacked("");
             Slot storage _recipient = _retailBalances[to][currentEra][currentSlot];
             unchecked {
@@ -291,7 +303,7 @@ abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
         require(to != address(0), "ERC20: burn from the zero address");
         require(balanceOf(to) >= value, "ERC20: burn amount exceeds balance");
         {
-            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safeFrame(_blockNumberProvider());
+            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(_blockNumberProvider());
             _updateRetailBalance(to, address(0), value, fromEra, toEra, fromSlot, toSlot);
         }
     }
@@ -301,7 +313,7 @@ abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
     function grantWholeSale(address to) public virtual {
         require(!_wholeSale[to], "can't grant exist wholesale");
         _wholeSale[to] = true;
-        emit GrantWholeSale(to, true);
+        // emit GrantWholeSale(to, true);
     }
 
     function revokeWholeSale(address to) public virtual {
@@ -317,7 +329,7 @@ abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
             // clean receive balance
             _updateReceiveBalance(to, address(0), receiveBalance);
         }
-        emit GrantWholeSale(to, false);
+        // emit GrantWholeSale(to, false);
     }
 
     /// @notice overriding balanceOf to use as safe balance.
@@ -329,7 +341,7 @@ abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
             /// @notice use _balances[account] as spendable balance and return only spendable balance.
             return super.balanceOf(account);
         } else {
-            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safeFrame(_blockNumberProvider());
+            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(_blockNumberProvider());
             return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot);
         }
     }
@@ -379,7 +391,7 @@ abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
             _transfer(from, to, value);
         } else {
             // declaration in else scope to avoid allocate memory for temporay varialbe if not need.
-            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safeFrame(_blockNumberProvider());
+            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(_blockNumberProvider());
             if (isFromWholeSale && !isToWholeSale) {
                 // consolidate by burning wholesale spendable balance and mint expirable to retail balance.
                 _burn(from, value);
@@ -427,4 +439,40 @@ abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
 
     /// @notice abstract function
     function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual override {}
+
+    function blockPerEra() external override view returns (uint40) {
+        return _slidingWindow._blockPerEra;
+    }
+    function blockPerSlot() external override view returns (uint40) {
+        return _slidingWindow._blockPerSlot;
+    }
+
+    function currentEraAndSlot() external override view returns (uint256 era, uint8 slot) {
+        return _slidingWindow.calculateEraAndSlot(_blockNumberProvider());
+    }
+
+    function getFrameSizeInBlockLength() external override view returns (uint40) {
+        return _slidingWindow.getFrameSizeInBlockLength();
+    }
+
+    function getFrameSizeInSlotLegth() external override view returns (uint8) {
+        return _slidingWindow.getFrameSizeInSlotLength();
+    }
+
+    function getFrameSizeInEraLength() external override view returns (uint8) {
+        return _slidingWindow.getFrameSizeInEraLength();
+    }
+
+    function frame() external override view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
+        return _slidingWindow.frame(_blockNumberProvider());
+    }
+
+    function safeFrame() external override view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
+        return _slidingWindow.safeFrame(_blockNumberProvider());
+    }
+
+    function slotPerEra() external override view returns (uint8) {
+        return _slidingWindow.getSlotPerEra();
+    }
+
 }
