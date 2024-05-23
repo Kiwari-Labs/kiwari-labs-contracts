@@ -74,22 +74,6 @@ library CircularDoublyLinkedList {
         }
     }
 
-    function remove(List storage self, uint256[] memory indexes) internal {
-        unchecked {
-            for (uint i = 0; i < indexes.length; i++) {
-                remove(self, indexes[i]);
-            }
-        }
-    }
-
-    function insert(List storage self, uint256[] memory indexes, bytes[] memory data) internal {
-        unchecked {
-            for (uint i = 0; i < indexes.length; i++) {
-                insert(self, indexes[i], data[i]);
-            }
-        }
-    }
-
     function remove(List storage self, uint256 index) internal {
         if (exist(self, index) && index > 0) {
             if (index == self._head) {
