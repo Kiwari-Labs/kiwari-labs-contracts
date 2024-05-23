@@ -10,6 +10,11 @@ import {
   ERC20_EXP_SYMBOL,
 } from "./constant.test";
 
+export const padIndexToData = function (index: Number) {
+  // The padding is applied from the start of this string (output: 0x0001).
+  return `0x${index.toString().padStart(4, "0")}`;
+};
+
 export const getAddress = async function (account: Signer | Contract) {
   if (account instanceof Contract) {
     return account.address.toLowerCase();
@@ -41,7 +46,7 @@ export const deployERC20EXP = async function () {
   };
 };
 
-export const deployDoublyList = async function () {
+export const deployDoublyList = async function ({ autoList = false, len = 10 } = {}) {
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 
   const DoublyList = await ethers.getContractFactory(
@@ -51,6 +56,16 @@ export const deployDoublyList = async function () {
 
   const doublylist = await DoublyList.deploy();
   await doublylist.deployed();
+
+  // To automatically generate the list.
+  // [1, 2, 3, ... , 8, 9, 10]
+  if (autoList) {
+    for (let i = 0; i < len; i++) {
+      const index = i + 1;
+      const data = padIndexToData(index);
+      await doublylist.insert(index, data);
+    }
+  }
 
   return {
     doublylist,
