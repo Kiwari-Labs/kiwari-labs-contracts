@@ -235,6 +235,7 @@ library CircularDoublyLinkedList {
         part = new uint[](tmpSize);
         uint256 index = start;
         uint256 counter;
+        // TODO: optimize this code.
         unchecked {
             while (index != _SENTINEL && counter < tmpSize) {
                 part[counter] = index; // Add the current index to the partition.
@@ -258,6 +259,16 @@ library CircularDoublyLinkedList {
         uint256 index = start;
         uint256 counter;
         unchecked {
+            // TODO: optimize this code.
+            while (counter < tmpSize) {
+                part[counter] = index; // Add the current index to the partition.
+                counter++;
+                index = self._list[index][_NEXT]; // Move to the next node.
+                if (index == _SENTINEL) {
+                    index = self._list[index][_NEXT]; 
+                    break;
+                }
+            }
             while (counter < tmpSize) {
                 part[counter] = index; // Add the current index to the partition.
                 counter++;

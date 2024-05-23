@@ -18,5 +18,17 @@ export const run = async () => {
         expect(sorted[i]).to.equal(sorted.length - i);
       }
     });
+
+    it("[UNHAPPY] sort the empty array with asc", async function () {
+      const { doublylist } = await deployDoublyList();
+      const sorted = await doublylist.ascendingList();
+      expect(sorted.length).to.equal(0);
+    });
+
+    it("[UNHAPPY] sort the empty array with des", async function () {
+      const { doublylist } = await deployDoublyList();
+      const sorted = await doublylist.descendingList();
+      expect(sorted.length).to.equal(0);
+    });
   });
 };
