@@ -21,7 +21,7 @@ export const run = async () => {
       const after = await erc20exp["balanceOf(address)"](aliceAddress);
       expect(before).to.equal(0);
       expect(after).to.equal(10000n);
-      await mine(await erc20exp.expirationPeriodInBlockLength());
+      await mine(await erc20exp.getFrameSizeInBlockLength());
       // clear all balance
       const shouldbezero = await erc20exp["balanceOf(address)"](aliceAddress);
       expect(shouldbezero).to.equal(0);
@@ -29,7 +29,7 @@ export const run = async () => {
       await erc20exp.mintRetail(aliceAddress, 1000n)
       await mine(1000);
       await erc20exp.mintRetail(aliceAddress, 1000n)
-      await mine((await erc20exp.expirationPeriodInBlockLength()- 1000));
+      await mine((await erc20exp.getFrameSizeInBlockLength()- 1000));
       const after1 = await erc20exp["balanceOf(address)"](aliceAddress);
       expect(after1).to.equal(1000n);
       await erc20exp.connect(alice).transfer(bobAddress, 1000n);

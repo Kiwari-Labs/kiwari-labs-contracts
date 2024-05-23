@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.5.0 <0.9.0;
 
-import "../../contracts/abstracts/Calendar.sol";
+import "../abstracts/Shoji.sol";
 
-contract MockCalendar is Calendar {
-    constructor(uint16 blockTime_, uint8 period_) Calendar(_blockNumberProvider(), blockTime_, period_) {}
+contract MockCalendar is Shoji {
+    constructor(uint16 blockTime_, uint8 period_) Shoji(_blockNumberProvider(), blockTime_, period_) {}
 }

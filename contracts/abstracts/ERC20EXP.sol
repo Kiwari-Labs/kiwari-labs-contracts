@@ -4,12 +4,12 @@ pragma solidity >=0.5.0 <0.9.0;
 /// @title ERC20EXP abstract contract
 /// @author ERC20EXP <erc20exp@protonmail.com>
 
-import "../abstracts/Calendar.sol";
+import "../abstracts/Shoji.sol";
+import "../libraries/Engawa.sol";
 import "../interfaces/IERC20EXP.sol";
-import "../libraries/CircularDoublyLinkedList.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
+abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
     using CircularDoublyLinkedList for CircularDoublyLinkedList.List;
 
     struct Slot {
@@ -27,7 +27,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         uint256 blockNumber_,
         uint16 blockTime_,
         uint8 expirePeriod_
-    ) ERC20(name_, symbol_) Calendar(blockNumber_, blockTime_, expirePeriod_) {}
+    ) ERC20(name_, symbol_) Shoji(blockNumber_, blockTime_, expirePeriod_) {}
 
     /// @notice always return 0 for non-wholesael account.
     /// @dev return available balance from given account.
@@ -58,7 +58,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         // If the latest block is zero or outside the expiration period, skip entrie slot return 0.
         uint256 lastestBlockCache = _spender.list.tail();
         uint256 blockNumberCache = _blockNumberProvider();
-        uint256 expirationPeriodInBlockLengthCache = expirationPeriodInBlockLength();
+        uint256 expirationPeriodInBlockLengthCache = getFrameSizeInBlockLength();
         // If the latest block is outside the expiration period, skip entrie slot return 0.
         unchecked {
             if (blockNumberCache - lastestBlockCache >= expirationPeriodInBlockLengthCache) {
@@ -198,7 +198,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         uint256 key = _getFirstUnexpiredBlockBalance(
             _sender.list.ascendingList(),
             blockNumberCache,
-            expirationPeriodInBlockLength()
+            getFrameSizeInBlockLength()
         );
         uint256 fristUnexpiredBlockBalance = _sender.blockBalances[key];
         // v4.8 openzeppelin errror msg
@@ -291,7 +291,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
         require(to != address(0), "ERC20: burn from the zero address");
         require(balanceOf(to) >= value, "ERC20: burn amount exceeds balance");
         {
-            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safePagination();
+            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safeFrame(_blockNumberProvider());
             _updateRetailBalance(to, address(0), value, fromEra, toEra, fromSlot, toSlot);
         }
     }
@@ -329,7 +329,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             /// @notice use _balances[account] as spendable balance and return only spendable balance.
             return super.balanceOf(account);
         } else {
-            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safePagination();
+            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safeFrame(_blockNumberProvider());
             return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot);
         }
     }
@@ -379,7 +379,7 @@ abstract contract ERC20Expirable is Calendar, ERC20, IERC20EXP {
             _transfer(from, to, value);
         } else {
             // declaration in else scope to avoid allocate memory for temporay varialbe if not need.
-            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safePagination();
+            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safeFrame(_blockNumberProvider());
             if (isFromWholeSale && !isToWholeSale) {
                 // consolidate by burning wholesale spendable balance and mint expirable to retail balance.
                 _burn(from, value);
