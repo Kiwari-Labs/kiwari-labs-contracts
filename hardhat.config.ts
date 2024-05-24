@@ -53,8 +53,8 @@ const config: HardhatUserConfig = {
     enabled: true,
   },
   docgen: {    
-    projectName: "",
-    projectDescription: "",
+    // projectName: "",
+    // projectDescription: "",
     outputDir: "./bonadocs",
     deploymentAddresses: {},
   },
