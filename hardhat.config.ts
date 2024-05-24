@@ -11,6 +11,8 @@ import glob from "glob";
 import { subtask } from "hardhat/config";
 import { TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS } from "hardhat/builtin-tasks/task-names";
 
+import "@bonadocs/docgen";
+
 const WALLET_PRIVATE_KEY = process.env.WALLET_PRIVATE_KEY || "";
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";
 
@@ -23,7 +25,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       gas: 2000000,
       gasPrice: 9000000000,
-      blockGasLimit: 0x1fffffffffffff
+      blockGasLimit: 0x1fffffffffffff,
     },
     localhost: {
       url: "http://127.0.0.1:8545",
@@ -49,6 +51,12 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     enabled: true,
+  },
+  docgen: {    
+    projectName: "",
+    projectDescription: "",
+    outputDir: "./bonadocs",
+    deploymentAddresses: {},
   },
 };
 

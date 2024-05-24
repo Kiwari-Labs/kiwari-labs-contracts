@@ -9,9 +9,11 @@
     "prettier": "prettier --write --plugin=prettier-plugin-solidity '**/*.sol'",
     "run:node": "npx hardhat node",
     "test": "npx hardhat test",
-    "test:clean": "npm run clean && npx hardhat test"
+    "test:clean": "npm run clean && npx hardhat test",
+    "docgen": "npx hardhat docgen"
   },
   "devDependencies": {
+    "@bonadocs/docgen": "^1.0.1-alpha.3",
     "@ethersproject/abi": "^5.4.7",
     "@ethersproject/providers": "^5.4.7",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
@@ -37,5 +39,6 @@
     "ts-node": "^10.9.1",
     "typechain": "^8.3.2",
     "typescript": "^5.2.2"
-  }
+  },
+  "dependencies": {}
 }
