@@ -25,7 +25,7 @@ export const run = async () => {
       expect(await doublylist.exist(head)).to.equal(false);
       expect(await doublylist.size()).to.equal(size.sub(1));
 
-      const list = await doublylist.ascendingList();
+      const list = await doublylist.ascending();
       for (let i = 0; i < 9; i++) {
         expect(list[i]).to.equal(i + 2);
       }
@@ -40,7 +40,7 @@ export const run = async () => {
       await doublylist.remove(index);
       expect(await doublylist.exist(index)).to.equal(false);
       expect(await doublylist.size()).to.equal(size.sub(1));
-      const list = await doublylist.ascendingList();
+      const list = await doublylist.ascending();
       for (let i = 0; i < 9; i++) {
         // Skip index 5.
         if (i < index - 1) {
@@ -60,7 +60,7 @@ export const run = async () => {
       await doublylist.remove(tail);
       expect(await doublylist.exist(tail)).to.equal(false);
       expect(await doublylist.size()).to.equal(size.sub(1));
-      const list = await doublylist.ascendingList();
+      const list = await doublylist.ascending();
       for (let i = 0; i < 9; i++) {
         expect(list[i]).to.equal(i + 1);
       }

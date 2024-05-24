@@ -46,27 +46,31 @@ contract MockCircularDoublyLinkedList {
         return CircularDoublyLinkedList.node(_list, index);
     }
 
-    function ascendingList() public view returns (uint256[] memory asd) {
-        return CircularDoublyLinkedList.ascendingList(_list);
+    function ascending() public view returns (uint256[] memory part) {
+        return CircularDoublyLinkedList.ascending(_list);
     }
 
-    function descendingList() public view returns (uint256[] memory des) {
-        return CircularDoublyLinkedList.descendingList(_list);
+    function descending() public view returns (uint256[] memory part) {
+        return CircularDoublyLinkedList.descending(_list);
     }
 
-    function firstParitionList() public view returns (uint256[] memory part) {
-        return CircularDoublyLinkedList.firstParitionList(_list);
+    function firstPartition() public view returns (uint256[] memory part) {
+        return CircularDoublyLinkedList.firstPartition(_list);
     }
 
-    function secondPartitionList() public view returns (uint256[] memory part) {
-        return CircularDoublyLinkedList.secondPartitionList(_list);
+    function secondPartition() public view returns (uint256[] memory part) {
+        return CircularDoublyLinkedList.secondPartition(_list);
     }
 
-    function partitionListGivenToLast(uint256 start) public view returns (uint256[] memory part) {
-        return CircularDoublyLinkedList.partitionListGivenToLast(_list, start);
+    function pathToTail(uint256 start) public view returns (uint256[] memory part) {
+        return CircularDoublyLinkedList.pathToTail(_list, start);
     }
 
-    function partitionList(uint256 start) public view returns (uint256[] memory part) {
-        return CircularDoublyLinkedList.partitionList(_list, start);
+    function pathToHead(uint256 start) public view returns (uint256[] memory part) {
+        return CircularDoublyLinkedList.pathToHead(_list, start);
+    }
+
+    function partition(uint256 start) public view returns (uint256[] memory part) {
+        return CircularDoublyLinkedList.partition(_list, start);
     }
 }
