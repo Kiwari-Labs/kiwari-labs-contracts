@@ -3,6 +3,7 @@ import * as Insertion from "./Insertion.test";
 import * as Sorting from "./Sorting.test";
 import * as Updatable from "./Updatable.test";
 import * as Removal from "./Removal.test";
+import * as Integration from "./Integration.test";
 
 export const run = async () => {
   describe("CircularDoublyLinkedList", async function () {
@@ -11,5 +12,6 @@ export const run = async () => {
     Sorting.run();
     Updatable.run();
     Removal.run();
+    Integration.run();
   });
 };
