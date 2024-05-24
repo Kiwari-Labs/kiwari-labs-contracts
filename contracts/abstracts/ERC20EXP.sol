@@ -77,14 +77,14 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 return 0;
             }
         }
-        uint256[] memory arrayCache = _spender.list.ascendingList();
+        uint256[] memory arrayCache = _spender.list.ascending();
         uint256 key = _getFirstUnexpiredBlockBalance(arrayCache, blockNumberCache, expirationPeriodInBlockLengthCache);
         // perfrom resize to zero reuse the array memory variable
         assembly {
             mstore(arrayCache, 0)
         }
         // Calculate the total balance using only the valid blocks.
-        arrayCache = _spender.list.partitionListGivenToLast(key);
+        arrayCache = _spender.list.pathToTail(key);
         uint256 lenght = arrayCache.length;
         if (lenght == 0) {
             return 0;
@@ -208,7 +208,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         Slot storage _sender = _retailBalances[from][fromEra][fromSlot];
         uint256 fromBalance = balanceOf(from);
         uint256 key = _getFirstUnexpiredBlockBalance(
-            _sender.list.ascendingList(),
+            _sender.list.ascending(),
             blockNumberCache,
             _slidingWindow.getFrameSizeInBlockLength()
         );

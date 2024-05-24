@@ -10,3 +10,6 @@ secret
 # Hardhat files
 cache
 artifacts
+
+# Document generate
+bonadocs
