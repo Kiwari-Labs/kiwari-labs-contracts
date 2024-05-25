@@ -203,14 +203,14 @@ abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
         uint256 fristUnexpiredBlockBalance = _sender.blockBalances[key];
         // v4.8 openzeppelin errror msg
         require(fromBalance >= value, "ERC20: transfer amount exceeds balance");
-        // @TODO avoid code if possible duplicate in DEFAULT and BURN it's can be refactor to increase
-        // maintainability balancing optimization and maintain
+        // if slot empty move slot when move slot it's can be move to next era
         if (fristUnexpiredBlockBalance < value) {
-            // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list
-            // if slot empty move slot when move slot it's can be move to next era
             if (fristUnexpiredBlockBalance == 0) {
-                // @TODO
+                // era++ if slot fromSlot is 0
+                // fromSlot++ if slot is not 0
+                // key will be zero if era and slot move
             }
+            _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot, key);
         }
         // if buffer slot greater than value not move to next slot or next era deduct balance
         if (fristUnexpiredBlockBalance > value) {
@@ -231,6 +231,18 @@ abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
             }
         }
         emit Transfer(from, to, value);
+    }
+    
+    function _firstInFirstOutTransfer(address from,
+        address to,
+        uint256 value,
+        uint256 fromEra,
+        uint256 toEra,
+        uint8 fromSlot,
+        uint8 toSlot,
+        uint256 key) internal {
+        // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list
+        // if slot empty move slot when move slot it's can be move to next era
     }
 
     /// @notice can't mint non-expirable token to non wholesale account.
