@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.5.0 <0.9.0;
 
-/// @title Engawa (縁側) is an implementation of Sorted Circular Doubly Linked SCDLLS with Sentinel node in Solidity.
+/// @title Engawa (縁側)
+/// @notice Engawa (縁側) is an implementation of Sorted Circular Doubly Linked SCDLLS with Sentinel node in Solidity.
 /// @author Kiwari
 // inspiration
 // https://github.com/o0ragman0o/LibCLL/blob/master/LibCLL.sol
 // https://github.com/vittominacori/solidity-linked-list/blob/master/contracts/StructuredLinkedList.sol
-
 library CircularDoublyLinkedList {
     struct List {
         uint256 _head;
@@ -20,9 +20,9 @@ library CircularDoublyLinkedList {
     bool private constant _PREV = false;
     bool private constant _NEXT = true;
 
-    /// @notice Insert data at the head of the list.
-    /// @dev This function inserts data at the head of the list.
-    /// @param self The list.
+    /// @notice Insert data at the head of the linked list.
+    /// @dev This function inserts data at the head of the linked list.
+    /// @param self The linked list.
     /// @param index The index at which to insert the data.
     /// @param data The data to insert.
     function _insertHead(List storage self, uint256 index, bytes memory data) private {
@@ -35,9 +35,9 @@ library CircularDoublyLinkedList {
         self._head = index;
     }
 
-    /// @notice Insert data into the list at a specified index.
-    /// @dev This function inserts data into the list at a specified index.
-    /// @param self The list.
+    /// @notice Insert data into the linked list at a specified index.
+    /// @dev This function inserts data into the linked list at a specified index.
+    /// @param self The linked list.
     /// @param index The index at which to insert the data.
     /// @param data The data to insert.
     function _insertNode(List storage self, uint256 index, bytes memory data) private {
@@ -53,9 +53,9 @@ library CircularDoublyLinkedList {
         self._data[index] = data;
     }
 
-    /// @notice Insert data at the tail of the list.
-    /// @dev This function inserts data at the tail of the list.
-    /// @param self The list.
+    /// @notice Insert data at the tail of the linked list.
+    /// @dev This function inserts data at the tail of the linked list.
+    /// @param self The linked list.
     /// @param index The index at which to insert the data.
     /// @param data The data to insert.
     function _insertTail(List storage self, uint256 index, bytes memory data) private {
@@ -68,9 +68,9 @@ library CircularDoublyLinkedList {
         self._tail = index;
     }
 
-    /// @notice Remove the head node from the list.
-    /// @dev This function removes the head node from the list.
-    /// @param self The list.
+    /// @notice Remove the head node from the linked list.
+    /// @dev This function removes the head node from the linked list.
+    /// @param self The linked list.
     function _removeHead(List storage self) private {
         uint256 _head = self._list[self._head][_NEXT];
         self._list[_SENTINEL][_NEXT] = _head;
@@ -81,9 +81,9 @@ library CircularDoublyLinkedList {
         self._head = _head;
     }
 
-    /// @notice Remove a node from the list at a specified index.
-    /// @dev This function removes a node from the list at a specified index.
-    /// @param self The list.
+    /// @notice Remove a node from the linked list at a specified index.
+    /// @dev This function removes a node from the linked list at a specified index.
+    /// @param self The linked list.
     /// @param index The specified index of the node to remove.
     function _removeNode(List storage self, uint256 index) private {
         uint256 prev;
@@ -96,9 +96,9 @@ library CircularDoublyLinkedList {
         delete self._data[index];
     }
 
-    /// @notice Remove the tail node from the list.
-    /// @dev This function removes the tail node from the list.
-    /// @param self The list.
+    /// @notice Remove the tail node from the linked list.
+    /// @dev This function removes the tail node from the linked list.
+    /// @param self The linked list.
     function _removeTail(List storage self) private {
         uint256 _tail = self._list[self._tail][_PREV];
         self._list[_SENTINEL][_PREV] = _tail;
@@ -109,30 +109,30 @@ library CircularDoublyLinkedList {
         self._tail = _tail;
     }
 
-    /// @notice Check if a node exists in the list.
-    /// @dev This function checks if a node exists in the list by the specified index.
-    /// @param self The list.
+    /// @notice Check if a node exists in the linked list.
+    /// @dev This function checks if a node exists in the linked list by the specified index.
+    /// @param self The linked list.
     /// @param index The index of the node to check for existence.
     /// @return True if the node exists, false otherwise.
     function exist(List storage self, uint256 index) internal view returns (bool) {
         if (self._list[index][_PREV] == _SENTINEL && self._list[index][_NEXT] == _SENTINEL) {
-            // In case the list has only one element.
+            // In case the linked list has only one element.
             return (self._list[_SENTINEL][_NEXT] == index);
         } else {
             return true;
         }
     }
 
-    /// @notice Insert data into the list at the specified index.
-    /// @dev This function inserts data into the list at the specified index.
-    /// @param self The list.
+    /// @notice Insert data into the linked list at the specified index.
+    /// @dev This function inserts data into the linked list at the specified index.
+    /// @param self The linked list.
     /// @param index The index at which to insert the data.
     /// @param data The data to insert.
     function insert(List storage self, uint256 index, bytes memory data) internal {
         // Check if the node does not exist and the index is valid.
         if (!exist(self, index) && index > 0) {
             if (self._size == 0) {
-                // If the list is empty, insert it at the head.
+                // If the linked list is empty, insert it at the head.
                 self._head = index;
                 self._tail = index;
                 self._list[_SENTINEL][_NEXT] = index;
@@ -148,14 +148,14 @@ library CircularDoublyLinkedList {
                 // Otherwise, insert in between existing nodes.
                 _insertNode(self, index, data);
             }
-            // Increment the size of the list.
+            // Increment the size of the linked list.
             self._size++;
         }
     }
 
-    /// @notice Remove a node from the list at the specified index.
-    /// @dev This function removes a node from the list at the specified index.
-    /// @param self The list.
+    /// @notice Remove a node from the linked list at the specified index.
+    /// @dev This function removes a node from the linked list at the specified index.
+    /// @param self The linked list.
     /// @param index The index of the node to remove.
     function remove(List storage self, uint256 index) internal {
         // Check if the node exists and the index is valid.
@@ -170,14 +170,14 @@ library CircularDoublyLinkedList {
                 // Otherwise, remove the node from between existing nodes.
                 _removeNode(self, index);
             }
-            // Decrement the size of the list.
+            // Decrement the size of the linked list.
             self._size--;
         }
     }
 
-    /// @notice Update the data of a node in the list.
-    /// @dev This function updates the data of a node in the list at the specified index.
-    /// @param self The list.
+    /// @notice Update the data of a node in the linked list.
+    /// @dev This function updates the data of a node in the linked list at the specified index.
+    /// @param self The linked list.
     /// @param index The target index of the node that wants to update.
     /// @param data The new data to assign to the node.
     function updateNodeData(List storage self, uint256 index, bytes memory data) internal {
@@ -186,50 +186,50 @@ library CircularDoublyLinkedList {
         }
     }
 
-    /// @notice Get the index of the head node in the list.
-    /// @dev This function returns the index of the head node in the list.
-    /// @param self The list.
+    /// @notice Get the index of the head node in the linked list.
+    /// @dev This function returns the index of the head node in the linked list.
+    /// @param self The linked list.
     /// @return The index of the head node.
     function head(List storage self) internal view returns (uint256) {
         return self._head;
     }
 
-    /// @notice Get the index of the middle node in the list.
-    /// @dev This function returns the index of the middle node in the list.
-    /// @param self The list.
+    /// @notice Get the index of the middle node in the linked list.
+    /// @dev This function returns the index of the middle node in the linked list.
+    /// @param self The linked list.
     /// @return The index of the middle node.
     function middle(List storage self) internal view returns (uint256) {
         uint256[] memory tmpList = firstPartition(self);
         return tmpList[tmpList.length - 1];
     }
 
-    /// @notice Get the index of the tail node in the list.
-    /// @dev This function returns the index of the tail node in the list.
-    /// @param self The list.
+    /// @notice Get the index of the tail node in the linked list.
+    /// @dev This function returns the index of the tail node in the linked list.
+    /// @param self The linked list.
     /// @return The index of the tail node.
     function tail(List storage self) internal view returns (uint256) {
         return self._tail;
     }
 
-    /// @notice Get the size of the list.
-    /// @dev This function returns the size of the list.
-    /// @param self The list.
-    /// @return The size of the list.
+    /// @notice Get the size of the linked list.
+    /// @dev This function returns the size of the linked list.
+    /// @param self The linked list.
+    /// @return The size of the linked list.
     function size(List storage self) internal view returns (uint256) {
         return self._size;
     }
 
     /// @notice Get the indices of the previous and next nodes of the sentinel node.
     /// @dev This function returns an array containing the indices of the previous and next nodes of the sentinel node.
-    /// @param self The list.
+    /// @param self The linked list.
     /// @return An array containing the indices of the previous and next nodes of the sentinel node.
     function guard(List storage self) internal view returns (uint256[2] memory) {
         return [self._list[_SENTINEL][_PREV], self._list[_SENTINEL][_NEXT]];
     }
 
-    /// @notice Get information about a node in the list.
-    /// @dev This function returns information about a node in the list by the specified index.
-    /// @param self The list.
+    /// @notice Get information about a node in the linked list.
+    /// @dev This function returns information about a node in the linked list by the specified index.
+    /// @param self The linked list.
     /// @param index The index of the node.
     /// @return prev The index of the previous node.
     /// @return data The data of the node.
@@ -243,7 +243,7 @@ library CircularDoublyLinkedList {
 
     /// @notice Get the indices of nodes in ascending order.
     /// @dev This function returns an array containing the indices of nodes in ascending order.
-    /// @param self The list.
+    /// @param self The linked list.
     /// @return asc An array containing the indices of nodes in ascending order.
     function ascending(List storage self) internal view returns (uint256[] memory asc) {
         uint256 index;
@@ -263,7 +263,7 @@ library CircularDoublyLinkedList {
 
     /// @notice Get the indices of nodes in descending order.
     /// @dev This function returns an array containing the indices of nodes in descending order.
-    /// @param self The list.
+    /// @param self The linked list.
     /// @return des An array containing the indices of nodes in descending order.
     function descending(List storage self) internal view returns (uint256[] memory des) {
         uint256 index;
@@ -281,9 +281,9 @@ library CircularDoublyLinkedList {
         return des;
     }
 
-    /// @notice Get the indices of nodes in the first partition of the list.
-    /// @dev This function returns an array containing the indices of nodes in the first partition of the list.
-    /// @param self The list.
+    /// @notice Get the indices of nodes in the first partition of the linked list.
+    /// @dev This function returns an array containing the indices of nodes in the first partition of the linked list.
+    /// @param self The linked list.
     /// @return part An array containing the indices of nodes in the first partition.
     function firstPartition(List storage self) internal view returns (uint256[] memory part) {
         uint256 tmpSize = self._size;
@@ -302,9 +302,9 @@ library CircularDoublyLinkedList {
         return part;
     }
 
-    /// @notice Get the indices of nodes in the second partition of the list.
-    /// @dev This function returns an array containing the indices of nodes in the second partition of the list.
-    /// @param self The list.
+    /// @notice Get the indices of nodes in the second partition of the linked list.
+    /// @dev This function returns an array containing the indices of nodes in the second partition of the linked list.
+    /// @param self The linked list.
     /// @return part An array containing the indices of nodes in the second partition.
     function secondPartition(List storage self) internal view returns (uint256[] memory part) {
         uint256 tmpSize = self._size;
@@ -328,9 +328,9 @@ library CircularDoublyLinkedList {
         return part;
     }
 
-    /// @notice Get the path of indices from a specified node to the head of the list.
-    /// @dev This function returns an array containing the indices of nodes from a specified node to the head of the list.
-    /// @param self The list.
+    /// @notice Get the path of indices from a specified node to the head of the linked list.
+    /// @dev This function returns an array containing the indices of nodes from a specified node to the head of the linked list.
+    /// @param self The linked list.
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes from the starting node to the head.
     function pathToHead(List storage self, uint256 start) internal view returns (uint256[] memory part) {
@@ -355,9 +355,9 @@ library CircularDoublyLinkedList {
         return part;
     }
 
-    /// @notice Get the path of indices from a specified node to the tail of the list.
-    /// @dev This function returns an array containing the indices of nodes from a specified node to the tail of the list.
-    /// @param self The list.
+    /// @notice Get the path of indices from a specified node to the tail of the linked list.
+    /// @dev This function returns an array containing the indices of nodes from a specified node to the tail of the linked list.
+    /// @param self The linked list.
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes from the starting node to the tail.
     function pathToTail(List storage self, uint256 start) internal view returns (uint256[] memory part) {
@@ -384,7 +384,7 @@ library CircularDoublyLinkedList {
 
     /// @notice Get the indices starting from a specified node and wrapping around to the beginning if necessary.
     /// @dev This function returns an array containing the indices of nodes starting from a specified node and wrapping around to the beginning if necessary.
-    /// @param self The list.
+    /// @param self The linked list.
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes.
     function partition(List storage self, uint256 start) internal view returns (uint256[] memory part) {

@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.5.0 <0.9.0;
 
-/// @title Fusuma (襖) is an implemation sliding window algorithm in Solidity, Fusuma sliding and relying on block-height rather than block-timestmap.
+/// @title Fusuma (襖)
+/// @notice Fusuma (襖) is an implementation sliding window algorithm in Solidity, Fusuma sliding and relying on block-height rather than block-timestamp. Fusuma is designed to be compatible with subsecond EVM L1 or L2.
 /// @author Kiwari
-/// @notice Fusuma designed to compatible with subsecond EVM L1 or L2.
-
 library Fusuma {
     // 51 bytes for struct variables type.
     struct SlidingWindow {
