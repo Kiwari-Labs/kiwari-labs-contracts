@@ -495,6 +495,10 @@ abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
         return _wholeSale[account];
     }
 
+    function tokenList(address account, uint256 era, uint8 slot) public view returns (uint256 [] memory){
+        return _retailBalances[account][era][slot].list.ascending();
+    }
+
     /// @notice due to token can expiration there is no actaul totalSupply.
     /// @return uint256 ZERO value.
     function totalSupply() public pure override returns (uint256) {
