@@ -136,7 +136,7 @@ library CircularDoublyLinkedList {
     }
 
     function middle(List storage self) internal view returns (uint256) {
-        uint256[] memory tmpList = firstParitionList(self);
+        uint256[] memory tmpList = firstParition(self);
         return tmpList[tmpList.length - 1];
     }
 
@@ -152,7 +152,7 @@ library CircularDoublyLinkedList {
         return [self.list[index][_PREV], self.list[index][_NEXT]];
     }
 
-    function ascendingList(List storage self) internal view returns (uint256[] memory asd) {
+    function ascending(List storage self) internal view returns (uint256[] memory asd) {
         uint256 index;
         uint256 tmpSize = self._size;
         if (tmpSize > 0) {
@@ -168,7 +168,7 @@ library CircularDoublyLinkedList {
         return asd;
     }
 
-    function descendingList(List storage self) internal view returns (uint256[] memory des) {
+    function descending(List storage self) internal view returns (uint256[] memory des) {
         uint256 index;
         uint256 tmpSize = self._size;
         if (tmpSize > 0) {
@@ -184,7 +184,7 @@ library CircularDoublyLinkedList {
         return des;
     }
 
-    function firstParitionList(List storage self) internal view returns (uint256[] memory part) {
+    function firstParition(List storage self) internal view returns (uint256[] memory part) {
         uint256 tmpSize = self._size;
         if (tmpSize > 0) {
             tmpSize = tmpSize / 2;
@@ -201,7 +201,7 @@ library CircularDoublyLinkedList {
         return part;
     }
 
-    function secondPartitionList(List storage self) internal view returns (uint256[] memory part) {
+    function secondPartition(List storage self) internal view returns (uint256[] memory part) {
         uint256 tmpSize = self._size;
         if (tmpSize > 0) {
             tmpSize = self._size / 2;
@@ -218,7 +218,7 @@ library CircularDoublyLinkedList {
         return part;
     }
 
-    function partitionListGivenToLast(List storage self, uint256 start) internal view returns (uint256[] memory part) {
+    function pathToHead(List storage self, uint256 start) internal view returns (uint256[] memory part) {
         uint256 tmpSize = self._size;
         if (tmpSize == 0 || !exist(self, start)) {
             return part;
@@ -240,7 +240,7 @@ library CircularDoublyLinkedList {
         return part;
     }
     
-    function partitionList(List storage self, uint256 start) internal view returns (uint256[] memory part) {
+    function pathToTail(List storage self, uint256 start) internal view returns (uint256[] memory part) {
         uint256 tmpSize = self._size;
         if (tmpSize == 0 || !exist(self, start)) {
             return part;

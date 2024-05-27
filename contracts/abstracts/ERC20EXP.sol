@@ -5,7 +5,7 @@ pragma solidity >=0.5.0 <0.9.0;
 /// @author ERC20EXP <erc20exp@protonmail.com>
 
 import "../libraries/SlidingWindow.sol";
-import "../libraries/SortedCircularDoublyLinkedListNaive.sol";
+import "../libraries/SortedCircularDoublyLinkedList.sol";
 import "../interfaces/IERC20EXP.sol";
 import "../interfaces/ISlidingWindow.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
