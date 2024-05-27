@@ -27,6 +27,31 @@ export const run = async () => {
       expect(balanceBob).to.equal(100);
     });
 
+    it("[HAPPY] correct transfer", async function () {
+      // TODO: add test case (suitable logic and event response).
+      const { erc20exp, alice ,bob} = await deployERC20EXP();
+      const aliceAddress = await alice.getAddress();
+      const bobAddress = await bob.getAddress();
+      const balanceAliceBefore = await erc20exp["balanceOf(address)"](aliceAddress);
+      for (let index = 0; index < 270; index++) {
+        await expect(await erc20exp.mintRetail(aliceAddress, 1n))
+        .to.emit(erc20exp, "Transfer")
+        .withArgs(ZERO_ADDRESS, aliceAddress, 1n);
+      }
+      const balanceAliceAfter = await erc20exp["balanceOf(address)"](aliceAddress);
+      expect(balanceAliceBefore).to.equal(0);
+      expect(balanceAliceAfter).to.equal(270n);
+      await erc20exp.connect(alice).transfer(bobAddress, 270n);
+      const balanceBob = await erc20exp["balanceOf(address)"](bobAddress);
+      const bobTokenList = await erc20exp.tokenList(bobAddress,0n,0n);
+      console.log("🚀 ~ bobTokenList:", bobTokenList);
+      console.log("balanceBob", balanceBob);
+      expect(balanceBob).to.equal(270);
+    });
+
+
+
+
     it("[UNHAPPY] should not be transfer to zero address", async function () {
       // TODO: add test case (suitable logic and event response).
     });

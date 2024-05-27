@@ -23,9 +23,9 @@ const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      gas: 2000000,
-      gasPrice: 9000000000,
-      blockGasLimit: 0x1fffffffffffff,
+      gas: 30_000_000,
+      gasPrice: 9_000_000_000,
+      blockGasLimit: 0x1fffffffffffff
     },
     localhost: {
       url: "http://127.0.0.1:8545",

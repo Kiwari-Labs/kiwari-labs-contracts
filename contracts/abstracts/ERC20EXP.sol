@@ -201,7 +201,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint256 toEra,
         uint8 fromSlot,
         uint8 toSlot
-    ) private {
+    ) internal {
         uint256 blockNumberCache = _blockNumberProvider();
         bytes memory emptyBytes = abi.encodePacked("");
         Slot storage _recipient = _retailBalances[to][toEra][toSlot];
@@ -218,11 +218,16 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         // if slot empty move slot when move slot it's can be move to next era
         if (fristUnexpiredBlockBalance < value) {
             if (fristUnexpiredBlockBalance == 0) {
-                // era++ if slot fromSlot is 0
-                // fromSlot++ if slot is not 0
-                // key will be zero if era and slot move
+                unchecked {
+                    if (fromSlot < 3) {
+                        fromSlot++;
+                    } else {
+                        fromSlot = 0;
+                        fromEra++;
+                    }
+                }
             }
-            _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot, key);
+            _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
         }
         // if buffer slot greater than value not move to next slot or next era deduct balance
         if (fristUnexpiredBlockBalance > value) {
@@ -245,16 +250,81 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         emit Transfer(from, to, value);
     }
     
-    function _firstInFirstOutTransfer(address from,
+    function _firstInFirstOutTransfer(
+        address from,
         address to,
         uint256 value,
         uint256 fromEra,
         uint256 toEra,
         uint8 fromSlot,
-        uint8 toSlot,
-        uint256 key) internal {
-        // @TODO CDLLS MUST BE first in first out (FIFO) and utilizing sorted list
-        // if slot empty move slot when move slot it's can be move to next era
+        uint8 toSlot
+    ) internal {
+        bytes memory emptyBytes = abi.encodePacked("");
+        uint256 remainingValue = value;
+
+        for (uint256 era = fromEra; era <= toEra; era++) {
+            uint8 startSlot = (era == fromEra) ? fromSlot : 0;
+            uint8 endSlot = (era == toEra) ? toSlot : 3;
+
+            for (uint8 slot = startSlot; slot <= endSlot; slot++) {
+                if (remainingValue == 0) break;
+
+                remainingValue = _transferFromSlot(
+                    from,
+                    to,
+                    remainingValue,
+                    era,
+                    slot,
+                    emptyBytes
+                );
+            }
+        }
+        require(remainingValue == 0, "ERC20: transfer amount exceeds balance");
+    }
+
+    function _transferFromSlot(
+        address from,
+        address to,
+        uint256 remainingValue,
+        uint256 era,
+        uint8 slot,
+        bytes memory emptyBytes
+    ) internal returns (uint256) {
+        Slot storage _sender = _retailBalances[from][era][slot];
+        Slot storage _recipient = _retailBalances[to][era][slot];
+
+        uint256[] memory blocks = _sender.list.ascending();
+        unchecked {
+            for (uint256 i = 0; i < blocks.length && remainingValue > 0; i++) {
+                uint256 blockKey = blocks[i];
+                uint256 blockBalance = _sender.blockBalances[blockKey];
+
+                if (blockBalance > 0) {
+                    if (blockBalance >= remainingValue) {
+                        _sender.blockBalances[blockKey] -= remainingValue;
+                        _recipient.blockBalances[blockKey] += remainingValue;
+                        _recipient.slotBalance += remainingValue;
+
+                        if (_sender.blockBalances[blockKey] == 0) {
+                            _sender.list.remove(blockKey);
+                        }
+                        _recipient.list.insert(blockKey, emptyBytes);
+
+                        remainingValue = 0;
+                        break;
+                    } else {
+                        _sender.blockBalances[blockKey] = 0;
+                        _recipient.blockBalances[blockKey] += blockBalance;
+                        _recipient.slotBalance += blockBalance;
+                        _sender.list.remove(blockKey);
+                        _recipient.list.insert(blockKey, emptyBytes);
+
+                        remainingValue -= blockBalance;
+                    }
+                }
+            }
+        }
+        return remainingValue;
     }
 
     /// @notice can't mint non-expirable token to non wholesale account.
@@ -435,6 +505,10 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     /// @return bool return boolean.
     function wholeSale(address account) public view returns (bool) {
         return _wholeSale[account];
+    }
+
+    function tokenList(address account, uint256 era, uint8 slot) public view returns (uint256 [] memory){
+        return _retailBalances[account][era][slot].list.ascending();
     }
 
     /// @notice due to token can expiration there is no actaul totalSupply.
