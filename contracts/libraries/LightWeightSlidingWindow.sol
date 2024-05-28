@@ -2,7 +2,7 @@
 pragma solidity >=0.5.0 <0.9.0;
 
 /// @title Shoji (障子)' is a lightweight version of the Fusuma. Shoji provide efficiency and handly sliding window algorithm.
-/// @author Kiwari
+/// @author Kiwari Labs
 /// @notice Some parameter in Fusuma was pre-define as a constant variable in Shoji.
 
 library SlidingWindow {

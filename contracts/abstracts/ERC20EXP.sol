@@ -2,7 +2,7 @@
 pragma solidity >=0.5.0 <0.9.0;
 
 /// @title ERC20EXP abstract contract
-/// @author ERC20EXP <erc20exp@protonmail.com>
+/// @author Kiwari Labs
 
 import "../libraries/SlidingWindow.sol";
 import "../libraries/SortedCircularDoublyLinkedList.sol";

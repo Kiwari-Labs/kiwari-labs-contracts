@@ -2,7 +2,7 @@
 pragma solidity >=0.5.0 <0.9.0;
 
 /// @title An Extendend version of ERC20 Interface
-/// @author Kiwari
+/// @author Kiwari Labs
 
 interface IERC20EXP {
     event GrantWholeSale(address index, bool auth);

@@ -2,7 +2,7 @@
 pragma solidity >=0.5.0 <0.9.0;
 
 /// @title Interface for working with sliding window algorithm.
-/// @author Kiwari
+/// @author Kiwari Labs
 
 interface ISlidingWindow {
     event BlockProducedPerYearUpdated(uint256 blockPerYearOld, uint256 blockPerYearNew);
