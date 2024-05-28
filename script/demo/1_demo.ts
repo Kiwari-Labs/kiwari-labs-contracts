@@ -18,24 +18,30 @@ import { network, ethers } from "hardhat";
 // mine blocks skipping block 1 years.
 
 async function main() {
-  const [alice, bob] = await ethers.getSigners();
-  const ERC20EXP = await ethers.getContractFactory(
-          "MockToken",
-          alice,
-        );
-  const erc20exp = await ERC20EXP.deploy(
-          "PointToken",
-          "POINT",
-          4000,
-          4,
-        );
-  await erc20exp.deployed();
-  console.log("ERC20 point address:", erc20exp.address);
-  const aliceAddress = await alice.getAddress();
-  const bobAddress = await bob.getAddress();
-  await erc20exp.connect(alice).mintRetail(await alice.getAddress(), parseEther("100"));
-  const aliceBalance = await erc20exp["balanceOf(address)"](aliceAddress);
-  console.log("aliceBalance:", aliceBalance.toString());
+  // const [alice, bob, charlie ] = await ethers.getSigners();
+  // const ERC20EXP = await ethers.getContractFactory(
+  //         "MockToken",
+  //         alice,
+  //       );
+  // const erc20exp = await ERC20EXP.deploy(
+  //         "PointToken",
+  //         "POINT",
+  //         4000,
+  //         4,
+  //       );
+  // await erc20exp.deployed();
+  // console.log("ERC20 point address:", erc20exp.address);
+  // const aliceAddress = await alice.getAddress();
+  // const bobAddress = await bob.getAddress();
+  // const charliesAddress = await charlie.getAddress();
+  // console.log("1: minting 100 token to alice")
+  // await erc20exp.connect(alice).mintRetail(aliceAddress, parseEther("100"));
+  // const aliceBalance = await erc20exp["balanceOf(address)"](aliceAddress);
+  // console.log("alice:",aliceAddress,"balance:", aliceBalance.toString());
+  // console.log("2: grant wholesale address to charlie");
+  // await erc20exp.connect(charlie).grantWholeSale(charliesAddress);
+// To skip block
+await network.provider.send("hardhat_mine", [10000000]);
 
 //   console.log("currentBlock:", await ethers.provider.getBlockNumber());
 //   console.log("alice transfer to bob");
@@ -45,7 +51,7 @@ async function main() {
 //   const aliceBalanceAfter = await erc20exp["balanceOf(address)"](aliceAddress);
 //   console.log("aliceBalanceAfter:", aliceBalanceAfter.toString());
 //   const era = await erc20exp.blockPerEra();
-// await network.provider.send("hardhat_mine", [10000000]);
+//   await network.provider.send("hardhat_mine", [10000000]);
 //   console.log("skip to expire block");
 //   console.log("currentBlock:", await ethers.provider.getBlockNumber());
 
