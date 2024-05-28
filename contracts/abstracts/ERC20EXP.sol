@@ -239,7 +239,7 @@ abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
     /// @param value description
     /// @param spendable true if want to mint to spendable balance false if want to mint to receive balance
     function _mintWholeSale(address to, uint256 value, bool spendable) internal virtual {
-        require(!_wholeSale[to], "can't mint non-expirable token to non wholesale account");
+        require(_wholeSale[to], "can't mint non-expirable token to non wholesale account");
         if (spendable) {
             _mint(to, value);
         } else {
@@ -253,7 +253,7 @@ abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
     /// @param value description
     /// @param spendable true if want to burn from spendable balance false if want to burn from receive balance
     function _burnWholeSale(address to, uint256 value, bool spendable) internal virtual {
-        require(!_wholeSale[to], "can't burn non-expirable token to non wholesale account");
+        require(_wholeSale[to], "can't burn non-expirable token to non wholesale account");
         if (spendable) {
             _burn(to, value);
         } else {
@@ -327,7 +327,7 @@ abstract contract ERC20Expirable is Shoji, ERC20, IERC20EXP {
     function balanceOf(address account) public view override returns (uint256) {
         if (_wholeSale[account]) {
             /// @notice use _balances[account] as spendable balance and return only spendable balance.
-            return super.balanceOf(account);
+            return _unSafeBalanceOf(account, true);
         } else {
             (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safeFrame(_blockNumberProvider());
             return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot);
