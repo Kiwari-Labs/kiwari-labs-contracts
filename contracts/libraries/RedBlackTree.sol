@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity >=0.5.0 <0.9.0;
 
-/// @title Bonsai (盆栽) is an implementation of Black-Red Tree (BST) in Solidity.
+/// @title Bonsai (盆栽) is an implementation of Red-Black Tree (RBT) in Solidity.
 /// @author Kiwari Labs
 // inspiration
 // https://github.com/bokkypoobah/BokkyPooBahsTreeLibrary/
@@ -73,14 +73,18 @@ library BlackRedTree {
         // @TODO
         require(!exist(self, index),"exist");
         _insert(self, index);
-        self.size++;
+        unchecked {
+            self.size++;
+        }
     }
 
     function remove(Tree storage self, uint256 index) internal {
         // @TODO
         require(exist(self, index),"not exist");
         _remove(self, index);
-        self.size--;
+        unchecked {
+            self.size--;
+        }
     }
 
     function size(Tree storage self) internal view returns (uint256) {
@@ -92,15 +96,7 @@ library BlackRedTree {
     ) internal view returns (uint256[] memory asc) {
         // @TODO
         unchecked {
-            // uint256 tmpSize = self.size;
-            // asc = new uint256[](tmpSize);
-            // uint256 index = self.head;
-            // asc[0] = index;
-            // for  (uint256 i = tmpSize - 1; i > 0; i--) {
-            //     uint256 key = _next(self, next);
-            //     asc[i] = key;
-            //     index = key;
-            // }
+          
         }
         return asc;
     }
@@ -109,6 +105,9 @@ library BlackRedTree {
         Tree storage self
     ) internal view returns (uint256[] memory des) {
         // @TODO
+        unchecked {
+          
+        }
         return des;
     }
 }
