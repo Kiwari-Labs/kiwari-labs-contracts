@@ -68,8 +68,8 @@ library CircularDoublyLinkedList {
     /// @dev This function removes the head node from the list.
     /// @param self The list.
     function _removeHead(List storage self) private {
-        uint256 _head = self._list[self._list[_SENTINEL][_NEXT]][_NEXT];
         uint256 _old = self._list[_SENTINEL][_NEXT];
+        uint256 _head = self._list[_old][_NEXT];
         delete self._list[_old][_PREV];
         delete self._list[_old][_NEXT];
         delete self._data[_old];
@@ -96,8 +96,8 @@ library CircularDoublyLinkedList {
     /// @dev This function removes the tail node from the list.
     /// @param self The list.
     function _removeTail(List storage self) private {
-        uint256 _tail = self._list[self._list[_SENTINEL][_PREV]][_PREV];
         uint256 _old = self._list[_SENTINEL][_PREV];
+        uint256 _tail = self._list[_old][_PREV];
         delete self._list[_old][_PREV];
         delete self._list[_old][_NEXT];
         delete self._data[_old];
@@ -143,7 +143,9 @@ library CircularDoublyLinkedList {
                 _insertNode(self, index, data);
             }
             // Increment the size of the list.
-            self._size++;
+            unchecked {
+                self._size++;
+            }
         }
     }
 
@@ -165,7 +167,9 @@ library CircularDoublyLinkedList {
                 _removeNode(self, index);
             }
             // Decrement the size of the list.
-            self._size--;
+            unchecked {
+                self._size--;
+            }
         }
     }
 
@@ -282,10 +286,10 @@ library CircularDoublyLinkedList {
     function firstPartition(List storage self) internal view returns (uint256[] memory part) {
         uint256 tmpSize = self._size;
         if (tmpSize > 0) {
-            tmpSize = tmpSize / 2;
-            part = new uint256[](tmpSize);
-            uint256 index;
             unchecked {
+                tmpSize = tmpSize / 2;
+                part = new uint256[](tmpSize);
+                uint256 index;
                 for (uint256 i = 0; i < tmpSize; i++) {
                     part[i] = self._list[index][_NEXT];
                     index = part[i];
@@ -304,14 +308,14 @@ library CircularDoublyLinkedList {
         uint256 tmpSize = self._size;
         if (tmpSize > 0) {
             // To fix the indivisible calculation.
-            if (self._size % 2 == 0) {
-                tmpSize = self._size / 2;
-            } else {
-                tmpSize = (self._size + 1) / 2;
-            }
-            part = new uint256[](tmpSize);
-            uint256 index;
             unchecked {
+                if (self._size % 2 == 0) {
+                    tmpSize = self._size / 2;
+                } else {
+                    tmpSize = (self._size + 1) / 2;
+                }
+                part = new uint256[](tmpSize);
+                uint256 index;
                 for (uint256 i = 0; i < tmpSize; i++) {
                     part[i] = self._list[index][_PREV];
                     index = part[i];
