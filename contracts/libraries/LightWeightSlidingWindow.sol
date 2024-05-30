@@ -5,17 +5,15 @@ pragma solidity >=0.5.0 <0.9.0;
 /// @author Kiwari Labs
 /// @notice Some parameter in Fusuma was pre-define as a constant variable in Shoji.
 
-
 library SlidingWindow {
-    // 12 bytes allocated for global variables
+    uint8 private constant TWO_BITS = 2;
     uint8 private constant SLOT_PER_ERA = 4;
     uint8 private constant MINIMUM_FRAME_SIZE = 1;
     uint8 private constant MAXIMUM_FRAME_SIZE = 8;
     uint8 private constant MINIMUM_BLOCKTIME_IN_MILLI_SECONDS = 100; // 100 milliseconds.
     uint24 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000; // 10 minutes.
     uint40 private constant YEAR_IN_MILLI_SECONDS = 31_556_926_000;
-
-    // 49 bytes for variables type.
+    
     struct SlidingWindowState {
         uint40 _blockPerEra;
         uint40 _blockPerSlot;
@@ -58,7 +56,7 @@ library SlidingWindow {
             if (blockNumber > startblockNumberCache) {
                 return
                     uint8(
-                        ((blockNumber - startblockNumberCache) % blockPerYearCache) / (blockPerYearCache / SLOT_PER_ERA)
+                        ((blockNumber - startblockNumberCache) % blockPerYearCache) / (blockPerYearCache / TWO_BITS)
                     );
             }
         }
@@ -73,13 +71,13 @@ library SlidingWindow {
         }
         unchecked {
             self._blockPerEra = YEAR_IN_MILLI_SECONDS / blockTime;
-            self._blockPerSlot = self._blockPerEra / SLOT_PER_ERA;
+            self._blockPerSlot = self._blockPerEra >> TWO_BITS ;
             self._frameSizeInBlockLength = self._blockPerSlot * frameSize;
             if (frameSize <= SLOT_PER_ERA) {
                 self._frameSizeInEraAndSlotLength[0] = 0;
                 self._frameSizeInEraAndSlotLength[1] = frameSize;
             } else {
-                self._frameSizeInEraAndSlotLength[0] = frameSize / SLOT_PER_ERA;
+                self._frameSizeInEraAndSlotLength[0] = frameSize >> TWO_BITS;
                 self._frameSizeInEraAndSlotLength[1] = frameSize % SLOT_PER_ERA;
             }
         }

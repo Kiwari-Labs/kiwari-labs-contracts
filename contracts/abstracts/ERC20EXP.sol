@@ -261,22 +261,23 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     ) internal {
         bytes memory emptyBytes = abi.encodePacked("");
         uint256 remainingValue = value;
+        unchecked {
+            for (uint256 era = fromEra; era <= toEra; era++) {
+                uint8 startSlot = (era == fromEra) ? fromSlot : 0;
+                uint8 endSlot = (era == toEra) ? toSlot : 3;
 
-        for (uint256 era = fromEra; era <= toEra; era++) {
-            uint8 startSlot = (era == fromEra) ? fromSlot : 0;
-            uint8 endSlot = (era == toEra) ? toSlot : 3;
+                for (uint8 slot = startSlot; slot <= endSlot; slot++) {
+                    if (remainingValue == 0) break;
 
-            for (uint8 slot = startSlot; slot <= endSlot; slot++) {
-                if (remainingValue == 0) break;
-
-                remainingValue = _transferFromSlot(
-                    from,
-                    to,
-                    remainingValue,
-                    era,
-                    slot,
-                    emptyBytes
-                );
+                    remainingValue = _transferFromSlot(
+                        from,
+                        to,
+                        remainingValue,
+                        era,
+                        slot,
+                        emptyBytes
+                    );
+                }
             }
         }
         require(remainingValue == 0, "ERC20: transfer amount exceeds balance");
@@ -395,7 +396,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     function grantWholeSale(address to) public virtual {
         require(!_wholeSale[to], "can't grant exist wholesale");
         _wholeSale[to] = true;
-        // emit GrantWholeSale(to, true);
+        emit GrantWholeSale(to, true);
     }
 
     function revokeWholeSale(address to) public virtual {
@@ -411,7 +412,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             // clean receive balance
             _updateReceiveBalance(to, address(0), receiveBalance);
         }
-        // emit GrantWholeSale(to, false);
+        emit GrantWholeSale(to, false);
     }
 
     /// @notice overriding balanceOf to use as safe balance.
