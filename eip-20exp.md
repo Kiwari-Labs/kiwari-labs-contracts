@@ -108,21 +108,17 @@ In the design sliding window algorithm need to be couarse because it's determist
     *
     */
 ```
+Assuming each era contain 4 slot.
+| Block Time (ms) | Receive Token Every (ms) | index/slot              | tx/day | Likelihood   |
+|-----------------|--------------------------|-------------------------|--------|--------------|
+| 100             | 100                      | 78,892,315              | 864,000| Very Unlikely|
+| 500             | 500                      | 15,778,463              | 172,800| Very Unlikely|
+| 1000            | 1000                     | 7,889,231               | 86,400 | Very Unlikely|
+| 1000            | 28,800,000               | 273                     | 3      | Unlikely     |
+| 1000            | 86,400,000               | 91                      | 1      | Possible     |
+| 5000            | 86,400,000               | 18                      | 1      | Very Likely  |
+| 10000           | 86,400,000               | 9                       | 1      | Very Likely  |
 
-``` 
-7889231 index if blocktime is 1 and expire period is 1 slot receive token every 1 second
-1577846 index if blocktime is 5 and expire period is 1 slot receive token every 5 second
-788923 index if blocktime is 10 and expire period is 1 slot receive token every 10 second
-273 index if blocktime 1 is and expire period is 1 slot receive token every 28200 second (3tx/day)
-91 index if blocktime 1 is and expire period is 1 slot receive token every 84600 second (1tx/1day)
-18 index if blocktime 5 is and expire period is 1 slot receive token every 84600 second (1tx/1day)
-9 index if blocktime 10 is and expire period is 1 slot receive token every 84600 second (1tx/1day)
-dynamic adjust number slot per era from given blockperiod
-if short blockperiod increase slot per era 
-if long blockperiod decrease slot per era
-how ever buffer slot still 1 even slot increase or decrease
-if wanted to reduce size in each slot reduce the frequent of receive token
-```
 
 #### Appendix
 

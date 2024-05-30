@@ -7,6 +7,7 @@ pragma solidity >=0.5.0 <0.9.0;
 
 library SlidingWindow {
     uint8 private constant TWO_BITS = 2;
+    uint8 private constant THREE_BITS = 3;
     uint8 private constant SLOT_PER_ERA = 4;
     uint8 private constant MINIMUM_FRAME_SIZE = 1;
     uint8 private constant MAXIMUM_FRAME_SIZE = 8;
@@ -78,7 +79,7 @@ library SlidingWindow {
                 self._frameSizeInEraAndSlotLength[1] = frameSize;
             } else {
                 self._frameSizeInEraAndSlotLength[0] = frameSize >> TWO_BITS;
-                self._frameSizeInEraAndSlotLength[1] = frameSize % SLOT_PER_ERA;
+                self._frameSizeInEraAndSlotLength[1] = frameSize & THREE_BITS;
             }
         }
     }

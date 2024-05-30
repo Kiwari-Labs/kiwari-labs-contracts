@@ -310,7 +310,7 @@ library CircularDoublyLinkedList {
         if (tmpSize > 0) {
             // To fix the indivisible calculation.
             unchecked {
-                if (self._size % 2 == 0) {
+                if (self._size & 1 == 0) {
                     tmpSize = self._size >> ONE_BIT;
                 } else {
                     tmpSize = (self._size + 1) >> ONE_BIT;
