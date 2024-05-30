@@ -1,7 +1,13 @@
-// SPDX-License-Identifier: MIT
-pragma solidity >=0.5.0 <0.8.0;
+// SPDX-License-Identifier: AGPL-3.0-or-later
+pragma solidity >=0.5.0 <0.9.0;
 
-library RedBlackTree {
+/// @title Bonsai (盆栽) is an implementation of Black-Red Tree (BST) in Solidity.
+/// @author Kiwari Labs
+// inspiration
+// https://github.com/bokkypoobah/BokkyPooBahsTreeLibrary/
+// https://github.com/saurfang/solidity-treemap/
+
+library BlackRedTree {
     struct Node {
         uint256 parent;
         uint256 left;
@@ -9,7 +15,7 @@ library RedBlackTree {
         bool red;
     }
 
-    struct RedBlackTree {
+    struct Tree {
         uint256 root;
         uint256 head;
         uint256 tail;
@@ -19,71 +25,75 @@ library RedBlackTree {
 
     uint256 private constant EMPTY = 0;
 
-    function _insert(RedBlackTree storage self) private {
+    function _insert(Tree storage self, uint256 index) private {
         // @TODO
     }
 
-    function _remove(RedBlackTree storage self) private {
+    function _remove(Tree storage self, uint256 index) private {
         // @TODO
     }
 
-    function head(RedBlackTree storage self) internal view returns (uint256) {
+    function head(Tree storage self) internal view returns (uint256) {
         return self.head;
     }
 
-    function middle(RedBlackTree storage self) internal view returns (uint256) {
-        // @TODO return middle
-        return 0;
+    function middle(Tree storage self) internal view returns (uint256) {
+        // @TODO
+        return EMPTY;
     }
 
-    function root(RedBlackTree storage self) internal view returns (uint256) {
+    function root(Tree storage self) internal view returns (uint256) {
         return self.root;
     }
 
-    function guard(RedBlackTree storage self) internal view returns (uint256 [2] calldata) {
-        return [self.head,self.tail];
+    function guard(Tree storage self) internal view returns (uint256 [2] memory) {
+        return [self.head, self.tail];
     }
 
-    function last(RedBlackTree storage self) internal returns (uint256) {
+    function last(Tree storage self) internal view returns (uint256) {
         return self.tail;
     }
 
     function exist(
-        RedBlackTree storage self,
+        Tree storage self,
         uint256 index
     ) internal view returns (bool) {
-        if (self.size > 0) {
-            return (key == self.root) || (self.nodes[key].parent > EMPTY);
+        if (self.size > EMPTY) {
+            return (self.nodes[index].parent > EMPTY) || (index == self.root);
         } else {
             return false;
         }
     }
 
-    function insert(RedBlackTree storage self, uint256 index) internal {
+    function node(Tree storage self, uint256 index) internal view returns (Node memory) {
+        return self.nodes[index];
+    }
+
+    function insert(Tree storage self, uint256 index) internal {
         // @TODO
-        _insert(index);
+        _insert(self, index);
         self.size++;
     }
 
-    function remove(RedBlackTree storage self, uint256 index) internal {
+    function remove(Tree storage self, uint256 index) internal {
         // @TODO
-        _remove(index);
+        _remove(self, index);
         self.size--;
     }
 
-    function size(RedBlackTree storage self) internal view returns (uint256) {
+    function size(Tree storage self) internal view returns (uint256) {
         return self.size;
     }
 
     function ascending(
-        RedBlackTree storage self
+        Tree storage self
     ) internal view returns (uint256[] memory list) {
         // @TODO
         return list;
     }
 
     function deascending(
-        RedBlackTree storage self
+        Tree storage self
     ) internal view returns (uint256[] memory list) {
         // @TODO
         return list;

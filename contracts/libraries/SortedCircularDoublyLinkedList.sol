@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity >=0.5.0 <0.9.0;
 
-/// @title Engawa (縁側) is an implementation of Sorted Circular Doubly Linked List with Sentinel node in Solidity (SCDLLS).
+/// @title Engawa (縁側) is an implementation of Sorted Circular Doubly Linked List with Sentinel node (SCDLLS) in Solidity.
 /// @author Kiwari Labs
 // inspiration
 // https://github.com/o0ragman0o/LibCLL/blob/master/LibCLL.sol
@@ -9,8 +9,6 @@ pragma solidity >=0.5.0 <0.9.0;
 
 library CircularDoublyLinkedList {
     struct List {
-        uint256 _head;
-        uint256 _tail;
         uint256 _size;
         mapping(uint256 => mapping(bool => uint256)) _list;
         mapping(uint256 => bytes) _data;
@@ -26,13 +24,12 @@ library CircularDoublyLinkedList {
     /// @param index The index at which to insert the data.
     /// @param data The data to insert.
     function _insertHead(List storage self, uint256 index, bytes memory data) private {
-        uint256 _head = self._head;
+        uint256 _head = self._list[_SENTINEL][_NEXT] ;
         self._list[_SENTINEL][_NEXT] = index;
         self._list[_head][_PREV] = index;
         self._list[index][_PREV] = _SENTINEL;
         self._list[index][_NEXT] = _head;
         self._data[index] = data;
-        self._head = index;
     }
 
     /// @notice Insert data into the list at a specified index.
@@ -41,7 +38,7 @@ library CircularDoublyLinkedList {
     /// @param index The index at which to insert the data.
     /// @param data The data to insert.
     function _insertNode(List storage self, uint256 index, bytes memory data) private {
-        uint256 current = self._head;
+        uint256 current = self._list[_SENTINEL][_NEXT];
         while (index > current) {
             current = self._list[current][_NEXT];
         }
@@ -59,26 +56,25 @@ library CircularDoublyLinkedList {
     /// @param index The index at which to insert the data.
     /// @param data The data to insert.
     function _insertTail(List storage self, uint256 index, bytes memory data) private {
-        uint256 _tail = self._tail;
+        uint256 _tail = self._list[_SENTINEL][_PREV];
         self._list[_SENTINEL][_PREV] = index;
         self._list[_tail][_NEXT] = index;
         self._list[index][_PREV] = _tail;
         self._list[index][_NEXT] = _SENTINEL;
         self._data[index] = data;
-        self._tail = index;
     }
 
     /// @notice Remove the head node from the list.
     /// @dev This function removes the head node from the list.
     /// @param self The list.
     function _removeHead(List storage self) private {
-        uint256 _head = self._list[self._head][_NEXT];
+        uint256 _head = self._list[self._list[_SENTINEL][_NEXT]][_NEXT];
+        uint256 _old = self._list[_SENTINEL][_NEXT];
+        delete self._list[_old][_PREV];
+        delete self._list[_old][_NEXT];
+        delete self._data[_old];
         self._list[_SENTINEL][_NEXT] = _head;
         self._list[_head][_PREV] = _SENTINEL;
-        delete self._list[self._head][_PREV];
-        delete self._list[self._head][_NEXT];
-        delete self._data[self._head];
-        self._head = _head;
     }
 
     /// @notice Remove a node from the list at a specified index.
@@ -100,13 +96,13 @@ library CircularDoublyLinkedList {
     /// @dev This function removes the tail node from the list.
     /// @param self The list.
     function _removeTail(List storage self) private {
-        uint256 _tail = self._list[self._tail][_PREV];
+        uint256 _tail = self._list[self._list[_SENTINEL][_PREV]][_PREV];
+        uint256 _old = self._list[_SENTINEL][_PREV];
+        delete self._list[_old][_PREV];
+        delete self._list[_old][_NEXT];
+        delete self._data[_old];
         self._list[_SENTINEL][_PREV] = _tail;
         self._list[_tail][_NEXT] = _SENTINEL;
-        delete self._list[self._tail][_PREV];
-        delete self._list[self._tail][_NEXT];
-        delete self._data[self._tail];
-        self._tail = _tail;
     }
 
     /// @notice Check if a node exists in the list.
@@ -133,15 +129,13 @@ library CircularDoublyLinkedList {
         if (!exist(self, index) && index > 0) {
             if (self._size == 0) {
                 // If the list is empty, insert it at the head.
-                self._head = index;
-                self._tail = index;
                 self._list[_SENTINEL][_NEXT] = index;
                 self._list[_SENTINEL][_PREV] = index;
                 self._data[index] = data;
-            } else if (index < self._head) {
+            } else if (index < self._list[_SENTINEL][_NEXT]) {
                 // If the index is before the current head, insert at the head.
                 _insertHead(self, index, data);
-            } else if (index > self._tail) {
+            } else if (index > self._list[_SENTINEL][_PREV]) {
                 // If the index is after the current tail, insert at the tail.
                 _insertTail(self, index, data);
             } else {
@@ -160,10 +154,10 @@ library CircularDoublyLinkedList {
     function remove(List storage self, uint256 index) internal {
         // Check if the node exists and the index is valid.
         if (exist(self, index) && index > 0) {
-            if (index == self._head) {
+            if (index == self._list[_SENTINEL][_NEXT]) {
                 // If the index corresponds to the head node, remove the head.
                 _removeHead(self);
-            } else if (index == self._tail) {
+            } else if (index == self._list[_SENTINEL][_PREV]) {
                 // If the index corresponds to the tail node, remove the tail.
                 _removeTail(self);
             } else {
@@ -191,7 +185,7 @@ library CircularDoublyLinkedList {
     /// @param self The list.
     /// @return The index of the head node.
     function head(List storage self) internal view returns (uint256) {
-        return self._head;
+        return self._list[_SENTINEL][_NEXT];
     }
 
     /// @notice Get the index of the middle node in the list.
@@ -208,7 +202,7 @@ library CircularDoublyLinkedList {
     /// @param self The list.
     /// @return The index of the tail node.
     function tail(List storage self) internal view returns (uint256) {
-        return self._tail;
+        return self._list[_SENTINEL][_PREV];
     }
 
     /// @notice Get the size of the list.
