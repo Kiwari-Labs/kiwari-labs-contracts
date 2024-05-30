@@ -248,7 +248,7 @@ library CircularDoublyLinkedList {
             unchecked {
                 for (uint256 i = tmpSize - 1; i > 0; i--) {
                     asc[i] = self._list[index][_PREV];
-                    index = self._list[index][_PREV];
+                    index = asc[i];
                 }
             }
         }
@@ -268,7 +268,7 @@ library CircularDoublyLinkedList {
             unchecked {
                 for (uint256 i = tmpSize - 1; i > 0; i--) {
                     des[i] = self._list[index][_NEXT];
-                    index = self._list[index][_NEXT];
+                    index = des[i];
                 }
             }
         }
@@ -288,7 +288,7 @@ library CircularDoublyLinkedList {
             unchecked {
                 for (uint256 i = 0; i < tmpSize; i++) {
                     part[i] = self._list[index][_NEXT];
-                    index = self._list[index][_NEXT];
+                    index = part[i];
                 }
             }
             return part;
@@ -314,7 +314,7 @@ library CircularDoublyLinkedList {
             unchecked {
                 for (uint256 i = 0; i < tmpSize; i++) {
                     part[i] = self._list[index][_PREV];
-                    index = self._list[index][_PREV];
+                    index = part[i];
                 }
             }
             return part;
