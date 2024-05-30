@@ -56,7 +56,7 @@ library SlidingWindow {
             if (blockNumber > startblockNumberCache) {
                 return
                     uint8(
-                        ((blockNumber - startblockNumberCache) % blockPerYearCache) / (blockPerYearCache / TWO_BITS)
+                        ((blockNumber - startblockNumberCache) % blockPerYearCache) / (blockPerYearCache >> TWO_BITS)
                     );
             }
         }
