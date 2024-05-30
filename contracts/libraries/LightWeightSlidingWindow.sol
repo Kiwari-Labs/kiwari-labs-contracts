@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity >=0.5.0 <0.9.0;
 
-/// @title Shoji (障子)' is a lightweight version of the Fusuma. Shoji provide efficiency and handly sliding window algorithm.
+/// @title Shoji (障子) is a lightweight version of the Fusuma. Shoji provide efficiency and handly sliding window algorithm.
 /// @author Kiwari Labs
 /// @notice Some parameter in Fusuma was pre-define as a constant variable in Shoji.
 
