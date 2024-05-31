@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { deployDoublyList, padIndexToData } from "../utils.test";
-import { data as mockData }from "../../mocks/data/shuffle_270_number";
+import { data as mockData }from "../../mocks/data/shuffle_273_number";
 
 export const run = async () => {
   describe("Insertion", async function () {
