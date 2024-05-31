@@ -43,9 +43,13 @@ export const run = async () => {
       expect(balanceAliceAfter).to.equal(270n);
       await erc20exp.connect(alice).transfer(bobAddress, 270n);
       const balanceBob = await erc20exp["balanceOf(address)"](bobAddress);
+      const balanceAliceAfterTransfer = await erc20exp["balanceOf(address)"](aliceAddress);
+      console.log("balanceAliceAfterTransfer:", balanceAliceAfterTransfer)
       const bobTokenList = await erc20exp.tokenList(bobAddress,0n,0n);
-      console.log("🚀 ~ bobTokenList:", bobTokenList.length);
+      console.log("bobTokenList:", bobTokenList.length);
       console.log("balanceBob", balanceBob);
+      const aliceTokenList = await erc20exp.tokenList(aliceAddress,0n,0n);
+      console.log("aliceTokenList:", aliceTokenList.length);
       expect(balanceBob).to.equal(270);
     });
 
