@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.5.0 <0.9.0;
 
 /// @title A light weight version of Engawa.

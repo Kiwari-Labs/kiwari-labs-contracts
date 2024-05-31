@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.5.0 <0.9.0;
 
 /// @title Fusuma (襖) is an implemation sliding window algorithm in Solidity, Fusuma sliding and relying on block-height rather than block-timestmap.
