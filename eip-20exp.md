@@ -29,14 +29,15 @@ challenge due to the limitation of smart contract concept that every block has b
 
 ## Rationale
 ##### Requirement: 
-- [ ] Compatible with existing ERC20 standard.
-- [ ] Configurable expiration period can be change.
-- [ ] Configurable block period (blocktime) can be change.
-- [ ] Auto select nearly expiration token when transfer as default (FIFO).
-- [ ] Auto look back spendable balance.
+- [x] Compatible with existing ERC20 standard.
+- [x] Configurable expiration period can be change.
+- [x] Configurable block period (blocktime) can be change.
+- [x] Auto select nearly expiration token when transfer as default (FIFO).
+- [x] Auto look back spendable balance.
+- [x] Extensible design for fit the business use case.  
+##### Additional requirement:
 - [ ] Whitelist account holding non-expriable balance.
 - [ ] Separate spending and receiving balance on whitelist account.
-- [ ] Extensible design for fit the business use case.
 
 ##### Era and Slot Conceptual
 
@@ -75,6 +76,8 @@ This contract creates an abstract implementation that adopts the sliding window 
         CircularDoublyLinkedList.List list;
     }
     
+    //... skipping
+
     mapping(address => mapping(uint256 => mapping(uint8 => Slot))) private _balances;
 ```
 With this struct `Slot` it's providing abstract loop in horizontal way more efficient to calculate usable balance of the account because it's provide `slotBalance` so
@@ -126,7 +129,7 @@ Similar idea fo page in pagination.
 First In First Out.
 
 `Slot` definition
-Similar idea of index in each page of pagination.
+Similar idea of index in each page of pagination.  
 ** first index of slot is 0
 
 ## Security Considerations

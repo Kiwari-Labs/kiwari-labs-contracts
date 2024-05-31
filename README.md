@@ -28,13 +28,7 @@ Compile the smart contract:
 yarn compile
 ```
 
-## Testing
-### Test case
-Reasonable number of receive transaction per user per slot.
-``` 
-273 index if blocktime 1 is and expire period is 1 slot receive token every 28200 second (3tx/day)
-``` 
-###### ** TODO need to reduce the gas used for suitable in any usecase or under uncertain condition.
+###### ** TODO need to reduce the gas used for suitable in any use case or under uncertain condition.
 Run the tests:
 ```
 yarn test
@@ -42,11 +36,7 @@ yarn test
 
 ### TODO
 
-- [] maintain middle in SCDLLS
-- [] remove single node in SCDLLS
-- [] remove multiple node in SCDLLS
 - [] case block per era more than or less than block per slot * slot per era (rounding error)
 - [] [improvement](https://github.com/MASDXI/ERC20EXP/issues/4#issue-2234558942)
 - [] unit test all function
 - [] acceptance/e2e test
-- [] gas optimize when all function are done.
