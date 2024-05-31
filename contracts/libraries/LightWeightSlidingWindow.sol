@@ -14,11 +14,11 @@ library SlidingWindow {
     uint8 private constant MINIMUM_BLOCKTIME_IN_MILLI_SECONDS = 100; // 100 milliseconds.
     uint24 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000; // 10 minutes.
     uint40 private constant YEAR_IN_MILLI_SECONDS = 31_556_926_000;
-    
+
     struct SlidingWindowState {
         uint40 _blockPerEra;
         uint40 _blockPerSlot;
-        uint40 _frameSizeInBlockLength; 
+        uint40 _frameSizeInBlockLength;
         uint8[2] _frameSizeInEraAndSlotLength;
         uint256 _startBlockNumber;
     }
@@ -72,7 +72,7 @@ library SlidingWindow {
         }
         unchecked {
             self._blockPerEra = YEAR_IN_MILLI_SECONDS / blockTime;
-            self._blockPerSlot = self._blockPerEra >> TWO_BITS ;
+            self._blockPerSlot = self._blockPerEra >> TWO_BITS;
             self._frameSizeInBlockLength = self._blockPerSlot * frameSize;
             if (frameSize <= SLOT_PER_ERA) {
                 self._frameSizeInEraAndSlotLength[0] = 0;
@@ -93,7 +93,10 @@ library SlidingWindow {
         return (era, slot);
     }
 
-    function calculateBlockDifferent(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint256) {
+    function calculateBlockDifferent(
+        SlidingWindowState storage self,
+        uint256 blockNumber
+    ) internal view returns (uint256) {
         uint256 frameSizeInBlockLengthCache = getFrameSizeInBlockLength(self);
         unchecked {
             if (blockNumber < frameSizeInBlockLengthCache) {
