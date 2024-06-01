@@ -47,7 +47,7 @@ library CircularDoublyLinkedList {
     /// @param index The index of the node to check for existence.
     /// @return True if the node exists, false otherwise.
     function exist(List storage self, uint256 index) internal view returns (bool) {
-        if (self._nodes[index][PREV] == SENTINEL && self._nodes[index][NEXT] == SENTINEL) {
+        if (self._nodes[index][PREV] == self._nodes[index][NEXT]) {
             // In case the list has only one element.
             return (self._nodes[SENTINEL][NEXT] == index);
         } else {
@@ -78,8 +78,8 @@ library CircularDoublyLinkedList {
                 while (index > tmpHead) {
                     tmpHead = self._nodes[tmpHead][NEXT];
                 }
-                uint256 prevCurrent = self._nodes[tmpHead][PREV];
-                _insertNode(self, index, prevCurrent, tmpHead);
+                tmpTail = self._nodes[tmpHead][PREV];
+                _insertNode(self, index, tmpTail, tmpHead);
             }
             // Increment the size of the list.
             unchecked {
@@ -249,8 +249,8 @@ library CircularDoublyLinkedList {
         unchecked {
             while (start > SENTINEL && counter < tmpSize) {
                 part[counter] = start; // Add the current index to the partition.
-                counter++;
                 start = self._nodes[start][PREV]; // Move to the next node.
+                counter++;
             }
         }
         // Resize the array to the actual count of elements using inline assembly.
@@ -275,8 +275,8 @@ library CircularDoublyLinkedList {
         unchecked {
             while (start > SENTINEL && counter < tmpSize) {
                 part[counter] = start; // Add the current index to the partition.
-                counter++;
                 start = self._nodes[start][NEXT]; // Move to the next node.
+                counter++;
             }
         }
         // Resize the array to the actual count of elements using inline assembly.
@@ -301,8 +301,8 @@ library CircularDoublyLinkedList {
         unchecked {
             while (counter < tmpSize) {
                 part[counter] = start; // Add the current index to the partition.
-                counter++;
                 start = self._nodes[start][NEXT]; // Move to the next node.
+                counter++;
                 if (start == SENTINEL) {
                     start = self._nodes[start][NEXT]; // Move to the next node.
                 }
