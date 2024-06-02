@@ -4,7 +4,6 @@ pragma solidity >=0.5.0 <0.9.0;
 /// @title A light weight version of Engawa.
 /// @author Kiwari Labs
 /// @notice This version reduce gas by remove embedded bytes data from node and less overhead compared to the original version.
-
 library CircularDoublyLinkedList {
     struct List {
         uint256 _size;
@@ -16,72 +15,48 @@ library CircularDoublyLinkedList {
     bool private constant PREV = false;
     bool private constant NEXT = true;
 
-    /// @notice Insert data into the list at a specified index.
-    /// @dev This function inserts data into the list at a specified index.
-    /// @param self The list.
-    /// @param index The index at which to insert the data.
-    /// @param prev The previous index.
-    /// @param next The next index.
-    function _insertNode(List storage self, uint256 index, uint256 prev, uint256 next) private {
-        self._nodes[prev][NEXT] = index;
-        self._nodes[next][PREV] = index;
-        self._nodes[index][PREV] = prev;
-        self._nodes[index][NEXT] = next;
-    }
-
-    /// @notice Remove a node from the list at a specified index.
-    /// @dev This function removes a node from the list at a specified index.
-    /// @param self The list.
-    /// @param index The specified index of the node to remove.
-    function _removeNode(List storage self, uint256 index) private {
-        (uint256 tmpPrev, uint256 tmpNext) = node(self, index);
-        self._nodes[tmpPrev][NEXT] = tmpNext;
-        self._nodes[tmpNext][PREV] = tmpPrev;
-        self._nodes[index][PREV] = SENTINEL;
-        self._nodes[index][NEXT] = SENTINEL;
-    }
-
     /// @notice Check if a node exists in the list.
     /// @dev This function checks if a node exists in the list by the specified index.
     /// @param self The list.
     /// @param index The index of the node to check for existence.
     /// @return True if the node exists, false otherwise.
     function exist(List storage self, uint256 index) internal view returns (bool) {
-        if (self._nodes[index][PREV] == self._nodes[index][NEXT]) {
-            // In case the list has only one element.
-            return (self._nodes[SENTINEL][NEXT] == index);
-        } else {
-            return true;
-        }
+       return (self._nodes[index][PREV] > 0 || self._nodes[SENTINEL][NEXT] == index);
     }
-
     /// @notice Insert data into the list at the specified index.
     /// @dev This function inserts data into the list at the specified index.
     /// @param self The list.
     /// @param index The index at which to insert the data.
     function insert(List storage self, uint256 index) internal {
-        // Check if the node does not exist and the index is valid.
         if (!exist(self, index)) {
-            (uint256 tmpTail, uint256 tmpHead) = node(self, SENTINEL);
-            if (self._size == SENTINEL) {
-                // If the list is empty, insert it at the head.
-                self._nodes[SENTINEL][PREV] = index;
+            uint256 tmpHead = self._nodes[SENTINEL][NEXT];
+            uint256 tmpTail = self._nodes[SENTINEL][PREV];
+            if (self._size == 0) {
                 self._nodes[SENTINEL][NEXT] = index;
+                self._nodes[SENTINEL][PREV] = index;
+                self._nodes[index][PREV] = SENTINEL;
+                self._nodes[index][NEXT] = SENTINEL;
             } else if (index < tmpHead) {
-                // If the index is before the current head, insert at the head.
-                _insertNode(self, index, SENTINEL, tmpHead);
+                self._nodes[SENTINEL][NEXT] = index;
+                self._nodes[tmpHead][PREV] = index;
+                self._nodes[index][PREV] = SENTINEL;
+                self._nodes[index][NEXT] = tmpHead;
             } else if (index > tmpTail) {
-                // If the index is after the current tail, insert at the tail.
-                _insertNode(self, index, tmpTail, SENTINEL);
+                self._nodes[SENTINEL][PREV] = index;
+                self._nodes[tmpTail][NEXT] = index;
+                self._nodes[index][PREV] = tmpTail;
+                self._nodes[index][NEXT] = SENTINEL;
             } else {
-                // Otherwise, insert in between existing nodes.
-                while (index > tmpHead) {
-                    tmpHead = self._nodes[tmpHead][NEXT];
+                uint256 current = tmpHead;
+                while (index > current) {
+                    current = self._nodes[current][NEXT];
                 }
-                tmpTail = self._nodes[tmpHead][PREV];
-                _insertNode(self, index, tmpTail, tmpHead);
+                uint256 prev = self._nodes[current][PREV];
+                self._nodes[prev][NEXT] = index;
+                self._nodes[current][PREV] = index;
+                self._nodes[index][PREV] = prev;
+                self._nodes[index][NEXT] = current;
             }
-            // Increment the size of the list.
             unchecked {
                 self._size++;
             }
@@ -96,7 +71,12 @@ library CircularDoublyLinkedList {
         // Check if the node exists and the index is valid.
         if (exist(self, index)) {
             // remove the node from between existing nodes.
-            _removeNode(self, index);
+            uint256 tmpPrev = self._nodes[index][PREV];
+            uint256 tmpNext = self._nodes[index][NEXT];
+            self._nodes[tmpPrev][NEXT] = tmpNext;
+            self._nodes[tmpNext][PREV] = tmpPrev;
+            self._nodes[index][PREV] = SENTINEL;
+            self._nodes[index][NEXT] = SENTINEL;
             // Decrement the size of the list.
             unchecked {
                 self._size--;

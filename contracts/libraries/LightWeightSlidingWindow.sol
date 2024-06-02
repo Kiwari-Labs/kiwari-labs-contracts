@@ -40,7 +40,7 @@ library SlidingWindow {
         return (era, slot);
     }
 
-    function _calculateEra(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint256 value) {
+    function calculateEra(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint256 value) {
         unchecked {
             value = self._startBlockNumber;
             // Calculate era based on the difference between the current block and start block
@@ -52,7 +52,7 @@ library SlidingWindow {
         }
     }
 
-    function _calculateSlot(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint8 value) {
+    function calculateSlot(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint8 value) {
         unchecked {
             uint256 startblockNumberCache = self._startBlockNumber;
             uint40 blockPerYearCache = self._blockPerEra;
@@ -92,8 +92,8 @@ library SlidingWindow {
         SlidingWindowState storage self,
         uint256 blockNumber
     ) internal view returns (uint256 era, uint8 slot) {
-        era = _calculateEra(self, blockNumber);
-        slot = _calculateSlot(self, blockNumber);
+        era = calculateEra(self, blockNumber);
+        slot = calculateSlot(self, blockNumber);
         return (era, slot);
     }
 
