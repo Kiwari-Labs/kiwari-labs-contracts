@@ -75,52 +75,47 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         address account,
         uint256 era,
         uint8 slot,
-        uint256 blockNumberCache
+        uint256 blockNumber
     ) private view returns (uint256 balanceCache) {
         Slot storage _spender = _retailBalances[account][era][slot];
-        // If the latest block is zero or outside the expiration period, skip entrie slot return 0.
-        uint256 uint256Cache1 = _spender.list.tail();
-        uint256 uint256Cache2 = _slidingWindow.getFrameSizeInBlockLength();
-        // If the latest block is outside the expiration period, skip entrie slot return 0.
-        unchecked {
-            if (blockNumberCache - uint256Cache1 >= uint256Cache2) {
-                return 0;
-            }
-        }
-        blockNumberCache = _getFirstUnexpiredBlockBalance(
+        uint256 frameSizeInBlockLengthCache = _slidingWindow.getFrameSizeInBlockLength();
+        uint256 index = _spender.list.tail();
+        blockNumber = _getFirstUnexpiredBlockBalance(
             _spender.list.ascending(),
-            blockNumberCache,
-            uint256Cache2
+            blockNumber,
+            frameSizeInBlockLengthCache
         );
         // Calculate the total balance using only the valid blocks.
-        uint256[] memory arrayCache = _spender.list.pathToTail(blockNumberCache);
-        uint256Cache1 = arrayCache.length;
-        if (uint256Cache1 == 0) {
-            return 0;
-        }
-        unchecked {
-            balanceCache += _spender.blockBalances[arrayCache[0]];
-            uint256Cache1 = arrayCache.length - 1;
-            while (uint256Cache1 > 0) {
-                blockNumberCache = arrayCache[uint256Cache1];
-                balanceCache += _spender.blockBalances[blockNumberCache];
-                uint256Cache1--;
+        uint256[] memory arrayCache = _spender.list.pathToTail(blockNumber);
+        index = arrayCache.length;
+        if (index > 0) {
+            unchecked {
+                balanceCache += _spender.blockBalances[arrayCache[0]];
+                index = arrayCache.length - 1;
+                while (index > 0) {
+                    blockNumber = arrayCache[index];
+                    balanceCache += _spender.blockBalances[blockNumber];
+                    index--;
+                }
             }
+            return balanceCache;
+        } else {
+            // otherwise the latest block is zero or outside the expiration period, skip entrie slot return 0.
+            return balanceCache;
         }
-        return balanceCache;
     }
 
     // if first index invalid move next till found valid key return index as key.
     function _getFirstUnexpiredBlockBalance(
         uint256[] memory list,
-        uint256 blockNumberCache,
-        uint256 expirationPeriodInBlockLengthCache
+        uint256 blockNumber,
+        uint256 expirationPeriodInBlockLength
     ) private pure returns (uint256 key) {
         unchecked {
             for (uint256 index = 0; index < list.length; index++) {
                 uint256 value = list[index];
                 // stop loop when found. always start form head because list is sorted before.
-                if (blockNumberCache - value <= expirationPeriodInBlockLengthCache) {
+                if (blockNumber - value <= expirationPeriodInBlockLength) {
                     key = value;
                     break;
                 }
@@ -185,22 +180,19 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             if (from == address(0)) {
                 // mint non-expirable token to receive balance.
                 _receiveBalances[to] += value;
-            } else {
+            } else if (to == address(0)) {
                 // revert if not enough
-                if (to == address(0)) {
-                    // burn non-expirable token from receive balance.
-                    _receiveBalances[from] -= value;
-                } else {
-                    // update non-expirable token from and to receive balance.
-                    _receiveBalances[to] += value;
-                    _receiveBalances[from] -= value;
-                }
+                // burn non-expirable token from receive balance.
+                _receiveBalances[from] -= value;
+            } else {
+                // update non-expirable token from and to receive balance.
+                _receiveBalances[to] += value;
+                _receiveBalances[from] -= value;
             }
         }
         emit Transfer(from, to, value);
     }
 
-    /// @custom:dataintegrityerrorappetite ignore to insert operation on address(0) for saving gas
     function _updateRetailBalance(
         address from,
         address to,
@@ -209,7 +201,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint256 toEra,
         uint8 fromSlot,
         uint8 toSlot,
-        uint256 blockNumberCache
+        uint256 blockNumber
     ) internal {
         Slot storage _recipient = _retailBalances[to][toEra][toSlot];
         Slot storage _sender = _retailBalances[from][fromEra][fromSlot];
@@ -217,7 +209,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         require(fromBalance >= value, "ERC20: transfer amount exceeds balance");
         uint256 key = _getFirstUnexpiredBlockBalance(
             _sender.list.ascending(),
-            blockNumberCache,
+            blockNumber,
             _slidingWindow.getFrameSizeInBlockLength()
         );
         fromBalance = _sender.blockBalances[key];
@@ -236,7 +228,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
         }
         // if buffer slot greater than value not move to next slot or next era deduct balance
-        if (fromBalance > value) {
+        else if (fromBalance > value) {
             unchecked {
                 _sender.blockBalances[key] -= value;
                 _recipient.blockBalances[key] += value;
@@ -244,7 +236,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             }
         }
         // if buffer slot can contain all value not move to next slot or next era
-        if (fromBalance == value) {
+        else {
             unchecked {
                 _sender.blockBalances[key] = 0;
                 _sender.list.remove(key);
@@ -270,7 +262,9 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 uint8 startSlot = (era == fromEra) ? fromSlot : 0;
                 uint8 endSlot = (era == toEra) ? toSlot : 3;
                 for (uint8 slot = startSlot; slot <= endSlot; slot++) {
-                    if (value == 0) break;
+                    if (value == 0) {
+                        break;
+                    }
                     value = _transferFromSlot(from, to, value, era, slot);
                 }
             }

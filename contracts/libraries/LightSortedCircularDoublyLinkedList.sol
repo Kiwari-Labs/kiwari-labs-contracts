@@ -249,8 +249,8 @@ library CircularDoublyLinkedList {
         unchecked {
             while (start > SENTINEL && counter < tmpSize) {
                 part[counter] = start; // Add the current index to the partition.
-                start = self._nodes[start][PREV]; // Move to the next node.
                 counter++;
+                start = self._nodes[start][PREV]; // Move to the next node.
             }
         }
         // Resize the array to the actual count of elements using inline assembly.
@@ -275,8 +275,8 @@ library CircularDoublyLinkedList {
         unchecked {
             while (start > SENTINEL && counter < tmpSize) {
                 part[counter] = start; // Add the current index to the partition.
-                start = self._nodes[start][NEXT]; // Move to the next node.
                 counter++;
+                start = self._nodes[start][NEXT]; // Move to the next node.
             }
         }
         // Resize the array to the actual count of elements using inline assembly.
@@ -301,8 +301,8 @@ library CircularDoublyLinkedList {
         unchecked {
             while (counter < tmpSize) {
                 part[counter] = start; // Add the current index to the partition.
-                start = self._nodes[start][NEXT]; // Move to the next node.
                 counter++;
+                start = self._nodes[start][NEXT]; // Move to the next node.
                 if (start == SENTINEL) {
                     start = self._nodes[start][NEXT]; // Move to the next node.
                 }
