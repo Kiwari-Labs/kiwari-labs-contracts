@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.5.0 <0.9.0;
 
-/// @title A light weight version of Engawa.
+/// @title A lightweight version of Engawa.
 /// @author Kiwari Labs
 /// @notice This version reduce gas by remove embedded bytes data from node and less overhead compared to the original version.
+
 library CircularDoublyLinkedList {
     struct List {
         uint256 _size;
