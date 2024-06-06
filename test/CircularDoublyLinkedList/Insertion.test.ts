@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { deployDoublyList, padIndexToData } from "../utils.test";
+import { data as mockData }from "../../mocks/data/shuffle_273_number";
 
 export const run = async () => {
   describe("Insertion", async function () {
@@ -23,6 +24,17 @@ export const run = async () => {
         expect(await doublylist.exist(index)).to.equal(true);
       }
       expect(await doublylist.size()).to.equal(len);
+    });
+
+    it("[HAPPY] correct multi insertion shuffle", async function () {
+      const { doublylist } = await deployDoublyList();
+      for (let i = 0; i <= mockData.length; i++) {
+        const index = i + 1;
+        const data = padIndexToData(index);
+        await doublylist.insert(i, data);
+        expect(await doublylist.exist(i)).to.equal(true);
+      }
+      expect(await doublylist.size()).to.equal(mockData.length);
     });
 
     it("[HAPPY] correct insertion at the head", async function () {

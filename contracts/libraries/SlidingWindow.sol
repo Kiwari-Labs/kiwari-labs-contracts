@@ -1,21 +1,13 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.5.0 <0.9.0;
 
-/// @title Fusuma (襖)
-/// @notice Fusuma (襖) is an implementation sliding window algorithm in Solidity, Fusuma sliding and relying on block-height rather than block-timestamp. Fusuma is designed to be compatible with subsecond EVM L1 or L2.
-/// @author Kiwari
-library Fusuma {
-    // 51 bytes for struct variables type.
-    struct SlidingWindow {
-        uint40 blockPerEra;
-        uint40 blockPerSlot;
-        uint40 frameSizeInBlockLength;
-        uint8[2] frameSizeInEraAndSlotLength;
-        uint8 frameSize;
-        uint8 slotSize;
-        uint256 startBlockNumber; 
-    }
+/// @title Fusuma (襖) is an implemation sliding window algorithm in Solidity, Fusuma sliding and relying on block-height rather than block-timestmap.
+/// @author Kiwari Labs
+/// @notice Fusuma designed to compatible with subsecond blocktime on both Layer 1 Network (L1) and Layer 2 Network (L2).
+// inspiration
+// https://github.com/stonecoldpat/slidingwindow
 
+library FullSlidingWindow {
     // 13 bytes for constant variables.
     uint8 private constant MINIMUM_SLOT_PER_ERA = 1;
     uint8 private constant MAXIMUM_SLOT_PER_ERA = 12;
@@ -25,30 +17,41 @@ library Fusuma {
     uint24 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000;
     uint40 private constant YEAR_IN_MILLI_SECONDS = 31_556_926_000;
 
+    // 50 bytes for struct variables type.
+    struct SlidingWindowState {
+        uint40 _blockPerEra;
+        uint40 _blockPerSlot;
+        uint40 _frameSizeInBlockLength;
+        uint8[2] _frameSizeInEraAndSlotLength;
+        uint8 _slotSize;
+        uint256 _startBlockNumber;
+    }
+
     error InvalidBlockTime();
     error InvalidFrameSize();
     error InvalidSlotPerEra();
 
-    function _calculateEra(SlidingWindow storage self, uint256 blockNumber) private view returns (uint256) {
+    function _calculateEra(SlidingWindowState storage self, uint256 blockNumber) private view returns (uint256) {
         unchecked {
-            uint256 startblockNumberCache = self.startBlockNumber;
+            uint256 startblockNumberCache = self._startBlockNumber;
             // Calculate era based on the difference between the current block and start block
-            if (startblockNumberCache != 0 && blockNumber > startblockNumberCache) {
-                return (blockNumber - startblockNumberCache) / self.blockPerEra;
+            if (startblockNumberCache > 0 && blockNumber > startblockNumberCache) {
+                return (blockNumber - startblockNumberCache) / self._blockPerEra;
             } else {
                 return 0;
             }
         }
     }
 
-    function _calculateSlot(SlidingWindow storage self, uint256 blockNumber) private view returns (uint8) {
+    function _calculateSlot(SlidingWindowState storage self, uint256 blockNumber) private view returns (uint8) {
         unchecked {
-            uint256 startblockNumberCache = self.startBlockNumber;
-            uint40 blockPerYearCache = self.blockPerEra;
+            uint256 startblockNumberCache = self._startBlockNumber;
+            uint40 blockPerYearCache = self._blockPerEra;
             if (blockNumber > startblockNumberCache) {
                 return
                     uint8(
-                        ((blockNumber - startblockNumberCache) % blockPerYearCache) / (blockPerYearCache / self.slotSize)
+                        ((blockNumber - startblockNumberCache) % blockPerYearCache) /
+                            (blockPerYearCache / self._slotSize)
                     );
             } else {
                 return 0;
@@ -56,9 +59,13 @@ library Fusuma {
         }
     }
 
-    function _frameBuffer(SlidingWindow storage self, uint256 era, uint8 slot) private view returns (uint256, uint8) {
+    function _frameBuffer(
+        SlidingWindowState storage self,
+        uint256 era,
+        uint8 slot
+    ) private view returns (uint256, uint8) {
         unchecked {
-            uint8 slotPerEraCache = self.slotSize - 1;
+            uint8 slotPerEraCache = self._slotSize - 1;
             if (era > 0 && slot > 0) {
                 if (slot < slotPerEraCache) {
                     slot--;
@@ -72,7 +79,7 @@ library Fusuma {
     }
 
     function updateSlidingWindow(
-        SlidingWindow storage self,
+        SlidingWindowState storage self,
         uint24 blockTime,
         uint8 frameSize,
         uint8 slotSize
@@ -87,23 +94,22 @@ library Fusuma {
             revert InvalidSlotPerEra();
         }
         unchecked {
-            self.blockPerEra = YEAR_IN_MILLI_SECONDS / blockTime;
-            self.blockPerSlot = self.blockPerEra / slotSize;
-            self.frameSize = frameSize;
-            self.frameSizeInBlockLength = self.blockPerSlot * self.frameSize;
-            self.slotSize = slotSize;
+            self._blockPerEra = YEAR_IN_MILLI_SECONDS / blockTime;
+            self._blockPerSlot = self._blockPerEra / slotSize;
+            self._frameSizeInBlockLength = self._blockPerSlot * frameSize;
+            self._slotSize = slotSize;
             if (frameSize <= slotSize) {
-                self.frameSizeInEraAndSlotLength[0] = 0;
-                self.frameSizeInEraAndSlotLength[1] = frameSize;
+                self._frameSizeInEraAndSlotLength[0] = 0;
+                self._frameSizeInEraAndSlotLength[1] = frameSize;
             } else {
-                self.frameSizeInEraAndSlotLength[0] = frameSize / slotSize;
-                self.frameSizeInEraAndSlotLength[1] = frameSize % slotSize;
+                self._frameSizeInEraAndSlotLength[0] = frameSize / slotSize;
+                self._frameSizeInEraAndSlotLength[1] = frameSize % slotSize;
             }
         }
     }
 
     function calculateEraAndSlot(
-        SlidingWindow storage self,
+        SlidingWindowState storage self,
         uint256 blockNumber
     ) internal view returns (uint256 era, uint8 slot) {
         era = _calculateEra(self, blockNumber);
@@ -111,8 +117,11 @@ library Fusuma {
         return (era, slot);
     }
 
-    function calculateBlockDifferent(SlidingWindow storage self, uint256 blockNumber) internal view returns (uint256) {
-        uint256 frameSizeInBlockLengthCache = self.frameSizeInBlockLength;
+    function calculateBlockDifferent(
+        SlidingWindowState storage self,
+        uint256 blockNumber
+    ) internal view returns (uint256) {
+        uint256 frameSizeInBlockLengthCache = self._frameSizeInBlockLength;
         unchecked {
             if (blockNumber >= frameSizeInBlockLengthCache) {
                 // If the current block is beyond the expiration period
@@ -125,7 +134,7 @@ library Fusuma {
     }
 
     function currentEraAndSlot(
-        SlidingWindow storage self,
+        SlidingWindowState storage self,
         uint256 blockNumber
     ) internal view returns (uint256 era, uint8 slot) {
         (era, slot) = calculateEraAndSlot(self, blockNumber);
@@ -133,7 +142,7 @@ library Fusuma {
     }
 
     function frame(
-        SlidingWindow storage self,
+        SlidingWindowState storage self,
         uint256 blockNumber
     ) internal view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
         (toEra, toSlot) = calculateEraAndSlot(self, blockNumber);
@@ -143,7 +152,7 @@ library Fusuma {
     }
 
     function safeFrame(
-        SlidingWindow storage self,
+        SlidingWindowState storage self,
         uint256 blockNumber
     ) internal view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
         (toEra, toSlot) = calculateEraAndSlot(self, blockNumber);
@@ -153,27 +162,31 @@ library Fusuma {
         return (fromEra, toEra, fromSlot, toSlot);
     }
 
-    function getBlockPerEra(SlidingWindow storage self) internal view returns (uint40) {
-        return self.blockPerEra;
+    function getBlockPerEra(SlidingWindowState storage self) internal view returns (uint40) {
+        return self._blockPerEra;
     }
 
-    function getBlockPerSlot(SlidingWindow storage self) internal view returns (uint40) {
-        return self.blockPerSlot;
+    function getBlockPerSlot(SlidingWindowState storage self) internal view returns (uint40) {
+        return self._blockPerSlot;
     }
 
-    function getFrameSizeInBlockLength(SlidingWindow storage self) internal view returns (uint40) {
-        return self.frameSizeInBlockLength;
+    function getFrameSizeInBlockLength(SlidingWindowState storage self) internal view returns (uint40) {
+        return self._frameSizeInBlockLength;
     }
 
-    function getFrameSizeInSlotLength(SlidingWindow storage self) internal view returns (uint8) {
-        return self.frameSize;
+    function getFrameSizeInEraLength(SlidingWindowState storage self) internal view returns (uint8) {
+        return self._frameSizeInEraAndSlotLength[0];
     }
 
-    function getFrameSizeInEraAndSlotLength(SlidingWindow storage self) internal view returns (uint8[2] memory) {
-        return self.frameSizeInEraAndSlotLength;
+    function getFrameSizeInSlotLength(SlidingWindowState storage self) internal view returns (uint8) {
+        return self._frameSizeInEraAndSlotLength[1];
     }
 
-    function getSlotPerEra(SlidingWindow storage self) internal view returns (uint8) {
-        return self.slotSize;
+    function getFrameSizeInEraAndSlotLength(SlidingWindowState storage self) internal view returns (uint8[2] memory) {
+        return self._frameSizeInEraAndSlotLength;
+    }
+
+    function getSlotPerEra(SlidingWindowState storage self) internal view returns (uint8) {
+        return self._slotSize;
     }
 }
