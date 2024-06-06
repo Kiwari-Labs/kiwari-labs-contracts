@@ -27,6 +27,8 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
 
     SlidingWindow.SlidingWindowState private _slidingWindow;
 
+    error ERC20InsufficientBalance();
+
     constructor(
         string memory name_,
         string memory symbol_,
@@ -190,7 +192,10 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         Slot storage _recipient = _retailBalances[to][toEra][toSlot];
         Slot storage _sender = _retailBalances[from][fromEra][fromSlot];
         uint256 fromBalance = balanceOf(from);
-        require(fromBalance >= value, "ERC20: transfer amount exceeds balance");
+        // require(fromBalance >= value, "ERC20: transfer amount exceeds balance");
+        if( fromBalance < value) {
+            revert ERC20InsufficientBalance();
+        }
         uint256 key = _getFirstUnexpiredBlockBalance(
             _sender.list.ascending(),
             blockNumber,
@@ -243,7 +248,10 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 }
             }
         }
-        require(value == 0, "ERC20: transfer amount exceeds balance");
+        // require(value == 0, "ERC20: transfer amount exceeds balance");
+        if (value > 0) {
+         revert ERC20InsufficientBalance();
+        }
     }
 
     function _transferFromSlot(
