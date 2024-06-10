@@ -7,7 +7,7 @@ status: Draft
 type: Standards Track
 category: ERC
 created: 2024-mm-dd
-requires: 20, 165
+requires: 20, 165, 1410, 3643
 ---
 
 ## Simple Summary
