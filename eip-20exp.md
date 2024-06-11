@@ -7,7 +7,7 @@ status: Draft
 type: Standards Track
 category: ERC
 created: 2024-mm-dd
-requires: 20, 165, 1410, 3643
+requires: 20, 165, 1400, 3643
 ---
 
 ## Simple Summary
@@ -26,6 +26,7 @@ An extension standard allows to create tokens with expiration date like loyalty 
 
 To create fungible tokens that have abilities to expiration like loyalty reward is 
 challenge due to the limitation of smart contract concept that every block has block gas limit how to preventing the transaction of   contract hits the block gas limit while compatible with existing ERC20 standard interface.
+`ERC1400` and `ERC3643` both are large.
 
 ## Rationale
 ##### Requirement: 
