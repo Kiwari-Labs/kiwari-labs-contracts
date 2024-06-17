@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.5.0 <0.9.0;
 
-/// @title A lightweight version of Engawa.
+/// @title A Featherweight version of Engawa.
 /// @author Kiwari Labs
-/// @notice This version reduce gas by remove embedded bytes data from node and less overhead compared to the original version.
+/// @notice This version reduce gas by rewrite into inline-assembly and remove embedded bytes data from node and less overhead compared to the original version.
 
 library CircularDoublyLinkedList {
     struct List {
@@ -20,16 +20,22 @@ library CircularDoublyLinkedList {
     /// @dev This function checks if a node exists in the list by the specified index.
     /// @param self The list.
     /// @param index The index of the node to check for existence.
-    /// @return True if the node exists, false otherwise.
-    function exist(List storage self, uint256 index) internal view returns (bool) {
-       return (self._nodes[index][PREV] > 0 || self._nodes[SENTINEL][NEXT] == index);
+    /// @return exists if the node exists, false otherwise.
+    function exist(List storage self, uint256 index) internal view returns (bool exists) {
+        // @TODO change to sload inline-assembly.
+        uint256 var1 = self._nodes[index][PREV];
+        uint256 var2 = self._nodes[SENTINEL][NEXT];
+        assembly {
+            exists := or(gt(var1, 0), eq(var2, index))
+        }
     }
-    
+
     /// @notice Insert data into the list at the specified index.
     /// @dev This function inserts data into the list at the specified index.
     /// @param self The list.
     /// @param index The index at which to insert the data.
     function insert(List storage self, uint256 index) internal {
+        // @TODO make it into inline-assembly.
         if (!exist(self, index)) {
             uint256 tmpHead = self._nodes[SENTINEL][NEXT];
             uint256 tmpTail = self._nodes[SENTINEL][PREV];
@@ -71,6 +77,7 @@ library CircularDoublyLinkedList {
     /// @param index The index of the node to remove.
     function remove(List storage self, uint256 index) internal {
         // Check if the node exists and the index is valid.
+        // @TODO make it into inline-assembly.
         if (exist(self, index)) {
             // remove the node from between existing nodes.
             uint256 tmpPrev = self._nodes[index][PREV];
@@ -134,6 +141,7 @@ library CircularDoublyLinkedList {
     /// @param self The list.
     /// @return asc An array containing the indices of nodes in ascending order.
     function ascending(List storage self) internal view returns (uint256[] memory asc) {
+        // @TODO make it into inline-assembly.
         uint256 index;
         uint256 tmpSize = self._size;
         if (tmpSize > SENTINEL) {
@@ -154,6 +162,7 @@ library CircularDoublyLinkedList {
     /// @param self The list.
     /// @return des An array containing the indices of nodes in descending order.
     function descending(List storage self) internal view returns (uint256[] memory des) {
+        // @TODO make it into inline-assembly.
         uint256 index;
         uint256 tmpSize = self._size;
         if (tmpSize > SENTINEL) {
@@ -174,6 +183,7 @@ library CircularDoublyLinkedList {
     /// @param self The list.
     /// @return part An array containing the indices of nodes in the first partition.
     function firstPartition(List storage self) internal view returns (uint256[] memory part) {
+        // @TODO make it into inline-assembly.
         uint256 tmpSize = self._size;
         if (tmpSize > SENTINEL) {
             unchecked {
@@ -195,6 +205,7 @@ library CircularDoublyLinkedList {
     /// @param self The list.
     /// @return part An array containing the indices of nodes in the second partition.
     function secondPartition(List storage self) internal view returns (uint256[] memory part) {
+        // @TODO make it into inline-assembly.
         uint256 tmpSize = self._size;
         if (tmpSize > SENTINEL) {
             // To fix the indivisible calculation.
@@ -222,6 +233,7 @@ library CircularDoublyLinkedList {
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes from the starting node to the head.
     function pathToHead(List storage self, uint256 start) internal view returns (uint256[] memory part) {
+        // @TODO make it into inline-assembly.
         if (!exist(self, start)) {
             return part;
         }
@@ -248,6 +260,7 @@ library CircularDoublyLinkedList {
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes from the starting node to the tail.
     function pathToTail(List storage self, uint256 start) internal view returns (uint256[] memory part) {
+        // @TODO make it into inline-assembly.
         if (!exist(self, start)) {
             return part;
         }
@@ -274,6 +287,7 @@ library CircularDoublyLinkedList {
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes.
     function partition(List storage self, uint256 start) internal view returns (uint256[] memory part) {
+        // @TODO make it into inline-assembly.
         if (!exist(self, start)) {
             return part;
         }
