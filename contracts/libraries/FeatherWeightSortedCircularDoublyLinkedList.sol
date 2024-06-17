@@ -65,8 +65,8 @@ library CircularDoublyLinkedList {
                 self._nodes[index][PREV] = prev;
                 self._nodes[index][NEXT] = current;
             }
-            unchecked {
-                self._size++;
+            assembly {
+                sstore(self.slot, add(sload(self.slot), 1))
             }
         }
     }
@@ -86,9 +86,8 @@ library CircularDoublyLinkedList {
             self._nodes[tmpNext][PREV] = tmpPrev;
             self._nodes[index][PREV] = SENTINEL;
             self._nodes[index][NEXT] = SENTINEL;
-            // Decrement the size of the list.
-            unchecked {
-                self._size--;
+            assembly {
+                sstore(self.slot, sub(sload(self.slot), 1))
             }
         }
     }
