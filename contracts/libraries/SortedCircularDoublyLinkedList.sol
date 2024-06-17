@@ -25,7 +25,7 @@ library CircularDoublyLinkedList {
     /// @param index The index at which to insert the data.
     /// @param data The data to insert.
     function _insertHead(List storage self, uint256 index, bytes memory data) private {
-        uint256 _head = self._list[SENTINEL][NEXT] ;
+        uint256 _head = self._list[SENTINEL][NEXT];
         self._list[SENTINEL][NEXT] = index;
         self._list[_head][PREV] = index;
         self._list[index][PREV] = SENTINEL;
@@ -110,14 +110,9 @@ library CircularDoublyLinkedList {
     /// @dev This function checks if a node exists in the list by the specified index.
     /// @param self The list.
     /// @param index The index of the node to check for existence.
-    /// @return True if the node exists, false otherwise.
-    function exist(List storage self, uint256 index) internal view returns (bool) {
-        if (self._list[index][PREV] == SENTINEL && self._list[index][NEXT] == SENTINEL) {
-            // In case the list has only one element.
-            return (self._list[SENTINEL][NEXT] == index);
-        } else {
-            return true;
-        }
+    /// @return result if the node exists, false otherwise.
+    function exist(List storage self, uint256 index) internal view returns (bool result) {
+        result = (self._list[index][PREV] > 0 || self._list[SENTINEL][NEXT] == index);
     }
 
     /// @notice Insert data into the list at the specified index.

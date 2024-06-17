@@ -3,7 +3,7 @@ pragma solidity >=0.5.0 <0.9.0;
 
 /// @title A Featherweight version of Shoji.
 /// @author Kiwari Labs
-/// @notice Rewrite Shoji into inline-assembly.
+/// @notice Rewrite Shoji mixed with inline-assembly.
 
 library SlidingWindow {
     uint8 private constant TWO_BITS = 2;
@@ -45,25 +45,34 @@ library SlidingWindow {
         unchecked {
             value = self._startBlockNumber;
             // Calculate era based on the difference between the current block and start block
-            if (value > 0 && blockNumber > value) {
-                return (blockNumber - value) / self._blockPerEra;
-            } else {
-                return 0;
+            uint256 blockPerEraCache = self._blockPerEra;
+            assembly {
+                switch and(gt(value, 0), gt(blockNumber, value))
+                case 1 {
+                    value := div(sub(blockNumber, value), blockPerEraCache)
+                }
+                default {
+                    value := 0
+                }
             }
         }
     }
 
-    function calculateSlot(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint8 value) {
+    function calculateSlot(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint8 slot) {
         unchecked {
             uint256 startblockNumberCache = self._startBlockNumber;
             uint40 blockPerYearCache = self._blockPerEra;
-            if (blockNumber > startblockNumberCache) {
-                return
-                    uint8(
-                        ((blockNumber - startblockNumberCache) % blockPerYearCache) / (blockPerYearCache >> TWO_BITS)
-                    );
-            } else {
-                return value;
+            assembly {
+                switch gt(blockNumber, startblockNumberCache)
+                case 1 {
+                    slot := div(
+                        mod(sub(blockNumber, startblockNumberCache), blockPerYearCache),
+                        shr(2, blockPerYearCache)
+                    )
+                }
+                default {
+                    slot := 0
+                }
             }
         }
     }
@@ -101,15 +110,15 @@ library SlidingWindow {
     function calculateBlockDifferent(
         SlidingWindowState storage self,
         uint256 blockNumber
-    ) internal view returns (uint256) {
-        uint256 frameSizeInBlockLengthCache = getFrameSizeInBlockLength(self);
+    ) internal view returns (uint256 blocks) {
+        blocks = getFrameSizeInBlockLength(self);
         unchecked {
-            if (blockNumber < frameSizeInBlockLengthCache) {
+            if (blockNumber < blocks) {
                 // If the current block is within the expiration period
-                return blockNumber;
+                blocks = blockNumber;
             } else {
                 // If the current block is beyond the expiration period
-                return blockNumber - frameSizeInBlockLengthCache;
+                blocks = blockNumber - blocks;
             }
         }
     }

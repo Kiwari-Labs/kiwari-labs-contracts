@@ -3,7 +3,7 @@ pragma solidity >=0.5.0 <0.9.0;
 
 /// @title A Featherweight version of Engawa.
 /// @author Kiwari Labs
-/// @notice This version reduce gas by rewrite into inline-assembly and remove embedded bytes data from node and less overhead compared to the original version.
+/// @notice This version reduce gas by rewrite mixed with inline-assembly and remove embedded bytes data from node and less overhead compared to the original version.
 
 library CircularDoublyLinkedList {
     struct List {
@@ -20,13 +20,13 @@ library CircularDoublyLinkedList {
     /// @dev This function checks if a node exists in the list by the specified index.
     /// @param self The list.
     /// @param index The index of the node to check for existence.
-    /// @return exists if the node exists, false otherwise.
-    function exist(List storage self, uint256 index) internal view returns (bool exists) {
+    /// @return result if the node exists true if exist, false otherwise.
+    function exist(List storage self, uint256 index) internal view returns (bool result) {
         // @TODO change to sload inline-assembly.
-        uint256 var1 = self._nodes[index][PREV];
-        uint256 var2 = self._nodes[SENTINEL][NEXT];
+        uint256 tmpBeforeIndex = self._nodes[index][PREV];
+        uint256 tmpHead = self._nodes[SENTINEL][NEXT];
         assembly {
-            exists := or(gt(var1, 0), eq(var2, index))
+            result := or(gt(tmpBeforeIndex, 0), eq(tmpHead, index))
         }
     }
 
@@ -142,9 +142,9 @@ library CircularDoublyLinkedList {
     /// @return asc An array containing the indices of nodes in ascending order.
     function ascending(List storage self) internal view returns (uint256[] memory asc) {
         // @TODO make it into inline-assembly.
-        uint256 index;
         uint256 tmpSize = self._size;
         if (tmpSize > SENTINEL) {
+            uint256 index;
             asc = new uint256[](tmpSize);
             asc[SENTINEL] = self._nodes[index][NEXT];
             unchecked {
@@ -163,9 +163,9 @@ library CircularDoublyLinkedList {
     /// @return des An array containing the indices of nodes in descending order.
     function descending(List storage self) internal view returns (uint256[] memory des) {
         // @TODO make it into inline-assembly.
-        uint256 index;
         uint256 tmpSize = self._size;
         if (tmpSize > SENTINEL) {
+            uint256 index;
             des = new uint256[](tmpSize);
             des[SENTINEL] = self._nodes[index][PREV];
             unchecked {

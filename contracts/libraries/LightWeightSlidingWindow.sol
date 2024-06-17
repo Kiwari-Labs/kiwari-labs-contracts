@@ -52,17 +52,14 @@ library SlidingWindow {
         }
     }
 
-    function calculateSlot(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint8 value) {
+    function calculateSlot(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint8 slot) {
         unchecked {
             uint256 startblockNumberCache = self._startBlockNumber;
             uint40 blockPerYearCache = self._blockPerEra;
             if (blockNumber > startblockNumberCache) {
-                return
-                    uint8(
-                        ((blockNumber - startblockNumberCache) % blockPerYearCache) / (blockPerYearCache >> TWO_BITS)
-                    );
-            } else {
-                return value;
+                slot = uint8(
+                    ((blockNumber - startblockNumberCache) % blockPerYearCache) / (blockPerYearCache >> TWO_BITS)
+                );
             }
         }
     }
@@ -100,15 +97,15 @@ library SlidingWindow {
     function calculateBlockDifferent(
         SlidingWindowState storage self,
         uint256 blockNumber
-    ) internal view returns (uint256) {
-        uint256 frameSizeInBlockLengthCache = getFrameSizeInBlockLength(self);
+    ) internal view returns (uint256 blocks) {
+        blocks = getFrameSizeInBlockLength(self);
         unchecked {
-            if (blockNumber < frameSizeInBlockLengthCache) {
+            if (blockNumber < blocks) {
                 // If the current block is within the expiration period
-                return blockNumber;
+                blocks = blockNumber;
             } else {
                 // If the current block is beyond the expiration period
-                return blockNumber - frameSizeInBlockLengthCache;
+                blocks = blockNumber - blocks;
             }
         }
     }

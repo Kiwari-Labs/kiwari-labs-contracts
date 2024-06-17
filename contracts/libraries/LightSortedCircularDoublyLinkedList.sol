@@ -20,11 +20,11 @@ library CircularDoublyLinkedList {
     /// @dev This function checks if a node exists in the list by the specified index.
     /// @param self The list.
     /// @param index The index of the node to check for existence.
-    /// @return True if the node exists, false otherwise.
-    function exist(List storage self, uint256 index) internal view returns (bool) {
-       return (self._nodes[index][PREV] > 0 || self._nodes[SENTINEL][NEXT] == index);
+    /// @return result if the node exists, false otherwise.
+    function exist(List storage self, uint256 index) internal view returns (bool result) {
+        result = (self._nodes[index][PREV] > 0 || self._nodes[SENTINEL][NEXT] == index);
     }
-    
+
     /// @notice Insert data into the list at the specified index.
     /// @dev This function inserts data into the list at the specified index.
     /// @param self The list.
@@ -134,10 +134,10 @@ library CircularDoublyLinkedList {
     /// @param self The list.
     /// @return asc An array containing the indices of nodes in ascending order.
     function ascending(List storage self) internal view returns (uint256[] memory asc) {
-        uint256 index;
         uint256 tmpSize = self._size;
         if (tmpSize > SENTINEL) {
             asc = new uint256[](tmpSize);
+            uint256 index;
             asc[SENTINEL] = self._nodes[index][NEXT];
             unchecked {
                 for (uint256 i = tmpSize - 1; i > SENTINEL; i--) {
@@ -154,10 +154,10 @@ library CircularDoublyLinkedList {
     /// @param self The list.
     /// @return des An array containing the indices of nodes in descending order.
     function descending(List storage self) internal view returns (uint256[] memory des) {
-        uint256 index;
         uint256 tmpSize = self._size;
         if (tmpSize > SENTINEL) {
             des = new uint256[](tmpSize);
+            uint256 index;
             des[SENTINEL] = self._nodes[index][PREV];
             unchecked {
                 for (uint256 i = tmpSize - 1; i > SENTINEL; i--) {

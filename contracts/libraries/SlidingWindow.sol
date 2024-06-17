@@ -43,18 +43,14 @@ library FullSlidingWindow {
         }
     }
 
-    function _calculateSlot(SlidingWindowState storage self, uint256 blockNumber) private view returns (uint8) {
+    function _calculateSlot(SlidingWindowState storage self, uint256 blockNumber) private view returns (uint8 slot) {
         unchecked {
             uint256 startblockNumberCache = self._startBlockNumber;
             uint40 blockPerYearCache = self._blockPerEra;
             if (blockNumber > startblockNumberCache) {
-                return
-                    uint8(
-                        ((blockNumber - startblockNumberCache) % blockPerYearCache) /
-                            (blockPerYearCache / self._slotSize)
-                    );
-            } else {
-                return 0;
+                slot = uint8(
+                    ((blockNumber - startblockNumberCache) % blockPerYearCache) / (blockPerYearCache / self._slotSize)
+                );
             }
         }
     }
