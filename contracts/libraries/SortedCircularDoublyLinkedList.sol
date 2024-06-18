@@ -7,7 +7,7 @@ pragma solidity >=0.5.0 <0.9.0;
 // https://github.com/o0ragman0o/LibCLL/blob/master/
 // https://github.com/vittominacori/solidity-linked-list/
 
-library CircularDoublyLinkedList {
+library SortedCircularDoublyLinkedList {
     struct List {
         uint256 _size;
         mapping(uint256 => mapping(bool => uint256)) _nodes;

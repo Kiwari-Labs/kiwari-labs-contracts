@@ -5,7 +5,7 @@ pragma solidity >=0.5.0 <0.9.0;
 /// @author Kiwari Labs
 /// @notice This version reduce gas by remove embedded bytes data from node and less overhead compared to the original version.
 
-library CircularDoublyLinkedList {
+library SortedCircularDoublyLinkedList {
     struct List {
         uint256 _size;
         mapping(uint256 => mapping(bool => uint256)) _nodes;

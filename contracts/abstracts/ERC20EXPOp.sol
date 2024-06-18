@@ -12,13 +12,13 @@ import "../interfaces/ISlidingWindow.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
-    using CircularDoublyLinkedList for CircularDoublyLinkedList.List;
+    using SortedCircularDoublyLinkedList for SortedCircularDoublyLinkedList.List;
     using SlidingWindow for SlidingWindow.SlidingWindowState;
 
     struct Slot {
         uint256 slotBalance;
         mapping(uint256 => uint256) blockBalances;
-        CircularDoublyLinkedList.List list;
+        SortedCircularDoublyLinkedList.List list;
     }
 
     mapping(address => bool) private _wholeSale;
@@ -193,7 +193,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         Slot storage _sender = _retailBalances[from][fromEra][fromSlot];
         uint256 fromBalance = balanceOf(from);
         // require(fromBalance >= value, "ERC20: transfer amount exceeds balance");
-        if( fromBalance < value) {
+        if (fromBalance < value) {
             revert ERC20InsufficientBalance();
         }
         uint256 key = _getFirstUnexpiredBlockBalance(
@@ -250,7 +250,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         }
         // require(value == 0, "ERC20: transfer amount exceeds balance");
         if (value > 0) {
-         revert ERC20InsufficientBalance();
+            revert ERC20InsufficientBalance();
         }
     }
 

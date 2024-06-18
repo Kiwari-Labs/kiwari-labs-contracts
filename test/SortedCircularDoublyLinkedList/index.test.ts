@@ -6,7 +6,7 @@ import * as Removal from "./Removal.test";
 import * as Integration from "./Integration.test";
 
 export const run = async () => {
-  describe("CircularDoublyLinkedList", async function () {
+  describe("SortedCircularDoublyLinkedList", async function () {
     General.run();
     Insertion.run();
     Sorting.run();
