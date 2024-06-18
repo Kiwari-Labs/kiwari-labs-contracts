@@ -20,9 +20,14 @@ library CircularDoublyLinkedList {
     /// @dev This function checks if a node exists in the list by the specified index.
     /// @param self The list.
     /// @param index The index of the node to check for existence.
-    /// @return result if the node exists, false otherwise.
+    /// @return result if the node exists true if exist, false otherwise.
     function exist(List storage self, uint256 index) internal view returns (bool result) {
-        result = (self._nodes[index][PREV] > 0 || self._nodes[SENTINEL][NEXT] == index);
+        // @TODO change to sload inline-assembly.
+        uint256 tmpBeforeIndex = self._nodes[index][PREV];
+        uint256 tmpHead = self._nodes[SENTINEL][NEXT];
+        assembly {
+            result := or(eq(tmpHead, index), gt(tmpBeforeIndex, 0))
+        }
     }
 
     /// @notice Insert data into the list at the specified index.
@@ -30,9 +35,10 @@ library CircularDoublyLinkedList {
     /// @param self The list.
     /// @param index The index at which to insert the data.
     function insert(List storage self, uint256 index) internal {
+        // @TODO make it into inline-assembly.
         if (!exist(self, index)) {
-            uint256 tmpHead = self._nodes[SENTINEL][NEXT];
             uint256 tmpTail = self._nodes[SENTINEL][PREV];
+            uint256 tmpHead = self._nodes[SENTINEL][NEXT];
             if (self._size == 0) {
                 self._nodes[SENTINEL][NEXT] = index;
                 self._nodes[SENTINEL][PREV] = index;
@@ -50,17 +56,17 @@ library CircularDoublyLinkedList {
                 self._nodes[index][NEXT] = SENTINEL;
             } else {
                 uint256 current = tmpHead;
-                while (index > current) {
-                    current = self._nodes[current][NEXT];
+                while (index > tmpHead) {
+                    tmpHead = self._nodes[tmpHead][NEXT];
                 }
                 uint256 prev = self._nodes[current][PREV];
                 self._nodes[prev][NEXT] = index;
-                self._nodes[current][PREV] = index;
                 self._nodes[index][PREV] = prev;
+                self._nodes[current][PREV] = index;
                 self._nodes[index][NEXT] = current;
             }
-            unchecked {
-                self._size++;
+            assembly {
+                sstore(self.slot, add(sload(self.slot), 1))
             }
         }
     }
@@ -71,17 +77,17 @@ library CircularDoublyLinkedList {
     /// @param index The index of the node to remove.
     function remove(List storage self, uint256 index) internal {
         // Check if the node exists and the index is valid.
+        // @TODO make it into inline-assembly.
         if (exist(self, index)) {
             // remove the node from between existing nodes.
+            self._nodes[index][NEXT] = SENTINEL;
+            self._nodes[index][PREV] = SENTINEL;
             uint256 tmpPrev = self._nodes[index][PREV];
             uint256 tmpNext = self._nodes[index][NEXT];
             self._nodes[tmpPrev][NEXT] = tmpNext;
             self._nodes[tmpNext][PREV] = tmpPrev;
-            self._nodes[index][PREV] = SENTINEL;
-            self._nodes[index][NEXT] = SENTINEL;
-            // Decrement the size of the list.
-            unchecked {
-                self._size--;
+            assembly {
+                sstore(self.slot, sub(sload(self.slot), 1))
             }
         }
     }
@@ -134,10 +140,11 @@ library CircularDoublyLinkedList {
     /// @param self The list.
     /// @return asc An array containing the indices of nodes in ascending order.
     function ascending(List storage self) internal view returns (uint256[] memory asc) {
+        // @TODO make it into inline-assembly.
         uint256 tmpSize = self._size;
         if (tmpSize > SENTINEL) {
-            asc = new uint256[](tmpSize);
             uint256 index;
+            asc = new uint256[](tmpSize);
             asc[SENTINEL] = self._nodes[index][NEXT];
             unchecked {
                 for (uint256 i = tmpSize - 1; i > SENTINEL; i--) {
@@ -154,10 +161,11 @@ library CircularDoublyLinkedList {
     /// @param self The list.
     /// @return des An array containing the indices of nodes in descending order.
     function descending(List storage self) internal view returns (uint256[] memory des) {
+        // @TODO make it into inline-assembly.
         uint256 tmpSize = self._size;
         if (tmpSize > SENTINEL) {
-            des = new uint256[](tmpSize);
             uint256 index;
+            des = new uint256[](tmpSize);
             des[SENTINEL] = self._nodes[index][PREV];
             unchecked {
                 for (uint256 i = tmpSize - 1; i > SENTINEL; i--) {
@@ -174,6 +182,7 @@ library CircularDoublyLinkedList {
     /// @param self The list.
     /// @return part An array containing the indices of nodes in the first partition.
     function firstPartition(List storage self) internal view returns (uint256[] memory part) {
+        // @TODO make it into inline-assembly.
         uint256 tmpSize = self._size;
         if (tmpSize > SENTINEL) {
             unchecked {
@@ -195,6 +204,7 @@ library CircularDoublyLinkedList {
     /// @param self The list.
     /// @return part An array containing the indices of nodes in the second partition.
     function secondPartition(List storage self) internal view returns (uint256[] memory part) {
+        // @TODO make it into inline-assembly.
         uint256 tmpSize = self._size;
         if (tmpSize > SENTINEL) {
             // To fix the indivisible calculation.
@@ -222,6 +232,7 @@ library CircularDoublyLinkedList {
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes from the starting node to the head.
     function pathToHead(List storage self, uint256 start) internal view returns (uint256[] memory part) {
+        // @TODO make it into inline-assembly.
         if (!exist(self, start)) {
             return part;
         }
@@ -248,6 +259,7 @@ library CircularDoublyLinkedList {
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes from the starting node to the tail.
     function pathToTail(List storage self, uint256 start) internal view returns (uint256[] memory part) {
+        // @TODO make it into inline-assembly.
         if (!exist(self, start)) {
             return part;
         }
@@ -274,6 +286,7 @@ library CircularDoublyLinkedList {
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes.
     function partition(List storage self, uint256 start) internal view returns (uint256[] memory part) {
+        // @TODO make it into inline-assembly.
         if (!exist(self, start)) {
             return part;
         }

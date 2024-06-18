@@ -27,13 +27,14 @@ library SlidingWindow {
     error InvalidFrameSize();
 
     function _frameBuffer(uint256 era, uint8 slot) private pure returns (uint256, uint8) {
-        unchecked {
-            if (era > 0 && slot > 0) {
-                if (slot < 3) {
-                    slot--;
-                } else {
-                    era--;
-                    slot = (SLOT_PER_ERA - 1);
+        assembly {
+            if and(gt(era, 0), gt(slot, 0)) {
+                if lt(slot, 3) {
+                    slot := sub(slot, 1)
+                }
+                if gt(slot, 3) {
+                    era := sub(era, 1)
+                    slot := sub(SLOT_PER_ERA, 1)
                 }
             }
         }
@@ -44,10 +45,15 @@ library SlidingWindow {
         unchecked {
             value = self._startBlockNumber;
             // Calculate era based on the difference between the current block and start block
-            if (value > 0 && blockNumber > value) {
-                return (blockNumber - value) / self._blockPerEra;
-            } else {
-                return 0;
+            uint256 blockPerEraCache = self._blockPerEra;
+            assembly {
+                switch and(gt(value, 0), gt(blockNumber, value))
+                case 1 {
+                    value := div(sub(blockNumber, value), blockPerEraCache)
+                }
+                default {
+                    value := 0
+                }
             }
         }
     }
@@ -56,10 +62,17 @@ library SlidingWindow {
         unchecked {
             uint256 startblockNumberCache = self._startBlockNumber;
             uint40 blockPerYearCache = self._blockPerEra;
-            if (blockNumber > startblockNumberCache) {
-                slot = uint8(
-                    ((blockNumber - startblockNumberCache) % blockPerYearCache) / (blockPerYearCache >> TWO_BITS)
-                );
+            assembly {
+                switch gt(blockNumber, startblockNumberCache)
+                case 1 {
+                    slot := div(
+                        mod(sub(blockNumber, startblockNumberCache), blockPerYearCache),
+                        shr(2, blockPerYearCache)
+                    )
+                }
+                default {
+                    slot := 0
+                }
             }
         }
     }
