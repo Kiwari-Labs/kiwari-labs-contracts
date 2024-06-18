@@ -40,3 +40,7 @@ yarn test
 - [] [improvement](https://github.com/MASDXI/ERC20EXP/issues/4#issue-2234558942)
 - [] unit test all function
 - [] acceptance/e2e test
+
+## License
+
+All ERC20EXP code Copyright (C) Kiwari Labs. All rights reserved.
