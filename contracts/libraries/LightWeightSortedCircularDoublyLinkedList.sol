@@ -92,6 +92,27 @@ library CircularDoublyLinkedList {
         }
     }
 
+    /// @notice Shrinks the list by removing all nodes before the specified index.
+    /// @dev This function updates the head of the list to the specified index, removing all previous nodes.
+    /// @param self The list.
+    /// @param index The index from which to shrink the list. All nodes before this index will be removed.
+    function shrink(List storage self, uint256 index) internal {
+        if (exist(self, index)) {
+            uint256 current = self._nodes[SENTINEL][NEXT];
+            while (current != index) {
+                uint256 nextNode = self._nodes[current][NEXT];
+                self._nodes[current][NEXT] = SENTINEL;
+                self._nodes[current][PREV] = SENTINEL;
+                assembly {
+                    sstore(self.slot, sub(sload(self.slot), 1))
+                }
+                current = nextNode;
+            }
+            self._nodes[SENTINEL][NEXT] = index;
+            self._nodes[index][PREV] = SENTINEL;
+        }
+    }
+
     /// @notice Get the index of the head node in the list.
     /// @dev This function returns the index of the head node in the list.
     /// @param self The list.

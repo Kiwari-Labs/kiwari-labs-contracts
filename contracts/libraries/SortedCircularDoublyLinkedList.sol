@@ -67,8 +67,8 @@ library CircularDoublyLinkedList {
                 self._nodes[index][NEXT] = current;
                 self._data[index] = data;
             }
-            assembly {
-                sstore(self.slot, add(sload(self.slot), 1))
+            unchecked {
+                self._size++;
             }
         }
     }
@@ -83,14 +83,36 @@ library CircularDoublyLinkedList {
             // remove the node from between existing nodes.
             uint256 tmpPrev = self._nodes[index][PREV];
             uint256 tmpNext = self._nodes[index][NEXT];
+            self._nodes[tmpPrev][NEXT] = tmpNext;
+            self._nodes[tmpNext][PREV] = tmpPrev;
             self._nodes[index][NEXT] = SENTINEL;
             self._nodes[index][PREV] = SENTINEL;
             self._data[index] = abi.encode(bytes(""));
-            self._nodes[tmpPrev][NEXT] = tmpNext;
-            self._nodes[tmpNext][PREV] = tmpPrev;
-            assembly {
-                sstore(self.slot, sub(sload(self.slot), 1))
+            unchecked {
+                self._size--;
             }
+        }
+    }
+
+    /// @notice Shrinks the list by removing all nodes before the specified index.
+    /// @dev This function updates the head of the list to the specified index, removing all previous nodes.
+    /// @param self The list.
+    /// @param index The index from which to shrink the list. All nodes before this index will be removed.
+    function shrink(List storage self, uint256 index) internal {
+        if (exist(self, index)) {
+            uint256 current = self._nodes[SENTINEL][NEXT];
+            while (current != index) {
+                uint256 nextNode = self._nodes[current][NEXT];
+                self._nodes[current][NEXT] = SENTINEL;
+                self._nodes[current][PREV] = SENTINEL;
+                self._data[current] = abi.encode(bytes(""));
+                unchecked {
+                    self._size--;
+                }
+                current = nextNode;
+            }
+            self._nodes[SENTINEL][NEXT] = index;
+            self._nodes[index][PREV] = SENTINEL;
         }
     }
 
