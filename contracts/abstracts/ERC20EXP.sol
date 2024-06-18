@@ -55,14 +55,14 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint256 era,
         uint8 startSlot,
         uint8 endSlot
-    ) private view returns (uint256 balanceCache) {
+    ) private view returns (uint256 balance) {
         unchecked {
             while (startSlot <= endSlot) {
-                balanceCache += _retailBalances[account][era][startSlot].slotBalance;
+                balance += _retailBalances[account][era][startSlot].slotBalance;
                 startSlot++;
             }
         }
-        return balanceCache;
+        return balance;
     }
 
     function _blockNumberProvider() internal view virtual returns (uint256) {
@@ -70,40 +70,25 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     }
 
     /// @custom:inefficientgasusedappetite heavy loop through array of blockindexed in wrostcase
-    function _bufferSlotBalance(address account, uint256 era, uint8 slot) private view returns (uint256 balanceCache) {
+    function _bufferSlotBalance(
+        address account,
+        uint256 era,
+        uint8 slot,
+        uint256 blockNumber
+    ) private view returns (uint256 balance) {
         Slot storage _spender = _retailBalances[account][era][slot];
-        // If the latest block is zero or outside the expiration period, skip entrie slot return 0.
-        uint256 lastestBlockCache = _spender.list.tail();
-        uint256 blockNumberCache = _blockNumberProvider();
-        uint256 expirationPeriodInBlockLengthCache = _slidingWindow.getFrameSizeInBlockLength();
-        // If the latest block is outside the expiration period, skip entrie slot return 0.
+        uint256 frameSizeInBlockLengthCache = _slidingWindow.getFrameSizeInBlockLength();
+        uint256[] memory ascendingList = _spender.list.ascending();
+        uint256 length = ascendingList.length;
         unchecked {
-            if (blockNumberCache - lastestBlockCache >= expirationPeriodInBlockLengthCache) {
-                return 0;
+            for (uint256 i = 0; i < length; i++) {
+                uint256 blockKey = ascendingList[i];
+                if (blockNumber - blockKey <= frameSizeInBlockLengthCache) {
+                    balance += _spender.blockBalances[blockKey];
+                }
             }
         }
-        uint256[] memory arrayCache = _spender.list.ascending();
-        uint256 key = _getFirstUnexpiredBlockBalance(arrayCache, blockNumberCache, expirationPeriodInBlockLengthCache);
-        // perfrom resize to zero reuse the array memory variable
-        assembly {
-            mstore(arrayCache, 0)
-        }
-        // Calculate the total balance using only the valid blocks.
-        arrayCache = _spender.list.pathToTail(key);
-        uint256 lenght = arrayCache.length;
-        if (lenght == 0) {
-            return 0;
-        }
-        unchecked {
-            balanceCache += _spender.blockBalances[arrayCache[0]];
-            uint index = arrayCache.length - 1;
-            while (index > 0) {
-                key = arrayCache[index];
-                balanceCache += _spender.blockBalances[key];
-                index--;
-            }
-        }
-        return balanceCache;
+        return balance;
     }
 
     // if first index invalid move next till found valid key return index as key.
@@ -127,25 +112,26 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     }
 
     /// @notice it's optimized assume fromEra and fromSlot already buffered, gap betaween fromEra to toEra
-    /// use slotBalance and sum to _balanceCache.
+    /// use slotBalance and sum to balance.
     /// @dev Return available balance from the given account, eras, and slots.
     /// @param account The address of the account for which the balance is being queried.
     /// @param fromEra The starting era for the balance lookup.
     /// @param toEra The ending era for the balance lookup.
     /// @param fromSlot The starting slot within the starting era for the balance lookup.
     /// @param toSlot The ending slot within the ending era for the balance lookup.
-    /// @return uint256 The available balance.
+    /// @param blockNumber The current blocknumber.
+    /// @return balance The available balance.
     function _lookBackBalance(
         address account,
         uint256 fromEra,
         uint256 toEra,
         uint8 fromSlot,
-        uint8 toSlot
-    ) internal view returns (uint256) {
-        if (fromEra == 0 && toEra == 0) {
-            return _bufferSlotBalance(account, 0, 0);
+        uint8 toSlot,
+        uint256 blockNumber
+    ) internal view returns (uint256 balance) {
+        if (fromEra & toEra == 0) {
+            return _bufferSlotBalance(account, 0, 0, blockNumber);
         } else {
-            uint256 balanceCache;
             uint256 index;
             // totalBlockBalance calcurate only buffer era/slot.
             // keep it simple stupid first by spliting into 3 part then sum.
@@ -153,23 +139,23 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             unchecked {
                 for (index = fromSlot; index < 4; index++) {
                     if (index == fromSlot) {
-                        balanceCache += _bufferSlotBalance(account, fromEra, uint8(index));
+                        balance += _bufferSlotBalance(account, fromEra, uint8(index), blockNumber);
                     } else {
-                        balanceCache += _retailBalances[account][fromEra][uint8(index)].slotBalance;
+                        balance += _retailBalances[account][fromEra][uint8(index)].slotBalance;
                     }
                 }
             }
             // part2: calulate balance betaween fromEra and toEra in naive way O(n)
             unchecked {
                 for (index = fromEra + 1; index < toEra; index++) {
-                    balanceCache += _slotBalance(account, index, 0, 4);
+                    balance += _slotBalance(account, index, 0, 4);
                 }
             }
             // part3:calulate balance at toEra in navie way O(n)
             unchecked {
-                balanceCache += _slotBalance(account, toEra, 0, toSlot);
+                balance += _slotBalance(account, toEra, 0, toSlot);
             }
-            return balanceCache;
+            return balance;
         }
     }
 
@@ -205,51 +191,39 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint256 fromEra,
         uint256 toEra,
         uint8 fromSlot,
-        uint8 toSlot
+        uint8 toSlot,
+        uint256 blockNumber
     ) internal {
-        uint256 blockNumberCache = _blockNumberProvider();
-        bytes memory emptyBytes = abi.encodePacked("");
         Slot storage _recipient = _retailBalances[to][toEra][toSlot];
         Slot storage _sender = _retailBalances[from][fromEra][fromSlot];
         uint256 fromBalance = balanceOf(from);
+        require(fromBalance >= value, "ERC20: transfer amount exceeds balance");
         uint256 key = _getFirstUnexpiredBlockBalance(
             _sender.list.ascending(),
-            blockNumberCache,
+            blockNumber,
             _slidingWindow.getFrameSizeInBlockLength()
         );
-        uint256 fristUnexpiredBlockBalance = _sender.blockBalances[key];
-        // v4.8 openzeppelin errror msg
-        require(fromBalance >= value, "ERC20: transfer amount exceeds balance");
-        // if slot empty move slot when move slot it's can be move to next era
-        if (fristUnexpiredBlockBalance < value) {
-            if (fristUnexpiredBlockBalance == 0) {
-                unchecked {
-                    if (fromSlot < 3) {
-                        fromSlot++;
-                    } else {
-                        fromSlot = 0;
-                        fromEra++;
-                    }
+        fromBalance = _sender.blockBalances[key];
+        if (fromBalance == 0) {
+            unchecked {
+                if (fromSlot < 3) {
+                    fromSlot++;
+                } else {
+                    fromSlot = 0;
+                    fromEra++;
                 }
             }
-            _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
         }
-        // if buffer slot greater than value not move to next slot or next era deduct balance
-        if (fristUnexpiredBlockBalance > value) {
+        if (fromBalance < value) {
+            _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
+        } else {
             unchecked {
                 _sender.blockBalances[key] -= value;
+                if (_sender.blockBalances[key] == 0) {
+                    _sender.list.remove(key);
+                }
                 _recipient.blockBalances[key] += value;
-                _recipient.list.insert(key, emptyBytes);
-            }
-        }
-        // if buffer slot can contain all value not move to next slot or next era
-        if (fristUnexpiredBlockBalance == value) {
-            unchecked {
-                _sender.blockBalances[key] = 0;
-                _sender.list.remove(key);
-                _recipient.blockBalances[key] += value;
-                _recipient.slotBalance += value;
-                _recipient.list.insert(key, emptyBytes);
+                _recipient.list.insert(key, abi.encode(""));
             }
         }
         emit Transfer(from, to, value);
@@ -264,7 +238,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint8 fromSlot,
         uint8 toSlot
     ) internal {
-        bytes memory emptyBytes = abi.encodePacked("");
         uint256 remainingValue = value;
         unchecked {
             for (uint256 era = fromEra; era <= toEra; era++) {
@@ -274,7 +247,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 for (uint8 slot = startSlot; slot <= endSlot; slot++) {
                     if (remainingValue == 0) break;
 
-                    remainingValue = _transferFromSlot(from, to, remainingValue, era, slot, emptyBytes);
+                    remainingValue = _transferFromSlot(from, to, remainingValue, era, slot, abi.encodePacked(""));
                 }
             }
         }
@@ -291,13 +264,12 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     ) internal returns (uint256) {
         Slot storage _sender = _retailBalances[from][era][slot];
         Slot storage _recipient = _retailBalances[to][era][slot];
-
         uint256[] memory blocks = _sender.list.ascending();
         unchecked {
-            for (uint256 i = 0; i < blocks.length && remainingValue > 0; i++) {
+            uint256 length = blocks.length;
+            for (uint256 i = 0; i < length && remainingValue > 0; i++) {
                 uint256 blockKey = blocks[i];
                 uint256 blockBalance = _sender.blockBalances[blockKey];
-
                 if (blockBalance > 0) {
                     if (blockBalance >= remainingValue) {
                         _sender.blockBalances[blockKey] -= remainingValue;
@@ -383,12 +355,9 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         require(!_wholeSale[to], "can't burn expirable token to non retail account");
         require(to != address(0), "ERC20: burn from the zero address");
         require(balanceOf(to) >= value, "ERC20: burn amount exceeds balance");
-        {
-            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(
-                _blockNumberProvider()
-            );
-            _updateRetailBalance(to, address(0), value, fromEra, toEra, fromSlot, toSlot);
-        }
+        uint256 blockNumberCache = _blockNumberProvider();
+        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumberCache);
+        _updateRetailBalance(to, address(0), value, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
     }
 
     /// @notice clear existing balance before, always perform force set receive balance to zero.
@@ -424,10 +393,9 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             /// @notice use _balances[account] as spendable balance and return only spendable balance.
             return _unSafeBalanceOf(account, true);
         } else {
-            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(
-                _blockNumberProvider()
-            );
-            return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot);
+            uint256 blockNumberCache = _blockNumberProvider();
+            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumberCache);
+            return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
         }
     }
 
@@ -454,7 +422,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 // handling case given invalid value always return zero.
                 return 0;
             } else {
-                return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot);
+                return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, _blockNumberProvider());
             }
         }
     }
@@ -476,9 +444,8 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             _transfer(from, to, value);
         } else {
             // declaration in else scope to avoid allocate memory for temporay varialbe if not need.
-            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(
-                _blockNumberProvider()
-            );
+            uint256 blockNumberCache = _blockNumberProvider();
+            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumberCache);
             if (isFromWholeSale && !isToWholeSale) {
                 // consolidate by burning wholesale spendable balance and mint expirable to retail balance.
                 _burn(from, value);
@@ -490,7 +457,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 _mintWholeSale(to, value, false);
             }
             if (!isFromWholeSale && !isToWholeSale) {
-                _updateRetailBalance(from, to, value, fromEra, toEra, fromSlot, toSlot);
+                _updateRetailBalance(from, to, value, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
             }
         }
         // hook after transfer

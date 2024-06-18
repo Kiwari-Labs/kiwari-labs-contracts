@@ -81,7 +81,7 @@ This contract creates an abstract implementation that adopts the sliding window 
 
     mapping(address => mapping(uint256 => mapping(uint8 => Slot))) private _balances;
 ```
-With this struct `Slot` it's providing abstract loop in horizontal way more efficient to calculate usable balance of the account because it's provide `slotBalance` so
+With this struct `Slot` it's providing abstract loop in horizontal way more efficient to calculate usable balance of the account because it's provide `slotBalance` which is act as suffix balance so  
 you don't need to get to iterate or traversal over the `list` for each `Slot` to calculate the entire slot balance if the slot can presume not expire. otherwise struct `Slot` also providing vertical in a sorted list.
 
 ##### Buffer Slot
