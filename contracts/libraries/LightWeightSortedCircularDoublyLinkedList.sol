@@ -55,14 +55,14 @@ library CircularDoublyLinkedList {
                 self._nodes[index][PREV] = tmpTail;
                 self._nodes[index][NEXT] = SENTINEL;
             } else {
-                uint256 current = tmpHead;
-                while (index > tmpHead) {
-                    tmpHead = self._nodes[tmpHead][NEXT];
+                uint256 current = self._nodes[SENTINEL][NEXT];
+                while (index > current) {
+                    current = self._nodes[current][NEXT];
                 }
-                uint256 prev = self._nodes[current][PREV];
-                self._nodes[prev][NEXT] = index;
-                self._nodes[index][PREV] = prev;
+                uint256 prevCurrent = self._nodes[current][PREV];
+                self._nodes[prevCurrent][NEXT] = index;
                 self._nodes[current][PREV] = index;
+                self._nodes[index][PREV] = prevCurrent;
                 self._nodes[index][NEXT] = current;
             }
             assembly {
@@ -80,10 +80,10 @@ library CircularDoublyLinkedList {
         // @TODO make it into inline-assembly.
         if (exist(self, index)) {
             // remove the node from between existing nodes.
-            self._nodes[index][NEXT] = SENTINEL;
-            self._nodes[index][PREV] = SENTINEL;
             uint256 tmpPrev = self._nodes[index][PREV];
             uint256 tmpNext = self._nodes[index][NEXT];
+            self._nodes[index][NEXT] = SENTINEL;
+            self._nodes[index][PREV] = SENTINEL;
             self._nodes[tmpPrev][NEXT] = tmpNext;
             self._nodes[tmpNext][PREV] = tmpPrev;
             assembly {

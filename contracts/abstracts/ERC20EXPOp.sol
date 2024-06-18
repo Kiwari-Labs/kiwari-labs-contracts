@@ -6,7 +6,7 @@ pragma solidity >=0.5.0 <0.9.0;
 /// @notice This abstract contract implementing Light Weight Sliding Window and Light Sorted Circular Doubly Linked List.
 
 import "../libraries/LightWeightSlidingWindow.sol";
-import "../libraries/LightSortedCircularDoublyLinkedList.sol";
+import "../libraries/LightWeightSortedCircularDoublyLinkedList.sol";
 import "../interfaces/IERC20EXP.sol";
 import "../interfaces/ISlidingWindow.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";

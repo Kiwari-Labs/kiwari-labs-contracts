@@ -38,10 +38,6 @@ contract MockCircularDoublyLinkedList {
         return CircularDoublyLinkedList.tail(_list);
     }
 
-    function guard() public view returns (uint256[2] memory) {
-        return CircularDoublyLinkedList.guard(_list);
-    }
-
     function node(uint256 index) public view returns (uint256 prev, bytes memory data, uint256 next) {
         return CircularDoublyLinkedList.node(_list, index);
     }
