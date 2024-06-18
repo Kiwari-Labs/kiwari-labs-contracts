@@ -26,25 +26,9 @@ library SlidingWindow {
     error InvalidBlockTime();
     error InvalidFrameSize();
 
-    function _frameBuffer(uint256 era, uint8 slot) private pure returns (uint256, uint8) {
-        assembly {
-            if and(gt(era, 0), gt(slot, 0)) {
-                if lt(slot, 3) {
-                    slot := sub(slot, 1)
-                }
-                if gt(slot, 3) {
-                    era := sub(era, 1)
-                    slot := sub(SLOT_PER_ERA, 1)
-                }
-            }
-        }
-        return (era, slot);
-    }
-
     function calculateEra(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint256 value) {
         unchecked {
             value = self._startBlockNumber;
-            // Calculate era based on the difference between the current block and start block
             uint256 blockPerEraCache = self._blockPerEra;
             assembly {
                 switch and(gt(value, 0), gt(blockNumber, value))
@@ -67,7 +51,7 @@ library SlidingWindow {
                 case 1 {
                     slot := div(
                         mod(sub(blockNumber, startblockNumberCache), blockPerYearCache),
-                        shr(2, blockPerYearCache)
+                        shr(TWO_BITS, blockPerYearCache)
                     )
                 }
                 default {
@@ -114,10 +98,8 @@ library SlidingWindow {
         blocks = getFrameSizeInBlockLength(self);
         unchecked {
             if (blockNumber < blocks) {
-                // If the current block is within the expiration period
                 blocks = blockNumber;
             } else {
-                // If the current block is beyond the expiration period
                 blocks = blockNumber - blocks;
             }
         }
@@ -138,7 +120,17 @@ library SlidingWindow {
         uint256 blockNumber
     ) internal view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
         (fromEra, toEra, fromSlot, toSlot) = frame(self, blockNumber);
-        (fromEra, fromSlot) = _frameBuffer(fromEra, fromSlot);
+        assembly {
+            if and(gt(fromEra, 0), gt(fromSlot, 0)) {
+                if lt(fromSlot, 3) {
+                    fromSlot := sub(fromSlot, 1)
+                }
+                if eq(fromSlot, 3) {
+                    fromEra := sub(fromEra, 1)
+                    fromSlot := sub(SLOT_PER_ERA, 1)
+                }
+            }
+        }
         return (fromEra, toEra, fromSlot, toSlot);
     }
 
