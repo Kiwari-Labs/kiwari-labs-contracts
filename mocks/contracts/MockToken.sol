@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.5.0 <0.9.0;
 
-import "../../contracts/abstracts/ERC20EXPOp.sol";
+import "../../contracts/abstracts/ERC20EXP.sol";
 
 contract MockToken is ERC20Expirable {
     constructor(

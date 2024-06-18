@@ -18,6 +18,7 @@ library SortedCircularDoublyLinkedList {
     uint8 private constant SENTINEL = 0;
     bool private constant PREV = false;
     bool private constant NEXT = true;
+    bytes private constant EMPTY = abi.encode("");
 
     /// @notice Check if a node exists in the list.
     /// @dev This function checks if a node exists in the list by the specified index.
@@ -87,7 +88,7 @@ library SortedCircularDoublyLinkedList {
             self._nodes[tmpNext][PREV] = tmpPrev;
             self._nodes[index][NEXT] = SENTINEL;
             self._nodes[index][PREV] = SENTINEL;
-            self._data[index] = abi.encode(bytes(""));
+            self._data[index] = EMPTY;
             unchecked {
                 self._size--;
             }
@@ -105,7 +106,7 @@ library SortedCircularDoublyLinkedList {
                 uint256 nextNode = self._nodes[current][NEXT];
                 self._nodes[current][NEXT] = SENTINEL;
                 self._nodes[current][PREV] = SENTINEL;
-                self._data[current] = abi.encode(bytes(""));
+                self._data[current] = EMPTY;
                 unchecked {
                     self._size--;
                 }
