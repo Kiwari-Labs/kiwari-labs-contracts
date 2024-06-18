@@ -44,12 +44,13 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     /// @dev return available balance from given account.
     /// @param account The address of the account for which the balance is being queried.
     /// @param unsafe The boolean flag for select which balance type is being queried.
-    /// @return uint256 return available balance.
-    function _unSafeBalanceOf(address account, bool unsafe) private view returns (uint256) {
-        if (unsafe) {
-            return _receiveBalances[account] + super.balanceOf(account);
-        } else {
-            return super.balanceOf(account);
+    /// @return balance return available balance.
+    function _unSafeBalanceOf(address account, bool unsafe) private view returns (uint256 balance) {
+        balance = super.balanceOf(account);
+        unchecked {
+            if (unsafe) {
+                balance += _receiveBalances[account];
+            }
         }
     }
 
@@ -65,7 +66,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 startSlot++;
             }
         }
-        return balance;
     }
 
     function _blockNumberProvider() internal view virtual returns (uint256) {
@@ -91,7 +91,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 }
             }
         }
-        return balance;
     }
 
     // if first index invalid move next till found valid key return index as key.
@@ -111,7 +110,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 }
             }
         }
-        return key;
     }
 
     /// @notice it's optimized assume fromEra and fromSlot already buffered, gap betaween fromEra to toEra
@@ -132,9 +130,9 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint8 toSlot,
         uint256 blockNumber
     ) internal view returns (uint256 balance) {
-        if (fromEra & toEra == 0) {
-            return _bufferSlotBalance(account, 0, 0, blockNumber);
-        } else {
+        if ((fromEra & toEra) == 0) {
+            balance = _bufferSlotBalance(account, 0, 0, blockNumber);
+        } else if (fromEra < toEra) {
             uint256 index;
             // totalBlockBalance calcurate only buffer era/slot.
             // keep it simple stupid first by spliting into 3 part then sum.
@@ -158,7 +156,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             unchecked {
                 balance += _slotBalance(account, toEra, 0, toSlot);
             }
-            return balance;
         }
     }
 
@@ -206,13 +203,14 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             _slidingWindow.getFrameSizeInBlockLength()
         );
         fromBalance = _sender.blockBalances[key];
-        if (fromBalance == 0) {
-            unchecked {
-                if (fromSlot < 3) {
-                    fromSlot++;
-                } else {
-                    fromSlot = 0;
-                    fromEra++;
+        assembly {
+            if iszero(fromBalance) {
+                if lt(fromSlot, 3) {
+                    fromSlot := add(fromSlot, 1)
+                }
+                if eq(fromSlot, 3) {
+                    fromSlot := 0
+                    fromEra := sub(fromEra, 1)
                 }
             }
         }
@@ -220,10 +218,11 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
         } else {
             unchecked {
-                _sender.blockBalances[key] -= value;
-                if (_sender.blockBalances[key] == 0) {
+                fromBalance -= value;
+                if (fromBalance == 0) {
                     _sender.list.remove(key);
                 }
+                _sender.blockBalances[key] = fromBalance;
                 _recipient.blockBalances[key] += value;
                 _recipient.list.insert(key);
             }
@@ -351,9 +350,9 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         require(!_wholeSale[to], "can't burn expirable token to non retail account");
         require(to != address(0), "ERC20: burn from the zero address");
         require(balanceOf(to) >= value, "ERC20: burn amount exceeds balance");
-        uint256 blockNumber = _blockNumberProvider();
-        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumber);
-        _updateRetailBalance(to, address(0), value, fromEra, toEra, fromSlot, toSlot, blockNumber);
+        uint256 blockNumberCache = _blockNumberProvider();
+        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumberCache);
+        _updateRetailBalance(to, address(0), value, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
     }
 
     /// @notice clear existing balance before, always perform force set receive balance to zero.
@@ -366,17 +365,17 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
 
     function revokeWholeSale(address to) public virtual {
         require(_wholeSale[to], "can't revoke non-wholesale");
-        _wholeSale[to] = false;
-        uint256 spendableBalance = super.balanceOf(to);
-        uint256 receiveBalance = _receiveBalances[to];
-        if (spendableBalance > 0) {
+        uint256 balance = super.balanceOf(to);
+        if (balance > 0) {
             // clean spendable balance
-            _burn(to, spendableBalance);
+            _burn(to, balance);
         }
-        if (_receiveBalances[to] > 0) {
+        uint256 receiveBalance = _receiveBalances[to];
+        if (receiveBalance > 0) {
             // clean receive balance
             _updateReceiveBalance(to, address(0), receiveBalance);
         }
+        _wholeSale[to] = false;
         emit GrantWholeSale(to, false);
     }
 
@@ -389,9 +388,9 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             /// @notice use _balances[account] as spendable balance and return only spendable balance.
             return _unSafeBalanceOf(account, true);
         } else {
-            uint256 blockNumber = _blockNumberProvider();
-            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumber);
-            return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, blockNumber);
+            uint256 blockNumberCache = _blockNumberProvider();
+            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumberCache);
+            return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
         }
     }
 
@@ -414,12 +413,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         if (_wholeSale[account]) {
             return _unSafeBalanceOf(account, true);
         } else {
-            if (fromEra > toEra) {
-                // handling case given invalid value always return zero.
-                return 0;
-            } else {
-                return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, _blockNumberProvider());
-            }
+            return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, _blockNumberProvider());
         }
     }
 
@@ -432,26 +426,24 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         address from = msg.sender;
         // hook before transfer
         _beforeTokenTransfer(from, to, value);
-        uint8 selector = (_wholeSale[to] ? 2 : 0) | (_wholeSale[from] ? 1 : 0);
-        if (selector == 3) {
-            // wholesale to wholesale transfer. in binary 11 if ( == 11)
-            _transfer(from, to, value);
+        uint256 selector = (_wholeSale[to] ? 2 : 0) | (_wholeSale[from] ? 1 : 0);
+        if (selector == 0) {
+            uint256 blockNumberCache = _blockNumberProvider();
+            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumberCache);
+            _updateRetailBalance(from, to, value, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
+        } else if (selector == 1) {
+            // consolidate by burning retail balance and mint non-expirable to whole receive balance.
+            _burnRetail(from, value);
+            _mintWholeSale(to, value, false);
+        } else if (selector == 2) {
+            // consolidate by burning wholesale spendable balance and mint expirable to retail balance.
+            _burn(from, value);
+            _mintRetail(to, value);
         } else {
-            // declaration in else scope to avoid allocate memory for temporary variable if not need.
-            uint256 blockNumber = _blockNumberProvider();
-            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumber);
-            if (selector == 2) {
-                // consolidate by burning wholesale spendable balance and mint expirable to retail balance.
-                _burn(from, value);
-                _mintRetail(to, value);
-            } else if (selector == 1) {
-                // consolidate by burning retail balance and mint non-expirable to whole receive balance.
-                _burnRetail(from, value);
-                _mintWholeSale(to, value, false);
-            } else {
-                _updateRetailBalance(from, to, value, fromEra, toEra, fromSlot, toSlot, blockNumber);
-            }
+            // wholesale to wholesale transfer.
+            _transfer(from, to, value);
         }
+
         // hook after transfer
         _afterTokenTransfer(from, to, value);
         return true;

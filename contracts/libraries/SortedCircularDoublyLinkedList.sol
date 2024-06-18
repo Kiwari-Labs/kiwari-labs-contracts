@@ -191,7 +191,6 @@ library SortedCircularDoublyLinkedList {
                 }
             }
         }
-        return asc;
     }
 
     /// @notice Get the indices of nodes in descending order.
@@ -211,7 +210,6 @@ library SortedCircularDoublyLinkedList {
                 }
             }
         }
-        return des;
     }
 
     /// @notice Get the indices of nodes in the first partition of the list.
@@ -230,9 +228,7 @@ library SortedCircularDoublyLinkedList {
                     index = part[i];
                 }
             }
-            return part;
         }
-        return part;
     }
 
     /// @notice Get the indices of nodes in the second partition of the list.
@@ -256,9 +252,7 @@ library SortedCircularDoublyLinkedList {
                     index = part[i];
                 }
             }
-            return part;
         }
-        return part;
     }
 
     /// @notice Get the path of indices from a specified node to the head of the list.
@@ -284,7 +278,6 @@ library SortedCircularDoublyLinkedList {
         assembly {
             mstore(part, counter) // Set the array length to the actual count.
         }
-        return part;
     }
 
     /// @notice Get the path of indices from a specified node to the tail of the list.
@@ -310,7 +303,6 @@ library SortedCircularDoublyLinkedList {
         assembly {
             mstore(part, counter) // Set the array length to the actual count.
         }
-        return part;
     }
 
     /// @notice Get the indices starting from a specified node and wrapping around to the beginning if necessary.
@@ -335,6 +327,5 @@ library SortedCircularDoublyLinkedList {
                 }
             }
         }
-        return part;
     }
 }

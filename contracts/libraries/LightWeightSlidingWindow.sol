@@ -88,7 +88,6 @@ library SlidingWindow {
     ) internal view returns (uint256 era, uint8 slot) {
         era = calculateEra(self, blockNumber);
         slot = calculateSlot(self, blockNumber);
-        return (era, slot);
     }
 
     function calculateBlockDifferent(
@@ -112,7 +111,6 @@ library SlidingWindow {
         (toEra, toSlot) = calculateEraAndSlot(self, blockNumber);
         blockNumber = calculateBlockDifferent(self, blockNumber);
         (fromEra, fromSlot) = calculateEraAndSlot(self, blockNumber);
-        return (fromEra, toEra, fromSlot, toSlot);
     }
 
     function safeFrame(
@@ -131,7 +129,6 @@ library SlidingWindow {
                 }
             }
         }
-        return (fromEra, toEra, fromSlot, toSlot);
     }
 
     function getBlockPerEra(SlidingWindowState storage self) internal view returns (uint40) {

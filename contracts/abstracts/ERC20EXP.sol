@@ -41,12 +41,13 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     /// @dev return available balance from given account.
     /// @param account The address of the account for which the balance is being queried.
     /// @param unsafe The boolean flag for select which balance type is being queried.
-    /// @return uint256 return available balance.
-    function _unSafeBalanceOf(address account, bool unsafe) private view returns (uint256) {
-        if (unsafe) {
-            return _receiveBalances[account] + super.balanceOf(account);
-        } else {
-            return super.balanceOf(account);
+    /// @return balance return available balance.
+    function _unSafeBalanceOf(address account, bool unsafe) private view returns (uint256 balance) {
+        balance = super.balanceOf(account);
+        unchecked {
+            if (unsafe) {
+                balance += _receiveBalances[account];
+            }
         }
     }
 
@@ -62,7 +63,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 startSlot++;
             }
         }
-        return balance;
     }
 
     function _blockNumberProvider() internal view virtual returns (uint256) {
@@ -88,7 +88,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 }
             }
         }
-        return balance;
     }
 
     // if first index invalid move next till found valid key return index as key.
@@ -96,8 +95,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint256[] memory list,
         uint256 blockNumberCache,
         uint256 expirationPeriodInBlockLengthCache
-    ) private pure returns (uint256) {
-        uint256 key;
+    ) private pure returns (uint256 key) {
         unchecked {
             for (uint256 index = 0; index < list.length; index++) {
                 uint256 value = list[index];
@@ -108,7 +106,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 }
             }
         }
-        return key;
     }
 
     /// @notice it's optimized assume fromEra and fromSlot already buffered, gap betaween fromEra to toEra
@@ -130,8 +127,8 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint256 blockNumber
     ) internal view returns (uint256 balance) {
         if (fromEra & toEra == 0) {
-            return _bufferSlotBalance(account, 0, 0, blockNumber);
-        } else {
+            balance = _bufferSlotBalance(account, 0, 0, blockNumber);
+        } else if (fromEra < toEra) {
             uint256 index;
             // totalBlockBalance calcurate only buffer era/slot.
             // keep it simple stupid first by spliting into 3 part then sum.
@@ -155,7 +152,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             unchecked {
                 balance += _slotBalance(account, toEra, 0, toSlot);
             }
-            return balance;
         }
     }
 
@@ -418,12 +414,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         if (_wholeSale[account]) {
             return _unSafeBalanceOf(account, true);
         } else {
-            if (fromEra > toEra) {
-                // handling case given invalid value always return zero.
-                return 0;
-            } else {
-                return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, _blockNumberProvider());
-            }
+            return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, _blockNumberProvider());
         }
     }
 
