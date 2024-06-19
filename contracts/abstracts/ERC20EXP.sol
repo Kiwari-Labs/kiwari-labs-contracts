@@ -129,23 +129,22 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         if (fromEra & toEra == 0) {
             balance = _bufferSlotBalance(account, 0, 0, blockNumber);
         } else if (fromEra < toEra) {
-            uint256 index;
             // totalBlockBalance calcurate only buffer era/slot.
             // keep it simple stupid first by spliting into 3 part then sum.
             // part1: calulate balance at fromEra in naive in naive way O(n)
             unchecked {
-                for (index = fromSlot; index < 4; index++) {
-                    if (index == fromSlot) {
-                        balance += _bufferSlotBalance(account, fromEra, uint8(index), blockNumber);
+                for (uint8 i = fromSlot; i < 4; i++) {
+                    if (i == fromSlot) {
+                        balance += _bufferSlotBalance(account, fromEra, i, blockNumber);
                     } else {
-                        balance += _retailBalances[account][fromEra][uint8(index)].slotBalance;
+                        balance += _retailBalances[account][fromEra][i].slotBalance;
                     }
                 }
             }
             // part2: calulate balance betaween fromEra and toEra in naive way O(n)
             unchecked {
-                for (index = fromEra + 1; index < toEra; index++) {
-                    balance += _slotBalance(account, index, 0, 4);
+                for (uint256 j = fromEra + 1; j < toEra; j++) {
+                    balance += _slotBalance(account, j, 0, 4);
                 }
             }
             // part3:calulate balance at toEra in navie way O(n)
