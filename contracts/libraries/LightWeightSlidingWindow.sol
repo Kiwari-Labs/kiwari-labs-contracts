@@ -69,9 +69,11 @@ library SlidingWindow {
             revert InvalidFrameSize();
         }
         unchecked {
-            self._blockPerEra = YEAR_IN_MILLI_SECONDS / blockTime;
-            self._blockPerSlot = self._blockPerEra >> TWO_BITS;
-            self._frameSizeInBlockLength = self._blockPerSlot * frameSize;
+            uint40 blockPerEraCache = YEAR_IN_MILLI_SECONDS / blockTime;
+            uint40 blockPerSlotCache = blockPerEraCache >> TWO_BITS;
+            self._blockPerEra = blockPerEraCache;
+            self._blockPerSlot = blockPerSlotCache;
+            self._frameSizeInBlockLength = blockPerSlotCache * frameSize;
             if (frameSize <= SLOT_PER_ERA) {
                 self._frameSizeInEraAndSlotLength[0] = 0;
                 self._frameSizeInEraAndSlotLength[1] = frameSize;
@@ -94,12 +96,10 @@ library SlidingWindow {
         SlidingWindowState storage self,
         uint256 blockNumber
     ) internal view returns (uint256 blocks) {
-        blocks = getFrameSizeInBlockLength(self);
+        uint256 blockLenghtCache = getFrameSizeInBlockLength(self);
         unchecked {
-            if (blockNumber < blocks) {
-                blocks = blockNumber;
-            } else {
-                blocks = blockNumber - blocks;
+            if (blockNumber >= blockLenghtCache) {
+                blocks = blockNumber - blockLenghtCache;
             }
         }
     }
