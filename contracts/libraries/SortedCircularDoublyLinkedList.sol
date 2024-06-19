@@ -38,35 +38,40 @@ library SortedCircularDoublyLinkedList {
         if (!exist(self, index)) {
             uint256 tmpTail = self._nodes[SENTINEL][PREV];
             uint256 tmpHead = self._nodes[SENTINEL][NEXT];
+            self._data[index] = data;
             if (self._size == 0) {
                 self._nodes[SENTINEL][NEXT] = index;
                 self._nodes[SENTINEL][PREV] = index;
                 self._nodes[index][PREV] = SENTINEL;
                 self._nodes[index][NEXT] = SENTINEL;
-                self._data[index] = data;
             } else if (index < tmpHead) {
                 self._nodes[SENTINEL][NEXT] = index;
                 self._nodes[tmpHead][PREV] = index;
                 self._nodes[index][PREV] = SENTINEL;
                 self._nodes[index][NEXT] = tmpHead;
-                self._data[index] = data;
             } else if (index > tmpTail) {
                 self._nodes[SENTINEL][PREV] = index;
                 self._nodes[tmpTail][NEXT] = index;
                 self._nodes[index][PREV] = tmpTail;
                 self._nodes[index][NEXT] = SENTINEL;
-                self._data[index] = data;
             } else {
-                uint256 current = self._nodes[SENTINEL][NEXT];
-                while (index > current) {
-                    current = self._nodes[current][NEXT];
+                uint256 tmpCurr;
+                if (index - tmpHead <= tmpTail - index) {
+                    tmpCurr = tmpHead;
+                    while (index > tmpCurr) {
+                        tmpCurr = self._nodes[tmpCurr][NEXT];
+                    }
+                } else {
+                    tmpCurr = tmpTail;
+                    while (index < tmpCurr) {
+                        tmpCurr = self._nodes[tmpCurr][PREV];
+                    }
                 }
-                uint256 prevCurrent = self._nodes[current][PREV];
-                self._nodes[prevCurrent][NEXT] = index;
-                self._nodes[current][PREV] = index;
-                self._nodes[index][PREV] = prevCurrent;
-                self._nodes[index][NEXT] = current;
-                self._data[index] = data;
+                uint256 tmpPrev = self._nodes[tmpCurr][PREV];
+                self._nodes[tmpPrev][NEXT] = index;
+                self._nodes[tmpCurr][PREV] = index;
+                self._nodes[index][PREV] = tmpPrev;
+                self._nodes[index][NEXT] = tmpCurr;
             }
             unchecked {
                 self._size++;
@@ -101,16 +106,16 @@ library SortedCircularDoublyLinkedList {
     /// @param index The index from which to shrink the list. All nodes before this index will be removed.
     function shrink(List storage self, uint256 index) internal {
         if (exist(self, index)) {
-            uint256 current = self._nodes[SENTINEL][NEXT];
-            while (current != index) {
-                uint256 nextNode = self._nodes[current][NEXT];
-                self._nodes[current][NEXT] = SENTINEL;
-                self._nodes[current][PREV] = SENTINEL;
-                self._data[current] = EMPTY;
+            uint256 tmpCurr = self._nodes[SENTINEL][NEXT];
+            while (tmpCurr != index) {
+                uint256 tmpNext = self._nodes[tmpCurr][NEXT];
+                self._nodes[tmpCurr][NEXT] = SENTINEL;
+                self._nodes[tmpCurr][PREV] = SENTINEL;
+                self._data[tmpCurr] = EMPTY;
+                tmpCurr = tmpNext;
                 unchecked {
                     self._size--;
                 }
-                current = nextNode;
             }
             self._nodes[SENTINEL][NEXT] = index;
             self._nodes[index][PREV] = SENTINEL;
@@ -139,10 +144,12 @@ library SortedCircularDoublyLinkedList {
     /// @notice Get the index of the middle node in the list.
     /// @dev This function returns the index of the middle node in the list.
     /// @param self The list.
-    /// @return The index of the middle node.
-    function middle(List storage self) internal view returns (uint256) {
-        uint256[] memory tmpList = firstPartition(self);
-        return tmpList[tmpList.length - 1];
+    /// @return mid The index of the middle node.
+    function middle(List storage self) internal view returns (uint256 mid) {
+        if (self._size > 0) {
+            uint256[] memory tmpList = firstPartition(self);
+            mid = tmpList[tmpList.length - 1];
+        }
     }
 
     /// @notice Get the index of the tail node in the list.
@@ -221,7 +228,7 @@ library SortedCircularDoublyLinkedList {
         uint256 tmpSize = self._size;
         if (tmpSize > 0) {
             unchecked {
-                tmpSize = tmpSize >> ONE_BIT;
+                tmpSize = tmpSize == 1 ? tmpSize : tmpSize >> ONE_BIT;
                 part = new uint256[](tmpSize);
                 uint256 index;
                 for (uint256 i = 0; i < tmpSize; i++) {

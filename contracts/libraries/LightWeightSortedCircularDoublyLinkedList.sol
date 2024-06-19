@@ -23,10 +23,10 @@ library SortedCircularDoublyLinkedList {
     /// @return result if the node exists true if exist, false otherwise.
     function exist(List storage self, uint256 index) internal view returns (bool result) {
         // @TODO change to sload inline-assembly.
-        uint256 tmpBeforeIndex = self._nodes[index][PREV];
-        uint256 tmpHead = self._nodes[SENTINEL][NEXT];
+        uint256 tmpPrev = self._nodes[index][PREV];
+        uint256 tmpNext = self._nodes[SENTINEL][NEXT];
         assembly {
-            result := or(eq(tmpHead, index), gt(tmpBeforeIndex, 0))
+            result := or(eq(tmpNext, index), gt(tmpPrev, 0))
         }
     }
 
@@ -55,15 +55,23 @@ library SortedCircularDoublyLinkedList {
                 self._nodes[index][PREV] = tmpTail;
                 self._nodes[index][NEXT] = SENTINEL;
             } else {
-                uint256 current = self._nodes[SENTINEL][NEXT];
-                while (index > current) {
-                    current = self._nodes[current][NEXT];
+                uint256 tmpCurr;
+                if (index - tmpHead <= tmpTail - index) {
+                    tmpCurr = tmpHead;
+                    while (index > tmpCurr) {
+                        tmpCurr = self._nodes[tmpCurr][NEXT];
+                    }
+                } else {
+                    tmpCurr = tmpTail;
+                    while (index < tmpCurr) {
+                        tmpCurr = self._nodes[tmpCurr][PREV];
+                    }
                 }
-                uint256 prevCurrent = self._nodes[current][PREV];
-                self._nodes[prevCurrent][NEXT] = index;
-                self._nodes[current][PREV] = index;
-                self._nodes[index][PREV] = prevCurrent;
-                self._nodes[index][NEXT] = current;
+                uint256 tmpPrev = self._nodes[tmpCurr][PREV];
+                self._nodes[tmpPrev][NEXT] = index;
+                self._nodes[tmpCurr][PREV] = index;
+                self._nodes[index][PREV] = tmpPrev;
+                self._nodes[index][NEXT] = tmpCurr;
             }
             assembly {
                 sstore(self.slot, add(sload(self.slot), 1))
@@ -98,15 +106,15 @@ library SortedCircularDoublyLinkedList {
     /// @param index The index from which to shrink the list. All nodes before this index will be removed.
     function shrink(List storage self, uint256 index) internal {
         if (exist(self, index)) {
-            uint256 current = self._nodes[SENTINEL][NEXT];
-            while (current != index) {
-                uint256 nextNode = self._nodes[current][NEXT];
-                self._nodes[current][NEXT] = SENTINEL;
-                self._nodes[current][PREV] = SENTINEL;
+            uint256 tmpCurr = self._nodes[SENTINEL][NEXT];
+            while (tmpCurr != index) {
+                uint256 tmpNext = self._nodes[tmpCurr][NEXT];
+                self._nodes[tmpCurr][NEXT] = SENTINEL;
+                self._nodes[tmpCurr][PREV] = SENTINEL;
+                tmpCurr = tmpNext;
                 assembly {
                     sstore(self.slot, sub(sload(self.slot), 1))
                 }
-                current = nextNode;
             }
             self._nodes[SENTINEL][NEXT] = index;
             self._nodes[index][PREV] = SENTINEL;
@@ -124,8 +132,14 @@ library SortedCircularDoublyLinkedList {
     /// @notice Get the index of the middle node in the list.
     /// @dev This function returns the index of the middle node in the list.
     /// @param self The list.
-    /// @return The index of the middle node.
-    function middle(List storage self) internal view returns (uint256) {
+    /// @return mid The index of the middle node.
+    function middle(List storage self) internal view returns (uint256 mid) {
+        assembly {
+            mid := sload(self.slot)
+            if iszero(mid) {
+                return(0x00, 0x20)
+            }
+        }
         uint256[] memory tmpList = firstPartition(self);
         return tmpList[tmpList.length - 1];
     }
@@ -205,7 +219,7 @@ library SortedCircularDoublyLinkedList {
         uint256 tmpSize = self._size;
         if (tmpSize > SENTINEL) {
             unchecked {
-                tmpSize = tmpSize >> ONE_BIT;
+                tmpSize = tmpSize == 1 ? tmpSize : tmpSize >> ONE_BIT;
                 part = new uint256[](tmpSize);
                 uint256 index;
                 for (uint256 i = SENTINEL; i < tmpSize; i++) {
