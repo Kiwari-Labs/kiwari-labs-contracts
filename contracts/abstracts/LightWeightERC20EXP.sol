@@ -3,7 +3,7 @@ pragma solidity >=0.5.0 <0.9.0;
 
 /// @title ERC20EXP abstract contract
 /// @author Kiwari Labs
-/// @notice This abstract contract implementing Light Weight Sliding Window and Light Sorted Circular Doubly Linked List.
+/// @notice This abstract contract implementing Light Weight Sliding Window and Light Weight Sorted Circular Doubly Linked List.
 
 import "../libraries/LightWeightSlidingWindow.sol";
 import "../libraries/LightWeightSortedCircularDoublyLinkedList.sol";
@@ -54,6 +54,11 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         }
     }
 
+    /// @param account description
+    /// @param era description
+    /// @param startSlot description
+    /// @param endSlot description
+    /// @return balance description
     function _slotBalance(
         address account,
         uint256 era,
@@ -68,10 +73,16 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         }
     }
 
+    /// @return current block number.
     function _blockNumberProvider() internal view virtual returns (uint256) {
         return block.number;
     }
 
+    /// @param account description
+    /// @param era description
+    /// @param slot description
+    /// @param blockNumber current block number
+    /// @return balance in buffer slot.
     /// @custom:inefficientgasusedappetite heavy loop through array of blockindexed in wrostcase
     function _bufferSlotBalance(
         address account,
@@ -94,6 +105,10 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     }
 
     // if first index invalid move next till found valid key return index as key.
+    /// @param list list of block number in sorted list.
+    /// @param blockNumber current block number.
+    /// @param expirationPeriodInBlockLength block length
+    /// @return key valid index
     function _getFirstUnexpiredBlockBalance(
         uint256[] memory list,
         uint256 blockNumber,
@@ -180,6 +195,14 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         emit Transfer(from, to, value);
     }
 
+    /// @param from description
+    /// @param to description
+    /// @param value description
+    /// @param fromEra description
+    /// @param toEra description
+    /// @param fromSlot description
+    /// @param toSlot description
+    /// @param blockNumber description
     function _updateRetailBalance(
         address from,
         address to,
@@ -229,6 +252,13 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         emit Transfer(from, to, value);
     }
 
+    /// @param from description
+    /// @param to description
+    /// @param value description
+    /// @param fromEra description
+    /// @param toEra description
+    /// @param fromSlot description
+    /// @param toSlot description
     function _firstInFirstOutTransfer(
         address from,
         address to,
@@ -255,6 +285,12 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         }
     }
 
+    /// @param from description
+    /// @param to description
+    /// @param remainingValue description
+    /// @param era description
+    /// @param slot description
+    /// @return blockBalance description
     function _transferFromSlot(
         address from,
         address to,
@@ -354,7 +390,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         _updateRetailBalance(to, address(0), value, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
     }
 
-    /// @notice clear existing balance before, always perform force set receive balance to zero.
     /// @param to description
     function grantWholeSale(address to) public virtual {
         require(!_wholeSale[to], "can't grant exist wholesale");
@@ -362,6 +397,8 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         emit GrantWholeSale(to, true);
     }
 
+    /// @notice clear existing balance before, always perform force set receive balance to zero.
+    /// @param to description
     function revokeWholeSale(address to) public virtual {
         require(_wholeSale[to], "can't revoke non-wholesale");
         uint256 balance = super.balanceOf(to);
@@ -380,8 +417,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
 
     /// @notice overriding balanceOf to use as safe balance.
     /// @dev return available balance from given account
-    /// @param account The address of the account for which the balance is being queried.
-    /// @return uint256 return available balance.
+    /// @inheritdoc IERC20
     function balanceOf(address account) public view override returns (uint256) {
         if (_wholeSale[account]) {
             /// @notice use _balances[account] as spendable balance and return only spendable balance.
@@ -417,12 +453,9 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     }
 
     /// @notice transfer use safe balanceOf for lookback available balance.
-    /// @param to description
-    /// @return value description
     /// @custom:inefficientgasusedappetite emit 2 transfer events inefficient gas.
-    function transfer(address to, uint256 value) public virtual override returns (bool) {
+    function _customTransfer(address from, address to, uint256 value) internal {
         require(to != address(0), "ERC20: transfer to the zero address");
-        address from = msg.sender;
         // hook before transfer
         _beforeTokenTransfer(from, to, value);
         uint256 selector = (_wholeSale[to] ? 2 : 0) | (_wholeSale[from] ? 1 : 0);
@@ -445,29 +478,41 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
 
         // hook after transfer
         _afterTokenTransfer(from, to, value);
+    }
+
+    /// @inheritdoc IERC20
+    /// @notice transfer use safe balanceOf for lookback available balance.
+    /// @custom:inefficientgasusedappetite emit 2 transfer events inefficient gas.
+    function transfer(address to, uint256 value) public virtual override returns (bool) {
+        _customTransfer(msg.sender, to, value);
         return true;
     }
 
-    /// @notice overriding function transferFrom
+    /// @inheritdoc IERC20
     function transferFrom(address from, address to, uint256 value) public override returns (bool) {
         address spender = msg.sender;
         _spendAllowance(from, spender, value);
-        transfer(to, value);
+        _customTransfer(from, to, value);
         return true;
     }
 
     /// @dev return is given address is whole sale address.
+    /// @param account description
     /// @return bool return boolean.
     function wholeSale(address account) public view returns (bool) {
         return _wholeSale[account];
     }
 
+    /// @param account description
+    /// @param era description
+    /// @param slot description
+    /// @return list of token
     function tokenList(address account, uint256 era, uint8 slot) public view returns (uint256[] memory) {
         return _retailBalances[account][era][slot].list.ascending();
     }
 
     /// @notice due to token can expiration there is no actaul totalSupply.
-    /// @return uint256 ZERO value.
+    /// @inheritdoc IERC20
     function totalSupply() public pure override returns (uint256) {
         /* @note if not override totalSupply,
          * totalSupply will only counting spendable balance of all _wholeSale account.

@@ -329,15 +329,12 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         require(!_wholeSale[to], "can't mint expirable token to non retail account");
         require(to != address(0), "ERC20: mint to the zero address");
         uint256 blockNumberCache = _blockNumberProvider();
-        {
-            (uint256 currentEra, uint8 currentSlot) = _slidingWindow.calculateEraAndSlot(blockNumberCache);
-            bytes memory emptyBytes = abi.encodePacked("");
-            Slot storage _recipient = _retailBalances[to][currentEra][currentSlot];
-            unchecked {
-                _recipient.slotBalance += value;
-                _recipient.blockBalances[blockNumberCache] += value;
-                _recipient.list.insert(blockNumberCache, emptyBytes);
-            }
+        (uint256 currentEra, uint8 currentSlot) = _slidingWindow.calculateEraAndSlot(blockNumberCache);
+        Slot storage _recipient = _retailBalances[to][currentEra][currentSlot];
+        unchecked {
+            _recipient.slotBalance += value;
+            _recipient.blockBalances[blockNumberCache] += value;
+            _recipient.list.insert(blockNumberCache, abi.encodePacked(""));
         }
         emit Transfer(address(0), to, value);
     }
@@ -355,7 +352,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         _updateRetailBalance(to, address(0), value, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
     }
 
-    /// @notice clear existing balance before, always perform force set receive balance to zero.
     /// @param to description
     function grantWholeSale(address to) public virtual {
         require(!_wholeSale[to], "can't grant exist wholesale");
@@ -363,6 +359,8 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         emit GrantWholeSale(to, true);
     }
 
+    /// @notice clear existing balance before, always perform force set receive balance to zero.
+    /// @param to description
     function revokeWholeSale(address to) public virtual {
         require(_wholeSale[to], "can't revoke non-wholesale");
         _wholeSale[to] = false;
@@ -381,8 +379,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
 
     /// @notice overriding balanceOf to use as safe balance.
     /// @dev return available balance from given account
-    /// @param account The address of the account for which the balance is being queried.
-    /// @return uint256 return available balance.
+    /// @inheritdoc IERC20
     function balanceOf(address account) public view override returns (uint256) {
         if (_wholeSale[account]) {
             /// @notice use _balances[account] as spendable balance and return only spendable balance.
@@ -418,63 +415,66 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     }
 
     /// @notice transfer use safe balanceOf for lookback available balance.
-    /// @param to description
-    /// @return value description
     /// @custom:inefficientgasusedappetite emit 2 transfer events inefficient gas.
-    /// @custom:inefficientgasusedappetite heavy check condition.
-    function transfer(address to, uint256 value) public virtual override returns (bool) {
+    function _customTransfer(address from, address to, uint256 value) internal {
         require(to != address(0), "ERC20: transfer to the zero address");
-        address from = msg.sender;
-        bool isFromWholeSale = _wholeSale[from];
-        bool isToWholeSale = _wholeSale[to];
         // hook before transfer
         _beforeTokenTransfer(from, to, value);
-        if (isFromWholeSale && isToWholeSale) {
-            // wholesale to wholesale transfer.
-            _transfer(from, to, value);
-        } else {
-            // declaration in else scope to avoid allocate memory for temporay varialbe if not need.
+        uint256 selector = (_wholeSale[to] ? 2 : 0) | (_wholeSale[from] ? 1 : 0);
+        if (selector == 0) {
             uint256 blockNumberCache = _blockNumberProvider();
             (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumberCache);
-            if (isFromWholeSale && !isToWholeSale) {
-                // consolidate by burning wholesale spendable balance and mint expirable to retail balance.
-                _burn(from, value);
-                _mintRetail(to, value);
-            }
-            if (!isFromWholeSale && isToWholeSale) {
-                // consolidate by burning retail balance and mint non-expirable to whole receive balance.
-                _burnRetail(from, value);
-                _mintWholeSale(to, value, false);
-            }
-            if (!isFromWholeSale && !isToWholeSale) {
-                _updateRetailBalance(from, to, value, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
-            }
+            _updateRetailBalance(from, to, value, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
+        } else if (selector == 1) {
+            // consolidate by burning retail balance and mint non-expirable to whole receive balance.
+            _burnRetail(from, value);
+            _mintWholeSale(to, value, false);
+        } else if (selector == 2) {
+            // consolidate by burning wholesale spendable balance and mint expirable to retail balance.
+            _burn(from, value);
+            _mintRetail(to, value);
+        } else {
+            // wholesale to wholesale transfer.
+            _transfer(from, to, value);
         }
+
         // hook after transfer
         _afterTokenTransfer(from, to, value);
+    }
+
+    /// @inheritdoc IERC20
+    /// @notice transfer use safe balanceOf for lookback available balance.
+    /// @custom:inefficientgasusedappetite emit 2 transfer events inefficient gas.
+    function transfer(address to, uint256 value) public virtual override returns (bool) {
+        _customTransfer(msg.sender, to, value);
         return true;
     }
 
-    /// @notice overriding function transferFrom
+    /// @inheritdoc IERC20
     function transferFrom(address from, address to, uint256 value) public override returns (bool) {
         address spender = msg.sender;
         _spendAllowance(from, spender, value);
-        transfer(to, value);
+        _customTransfer(from, to, value);
         return true;
     }
 
     /// @dev return is given address is whole sale address.
+    /// @param account description
     /// @return bool return boolean.
     function wholeSale(address account) public view returns (bool) {
         return _wholeSale[account];
     }
 
+    /// @param account description
+    /// @param era description
+    /// @param slot description
+    /// @return list of token
     function tokenList(address account, uint256 era, uint8 slot) public view returns (uint256[] memory) {
         return _retailBalances[account][era][slot].list.ascending();
     }
 
     /// @notice due to token can expiration there is no actaul totalSupply.
-    /// @return uint256 ZERO value.
+    /// @inheritdoc IERC20
     function totalSupply() public pure override returns (uint256) {
         /* @note if not override totalSupply,
          * totalSupply will only counting spendable balance of all _wholeSale account.

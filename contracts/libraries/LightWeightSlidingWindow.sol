@@ -11,8 +11,8 @@ library SlidingWindow {
     uint8 private constant SLOT_PER_ERA = 4;
     uint8 private constant MINIMUM_FRAME_SIZE = 1;
     uint8 private constant MAXIMUM_FRAME_SIZE = 8;
-    uint8 private constant MINIMUM_BLOCKTIME_IN_MILLI_SECONDS = 100; // 100 milliseconds.
-    uint24 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000; // 10 minutes.
+    uint8 private constant MINIMUM_BLOCKTIME_IN_MILLI_SECONDS = 100;
+    uint24 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000;
     uint40 private constant YEAR_IN_MILLI_SECONDS = 31_556_926_000;
 
     struct SlidingWindowState {
@@ -26,22 +26,22 @@ library SlidingWindow {
     error InvalidBlockTime();
     error InvalidFrameSize();
 
-    function calculateEra(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint256 value) {
+    /// @param self The sliding window state.
+    /// @param blockNumber description
+    /// @return era description
+    function calculateEra(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint256 era) {
         unchecked {
-            value = self._startBlockNumber;
-            uint256 blockPerEraCache = self._blockPerEra;
-            assembly {
-                switch and(gt(value, 0), gt(blockNumber, value))
-                case 1 {
-                    value := div(sub(blockNumber, value), blockPerEraCache)
-                }
-                default {
-                    value := 0
-                }
+            uint256 startblockNumberCache = self._startBlockNumber;
+            // Calculate era based on the difference between the current block and start block
+            if (startblockNumberCache > 0 && blockNumber > startblockNumberCache) {
+                era = (blockNumber - startblockNumberCache) / self._blockPerEra;
             }
         }
     }
 
+    /// @param self The sliding window state.
+    /// @param blockNumber description
+    /// @return slot description
     function calculateSlot(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint8 slot) {
         unchecked {
             uint256 startblockNumberCache = self._startBlockNumber;
@@ -61,6 +61,9 @@ library SlidingWindow {
         }
     }
 
+    /// @param self The sliding window state.
+    /// @param blockTime description
+    /// @param frameSize description
     function updateSlidingWindow(SlidingWindowState storage self, uint24 blockTime, uint8 frameSize) internal {
         if (blockTime < MINIMUM_BLOCKTIME_IN_MILLI_SECONDS || blockTime > MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS) {
             revert InvalidBlockTime();
@@ -84,6 +87,10 @@ library SlidingWindow {
         }
     }
 
+    /// @param self The sliding window state.
+    /// @param blockNumber description
+    /// @return era description
+    /// @return slot description
     function calculateEraAndSlot(
         SlidingWindowState storage self,
         uint256 blockNumber
@@ -92,6 +99,9 @@ library SlidingWindow {
         slot = calculateSlot(self, blockNumber);
     }
 
+    /// @param self The sliding window state.
+    /// @param blockNumber description
+    /// @return blocks description
     function calculateBlockDifferent(
         SlidingWindowState storage self,
         uint256 blockNumber
@@ -104,6 +114,12 @@ library SlidingWindow {
         }
     }
 
+    /// @param self The sliding window state.
+    /// @param blockNumber description
+    /// @return fromEra description
+    /// @return toEra description
+    /// @return fromSlot description
+    /// @return toSlot description
     function frame(
         SlidingWindowState storage self,
         uint256 blockNumber
@@ -113,6 +129,12 @@ library SlidingWindow {
         (fromEra, fromSlot) = calculateEraAndSlot(self, blockNumber);
     }
 
+    /// @param self The sliding window state.
+    /// @param blockNumber description
+    /// @return fromEra description
+    /// @return toEra description
+    /// @return fromSlot description
+    /// @return toSlot description
     function safeFrame(
         SlidingWindowState storage self,
         uint256 blockNumber
@@ -131,30 +153,43 @@ library SlidingWindow {
         }
     }
 
+    /// @param self The sliding window state.
+    /// @return description description
     function getBlockPerEra(SlidingWindowState storage self) internal view returns (uint40) {
         return self._blockPerEra;
     }
 
+    /// @param self The sliding window state.
+    /// @return description description
     function getBlockPerSlot(SlidingWindowState storage self) internal view returns (uint40) {
         return self._blockPerSlot;
     }
 
+    /// @param self The sliding window state.
+    /// @return description description
     function getFrameSizeInBlockLength(SlidingWindowState storage self) internal view returns (uint40) {
         return self._frameSizeInBlockLength;
     }
 
+    /// @param self The sliding window state.
+    /// @return description description
     function getFrameSizeInEraLength(SlidingWindowState storage self) internal view returns (uint8) {
         return self._frameSizeInEraAndSlotLength[0];
     }
 
+    /// @param self The sliding window state.
+    /// @return description description
     function getFrameSizeInSlotLength(SlidingWindowState storage self) internal view returns (uint8) {
         return self._frameSizeInEraAndSlotLength[1];
     }
 
+    /// @param self The sliding window state.
+    /// @return description description
     function getFrameSizeInEraAndSlotLength(SlidingWindowState storage self) internal view returns (uint8[2] memory) {
         return self._frameSizeInEraAndSlotLength;
     }
 
+    /// @return description description
     function getSlotPerEra() internal pure returns (uint8) {
         return SLOT_PER_ERA;
     }
