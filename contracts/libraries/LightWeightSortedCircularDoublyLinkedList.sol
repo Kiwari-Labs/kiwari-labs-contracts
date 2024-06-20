@@ -81,7 +81,6 @@ library SortedCircularDoublyLinkedList {
     /// @param self The list.
     /// @param index The index at which to insert the data.
     function insert(List storage self, uint256 index) internal {
-        // @TODO make it into inline-assembly.
         if (!exist(self, index)) {
             (uint256 tmpTail, uint256 tmpHead) = node(self, SENTINEL);
             if (self._size == 0) {
@@ -125,7 +124,6 @@ library SortedCircularDoublyLinkedList {
     /// @param index The index of the node to remove.
     function remove(List storage self, uint256 index) internal {
         // Check if the node exists and the index is valid.
-        // @TODO make it into inline-assembly.
         if (exist(self, index)) {
             // remove the node from between existing nodes.
             (uint256 tmpPrev, uint256 tmpNext) = node(self, SENTINEL);
@@ -250,7 +248,6 @@ library SortedCircularDoublyLinkedList {
     /// @param self The list.
     /// @return part An array containing the indices of nodes in the first partition.
     function firstPartition(List storage self) internal view returns (uint256[] memory part) {
-        // @TODO make it into inline-assembly.
         uint256 tmpSize = self._size;
         if (tmpSize > SENTINEL) {
             unchecked {
@@ -265,7 +262,6 @@ library SortedCircularDoublyLinkedList {
     /// @param self The list.
     /// @return part An array containing the indices of nodes in the second partition.
     function secondPartition(List storage self) internal view returns (uint256[] memory part) {
-        // @TODO make it into inline-assembly.
         uint256 tmpSize = self._size;
         if (tmpSize > SENTINEL) {
             // To fix the indivisible calculation.
@@ -308,7 +304,6 @@ library SortedCircularDoublyLinkedList {
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes.
     function partition(List storage self, uint256 start) internal view returns (uint256[] memory part) {
-        // @TODO make it into inline-assembly.
         if (exist(self, start)) {
             uint256 tmpSize = self._size;
             part = new uint[](tmpSize);

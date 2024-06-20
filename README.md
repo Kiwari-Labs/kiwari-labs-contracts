@@ -38,8 +38,6 @@ Compile the smart contract:
 yarn compile
 ```
 
-###### \*\* TODO need to reduce the gas used for suitable in any use case or under uncertain condition.
-
 Run the tests:
 
 ```
