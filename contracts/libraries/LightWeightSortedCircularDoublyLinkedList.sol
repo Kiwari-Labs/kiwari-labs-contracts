@@ -38,7 +38,7 @@ library SortedCircularDoublyLinkedList {
         if (!exist(self, index)) {
             uint256 tmpTail = self._nodes[SENTINEL][PREV];
             uint256 tmpHead = self._nodes[SENTINEL][NEXT];
-            if (self._size == 0) {
+            if (self._size == SENTINEL) {
                 self._nodes[SENTINEL][NEXT] = index;
                 self._nodes[SENTINEL][PREV] = index;
                 self._nodes[index][PREV] = SENTINEL;
@@ -232,9 +232,8 @@ library SortedCircularDoublyLinkedList {
     function secondPartition(List storage self) internal view returns (uint256[] memory part) {
         uint256 tmpSize = self._size;
         if (tmpSize > SENTINEL) {
-            // To fix the indivisible calculation.
             unchecked {
-                if (tmpSize & 1 == SENTINEL) {
+                if (tmpSize & ONE_BIT == SENTINEL) {
                     tmpSize = tmpSize >> ONE_BIT;
                 } else {
                     tmpSize = (tmpSize + 1) >> ONE_BIT;
@@ -255,22 +254,21 @@ library SortedCircularDoublyLinkedList {
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes from the starting node to the head.
     function pathToHead(List storage self, uint256 start) internal view returns (uint256[] memory part) {
-        if (!exist(self, start)) {
-            return part;
-        }
-        uint256 tmpSize = self._size;
-        part = new uint[](tmpSize);
-        uint256 counter;
-        unchecked {
-            while (start > SENTINEL && counter < tmpSize) {
-                part[counter] = start; // Add the current index to the partition.
-                counter++;
-                start = self._nodes[start][PREV]; // Move to the next node.
+        if (exist(self, start)) {
+            uint256 tmpSize = self._size;
+            part = new uint[](tmpSize);
+            uint256 counter;
+            unchecked {
+                while (start > SENTINEL && counter < tmpSize) {
+                    part[counter] = start; // Add the current index to the partition.
+                    counter++;
+                    start = self._nodes[start][PREV]; // Move to the next node.
+                }
             }
-        }
-        // Resize the array to the actual count of elements using inline assembly.
-        assembly {
-            mstore(part, counter) // Set the array length to the actual count.
+            // Resize the array to the actual count of elements using inline assembly.
+            assembly {
+                mstore(part, counter) // Set the array length to the actual count.
+            }
         }
     }
 
@@ -280,22 +278,21 @@ library SortedCircularDoublyLinkedList {
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes from the starting node to the tail.
     function pathToTail(List storage self, uint256 start) internal view returns (uint256[] memory part) {
-        if (!exist(self, start)) {
-            return part;
-        }
-        uint256 tmpSize = self._size;
-        part = new uint[](tmpSize);
-        uint256 counter;
-        unchecked {
-            while (start > SENTINEL && counter < tmpSize) {
-                part[counter] = start; // Add the current index to the partition.
-                counter++;
-                start = self._nodes[start][NEXT]; // Move to the next node.
+        if (exist(self, start)) {
+            uint256 tmpSize = self._size;
+            part = new uint[](tmpSize);
+            uint256 counter;
+            unchecked {
+                while (start > SENTINEL && counter < tmpSize) {
+                    part[counter] = start; // Add the current index to the partition.
+                    counter++;
+                    start = self._nodes[start][NEXT]; // Move to the next node.
+                }
             }
-        }
-        // Resize the array to the actual count of elements using inline assembly.
-        assembly {
-            mstore(part, counter) // Set the array length to the actual count.
+            // Resize the array to the actual count of elements using inline assembly.
+            assembly {
+                mstore(part, counter) // Set the array length to the actual count.
+            }
         }
     }
 
@@ -305,19 +302,18 @@ library SortedCircularDoublyLinkedList {
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes.
     function partition(List storage self, uint256 start) internal view returns (uint256[] memory part) {
-        if (!exist(self, start)) {
-            return part;
-        }
-        uint256 tmpSize = self._size;
-        part = new uint[](tmpSize);
-        uint256 counter;
-        unchecked {
-            while (counter < tmpSize) {
-                part[counter] = start; // Add the current index to the partition.
-                counter++;
-                start = self._nodes[start][NEXT]; // Move to the next node.
-                if (start == SENTINEL) {
+        if (exist(self, start)) {
+            uint256 tmpSize = self._size;
+            part = new uint[](tmpSize);
+            uint256 counter;
+            unchecked {
+                while (counter < tmpSize) {
+                    part[counter] = start; // Add the current index to the partition.
+                    counter++;
                     start = self._nodes[start][NEXT]; // Move to the next node.
+                    if (start == SENTINEL) {
+                        start = self._nodes[start][NEXT]; // Move to the next node.
+                    }
                 }
             }
         }

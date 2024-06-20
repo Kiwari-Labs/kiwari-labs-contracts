@@ -28,11 +28,13 @@ library SortedCircularDoublyLinkedList {
         uint256 listSize,
         bool direction
     ) private view returns (uint256[] memory part) {
-        part = new uint256[](listSize);
-        uint256 index;
-        for (uint256 i = 0; i < listSize; i++) {
-            part[i] = self._nodes[index][direction];
-            index = part[i];
+        unchecked {
+            part = new uint256[](listSize);
+            uint256 index;
+            for (uint256 i = SENTINEL; i < listSize; i++) {
+                part[i] = self._nodes[index][direction];
+                index = part[i];
+            }
         }
     }
 
@@ -90,7 +92,7 @@ library SortedCircularDoublyLinkedList {
     /// @param index The index of the node to check for existence.
     /// @return result if the node exists, false otherwise.
     function exist(List storage self, uint256 index) internal view returns (bool result) {
-        result = (self._nodes[index][PREV] > 0 || self._nodes[SENTINEL][NEXT] == index);
+        result = (self._nodes[index][PREV] > SENTINEL || self._nodes[SENTINEL][NEXT] == index);
     }
 
     /// @notice Insert data into the linked list at the specified index.
@@ -103,7 +105,7 @@ library SortedCircularDoublyLinkedList {
             uint256 tmpTail = self._nodes[SENTINEL][PREV];
             uint256 tmpHead = self._nodes[SENTINEL][NEXT];
             self._data[index] = data;
-            if (self._size == 0) {
+            if (self._size == SENTINEL) {
                 _setNode(self, SENTINEL, index, index);
                 _setNode(self, index, SENTINEL, SENTINEL);
             } else if (index < tmpHead) {
@@ -203,7 +205,7 @@ library SortedCircularDoublyLinkedList {
     /// @param self The list.
     /// @return mid The index of the middle node.
     function middle(List storage self) internal view returns (uint256 mid) {
-        if (self._size > 0) {
+        if (self._size > SENTINEL) {
             uint256[] memory tmpList = firstPartition(self);
             mid = tmpList[tmpList.length - 1];
         }
@@ -261,7 +263,7 @@ library SortedCircularDoublyLinkedList {
     /// @return part An array containing the indices of nodes in the first partition.
     function firstPartition(List storage self) internal view returns (uint256[] memory part) {
         uint256 tmpSize = self._size;
-        if (tmpSize > 0) {
+        if (tmpSize > SENTINEL) {
             unchecked {
                 tmpSize = tmpSize == 1 ? tmpSize : tmpSize >> ONE_BIT;
             }
@@ -275,9 +277,9 @@ library SortedCircularDoublyLinkedList {
     /// @return part An array containing the indices of nodes in the second partition.
     function secondPartition(List storage self) internal view returns (uint256[] memory part) {
         uint256 tmpSize = self._size;
-        if (tmpSize > 0) {
+        if (tmpSize > SENTINEL) {
             unchecked {
-                if (tmpSize & 1 == 0) {
+                if (tmpSize & ONE_BIT == SENTINEL) {
                     tmpSize = tmpSize >> ONE_BIT;
                 } else {
                     tmpSize = (tmpSize + 1) >> ONE_BIT;
