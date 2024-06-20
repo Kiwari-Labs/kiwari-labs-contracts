@@ -40,7 +40,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         _slidingWindow.updateSlidingWindow(blockTime_, expirePeriod_);
     }
 
-    /// @notice always return 0 for non-wholesael account.
+    /// @notice always return 0 for non-wholesale account.
     /// @dev return available balance from given account.
     /// @param account The address of the account for which the balance is being queried.
     /// @param unsafe The boolean flag for select which balance type is being queried.
