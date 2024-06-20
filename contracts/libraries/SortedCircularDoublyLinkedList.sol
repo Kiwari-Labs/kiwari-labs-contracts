@@ -20,18 +20,18 @@ library SortedCircularDoublyLinkedList {
     bool private constant NEXT = true;
     bytes private constant EMPTY = abi.encode("");
 
-    /// @notice Check if a node exists in the list.
-    /// @dev This function checks if a node exists in the list by the specified index.
-    /// @param self The list.
+    /// @notice Check if a node exists in the linked list.
+    /// @dev This function checks if a node exists in the linked list by the specified index.
+    /// @param self The linked list.
     /// @param index The index of the node to check for existence.
     /// @return result if the node exists, false otherwise.
     function exist(List storage self, uint256 index) internal view returns (bool result) {
         result = (self._nodes[index][PREV] > 0 || self._nodes[SENTINEL][NEXT] == index);
     }
 
-    /// @notice Insert data into the list at the specified index.
-    /// @dev This function inserts data into the list at the specified index.
-    /// @param self The list.
+    /// @notice Insert data into the linked list at the specified index.
+    /// @dev This function inserts data into the linked list at the specified index.
+    /// @param self The linked list.
     /// @param index The index at which to insert the data.
     /// @param data The data to insert.
     function insert(List storage self, uint256 index, bytes memory data) internal {
@@ -79,9 +79,9 @@ library SortedCircularDoublyLinkedList {
         }
     }
 
-    /// @notice Remove a node from the list at the specified index.
-    /// @dev This function removes a node from the list at the specified index.
-    /// @param self The list.
+    /// @notice Remove a node from the linked list at the specified index.
+    /// @dev This function removes a node from the linked list at the specified index.
+    /// @param self The linked list.
     /// @param index The index of the node to remove.
     function remove(List storage self, uint256 index) internal {
         // Check if the node exists and the index is valid.
@@ -133,9 +133,9 @@ library SortedCircularDoublyLinkedList {
         }
     }
 
-    /// @notice Get the index of the head node in the list.
-    /// @dev This function returns the index of the head node in the list.
-    /// @param self The list.
+    /// @notice Get the index of the head node in the linked list.
+    /// @dev This function returns the index of the head node in the linked list.
+    /// @param self The linked list.
     /// @return The index of the head node.
     function head(List storage self) internal view returns (uint256) {
         return self._nodes[SENTINEL][NEXT];
@@ -152,18 +152,18 @@ library SortedCircularDoublyLinkedList {
         }
     }
 
-    /// @notice Get the index of the tail node in the list.
-    /// @dev This function returns the index of the tail node in the list.
-    /// @param self The list.
+    /// @notice Get the index of the tail node in the linked list.
+    /// @dev This function returns the index of the tail node in the linked list.
+    /// @param self The linked list.
     /// @return The index of the tail node.
     function tail(List storage self) internal view returns (uint256) {
         return self._nodes[SENTINEL][PREV];
     }
 
-    /// @notice Get the size of the list.
-    /// @dev This function returns the size of the list.
-    /// @param self The list.
-    /// @return The size of the list.
+    /// @notice Get the size of the linked list.
+    /// @dev This function returns the size of the linked list.
+    /// @param self The linked list.
+    /// @return The size of the linked list.
     function size(List storage self) internal view returns (uint256) {
         return self._size;
     }
@@ -184,7 +184,7 @@ library SortedCircularDoublyLinkedList {
 
     /// @notice Get the indices of nodes in ascending order.
     /// @dev This function returns an array containing the indices of nodes in ascending order.
-    /// @param self The list.
+    /// @param self The linked list.
     /// @return asc An array containing the indices of nodes in ascending order.
     function ascending(List storage self) internal view returns (uint256[] memory asc) {
         uint256 tmpSize = self._size;
@@ -203,7 +203,7 @@ library SortedCircularDoublyLinkedList {
 
     /// @notice Get the indices of nodes in descending order.
     /// @dev This function returns an array containing the indices of nodes in descending order.
-    /// @param self The list.
+    /// @param self The linked list.
     /// @return des An array containing the indices of nodes in descending order.
     function descending(List storage self) internal view returns (uint256[] memory des) {
         uint256 tmpSize = self._size;
@@ -220,9 +220,9 @@ library SortedCircularDoublyLinkedList {
         }
     }
 
-    /// @notice Get the indices of nodes in the first partition of the list.
-    /// @dev This function returns an array containing the indices of nodes in the first partition of the list.
-    /// @param self The list.
+    /// @notice Get the indices of nodes in the first partition of the linked list.
+    /// @dev This function returns an array containing the indices of nodes in the first partition of the linked list.
+    /// @param self The linked list.
     /// @return part An array containing the indices of nodes in the first partition.
     function firstPartition(List storage self) internal view returns (uint256[] memory part) {
         uint256 tmpSize = self._size;
@@ -239,9 +239,9 @@ library SortedCircularDoublyLinkedList {
         }
     }
 
-    /// @notice Get the indices of nodes in the second partition of the list.
-    /// @dev This function returns an array containing the indices of nodes in the second partition of the list.
-    /// @param self The list.
+    /// @notice Get the indices of nodes in the second partition of the linked list.
+    /// @dev This function returns an array containing the indices of nodes in the second partition of the linked list.
+    /// @param self The linked list.
     /// @return part An array containing the indices of nodes in the second partition.
     function secondPartition(List storage self) internal view returns (uint256[] memory part) {
         uint256 tmpSize = self._size;
@@ -263,9 +263,9 @@ library SortedCircularDoublyLinkedList {
         }
     }
 
-    /// @notice Get the path of indices from a specified node to the head of the list.
-    /// @dev This function returns an array containing the indices of nodes from a specified node to the head of the list.
-    /// @param self The list.
+    /// @notice Get the path of indices from a specified node to the head of the linked list.
+    /// @dev This function returns an array containing the indices of nodes from a specified node to the head of the linked list.
+    /// @param self The linked list.
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes from the starting node to the head.
     function pathToHead(List storage self, uint256 start) internal view returns (uint256[] memory part) {
@@ -288,9 +288,9 @@ library SortedCircularDoublyLinkedList {
         }
     }
 
-    /// @notice Get the path of indices from a specified node to the tail of the list.
-    /// @dev This function returns an array containing the indices of nodes from a specified node to the tail of the list.
-    /// @param self The list.
+    /// @notice Get the path of indices from a specified node to the tail of the linked list.
+    /// @dev This function returns an array containing the indices of nodes from a specified node to the tail of the linked list.
+    /// @param self The linked list.
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes from the starting node to the tail.
     function pathToTail(List storage self, uint256 start) internal view returns (uint256[] memory part) {
@@ -315,7 +315,7 @@ library SortedCircularDoublyLinkedList {
 
     /// @notice Get the indices starting from a specified node and wrapping around to the beginning if necessary.
     /// @dev This function returns an array containing the indices of nodes starting from a specified node and wrapping around to the beginning if necessary.
-    /// @param self The list.
+    /// @param self The linked list.
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes.
     function partition(List storage self, uint256 start) internal view returns (uint256[] memory part) {

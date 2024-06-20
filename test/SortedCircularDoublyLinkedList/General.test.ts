@@ -3,12 +3,12 @@ import { deployDoublyList, padIndexToData } from "../utils.test";
 
 export const run = async () => {
   describe("General", async function () {
-    it("[HAPPY] query middle from even list", async function () {
+    it("[HAPPY] query middle from even linked list", async function () {
       const { doublylist } = await deployDoublyList({ autoList: true, len: 4 });
       expect(await doublylist.middle()).to.equal(2);
     });
 
-    it("[HAPPY] query middle from odd list", async function () {
+    it("[HAPPY] query middle from odd linked list", async function () {
       const { doublylist } = await deployDoublyList({ autoList: true, len: 5 });
       // Please note that why the middle of 5 is 2.
       // Because in terms of actual implementation, we can not returns the node at a position of 2.5.
@@ -25,7 +25,7 @@ export const run = async () => {
       }
     });
 
-    it("[HAPPY] query first partition from even list", async function () {
+    it("[HAPPY] query first partition from even linked list", async function () {
       const { doublylist } = await deployDoublyList({ autoList: true, len: 6 });
       // [1, 2, 3, 4, 5, 6] => [1, 2, 3]
       const list = await doublylist.firstPartition();
@@ -35,7 +35,7 @@ export const run = async () => {
       }
     });
 
-    it("[HAPPY] query second partition from odd list", async function () {
+    it("[HAPPY] query second partition from odd linked list", async function () {
       const { doublylist } = await deployDoublyList({ autoList: true, len: 5 });
       // [1, 2, 3, 4, 5] => [5, 4, 3]
       const list = await doublylist.secondPartition();
@@ -47,7 +47,7 @@ export const run = async () => {
       }
     });
 
-    it("[HAPPY] query second partition from even list", async function () {
+    it("[HAPPY] query second partition from even linked list", async function () {
       const { doublylist } = await deployDoublyList({ autoList: true, len: 6 });
       // [1, 2, 3, 4, 5, 6] => [6, 5, 4]
       const list = await doublylist.secondPartition();
@@ -95,7 +95,7 @@ export const run = async () => {
       }
     });
 
-    it("[UNHAPPY] always returns empty when the list has no element", async function () {
+    it("[UNHAPPY] always returns empty when the linked list has no element", async function () {
       const { doublylist } = await deployDoublyList();
       let list = await doublylist.firstPartition();
       expect(list.length).to.equal(0);
@@ -109,7 +109,7 @@ export const run = async () => {
       expect(list.length).to.equal(0);
     });
 
-    it("[UNHAPPY] the index not found in list", async function () {
+    it("[UNHAPPY] the index not found in linked list", async function () {
       const { doublylist } = await deployDoublyList({ autoList: true });
       let list = await doublylist.partition(11);
       expect(list.length).to.equal(0);
