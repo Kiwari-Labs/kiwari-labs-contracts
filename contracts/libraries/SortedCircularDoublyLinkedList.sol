@@ -20,6 +20,70 @@ library SortedCircularDoublyLinkedList {
     bool private constant NEXT = true;
     bytes private constant EMPTY = abi.encode("");
 
+    /// @param self The linked list.
+    /// @param direction The direction NEXT or PREV
+    /// @return part An array containing the indices of nodes into partition.
+    function _partition(
+        List storage self,
+        uint256 listSize,
+        bool direction
+    ) private view returns (uint256[] memory part) {
+        part = new uint256[](listSize);
+        uint256 index;
+        for (uint256 i = 0; i < listSize; i++) {
+            part[i] = self._nodes[index][direction];
+            index = part[i];
+        }
+    }
+
+    /// @param self The linked list.
+    /// @param index The starting index.
+    /// @param direction The direction NEXT or PREV
+    /// @return part An array containing the indices of nodes from start to head or tail.
+    function _path(List storage self, uint256 index, bool direction) private view returns (uint256[] memory part) {
+        uint256 tmpSize = self._size;
+        part = new uint[](tmpSize);
+        uint256 counter;
+        unchecked {
+            while (index != SENTINEL && counter < tmpSize) {
+                part[counter] = index;
+                counter++;
+                index = self._nodes[index][direction];
+            }
+        }
+        // Resize the array to the actual count of elements using inline assembly.
+        assembly {
+            mstore(part, counter) // Set the array length to the actual count.
+        }
+    }
+
+    /// @param self The linked list.
+    /// @param direction The direction from head or from tail
+    /// @return list A list of node in order by given direction.
+    function _traversal(List storage self, bool direction) private view returns (uint256[] memory list) {
+        uint256 tmpSize = self._size;
+        if (tmpSize > SENTINEL) {
+            uint256 index;
+            list = new uint256[](tmpSize);
+            list[SENTINEL] = self._nodes[index][!direction];
+            unchecked {
+                for (uint256 i = tmpSize - 1; i > SENTINEL; i--) {
+                    list[i] = self._nodes[index][direction];
+                    index = list[i];
+                }
+            }
+        }
+    }
+
+    /// @param self The linked list.
+    /// @param index The index at which to insert the data.
+    /// @param prev The previous node before the index.
+    /// @param next The next node after the index.
+    function _setNode(List storage self, uint256 index, uint256 prev, uint256 next) private {
+        self._nodes[index][PREV] = prev;
+        self._nodes[index][NEXT] = next;
+    }
+
     /// @notice Check if a node exists in the linked list.
     /// @dev This function checks if a node exists in the linked list by the specified index.
     /// @param self The linked list.
@@ -40,20 +104,16 @@ library SortedCircularDoublyLinkedList {
             uint256 tmpHead = self._nodes[SENTINEL][NEXT];
             self._data[index] = data;
             if (self._size == 0) {
-                self._nodes[SENTINEL][NEXT] = index;
-                self._nodes[SENTINEL][PREV] = index;
-                self._nodes[index][PREV] = SENTINEL;
-                self._nodes[index][NEXT] = SENTINEL;
+                _setNode(self, SENTINEL, index, index);
+                _setNode(self, index, SENTINEL, SENTINEL);
             } else if (index < tmpHead) {
                 self._nodes[SENTINEL][NEXT] = index;
                 self._nodes[tmpHead][PREV] = index;
-                self._nodes[index][PREV] = SENTINEL;
-                self._nodes[index][NEXT] = tmpHead;
+                _setNode(self, index, SENTINEL, tmpHead);
             } else if (index > tmpTail) {
                 self._nodes[SENTINEL][PREV] = index;
                 self._nodes[tmpTail][NEXT] = index;
-                self._nodes[index][PREV] = tmpTail;
-                self._nodes[index][NEXT] = SENTINEL;
+                _setNode(self, index, tmpTail, SENTINEL);
             } else {
                 uint256 tmpCurr;
                 if (index - tmpHead <= tmpTail - index) {
@@ -70,8 +130,7 @@ library SortedCircularDoublyLinkedList {
                 uint256 tmpPrev = self._nodes[tmpCurr][PREV];
                 self._nodes[tmpPrev][NEXT] = index;
                 self._nodes[tmpCurr][PREV] = index;
-                self._nodes[index][PREV] = tmpPrev;
-                self._nodes[index][NEXT] = tmpCurr;
+                _setNode(self, index, tmpPrev, tmpCurr);
             }
             unchecked {
                 self._size++;
@@ -91,8 +150,7 @@ library SortedCircularDoublyLinkedList {
             uint256 tmpNext = self._nodes[index][NEXT];
             self._nodes[tmpPrev][NEXT] = tmpNext;
             self._nodes[tmpNext][PREV] = tmpPrev;
-            self._nodes[index][NEXT] = SENTINEL;
-            self._nodes[index][PREV] = SENTINEL;
+            _setNode(self, index, SENTINEL, SENTINEL);
             self._data[index] = EMPTY;
             unchecked {
                 self._size--;
@@ -109,8 +167,7 @@ library SortedCircularDoublyLinkedList {
             uint256 tmpCurr = self._nodes[SENTINEL][NEXT];
             while (tmpCurr != index) {
                 uint256 tmpNext = self._nodes[tmpCurr][NEXT];
-                self._nodes[tmpCurr][NEXT] = SENTINEL;
-                self._nodes[tmpCurr][PREV] = SENTINEL;
+                _setNode(self, tmpCurr, SENTINEL, SENTINEL);
                 self._data[tmpCurr] = EMPTY;
                 tmpCurr = tmpNext;
                 unchecked {
@@ -186,38 +243,16 @@ library SortedCircularDoublyLinkedList {
     /// @dev This function returns an array containing the indices of nodes in ascending order.
     /// @param self The linked list.
     /// @return asc An array containing the indices of nodes in ascending order.
-    function ascending(List storage self) internal view returns (uint256[] memory asc) {
-        uint256 tmpSize = self._size;
-        if (tmpSize > 0) {
-            uint256 index;
-            asc = new uint256[](tmpSize);
-            asc[0] = self._nodes[index][NEXT];
-            unchecked {
-                for (uint256 i = tmpSize - 1; i > 0; i--) {
-                    asc[i] = self._nodes[index][PREV];
-                    index = asc[i];
-                }
-            }
-        }
+    function ascending(List storage self) internal view returns (uint256[] memory) {
+        return _traversal(self, PREV);
     }
 
     /// @notice Get the indices of nodes in descending order.
     /// @dev This function returns an array containing the indices of nodes in descending order.
     /// @param self The linked list.
-    /// @return des An array containing the indices of nodes in descending order.
-    function descending(List storage self) internal view returns (uint256[] memory des) {
-        uint256 tmpSize = self._size;
-        if (tmpSize > 0) {
-            uint256 index;
-            des = new uint256[](tmpSize);
-            des[0] = self._nodes[index][PREV];
-            unchecked {
-                for (uint256 i = tmpSize - 1; i > 0; i--) {
-                    des[i] = self._nodes[index][NEXT];
-                    index = des[i];
-                }
-            }
-        }
+    /// @return An array containing the indices of nodes in descending order.
+    function descending(List storage self) internal view returns (uint256[] memory) {
+        return _traversal(self, NEXT);
     }
 
     /// @notice Get the indices of nodes in the first partition of the linked list.
@@ -229,13 +264,8 @@ library SortedCircularDoublyLinkedList {
         if (tmpSize > 0) {
             unchecked {
                 tmpSize = tmpSize == 1 ? tmpSize : tmpSize >> ONE_BIT;
-                part = new uint256[](tmpSize);
-                uint256 index;
-                for (uint256 i = 0; i < tmpSize; i++) {
-                    part[i] = self._nodes[index][NEXT];
-                    index = part[i];
-                }
             }
+            part = _partition(self, tmpSize, NEXT);
         }
     }
 
@@ -246,19 +276,13 @@ library SortedCircularDoublyLinkedList {
     function secondPartition(List storage self) internal view returns (uint256[] memory part) {
         uint256 tmpSize = self._size;
         if (tmpSize > 0) {
-            // To fix the indivisible calculation.
             unchecked {
                 if (tmpSize & 1 == 0) {
                     tmpSize = tmpSize >> ONE_BIT;
                 } else {
                     tmpSize = (tmpSize + 1) >> ONE_BIT;
                 }
-                part = new uint256[](tmpSize);
-                uint256 index;
-                for (uint256 i = 0; i < tmpSize; i++) {
-                    part[i] = self._nodes[index][PREV];
-                    index = part[i];
-                }
+                part = _partition(self, tmpSize, PREV);
             }
         }
     }
@@ -266,50 +290,22 @@ library SortedCircularDoublyLinkedList {
     /// @notice Get the path of indices from a specified node to the head of the linked list.
     /// @dev This function returns an array containing the indices of nodes from a specified node to the head of the linked list.
     /// @param self The linked list.
-    /// @param start The starting index.
+    /// @param index The starting index.
     /// @return part An array containing the indices of nodes from the starting node to the head.
-    function pathToHead(List storage self, uint256 start) internal view returns (uint256[] memory part) {
-        if (!exist(self, start)) {
-            return part;
-        }
-        uint256 tmpSize = self._size;
-        part = new uint[](tmpSize);
-        uint256 counter;
-        unchecked {
-            while (start != SENTINEL && counter < tmpSize) {
-                part[counter] = start; // Add the current index to the partition.
-                counter++;
-                start = self._nodes[start][PREV]; // Move to the next node.
-            }
-        }
-        // Resize the array to the actual count of elements using inline assembly.
-        assembly {
-            mstore(part, counter) // Set the array length to the actual count.
+    function pathToHead(List storage self, uint256 index) internal view returns (uint256[] memory part) {
+        if (exist(self, index)) {
+            part = _path(self, index, PREV);
         }
     }
 
     /// @notice Get the path of indices from a specified node to the tail of the linked list.
     /// @dev This function returns an array containing the indices of nodes from a specified node to the tail of the linked list.
     /// @param self The linked list.
-    /// @param start The starting index.
+    /// @param index The starting index.
     /// @return part An array containing the indices of nodes from the starting node to the tail.
-    function pathToTail(List storage self, uint256 start) internal view returns (uint256[] memory part) {
-        if (!exist(self, start)) {
-            return part;
-        }
-        uint256 tmpSize = self._size;
-        part = new uint[](tmpSize);
-        uint256 counter;
-        unchecked {
-            while (start != SENTINEL && counter < tmpSize) {
-                part[counter] = start; // Add the current index to the partition.
-                counter++;
-                start = self._nodes[start][NEXT]; // Move to the next node.
-            }
-        }
-        // Resize the array to the actual count of elements using inline assembly.
-        assembly {
-            mstore(part, counter) // Set the array length to the actual count.
+    function pathToTail(List storage self, uint256 index) internal view returns (uint256[] memory part) {
+        if (exist(self, index)) {
+            part = _path(self, index, NEXT);
         }
     }
 
@@ -319,19 +315,18 @@ library SortedCircularDoublyLinkedList {
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes.
     function partition(List storage self, uint256 start) internal view returns (uint256[] memory part) {
-        if (!exist(self, start)) {
-            return part;
-        }
-        uint256 tmpSize = self._size;
-        part = new uint[](tmpSize);
-        uint256 counter;
-        unchecked {
-            while (counter < tmpSize) {
-                part[counter] = start; // Add the current index to the partition.
-                counter++;
-                start = self._nodes[start][NEXT]; // Move to the next node.
-                if (start == SENTINEL) {
+        if (exist(self, start)) {
+            uint256 tmpSize = self._size;
+            part = new uint[](tmpSize);
+            uint256 counter;
+            unchecked {
+                while (counter < tmpSize) {
+                    part[counter] = start; // Add the current index to the partition.
+                    counter++;
                     start = self._nodes[start][NEXT]; // Move to the next node.
+                    if (start == SENTINEL) {
+                        start = self._nodes[start][NEXT]; // Move to the next node.
+                    }
                 }
             }
         }
