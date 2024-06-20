@@ -37,7 +37,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         _slidingWindow.updateSlidingWindow(blockTime_, expirePeriod_, 4);
     }
 
-    /// @notice always return 0 for non-wholesael account.
+    /// @notice always return 0 for non-wholesale account.
     /// @dev return available balance from given account.
     /// @param account The address of the account for which the balance is being queried.
     /// @param unsafe The boolean flag for select which balance type is being queried.
@@ -116,7 +116,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     /// @param toEra The ending era for the balance lookup.
     /// @param fromSlot The starting slot within the starting era for the balance lookup.
     /// @param toSlot The ending slot within the ending era for the balance lookup.
-    /// @param blockNumber The current blocknumber.
+    /// @param blocknumber The current blocknumber.
     /// @return balance The available balance.
     function _lookBackBalance(
         address account,
