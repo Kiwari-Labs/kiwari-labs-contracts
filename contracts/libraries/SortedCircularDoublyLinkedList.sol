@@ -7,10 +7,10 @@ pragma solidity >=0.5.0 <0.9.0;
 // https://github.com/o0ragman0o/LibCLL/blob/master/
 // https://github.com/vittominacori/solidity-linked-list/
 
-library CircularDoublyLinkedList {
+library SortedCircularDoublyLinkedList {
     struct List {
         uint256 _size;
-        mapping(uint256 => mapping(bool => uint256)) _list;
+        mapping(uint256 => mapping(bool => uint256)) _nodes;
         mapping(uint256 => bytes) _data;
     }
 
@@ -18,106 +18,15 @@ library CircularDoublyLinkedList {
     uint8 private constant SENTINEL = 0;
     bool private constant PREV = false;
     bool private constant NEXT = true;
-
-    /// @notice Insert data at the head of the linked list.
-    /// @dev This function inserts data at the head of the linked list.
-    /// @param self The linked list.
-    /// @param index The index at which to insert the data.
-    /// @param data The data to insert.
-    function _insertHead(List storage self, uint256 index, bytes memory data) private {
-        uint256 _head = self._list[SENTINEL][NEXT] ;
-        self._list[SENTINEL][NEXT] = index;
-        self._list[_head][PREV] = index;
-        self._list[index][PREV] = SENTINEL;
-        self._list[index][NEXT] = _head;
-        self._data[index] = data;
-    }
-
-    /// @notice Insert data into the linked list at a specified index.
-    /// @dev This function inserts data into the linked list at a specified index.
-    /// @param self The linked list.
-    /// @param index The index at which to insert the data.
-    /// @param data The data to insert.
-    function _insertNode(List storage self, uint256 index, bytes memory data) private {
-        uint256 current = self._list[SENTINEL][NEXT];
-        while (index > current) {
-            current = self._list[current][NEXT];
-        }
-        uint256 prevCurrent = self._list[current][PREV];
-        self._list[prevCurrent][NEXT] = index;
-        self._list[current][PREV] = index;
-        self._list[index][PREV] = prevCurrent;
-        self._list[index][NEXT] = current;
-        self._data[index] = data;
-    }
-
-    /// @notice Insert data at the tail of the linked list.
-    /// @dev This function inserts data at the tail of the linked list.
-    /// @param self The linked list.
-    /// @param index The index at which to insert the data.
-    /// @param data The data to insert.
-    function _insertTail(List storage self, uint256 index, bytes memory data) private {
-        uint256 _tail = self._list[SENTINEL][PREV];
-        self._list[SENTINEL][PREV] = index;
-        self._list[_tail][NEXT] = index;
-        self._list[index][PREV] = _tail;
-        self._list[index][NEXT] = SENTINEL;
-        self._data[index] = data;
-    }
-
-    /// @notice Remove the head node from the linked list.
-    /// @dev This function removes the head node from the linked list.
-    /// @param self The linked list.
-    function _removeHead(List storage self) private {
-        uint256 _old = self._list[SENTINEL][NEXT];
-        uint256 _head = self._list[_old][NEXT];
-        delete self._list[_old][PREV];
-        delete self._list[_old][NEXT];
-        delete self._data[_old];
-        self._list[SENTINEL][NEXT] = _head;
-        self._list[_head][PREV] = SENTINEL;
-    }
-
-    /// @notice Remove a node from the linked list at a specified index.
-    /// @dev This function removes a node from the linked list at a specified index.
-    /// @param self The linked list.
-    /// @param index The specified index of the node to remove.
-    function _removeNode(List storage self, uint256 index) private {
-        uint256 prev;
-        uint256 next;
-        (prev, , next) = node(self, index);
-        self._list[prev][NEXT] = next;
-        self._list[next][PREV] = prev;
-        delete self._list[index][PREV];
-        delete self._list[index][NEXT];
-        delete self._data[index];
-    }
-
-    /// @notice Remove the tail node from the linked list.
-    /// @dev This function removes the tail node from the linked list.
-    /// @param self The linked list.
-    function _removeTail(List storage self) private {
-        uint256 _old = self._list[SENTINEL][PREV];
-        uint256 _tail = self._list[_old][PREV];
-        delete self._list[_old][PREV];
-        delete self._list[_old][NEXT];
-        delete self._data[_old];
-        self._list[SENTINEL][PREV] = _tail;
-        self._list[_tail][NEXT] = SENTINEL;
-    }
+    bytes private constant EMPTY = abi.encode("");
 
     /// @notice Check if a node exists in the linked list.
     /// @dev This function checks if a node exists in the linked list by the specified index.
     /// @param self The linked list.
     /// @param index The index of the node to check for existence.
-    /// @return True if the node exists, false otherwise.
-    function exist(List storage self, uint256 index) internal view returns (bool) {
-        if (self._list[index][PREV] == SENTINEL && self._list[index][NEXT] == SENTINEL) {
-            // In case the list has only one element.
-            return (self._list[SENTINEL][NEXT] == index);
-        } else {
-            return true;
-        }
+    /// @return result if the node exists, false otherwise.
+    function exist(List storage self, uint256 index) internal view returns (bool result) {
+        result = (self._nodes[index][PREV] > 0 || self._nodes[SENTINEL][NEXT] == index);
     }
 
     /// @notice Insert data into the linked list at the specified index.
@@ -126,24 +35,44 @@ library CircularDoublyLinkedList {
     /// @param index The index at which to insert the data.
     /// @param data The data to insert.
     function insert(List storage self, uint256 index, bytes memory data) internal {
-        // Check if the node does not exist and the index is valid.
-        if (!exist(self, index) && index > 0) {
+        if (!exist(self, index)) {
+            uint256 tmpTail = self._nodes[SENTINEL][PREV];
+            uint256 tmpHead = self._nodes[SENTINEL][NEXT];
+            self._data[index] = data;
             if (self._size == 0) {
-                // If the list is empty, insert it at the head.
-                self._list[SENTINEL][NEXT] = index;
-                self._list[SENTINEL][PREV] = index;
-                self._data[index] = data;
-            } else if (index < self._list[SENTINEL][NEXT]) {
-                // If the index is before the current head, insert at the head.
-                _insertHead(self, index, data);
-            } else if (index > self._list[SENTINEL][PREV]) {
-                // If the index is after the current tail, insert at the tail.
-                _insertTail(self, index, data);
+                self._nodes[SENTINEL][NEXT] = index;
+                self._nodes[SENTINEL][PREV] = index;
+                self._nodes[index][PREV] = SENTINEL;
+                self._nodes[index][NEXT] = SENTINEL;
+            } else if (index < tmpHead) {
+                self._nodes[SENTINEL][NEXT] = index;
+                self._nodes[tmpHead][PREV] = index;
+                self._nodes[index][PREV] = SENTINEL;
+                self._nodes[index][NEXT] = tmpHead;
+            } else if (index > tmpTail) {
+                self._nodes[SENTINEL][PREV] = index;
+                self._nodes[tmpTail][NEXT] = index;
+                self._nodes[index][PREV] = tmpTail;
+                self._nodes[index][NEXT] = SENTINEL;
             } else {
-                // Otherwise, insert in between existing nodes.
-                _insertNode(self, index, data);
+                uint256 tmpCurr;
+                if (index - tmpHead <= tmpTail - index) {
+                    tmpCurr = tmpHead;
+                    while (index > tmpCurr) {
+                        tmpCurr = self._nodes[tmpCurr][NEXT];
+                    }
+                } else {
+                    tmpCurr = tmpTail;
+                    while (index < tmpCurr) {
+                        tmpCurr = self._nodes[tmpCurr][PREV];
+                    }
+                }
+                uint256 tmpPrev = self._nodes[tmpCurr][PREV];
+                self._nodes[tmpPrev][NEXT] = index;
+                self._nodes[tmpCurr][PREV] = index;
+                self._nodes[index][PREV] = tmpPrev;
+                self._nodes[index][NEXT] = tmpCurr;
             }
-            // Increment the size of the list.
             unchecked {
                 self._size++;
             }
@@ -156,27 +85,46 @@ library CircularDoublyLinkedList {
     /// @param index The index of the node to remove.
     function remove(List storage self, uint256 index) internal {
         // Check if the node exists and the index is valid.
-        if (exist(self, index) && index > 0) {
-            if (index == self._list[SENTINEL][NEXT]) {
-                // If the index corresponds to the head node, remove the head.
-                _removeHead(self);
-            } else if (index == self._list[SENTINEL][PREV]) {
-                // If the index corresponds to the tail node, remove the tail.
-                _removeTail(self);
-            } else {
-                // Otherwise, remove the node from between existing nodes.
-                _removeNode(self, index);
-            }
-            // Decrement the size of the list.
+        if (exist(self, index)) {
+            // remove the node from between existing nodes.
+            uint256 tmpPrev = self._nodes[index][PREV];
+            uint256 tmpNext = self._nodes[index][NEXT];
+            self._nodes[tmpPrev][NEXT] = tmpNext;
+            self._nodes[tmpNext][PREV] = tmpPrev;
+            self._nodes[index][NEXT] = SENTINEL;
+            self._nodes[index][PREV] = SENTINEL;
+            self._data[index] = EMPTY;
             unchecked {
                 self._size--;
             }
         }
     }
 
-    /// @notice Update the data of a node in the linked list.
-    /// @dev This function updates the data of a node in the linked list at the specified index.
-    /// @param self The linked list.
+    /// @notice Shrinks the list by removing all nodes before the specified index.
+    /// @dev This function updates the head of the list to the specified index, removing all previous nodes.
+    /// @param self The list.
+    /// @param index The index from which to shrink the list. All nodes before this index will be removed.
+    function shrink(List storage self, uint256 index) internal {
+        if (exist(self, index)) {
+            uint256 tmpCurr = self._nodes[SENTINEL][NEXT];
+            while (tmpCurr != index) {
+                uint256 tmpNext = self._nodes[tmpCurr][NEXT];
+                self._nodes[tmpCurr][NEXT] = SENTINEL;
+                self._nodes[tmpCurr][PREV] = SENTINEL;
+                self._data[tmpCurr] = EMPTY;
+                tmpCurr = tmpNext;
+                unchecked {
+                    self._size--;
+                }
+            }
+            self._nodes[SENTINEL][NEXT] = index;
+            self._nodes[index][PREV] = SENTINEL;
+        }
+    }
+
+    /// @notice Update the data of a node in the list.
+    /// @dev This function updates the data of a node in the list at the specified index.
+    /// @param self The list.
     /// @param index The target index of the node that wants to update.
     /// @param data The new data to assign to the node.
     function updateNodeData(List storage self, uint256 index, bytes memory data) internal {
@@ -190,16 +138,18 @@ library CircularDoublyLinkedList {
     /// @param self The linked list.
     /// @return The index of the head node.
     function head(List storage self) internal view returns (uint256) {
-        return self._list[SENTINEL][NEXT];
+        return self._nodes[SENTINEL][NEXT];
     }
 
-    /// @notice Get the index of the middle node in the linked list.
-    /// @dev This function returns the index of the middle node in the linked list.
-    /// @param self The linked list.
-    /// @return The index of the middle node.
-    function middle(List storage self) internal view returns (uint256) {
-        uint256[] memory tmpList = firstPartition(self);
-        return tmpList[tmpList.length - 1];
+    /// @notice Get the index of the middle node in the list.
+    /// @dev This function returns the index of the middle node in the list.
+    /// @param self The list.
+    /// @return mid The index of the middle node.
+    function middle(List storage self) internal view returns (uint256 mid) {
+        if (self._size > 0) {
+            uint256[] memory tmpList = firstPartition(self);
+            mid = tmpList[tmpList.length - 1];
+        }
     }
 
     /// @notice Get the index of the tail node in the linked list.
@@ -207,7 +157,7 @@ library CircularDoublyLinkedList {
     /// @param self The linked list.
     /// @return The index of the tail node.
     function tail(List storage self) internal view returns (uint256) {
-        return self._list[SENTINEL][PREV];
+        return self._nodes[SENTINEL][PREV];
     }
 
     /// @notice Get the size of the linked list.
@@ -218,17 +168,9 @@ library CircularDoublyLinkedList {
         return self._size;
     }
 
-    /// @notice Get the indices of the previous and next nodes of the sentinel node.
-    /// @dev This function returns an array containing the indices of the previous and next nodes of the sentinel node.
-    /// @param self The linked list.
-    /// @return An array containing the indices of the previous and next nodes of the sentinel node.
-    function guard(List storage self) internal view returns (uint256[2] memory) {
-        return [self._list[SENTINEL][PREV], self._list[SENTINEL][NEXT]];
-    }
-
-    /// @notice Get information about a node in the linked list.
-    /// @dev This function returns information about a node in the linked list by the specified index.
-    /// @param self The linked list.
+    /// @notice Get information about a node in the list.
+    /// @dev This function returns information about a node in the list by the specified index.
+    /// @param self The list.
     /// @param index The index of the node.
     /// @return prev The index of the previous node.
     /// @return data The data of the node.
@@ -237,7 +179,7 @@ library CircularDoublyLinkedList {
         List storage self,
         uint256 index
     ) internal view returns (uint256 prev, bytes memory data, uint256 next) {
-        return (self._list[index][PREV], self._data[index], self._list[index][NEXT]);
+        return (self._nodes[index][PREV], self._data[index], self._nodes[index][NEXT]);
     }
 
     /// @notice Get the indices of nodes in ascending order.
@@ -245,19 +187,18 @@ library CircularDoublyLinkedList {
     /// @param self The linked list.
     /// @return asc An array containing the indices of nodes in ascending order.
     function ascending(List storage self) internal view returns (uint256[] memory asc) {
-        uint256 index;
         uint256 tmpSize = self._size;
         if (tmpSize > 0) {
+            uint256 index;
             asc = new uint256[](tmpSize);
-            asc[0] = self._list[index][NEXT];
+            asc[0] = self._nodes[index][NEXT];
             unchecked {
                 for (uint256 i = tmpSize - 1; i > 0; i--) {
-                    asc[i] = self._list[index][PREV];
+                    asc[i] = self._nodes[index][PREV];
                     index = asc[i];
                 }
             }
         }
-        return asc;
     }
 
     /// @notice Get the indices of nodes in descending order.
@@ -265,19 +206,18 @@ library CircularDoublyLinkedList {
     /// @param self The linked list.
     /// @return des An array containing the indices of nodes in descending order.
     function descending(List storage self) internal view returns (uint256[] memory des) {
-        uint256 index;
         uint256 tmpSize = self._size;
         if (tmpSize > 0) {
+            uint256 index;
             des = new uint256[](tmpSize);
-            des[0] = self._list[index][PREV];
+            des[0] = self._nodes[index][PREV];
             unchecked {
                 for (uint256 i = tmpSize - 1; i > 0; i--) {
-                    des[i] = self._list[index][NEXT];
+                    des[i] = self._nodes[index][NEXT];
                     index = des[i];
                 }
             }
         }
-        return des;
     }
 
     /// @notice Get the indices of nodes in the first partition of the linked list.
@@ -288,17 +228,15 @@ library CircularDoublyLinkedList {
         uint256 tmpSize = self._size;
         if (tmpSize > 0) {
             unchecked {
-                tmpSize = tmpSize >> ONE_BIT;
+                tmpSize = tmpSize == 1 ? tmpSize : tmpSize >> ONE_BIT;
                 part = new uint256[](tmpSize);
                 uint256 index;
                 for (uint256 i = 0; i < tmpSize; i++) {
-                    part[i] = self._list[index][NEXT];
+                    part[i] = self._nodes[index][NEXT];
                     index = part[i];
                 }
             }
-            return part;
         }
-        return part;
     }
 
     /// @notice Get the indices of nodes in the second partition of the linked list.
@@ -310,21 +248,19 @@ library CircularDoublyLinkedList {
         if (tmpSize > 0) {
             // To fix the indivisible calculation.
             unchecked {
-                if (self._size & 1 == 0) {
-                    tmpSize = self._size >> ONE_BIT;
+                if (tmpSize & 1 == 0) {
+                    tmpSize = tmpSize >> ONE_BIT;
                 } else {
-                    tmpSize = (self._size + 1) >> ONE_BIT;
+                    tmpSize = (tmpSize + 1) >> ONE_BIT;
                 }
                 part = new uint256[](tmpSize);
                 uint256 index;
                 for (uint256 i = 0; i < tmpSize; i++) {
-                    part[i] = self._list[index][PREV];
+                    part[i] = self._nodes[index][PREV];
                     index = part[i];
                 }
             }
-            return part;
         }
-        return part;
     }
 
     /// @notice Get the path of indices from a specified node to the head of the linked list.
@@ -333,25 +269,23 @@ library CircularDoublyLinkedList {
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes from the starting node to the head.
     function pathToHead(List storage self, uint256 start) internal view returns (uint256[] memory part) {
-        uint256 tmpSize = self._size;
-        if (tmpSize == 0 || !exist(self, start)) {
+        if (!exist(self, start)) {
             return part;
         }
+        uint256 tmpSize = self._size;
         part = new uint[](tmpSize);
-        uint256 index = start;
         uint256 counter;
         unchecked {
-            while (index != SENTINEL && counter < tmpSize) {
-                part[counter] = index; // Add the current index to the partition.
+            while (start != SENTINEL && counter < tmpSize) {
+                part[counter] = start; // Add the current index to the partition.
                 counter++;
-                index = self._list[index][PREV]; // Move to the next node.
+                start = self._nodes[start][PREV]; // Move to the next node.
             }
         }
         // Resize the array to the actual count of elements using inline assembly.
         assembly {
             mstore(part, counter) // Set the array length to the actual count.
         }
-        return part;
     }
 
     /// @notice Get the path of indices from a specified node to the tail of the linked list.
@@ -360,25 +294,23 @@ library CircularDoublyLinkedList {
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes from the starting node to the tail.
     function pathToTail(List storage self, uint256 start) internal view returns (uint256[] memory part) {
-        uint256 tmpSize = self._size;
-        if (tmpSize == 0 || !exist(self, start)) {
+        if (!exist(self, start)) {
             return part;
         }
+        uint256 tmpSize = self._size;
         part = new uint[](tmpSize);
-        uint256 index = start;
         uint256 counter;
         unchecked {
-            while (index != SENTINEL && counter < tmpSize) {
-                part[counter] = index; // Add the current index to the partition.
+            while (start != SENTINEL && counter < tmpSize) {
+                part[counter] = start; // Add the current index to the partition.
                 counter++;
-                index = self._list[index][NEXT]; // Move to the next node.
+                start = self._nodes[start][NEXT]; // Move to the next node.
             }
         }
         // Resize the array to the actual count of elements using inline assembly.
         assembly {
             mstore(part, counter) // Set the array length to the actual count.
         }
-        return part;
     }
 
     /// @notice Get the indices starting from a specified node and wrapping around to the beginning if necessary.
@@ -387,23 +319,21 @@ library CircularDoublyLinkedList {
     /// @param start The starting index.
     /// @return part An array containing the indices of nodes.
     function partition(List storage self, uint256 start) internal view returns (uint256[] memory part) {
-        uint256 tmpSize = self._size;
-        if (tmpSize == 0 || !exist(self, start)) {
+        if (!exist(self, start)) {
             return part;
         }
+        uint256 tmpSize = self._size;
         part = new uint[](tmpSize);
-        uint256 index = start;
         uint256 counter;
         unchecked {
             while (counter < tmpSize) {
-                part[counter] = index; // Add the current index to the partition.
+                part[counter] = start; // Add the current index to the partition.
                 counter++;
-                index = self._list[index][NEXT]; // Move to the next node.
-                if (index == SENTINEL) {
-                    index = self._list[index][NEXT]; // Move to the next node.
+                start = self._nodes[start][NEXT]; // Move to the next node.
+                if (start == SENTINEL) {
+                    start = self._nodes[start][NEXT]; // Move to the next node.
                 }
             }
         }
-        return part;
     }
 }

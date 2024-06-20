@@ -8,6 +8,7 @@ import {
   ERC20_EXP_EXPIRE_PERIOD,
   ERC20_EXP_NAME,
   ERC20_EXP_SYMBOL,
+  SLIDING_WINDOW_CONTRACT
 } from "./constant.test";
 
 export const padIndexToData = function (index: Number) {
@@ -75,3 +76,5 @@ export const deployDoublyList = async function ({ autoList = false, len = 10 } =
     jame,
   };
 };
+
+// export deploySlidingWindow = async function () {}

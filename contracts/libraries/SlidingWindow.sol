@@ -7,8 +7,7 @@ pragma solidity >=0.5.0 <0.9.0;
 // inspiration
 // https://github.com/stonecoldpat/slidingwindow
 
-library FullSlidingWindow {
-    // 13 bytes for constant variables.
+library SlidingWindow {
     uint8 private constant MINIMUM_SLOT_PER_ERA = 1;
     uint8 private constant MAXIMUM_SLOT_PER_ERA = 12;
     uint8 private constant MINIMUM_FRAME_SIZE = 1;
@@ -17,7 +16,6 @@ library FullSlidingWindow {
     uint24 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000;
     uint40 private constant YEAR_IN_MILLI_SECONDS = 31_556_926_000;
 
-    // 50 bytes for struct variables type.
     struct SlidingWindowState {
         uint40 _blockPerEra;
         uint40 _blockPerSlot;
@@ -31,34 +29,39 @@ library FullSlidingWindow {
     error InvalidFrameSize();
     error InvalidSlotPerEra();
 
-    function _calculateEra(SlidingWindowState storage self, uint256 blockNumber) private view returns (uint256) {
+    /// @param self The sliding window state.
+    /// @param blockNumber description
+    /// @return era description
+    function _calculateEra(SlidingWindowState storage self, uint256 blockNumber) private view returns (uint256 era) {
         unchecked {
             uint256 startblockNumberCache = self._startBlockNumber;
             // Calculate era based on the difference between the current block and start block
             if (startblockNumberCache > 0 && blockNumber > startblockNumberCache) {
-                return (blockNumber - startblockNumberCache) / self._blockPerEra;
-            } else {
-                return 0;
+                era = (blockNumber - startblockNumberCache) / self._blockPerEra;
             }
         }
     }
 
-    function _calculateSlot(SlidingWindowState storage self, uint256 blockNumber) private view returns (uint8) {
+    /// @param self The sliding window state.
+    /// @param blockNumber description
+    /// @return slot description
+    function _calculateSlot(SlidingWindowState storage self, uint256 blockNumber) private view returns (uint8 slot) {
         unchecked {
             uint256 startblockNumberCache = self._startBlockNumber;
             uint40 blockPerYearCache = self._blockPerEra;
             if (blockNumber > startblockNumberCache) {
-                return
-                    uint8(
-                        ((blockNumber - startblockNumberCache) % blockPerYearCache) /
-                            (blockPerYearCache / self._slotSize)
-                    );
-            } else {
-                return 0;
+                slot = uint8(
+                    ((blockNumber - startblockNumberCache) % blockPerYearCache) / (blockPerYearCache / self._slotSize)
+                );
             }
         }
     }
 
+    /// @param self The sliding window state.
+    /// @param era description
+    /// @param slot description
+    /// @return description description
+    /// @return description description
     function _frameBuffer(
         SlidingWindowState storage self,
         uint256 era,
@@ -78,6 +81,10 @@ library FullSlidingWindow {
         return (era, slot);
     }
 
+    /// @param self The sliding window state.
+    /// @param blockTime description
+    /// @param frameSize description
+    /// @param slotSize description
     function updateSlidingWindow(
         SlidingWindowState storage self,
         uint24 blockTime,
@@ -108,6 +115,10 @@ library FullSlidingWindow {
         }
     }
 
+    /// @param self The sliding window state.
+    /// @param blockNumber description
+    /// @return era description
+    /// @return slot description
     function calculateEraAndSlot(
         SlidingWindowState storage self,
         uint256 blockNumber
@@ -117,30 +128,39 @@ library FullSlidingWindow {
         return (era, slot);
     }
 
+    /// @param self The sliding window state.
+    /// @param blockNumber description
+    /// @return blocks description
     function calculateBlockDifferent(
         SlidingWindowState storage self,
         uint256 blockNumber
-    ) internal view returns (uint256) {
+    ) internal view returns (uint256 blocks) {
         uint256 frameSizeInBlockLengthCache = self._frameSizeInBlockLength;
         unchecked {
             if (blockNumber >= frameSizeInBlockLengthCache) {
                 // If the current block is beyond the expiration period
-                return blockNumber - frameSizeInBlockLengthCache;
-            } else {
-                // If the current block is within the expiration period
-                return blockNumber;
+                blocks = blockNumber - frameSizeInBlockLengthCache;
             }
         }
     }
 
+    /// @param self The sliding window state.
+    /// @param blockNumber description
+    /// @return era description
+    /// @return slot description
     function currentEraAndSlot(
         SlidingWindowState storage self,
         uint256 blockNumber
     ) internal view returns (uint256 era, uint8 slot) {
         (era, slot) = calculateEraAndSlot(self, blockNumber);
-        return (era, slot);
     }
 
+    /// @param self The sliding window state.
+    /// @param blockNumber description
+    /// @return fromEra description
+    /// @return toEra description
+    /// @return fromSlot description
+    /// @return toSlot description
     function frame(
         SlidingWindowState storage self,
         uint256 blockNumber
@@ -148,9 +168,14 @@ library FullSlidingWindow {
         (toEra, toSlot) = calculateEraAndSlot(self, blockNumber);
         blockNumber = calculateBlockDifferent(self, blockNumber);
         (fromEra, fromSlot) = calculateEraAndSlot(self, blockNumber);
-        return (fromEra, toEra, fromSlot, toSlot);
     }
 
+    /// @param self The sliding window state.
+    /// @param blockNumber description
+    /// @return fromEra description
+    /// @return toEra description
+    /// @return fromSlot description
+    /// @return toSlot description
     function safeFrame(
         SlidingWindowState storage self,
         uint256 blockNumber
@@ -159,33 +184,46 @@ library FullSlidingWindow {
         blockNumber = calculateBlockDifferent(self, blockNumber);
         (fromEra, fromSlot) = calculateEraAndSlot(self, blockNumber);
         (fromEra, fromSlot) = _frameBuffer(self, fromEra, fromSlot);
-        return (fromEra, toEra, fromSlot, toSlot);
     }
 
+    /// @param self The sliding window state.
+    /// @return description description
     function getBlockPerEra(SlidingWindowState storage self) internal view returns (uint40) {
         return self._blockPerEra;
     }
 
+    /// @param self The sliding window state.
+    /// @return description description
     function getBlockPerSlot(SlidingWindowState storage self) internal view returns (uint40) {
         return self._blockPerSlot;
     }
 
+    /// @param self The sliding window state.
+    /// @return description description
     function getFrameSizeInBlockLength(SlidingWindowState storage self) internal view returns (uint40) {
         return self._frameSizeInBlockLength;
     }
 
+    /// @param self The sliding window state.
+    /// @return description description
     function getFrameSizeInEraLength(SlidingWindowState storage self) internal view returns (uint8) {
         return self._frameSizeInEraAndSlotLength[0];
     }
 
+    /// @param self The sliding window state.
+    /// @return description description
     function getFrameSizeInSlotLength(SlidingWindowState storage self) internal view returns (uint8) {
         return self._frameSizeInEraAndSlotLength[1];
     }
 
+    /// @param self The sliding window state.
+    /// @return description description
     function getFrameSizeInEraAndSlotLength(SlidingWindowState storage self) internal view returns (uint8[2] memory) {
         return self._frameSizeInEraAndSlotLength;
     }
 
+    /// @param self The sliding window state.
+    /// @return description description
     function getSlotPerEra(SlidingWindowState storage self) internal view returns (uint8) {
         return self._slotSize;
     }
