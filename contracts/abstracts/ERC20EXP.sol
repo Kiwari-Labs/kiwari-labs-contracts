@@ -116,7 +116,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     /// @param toEra The ending era for the balance lookup.
     /// @param fromSlot The starting slot within the starting era for the balance lookup.
     /// @param toSlot The ending slot within the ending era for the balance lookup.
-    /// @param blocknumber The current blocknumber.
+    /// @param blockNumber The current blocknumber.
     /// @return balance The available balance.
     function _lookBackBalance(
         address account,
