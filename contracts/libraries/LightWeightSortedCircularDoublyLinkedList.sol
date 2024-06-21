@@ -30,6 +30,20 @@ library SortedCircularDoublyLinkedList {
         }
     }
 
+    /// @param self The list.
+    /// @param index The index.
+    /// @return next index.
+    function next(List storage self, uint256 index) internal view returns (uint256) {
+        return self._nodes[index][NEXT];
+    }
+
+    /// @param self The list.
+    /// @param index The index.
+    /// @return previous index.
+    function previous(List storage self, uint256 index) internal view returns (uint256) {
+        return self._nodes[index][PREV];
+    }
+
     /// @notice Insert data into the list at the specified index.
     /// @dev This function inserts data into the list at the specified index.
     /// @param self The list.
@@ -164,7 +178,7 @@ library SortedCircularDoublyLinkedList {
     /// @param index The index of the node.
     /// @return prev The index of the previous node.
     /// @return next The index of the next node.
-    function node(List storage self, uint256 index) internal view returns (uint256 prev, uint256 next) {
+    function node(List storage self, uint256 index) internal view returns (uint256, uint256) {
         return (self._nodes[index][PREV], self._nodes[index][NEXT]);
     }
 

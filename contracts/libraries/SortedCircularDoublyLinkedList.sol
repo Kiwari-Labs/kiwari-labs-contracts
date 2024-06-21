@@ -4,7 +4,7 @@ pragma solidity >=0.5.0 <0.9.0;
 /// @title Engawa (縁側) is an implementation of Sorted Circular Doubly Linked List with Sentinel node (SCDLLS) in Solidity.
 /// @author Kiwari Labs
 // inspiration
-// https://github.com/o0ragman0o/LibCLL/blob/master/
+// https://github.com/o0ragman0o/LibCLL/
 // https://github.com/vittominacori/solidity-linked-list/
 
 library SortedCircularDoublyLinkedList {
@@ -79,11 +79,11 @@ library SortedCircularDoublyLinkedList {
 
     /// @param self The linked list.
     /// @param index The index at which to insert the data.
-    /// @param prev The previous node before the index.
-    /// @param next The next node after the index.
-    function _setNode(List storage self, uint256 index, uint256 prev, uint256 next) private {
-        self._nodes[index][PREV] = prev;
-        self._nodes[index][NEXT] = next;
+    /// @param prev_ The previous node before the index.
+    /// @param next_ The next node after the index.
+    function _setNode(List storage self, uint256 index, uint256 prev_, uint256 next_) private {
+        self._nodes[index][PREV] = prev_;
+        self._nodes[index][NEXT] = next_;
     }
 
     /// @notice Check if a node exists in the linked list.
@@ -93,6 +93,20 @@ library SortedCircularDoublyLinkedList {
     /// @return result if the node exists, false otherwise.
     function exist(List storage self, uint256 index) internal view returns (bool result) {
         result = (self._nodes[index][PREV] > SENTINEL || self._nodes[SENTINEL][NEXT] == index);
+    }
+
+    /// @param self The list.
+    /// @param index The index.
+    /// @return next index.
+    function next(List storage self, uint256 index) internal view returns (uint256) {
+        return self._nodes[index][NEXT];
+    }
+
+    /// @param self The list.
+    /// @param index The index.
+    /// @return previous index.
+    function previous(List storage self, uint256 index) internal view returns (uint256) {
+        return self._nodes[index][PREV];
     }
 
     /// @notice Insert data into the linked list at the specified index.
@@ -234,10 +248,7 @@ library SortedCircularDoublyLinkedList {
     /// @return prev The index of the previous node.
     /// @return data The data of the node.
     /// @return next The index of the next node.
-    function node(
-        List storage self,
-        uint256 index
-    ) internal view returns (uint256 prev, bytes memory data, uint256 next) {
+    function node(List storage self, uint256 index) internal view returns (uint256, bytes memory, uint256) {
         return (self._nodes[index][PREV], self._data[index], self._nodes[index][NEXT]);
     }
 

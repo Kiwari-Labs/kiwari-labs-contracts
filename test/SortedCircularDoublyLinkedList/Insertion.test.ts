@@ -28,11 +28,11 @@ export const run = async () => {
 
     it("[HAPPY] correct multi insertion shuffle", async function () {
       const { doublylist } = await deployDoublyList();
-      for (let i = 0; i <= mockData.length; i++) {
+      for (let i = 0; i < mockData.length; i++) {
         const index = i + 1;
         const data = padIndexToData(index);
-        await doublylist.insert(i, data);
-        expect(await doublylist.exist(i)).to.equal(true);
+        await doublylist.insert(mockData[i], data);
+        expect(await doublylist.exist(mockData[i])).to.equal(true);
       }
       expect(await doublylist.size()).to.equal(mockData.length);
     });
