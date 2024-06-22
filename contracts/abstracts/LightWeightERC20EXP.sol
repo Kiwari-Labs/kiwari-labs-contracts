@@ -145,8 +145,8 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint8 toSlot,
         uint256 blockNumber
     ) internal view returns (uint256 balance) {
-        if ((fromEra & toEra) == 0) {
-            balance = _bufferSlotBalance(account, 0, 0, blockNumber);
+        if (fromEra == toEra) {
+            balance = _bufferSlotBalance(account, fromEra, fromSlot, blockNumber);
         } else if (fromEra < toEra) {
             // totalBlockBalance calcurate only buffer era/slot.
             // keep it simple stupid first by spliting into 3 part then sum.
@@ -182,14 +182,11 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             if (from == address(0)) {
                 // mint non-expirable token to receive balance.
                 _receiveBalances[to] += value;
-            } else if (to == address(0)) {
-                // revert if not enough
+            } else {
                 // burn non-expirable token from receive balance.
                 _receiveBalances[from] -= value;
-            } else {
                 // update non-expirable token from and to receive balance.
                 _receiveBalances[to] += value;
-                _receiveBalances[from] -= value;
             }
         }
         emit Transfer(from, to, value);
