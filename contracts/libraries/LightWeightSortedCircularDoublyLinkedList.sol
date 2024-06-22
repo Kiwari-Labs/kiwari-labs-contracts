@@ -30,16 +30,18 @@ library SortedCircularDoublyLinkedList {
         }
     }
 
+    /// @notice Get the index of the next node in the list.
     /// @param self The list.
-    /// @param index The index.
-    /// @return next index.
+    /// @param index The index of the current node.
+    /// @return The index of the next node.
     function next(List storage self, uint256 index) internal view returns (uint256) {
         return self._nodes[index][NEXT];
     }
 
+    /// @notice Get the index of the previous node in the list.
     /// @param self The list.
-    /// @param index The index.
-    /// @return previous index.
+    /// @param index The index of the current node.
+    /// @return The index of the previous node.
     function previous(List storage self, uint256 index) internal view returns (uint256) {
         return self._nodes[index][PREV];
     }
