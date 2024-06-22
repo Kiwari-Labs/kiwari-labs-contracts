@@ -18,8 +18,8 @@ library SortedCircularDoublyLinkedList {
     uint8 private constant SENTINEL = 0;
     bool private constant PREV = false;
     bool private constant NEXT = true;
-    bytes private constant EMPTY = abi.encode("");
-
+    bytes private constant EMPTY = ("");
+    
     /// @notice Partitions the linked list in the specified direction.
     /// @dev This function creates an array `part` of size `listSize` containing indices of nodes
     /// in the linked list, traversing in the specified `direction` (NEXT or PREV).
