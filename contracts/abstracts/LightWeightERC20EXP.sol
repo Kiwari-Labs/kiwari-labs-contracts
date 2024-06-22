@@ -392,7 +392,9 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     /// @param value The amount of tokens to mint.
     function _mintRetail(address to, uint256 value) internal virtual {
         require(!_wholeSale[to], "can't mint expirable token to non retail account");
-        require(to != address(0), "ERC20: mint to the zero address");
+        if (to == address(0)) {
+            revert ERC20InvalidReceiver(address(0));
+        }
         uint256 blockNumberCache = _blockNumberProvider();
         (uint256 currentEra, uint8 currentSlot) = _slidingWindow.calculateEraAndSlot(blockNumberCache);
         Slot storage _recipient = _retailBalances[to][currentEra][currentSlot];
@@ -410,7 +412,9 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     /// @param value The amount of tokens to burn.
     function _burnRetail(address to, uint256 value) internal virtual {
         require(!_wholeSale[to], "can't burn expirable token to non retail account");
-        require(to != address(0), "ERC20: burn from the zero address");
+        if (to == address(0)) {
+            revert ERC20InvalidSender(address(0));
+        }
         require(balanceOf(to) >= value, "ERC20: burn amount exceeds balance");
         uint256 blockNumberCache = _blockNumberProvider();
         (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumberCache);

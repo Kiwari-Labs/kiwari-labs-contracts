@@ -304,7 +304,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 }
             }
         }
-        if (value > 0) {
+        if (remainingValue > 0) {
             revert ERC20InsufficientBalance(from, 0, value);
         }
     }
