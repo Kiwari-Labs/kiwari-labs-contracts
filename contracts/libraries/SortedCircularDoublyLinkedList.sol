@@ -20,9 +20,13 @@ library SortedCircularDoublyLinkedList {
     bool private constant NEXT = true;
     bytes private constant EMPTY = abi.encode("");
 
-    /// @param self The linked list.
-    /// @param direction The direction NEXT or PREV
-    /// @return part An array containing the indices of nodes into partition.
+    /// @notice Partitions the linked list in the specified direction.
+    /// @dev This function creates an array `part` of size `listSize` containing indices of nodes
+    /// in the linked list, traversing in the specified `direction` (NEXT or PREV).
+    /// @param self The linked list state where the operation is performed.
+    /// @param listSize The size of the list to partition.
+    /// @param direction The direction of traversal: NEXT for forward, PREV for backward.
+    /// @return part An array containing the indices of nodes in the partition.
     function _partition(
         List storage self,
         uint256 listSize,
@@ -38,10 +42,13 @@ library SortedCircularDoublyLinkedList {
         }
     }
 
-    /// @param self The linked list.
-    /// @param index The starting index.
-    /// @param direction The direction NEXT or PREV
-    /// @return part An array containing the indices of nodes from start to head or tail.
+    /// @notice Retrieves the path of node indices in the specified direction starting from the given index.
+    /// @dev This function constructs an array `part` that holds indices of nodes in the linked list,
+    /// starting from `index` and following the specified `direction` (NEXT or PREV) until reaching the end.
+    /// @param self The linked list state where the operation is performed.
+    /// @param index The starting index of the node.
+    /// @param direction The direction of traversal: NEXT for forward, PREV for backward.
+    /// @return part An array containing the indices of nodes from the starting index to the head (if traversing NEXT) or tail (if traversing PREV).
     function _path(List storage self, uint256 index, bool direction) private view returns (uint256[] memory part) {
         uint256 tmpSize = self._size;
         part = new uint[](tmpSize);
@@ -59,9 +66,12 @@ library SortedCircularDoublyLinkedList {
         }
     }
 
-    /// @param self The linked list.
-    /// @param direction The direction from head or from tail
-    /// @return list A list of node in order by given direction.
+    /// @notice Traverses the linked list in the specified direction and returns a list of node indices.
+    /// @dev This function constructs an array `list` that holds indices of nodes in the linked list,
+    /// starting from either the head or the tail based on the `direction` parameter.
+    /// @param self The linked list state where the operation is performed.
+    /// @param direction The direction of traversal: true for forward (from head), false for backward (from tail).
+    /// @return list An array containing the indices of nodes in the linked list, ordered according to the specified direction.
     function _traversal(List storage self, bool direction) private view returns (uint256[] memory list) {
         uint256 tmpSize = self._size;
         if (tmpSize > SENTINEL) {
@@ -95,16 +105,18 @@ library SortedCircularDoublyLinkedList {
         result = (self._nodes[index][PREV] > SENTINEL || self._nodes[SENTINEL][NEXT] == index);
     }
 
+    /// @notice Get the index of the next node in the list.
     /// @param self The list.
-    /// @param index The index.
-    /// @return next index.
+    /// @param index The index of the current node.
+    /// @return The index of the next node.
     function next(List storage self, uint256 index) internal view returns (uint256) {
         return self._nodes[index][NEXT];
     }
 
+    /// @notice Get the index of the previous node in the list.
     /// @param self The list.
-    /// @param index The index.
-    /// @return previous index.
+    /// @param index The index of the current node.
+    /// @return The index of the previous node.
     function previous(List storage self, uint256 index) internal view returns (uint256) {
         return self._nodes[index][PREV];
     }
