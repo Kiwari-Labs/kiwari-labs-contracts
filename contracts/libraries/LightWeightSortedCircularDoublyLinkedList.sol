@@ -45,7 +45,7 @@ library SortedCircularDoublyLinkedList {
     function previous(List storage self, uint256 index) internal view returns (uint256) {
         return self._nodes[index][PREV];
     }
-    
+
     /// @notice Insert data into the list at the specified index.
     /// @dev This function inserts data into the list at the specified index.
     /// @param self The list.
