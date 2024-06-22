@@ -2,7 +2,7 @@ import { Contract, Signer } from "ethers";
 import { ethers } from "hardhat";
 
 import {
-  CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT,
+  SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT,
   ERC20_EXP_CONTRACT,
   ERC20_EXP_BLOCK_PERIOD,
   ERC20_EXP_EXPIRE_PERIOD,
@@ -51,7 +51,7 @@ export const deployDoublyList = async function ({ autoList = false, len = 10 } =
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 
   const DoublyList = await ethers.getContractFactory(
-    CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT,
+    SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT,
     deployer,
   );
 
