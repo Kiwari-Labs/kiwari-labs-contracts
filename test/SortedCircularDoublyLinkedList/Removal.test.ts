@@ -24,11 +24,14 @@ export const run = async () => {
       await doublylist.remove(head);
       expect(await doublylist.exist(head)).to.equal(false);
       expect(await doublylist.size()).to.equal(size.sub(1));
-
       const list = await doublylist.ascending();
       for (let i = 0; i < 9; i++) {
         expect(list[i]).to.equal(i + 2);
       }
+      const node = await doublylist.node(1);
+      expect(node.prev).to.equal(0);
+      expect(node.next).to.equal(0);
+      expect(node.data).to.equal("0x");
     });
 
     it("[HAPPY] correct removal of a node", async function () {
