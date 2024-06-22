@@ -1,76 +1,72 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.5.0 <0.9.0;
 
-import "../../contracts/libraries/Engawa.sol";
+import "../../contracts/libraries/SortedCircularDoublyLinkedList.sol";
 
 contract MockCircularDoublyLinkedList {
-    CircularDoublyLinkedList.List public _list;
+    SortedCircularDoublyLinkedList.List public list;
 
     function exist(uint256 index) public view returns (bool) {
-        return CircularDoublyLinkedList.exist(_list, index);
+        return SortedCircularDoublyLinkedList.exist(list, index);
     }
 
     function insert(uint256 index, bytes memory data) public {
-        CircularDoublyLinkedList.insert(_list, index, data);
+        SortedCircularDoublyLinkedList.insert(list, index, data);
     }
 
     function updateNodeData(uint256 index, bytes memory data) public {
-        CircularDoublyLinkedList.updateNodeData(_list, index, data);
+        SortedCircularDoublyLinkedList.updateNodeData(list, index, data);
     }
 
     function remove(uint256 index) public {
-        CircularDoublyLinkedList.remove(_list, index);
+        SortedCircularDoublyLinkedList.remove(list, index);
     }
 
     function size() public view returns (uint256) {
-        return CircularDoublyLinkedList.size(_list);
+        return SortedCircularDoublyLinkedList.size(list);
     }
 
     function head() public view returns (uint256) {
-        return CircularDoublyLinkedList.head(_list);
+        return SortedCircularDoublyLinkedList.head(list);
     }
 
     function middle() public view returns (uint256) {
-        return CircularDoublyLinkedList.middle(_list);
+        return SortedCircularDoublyLinkedList.middle(list);
     }
 
     function tail() public view returns (uint256) {
-        return CircularDoublyLinkedList.tail(_list);
-    }
-
-    function guard() public view returns (uint256[2] memory) {
-        return CircularDoublyLinkedList.guard(_list);
+        return SortedCircularDoublyLinkedList.tail(list);
     }
 
     function node(uint256 index) public view returns (uint256 prev, bytes memory data, uint256 next) {
-        return CircularDoublyLinkedList.node(_list, index);
+        return SortedCircularDoublyLinkedList.node(list, index);
     }
 
     function ascending() public view returns (uint256[] memory part) {
-        return CircularDoublyLinkedList.ascending(_list);
+        return SortedCircularDoublyLinkedList.ascending(list);
     }
 
     function descending() public view returns (uint256[] memory part) {
-        return CircularDoublyLinkedList.descending(_list);
+        return SortedCircularDoublyLinkedList.descending(list);
     }
 
     function firstPartition() public view returns (uint256[] memory part) {
-        return CircularDoublyLinkedList.firstPartition(_list);
+        return SortedCircularDoublyLinkedList.firstPartition(list);
     }
 
     function secondPartition() public view returns (uint256[] memory part) {
-        return CircularDoublyLinkedList.secondPartition(_list);
+        return SortedCircularDoublyLinkedList.secondPartition(list);
     }
 
     function pathToTail(uint256 start) public view returns (uint256[] memory part) {
-        return CircularDoublyLinkedList.pathToTail(_list, start);
+        return SortedCircularDoublyLinkedList.pathToTail(list, start);
     }
 
     function pathToHead(uint256 start) public view returns (uint256[] memory part) {
-        return CircularDoublyLinkedList.pathToHead(_list, start);
+        return SortedCircularDoublyLinkedList.pathToHead(list, start);
     }
 
     function partition(uint256 start) public view returns (uint256[] memory part) {
-        return CircularDoublyLinkedList.partition(_list, start);
+        return SortedCircularDoublyLinkedList.partition(list, start);
     }
 }

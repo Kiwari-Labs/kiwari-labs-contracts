@@ -9,6 +9,7 @@
     "prettier": "prettier --write --plugin=prettier-plugin-solidity '**/*.sol'",
     "run:node": "npx hardhat node",
     "test": "npx hardhat test",
+    "test:parallel": "npx hardhat test --parallel",
     "test:clean": "npm run clean && npx hardhat test",
     "docgen": "npx hardhat docgen"
   },
@@ -25,6 +26,7 @@
     "@typechain/ethers-v5": "^10.2.1",
     "@typechain/hardhat": "^6.1.6",
     "@types/chai": "^4.3.3",
+    "@types/lodash": "^4.17.5",
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.19.2",
     "chai": "^4.3.4",
@@ -33,6 +35,7 @@
     "hardhat": "^2.13.0",
     "hardhat-deploy": "^0.11.44",
     "hardhat-gas-reporter": "^1.0.9",
+    "lodash": "^4.17.21",
     "prettier": "^3.1.0",
     "prettier-plugin-solidity": "^1.2.0",
     "solidity-coverage": "^0.8.5",
