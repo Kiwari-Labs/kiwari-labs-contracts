@@ -10,6 +10,7 @@ To compile and test the smart contract, you need the following:
 
 - node [Download](https://nodejs.org/en/)
 - nvm [Download](https://github.com/nvm-sh/nvm#installing-and-updating)
+- yarn [Download](https://yarnpkg.com/getting-started/install)
 - git [Download](https://git-scm.com/)
 
 #### Installing

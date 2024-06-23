@@ -9,7 +9,7 @@ contract MockLightWeightSortedCircularDoublyLinkedList {
     function exist(uint256 index) public view returns (bool) {
         return SortedCircularDoublyLinkedList.exist(list, index);
     }
-    
+
     function next(uint256 index) public view returns (uint256) {
         return SortedCircularDoublyLinkedList.next(list, index);
     }
