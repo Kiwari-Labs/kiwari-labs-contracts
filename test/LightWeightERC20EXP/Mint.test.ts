@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { deployERC20EXP } from "../utils.test";
+import { deployLightWeightERC20EXP } from "../utils.test";
 import { ZERO_ADDRESS } from "../constant.test";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
 // import { ERC20_EXP_NAME, ERC20_EXP_SYMBOL } from "../constant.test";
@@ -9,7 +9,7 @@ export const run = async () => {
   describe("Mint", async function () {
     it("[HAPPY] correct mint", async function () {
       // TODO: add test case (suitable logic and event response).
-      const { erc20exp, alice } = await deployERC20EXP();
+      const { erc20exp, alice } = await deployLightWeightERC20EXP();
       const aliceAddress = await alice.getAddress();
       const before = await erc20exp["balanceOf(address)"](aliceAddress);
       await expect(await erc20exp.mintRetail(aliceAddress, 1000n))
@@ -20,6 +20,7 @@ export const run = async () => {
       expect(after).to.equal(1000n);
     });
 
+
     it("[UNHAPPY] mint to zero address", async function () {
       // TODO: add test case (suitable logic and event response).
     });
@@ -28,8 +29,8 @@ export const run = async () => {
   describe("Mint To Wholesaler", async function () {
     it("[HAPPY] correct mint", async function () {
       // TODO: add test case (suitable logic and event response).
-      const { erc20exp, alice } = await deployERC20EXP();
-      const aliceAddress = await alice.getAddress();
+      // const { erc20exp, alice } = await deployLightWeightERC20EXP();
+      // const aliceAddress = await alice.getAddress();
       // await expect(erc20exp.mintWholeSale(aliceAddress, 1))
       // .to.be.emit(erc20exp,"Transfer")
       // .withArgs(ZERO_ADDRESS, aliceAddress, 1);
@@ -37,13 +38,13 @@ export const run = async () => {
 
     it("[UNHAPPY] mint to zero address", async function () {
       // TODO: add test case (suitable logic and event response).
-      //  const { erc20exp } = await deployERC20EXP();
+      //  const { erc20exp } = await deployLightWeightERC20EXP();
       //  await expect(erc20exp.mintWholeSale(ZERO_ADDRESS, 1)).to.be.revertedWith("ERC20: mint to the zero address");  
     });
 
     it("[UNHAPPY] mint to non-wholesaler", async function () {
       // TODO: add test case (suitable logic and event response).
-      // const { erc20exp, bob } = await deployERC20EXP();
+      // const { erc20exp, bob } = await deployLightWeightERC20EXP();
       // const bobAddress = await bob.getAddress();
       // await expect(erc20exp.mintWholeSale(ZERO_ADDRESS, 1)).to.be.revertedWith("ERC20: mint to the zero address");  
     });
@@ -52,7 +53,7 @@ export const run = async () => {
   describe("Mint To Retailer", async function () {
     it("[HAPPY] correct mint", async function () {
       // TODO: add test case (suitable logic and event response).
-      const { erc20exp, alice } = await deployERC20EXP();
+      const { erc20exp, alice } = await deployLightWeightERC20EXP();
       const aliceAddress = await alice.getAddress();
       await expect(erc20exp.mintRetail(aliceAddress, 1))
         .to.be.emit(erc20exp, "Transfer")
@@ -63,7 +64,7 @@ export const run = async () => {
 
     it("[UNHAPPY] mint to zero address", async function () {
       // TODO: add test case (suitable logic and event response).
-      const { erc20exp } = await deployERC20EXP();
+      const { erc20exp } = await deployLightWeightERC20EXP();
       await expect(erc20exp.mintRetail(ZERO_ADDRESS, 1)).to.be
         .revertedWithCustomError(erc20exp, "ERC20InvalidReceiver")
         .withArgs(ZERO_ADDRESS);
@@ -71,7 +72,7 @@ export const run = async () => {
 
     it("[UNHAPPY] mint to non-retailer", async function () {
       // TODO: add test case (suitable logic and event response).
-      const { erc20exp, alice } = await deployERC20EXP();
+      const { erc20exp, alice } = await deployLightWeightERC20EXP();
       const bobAddress = await alice.getAddress();
       // await erc20exp.grantWholeSale(bobAddress,true);
       await erc20exp.mintRetail(bobAddress, 1000);

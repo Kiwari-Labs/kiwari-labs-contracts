@@ -1,6 +1,7 @@
 import "@nomicfoundation/hardhat-toolbox";
 import "hardhat-gas-reporter";
 import "hardhat-deploy";
+import "hardhat-ignore-warnings";
 
 import { HardhatUserConfig } from "hardhat/types";
 import path from "path";
@@ -56,6 +57,7 @@ const config: HardhatUserConfig = {
   gasReporter: {
     enabled: true,
   },
+  warnings: 'warn' ,
   docgen: {    
     // projectName: "",
     // projectDescription: "",

@@ -50,6 +50,7 @@ contract MockSortedCircularDoublyLinkedList {
         return SortedCircularDoublyLinkedList.tail(list);
     }
 
+    // solc-ignore-next-line shadowing
     function node(uint256 index) public view returns (uint256 prev, bytes memory data, uint256 next) {
         return SortedCircularDoublyLinkedList.node(list, index);
     }

@@ -9,7 +9,7 @@ contract MockLightWeightSortedCircularDoublyLinkedList {
     function exist(uint256 index) public view returns (bool) {
         return SortedCircularDoublyLinkedList.exist(list, index);
     }
-
+    
     function next(uint256 index) public view returns (uint256) {
         return SortedCircularDoublyLinkedList.next(list, index);
     }
@@ -46,6 +46,7 @@ contract MockLightWeightSortedCircularDoublyLinkedList {
         return SortedCircularDoublyLinkedList.tail(list);
     }
 
+    // solc-ignore-next-line shadowing
     function node(uint256 index) public view returns (uint256 prev, uint256 next) {
         return SortedCircularDoublyLinkedList.node(list, index);
     }
