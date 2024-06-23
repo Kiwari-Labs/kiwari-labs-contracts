@@ -15,7 +15,7 @@ export const run = async () => {
       expect(await doublylist.middle()).to.equal(2);
     });
 
-    it("[HAPPY] query first partition from odd list", async function () {
+    it("[HAPPY] query first partition from odd linked list", async function () {
       const { doublylist } = await deployDoublyList({ autoList: true, len: 5 });
       // [1, 2, 3, 4, 5] => [1, 2]
       const list = await doublylist.firstPartition();
@@ -35,6 +35,13 @@ export const run = async () => {
       }
     });
 
+    it("[HAPPY] query first partition from only one linked list", async function () {
+      const { doublylist } = await deployDoublyList({ autoList: true, len: 1});
+      const list = await doublylist.firstPartition();
+      expect(list.length).to.equal(1);
+      expect(await doublylist.size()).to.equal(1);
+    });
+    
     it("[HAPPY] query second partition from odd linked list", async function () {
       const { doublylist } = await deployDoublyList({ autoList: true, len: 5 });
       // [1, 2, 3, 4, 5] => [5, 4, 3]
@@ -94,6 +101,16 @@ export const run = async () => {
         expect(list[i]).to.equal(start + i);
       }
     });
+    
+    it("[HAPPY] query previous node", async function () {
+      const { doublylist } = await deployDoublyList({ autoList: true, len: 3 });
+      expect(await doublylist.previous(2)).to.equal(1);
+    });
+
+    it("[HAPPY] query next node", async function () {
+      const { doublylist } = await deployDoublyList({ autoList: true, len: 3 });
+      expect(await doublylist.next(2)).to.equal(3);
+    });
 
     it("[UNHAPPY] always returns empty when the linked list has no element", async function () {
       const { doublylist } = await deployDoublyList();
@@ -117,6 +134,19 @@ export const run = async () => {
       expect(list.length).to.equal(0);
       list = await doublylist.pathToTail(11);
       expect(list.length).to.equal(0);
+    });
+
+    it("[UNHAPPY] query middle from emtpy linked list", async function () {
+      const { doublylist } = await deployDoublyList({});
+      expect(await doublylist.middle()).to.equal(0);
+      expect(await doublylist.size()).to.equal(0);
+    });
+
+    it("[UNHAPPY] query first partition from emtpy linked list", async function () {
+      const { doublylist } = await deployDoublyList({});
+      const list = await doublylist.firstPartition();
+      expect(list.length).to.equal(0);
+      expect(await doublylist.size()).to.equal(0);
     });
   });
 };

@@ -1,7 +1,7 @@
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 export const ERC20_EXP_CONTRACT = "MockToken";
-export const CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT = "MockCircularDoublyLinkedList";
+export const SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT = "MockSortedCircularDoublyLinkedList";
 export const SLIDING_WINDOW_CONTRACT = "MockSlidingWindow";
 
 export const ERC20_EXP_BLOCK_PERIOD = "4000";

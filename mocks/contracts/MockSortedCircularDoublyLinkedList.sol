@@ -3,11 +3,19 @@ pragma solidity >=0.5.0 <0.9.0;
 
 import "../../contracts/libraries/SortedCircularDoublyLinkedList.sol";
 
-contract MockCircularDoublyLinkedList {
+contract MockSortedCircularDoublyLinkedList {
     SortedCircularDoublyLinkedList.List public list;
 
     function exist(uint256 index) public view returns (bool) {
         return SortedCircularDoublyLinkedList.exist(list, index);
+    }
+
+    function next(uint256 index) public view returns (uint256) {
+        return SortedCircularDoublyLinkedList.next(list, index);
+    }
+
+    function previous(uint256 index) public view returns (uint256) {
+        return SortedCircularDoublyLinkedList.previous(list, index);
     }
 
     function insert(uint256 index, bytes memory data) public {
@@ -16,6 +24,10 @@ contract MockCircularDoublyLinkedList {
 
     function updateNodeData(uint256 index, bytes memory data) public {
         SortedCircularDoublyLinkedList.updateNodeData(list, index, data);
+    }
+
+    function shrink(uint256 index) public {
+        SortedCircularDoublyLinkedList.shrink(list, index);
     }
 
     function remove(uint256 index) public {
