@@ -131,7 +131,7 @@ export const deployLightWeightDoublyList = async function ({ autoList = false, l
 
 export const deployLightWeightSlidingWindow = async function () {
   return deploySlidingWindowSelector(true);
-};
+}
 
 export const deploySlidingWindow = async function () {
   return deploySlidingWindowSelector(false);
@@ -140,5 +140,4 @@ export const deploySlidingWindow = async function () {
 export const deployDoublyList = async function ({ autoList = false, len = 10 } = {}) {
   return deployDoublyListSelector(false, autoList, len);
 };
-
 

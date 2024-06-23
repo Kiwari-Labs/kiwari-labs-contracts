@@ -56,6 +56,7 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     enabled: true,
+    showMethodSig: true
   },
   warnings: 'warn' ,
   docgen: {    
