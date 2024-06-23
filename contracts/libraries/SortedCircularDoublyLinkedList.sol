@@ -130,8 +130,9 @@ library SortedCircularDoublyLinkedList {
         if (!exist(self, index)) {
             uint256 tmpTail = self._nodes[SENTINEL][PREV];
             uint256 tmpHead = self._nodes[SENTINEL][NEXT];
+            uint256 tmpSize = self._size;
             self._data[index] = data;
-            if (self._size == SENTINEL) {
+            if (tmpSize == SENTINEL) {
                 _setNode(self, SENTINEL, index, index);
                 _setNode(self, index, SENTINEL, SENTINEL);
             } else if (index < tmpHead) {
@@ -161,7 +162,7 @@ library SortedCircularDoublyLinkedList {
                 _setNode(self, index, tmpPrev, tmpCurr);
             }
             unchecked {
-                self._size++;
+                self._size = tmpSize + 1;
             }
         }
     }
@@ -193,15 +194,17 @@ library SortedCircularDoublyLinkedList {
     function shrink(List storage self, uint256 index) internal {
         if (exist(self, index)) {
             uint256 tmpCurr = self._nodes[SENTINEL][NEXT];
+            uint256 tmpSize = self._size;
             while (tmpCurr != index) {
                 uint256 tmpNext = self._nodes[tmpCurr][NEXT];
                 _setNode(self, tmpCurr, SENTINEL, SENTINEL);
                 self._data[tmpCurr] = EMPTY;
                 tmpCurr = tmpNext;
                 unchecked {
-                    self._size--;
+                    tmpSize--;
                 }
             }
+            self._size = tmpSize;
             self._nodes[SENTINEL][NEXT] = index;
             self._nodes[index][PREV] = SENTINEL;
         }
