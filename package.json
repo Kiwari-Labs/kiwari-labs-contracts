@@ -34,7 +34,7 @@
     "ethers": "^5.7.2",
     "hardhat": "^2.13.0",
     "hardhat-deploy": "^0.11.44",
-    "hardhat-gas-reporter": "^1.0.9",
+    "hardhat-gas-reporter": "^2.0.0",
     "lodash": "^4.17.21",
     "prettier": "^3.1.0",
     "prettier-plugin-solidity": "^1.2.0",
@@ -43,5 +43,6 @@
     "typechain": "^8.3.2",
     "typescript": "^5.2.2"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "version": "0.0.1"
 }
