@@ -1,10 +1,10 @@
-import { expect } from "chai";
-import { deployDoublyList, padIndexToData } from "../utils.test";
+import {expect} from "chai";
+import {deployDoublyList, padIndexToData} from "../utils.test";
 
 export const run = async () => {
   describe("Removal", async function () {
     it("[HAPPY] correct removal", async function () {
-      const { doublylist } = await deployDoublyList();
+      const {doublylist} = await deployDoublyList();
 
       const index = 1;
       const data = padIndexToData(index);
@@ -16,7 +16,7 @@ export const run = async () => {
     });
 
     it("[HAPPY] correct removal from the head", async function () {
-      const { doublylist } = await deployDoublyList({ autoList: true });
+      const {doublylist} = await deployDoublyList({autoList: true});
 
       const head = await doublylist.head();
       const size = await doublylist.size();
@@ -35,7 +35,7 @@ export const run = async () => {
     });
 
     it("[HAPPY] correct removal of a node", async function () {
-      const { doublylist } = await deployDoublyList({ autoList: true });
+      const {doublylist} = await deployDoublyList({autoList: true});
 
       const index = 5;
       const size = await doublylist.size();
@@ -55,7 +55,7 @@ export const run = async () => {
     });
 
     it("[HAPPY] correct removal from the tail", async function () {
-      const { doublylist } = await deployDoublyList({ autoList: true });
+      const {doublylist} = await deployDoublyList({autoList: true});
 
       const tail = await doublylist.tail();
       const size = await doublylist.size();
@@ -70,7 +70,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] unable to remove unreal index", async function () {
-      const { doublylist } = await deployDoublyList();
+      const {doublylist} = await deployDoublyList();
       await doublylist.remove(1);
       expect(await doublylist.size()).to.equal(0);
     });

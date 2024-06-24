@@ -1,10 +1,13 @@
-import { expect } from "chai";
-import { deployLightWeightDoublyList } from "../utils.test";
+import {expect} from "chai";
+import {deployLightWeightDoublyList} from "../utils.test";
 
 export const run = async () => {
   describe("Sorting", async function () {
     it("[HAPPY] correct ascend sorting", async function () {
-      const { doublylist } = await deployLightWeightDoublyList({ autoList: true, len: 5 });
+      const {doublylist} = await deployLightWeightDoublyList({
+        autoList: true,
+        len: 5,
+      });
       const sorted = await doublylist.ascending();
       for (let i = 0; i < sorted.length; i++) {
         expect(sorted[i]).to.equal(i + 1);
@@ -12,7 +15,10 @@ export const run = async () => {
     });
 
     it("[HAPPY] correct descend sorting", async function () {
-      const { doublylist } = await deployLightWeightDoublyList({ autoList: true, len: 5 });
+      const {doublylist} = await deployLightWeightDoublyList({
+        autoList: true,
+        len: 5,
+      });
       const sorted = await doublylist.descending();
       for (let i = 0; i < sorted.length; i++) {
         expect(sorted[i]).to.equal(sorted.length - i);
@@ -20,13 +26,13 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] sort the empty array with asc", async function () {
-      const { doublylist } = await deployLightWeightDoublyList();
+      const {doublylist} = await deployLightWeightDoublyList();
       const sorted = await doublylist.ascending();
       expect(sorted.length).to.equal(0);
     });
 
     it("[UNHAPPY] sort the empty array with des", async function () {
-      const { doublylist } = await deployLightWeightDoublyList();
+      const {doublylist} = await deployLightWeightDoublyList();
       const sorted = await doublylist.descending();
       expect(sorted.length).to.equal(0);
     });

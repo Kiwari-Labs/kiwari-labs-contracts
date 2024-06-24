@@ -1,15 +1,15 @@
-import { expect } from "chai";
-import { ethers } from "hardhat";
-import { deployLightWeightERC20EXP } from "../utils.test";
-import { ZERO_ADDRESS } from "../constant.test";
-import { mine } from "@nomicfoundation/hardhat-network-helpers";
+import {expect} from "chai";
+import {ethers} from "hardhat";
+import {deployLightWeightERC20EXP} from "../utils.test";
+import {ZERO_ADDRESS} from "../constant.test";
+import {mine} from "@nomicfoundation/hardhat-network-helpers";
 // import { ERC20_EXP_NAME, ERC20_EXP_SYMBOL } from "../constant.test";
 
 export const run = async () => {
   describe("Transfer", async function () {
     it("[HAPPY] correct transfer", async function () {
       // TODO: add test case (suitable logic and event response).
-      const { erc20exp, alice, bob } = await deployLightWeightERC20EXP();
+      const {erc20exp, alice, bob} = await deployLightWeightERC20EXP();
       const aliceAddress = await alice.getAddress();
       const bobAddress = await bob.getAddress();
       const balanceAliceBefore = await erc20exp["balanceOf(address)"](aliceAddress);
@@ -29,7 +29,7 @@ export const run = async () => {
 
     it("[HAPPY] correct transfer", async function () {
       // TODO: add test case (suitable logic and event response).
-      const { erc20exp, alice, bob } = await deployLightWeightERC20EXP();
+      const {erc20exp, alice, bob} = await deployLightWeightERC20EXP();
       const aliceAddress = await alice.getAddress();
       const bobAddress = await bob.getAddress();
       const balanceAliceBefore = await erc20exp["balanceOf(address)"](aliceAddress);
@@ -44,7 +44,7 @@ export const run = async () => {
       await erc20exp.connect(alice).transfer(bobAddress, 270n);
       const balanceBob = await erc20exp["balanceOf(address)"](bobAddress);
       const balanceAliceAfterTransfer = await erc20exp["balanceOf(address)"](aliceAddress);
-      console.log("balanceAliceAfterTransfer:", balanceAliceAfterTransfer)
+      console.log("balanceAliceAfterTransfer:", balanceAliceAfterTransfer);
       const bobTokenList = await erc20exp.tokenList(bobAddress, 0n, 0n);
       console.log("bobTokenList:", bobTokenList.length);
       console.log("balanceBob", balanceBob);

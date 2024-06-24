@@ -1,11 +1,11 @@
-import { expect } from "chai";
-import { deployDoublyList, padIndexToData } from "../utils.test";
-import { data as mockData }from "../../mocks/data/shuffle_273_number";
+import {expect} from "chai";
+import {deployDoublyList, padIndexToData} from "../utils.test";
+import {data as mockData} from "../../mocks/data/shuffle_273_number";
 
 export const run = async () => {
   describe("Insertion", async function () {
     it("[HAPPY] correct one insertion", async function () {
-      const { doublylist } = await deployDoublyList();
+      const {doublylist} = await deployDoublyList();
       const index = 1;
       const data = padIndexToData(index);
       await doublylist.insert(index, data);
@@ -14,7 +14,7 @@ export const run = async () => {
     });
 
     it("[HAPPY] correct multi insertion", async function () {
-      const { doublylist } = await deployDoublyList();
+      const {doublylist} = await deployDoublyList();
 
       const len = 10;
       for (let i = 0; i < len; i++) {
@@ -27,7 +27,7 @@ export const run = async () => {
     });
 
     it("[HAPPY] correct multi insertion shuffle", async function () {
-      const { doublylist } = await deployDoublyList();
+      const {doublylist} = await deployDoublyList();
       for (let i = 0; i < mockData.length; i++) {
         const index = i + 1;
         const data = padIndexToData(index);
@@ -38,7 +38,7 @@ export const run = async () => {
     });
 
     it("[HAPPY] correct insertion at the head", async function () {
-      const { doublylist } = await deployDoublyList();
+      const {doublylist} = await deployDoublyList();
 
       let index = 2;
       let data = padIndexToData(index);
@@ -54,7 +54,7 @@ export const run = async () => {
     });
 
     it("[HAPPY] correct insertion at the tail", async function () {
-      const { doublylist } = await deployDoublyList();
+      const {doublylist} = await deployDoublyList();
 
       let index = 1;
       let data = padIndexToData(index);
@@ -70,7 +70,7 @@ export const run = async () => {
     });
 
     it("[HAPPY] correct insertion between head and tail", async function () {
-      const { doublylist } = await deployDoublyList();
+      const {doublylist} = await deployDoublyList();
 
       let index = 1;
       let data = padIndexToData(index);
@@ -97,7 +97,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] the index must be more than 1", async function () {
-      const { doublylist } = await deployDoublyList();
+      const {doublylist} = await deployDoublyList();
 
       // The index 0 is reserved for _SENTINEL.
       const index = 0;
@@ -107,7 +107,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] the index must not be duplicated", async function () {
-      const { doublylist } = await deployDoublyList();
+      const {doublylist} = await deployDoublyList();
       let index = 1;
       let data = padIndexToData(index);
       await doublylist.insert(index, data);

@@ -1,11 +1,11 @@
-import { expect } from "chai";
-import { deployLightWeightDoublyList } from "../utils.test";
+import {expect} from "chai";
+import {deployLightWeightDoublyList} from "../utils.test";
 
 export const run = async () => {
   describe("Integration", async function () {
     it("[HAPPY] correct integration", async function () {
       const len = 10;
-      const { doublylist } = await deployLightWeightDoublyList({
+      const {doublylist} = await deployLightWeightDoublyList({
         autoList: true,
         len: len,
       });

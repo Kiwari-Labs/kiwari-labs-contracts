@@ -1,10 +1,10 @@
-import { expect } from "chai";
-import { deployLightWeightDoublyList } from "../utils.test";
+import {expect} from "chai";
+import {deployLightWeightDoublyList} from "../utils.test";
 
 export const run = async () => {
   describe("Removal", async function () {
     it("[HAPPY] correct removal", async function () {
-      const { doublylist } = await deployLightWeightDoublyList();
+      const {doublylist} = await deployLightWeightDoublyList();
 
       const index = 1;
       await doublylist.insert(index);
@@ -15,7 +15,9 @@ export const run = async () => {
     });
 
     it("[HAPPY] correct removal from the head", async function () {
-      const { doublylist } = await deployLightWeightDoublyList({ autoList: true });
+      const {doublylist} = await deployLightWeightDoublyList({
+        autoList: true,
+      });
 
       const head = await doublylist.head();
       const size = await doublylist.size();
@@ -33,7 +35,9 @@ export const run = async () => {
     });
 
     it("[HAPPY] correct removal of a node", async function () {
-      const { doublylist } = await deployLightWeightDoublyList({ autoList: true });
+      const {doublylist} = await deployLightWeightDoublyList({
+        autoList: true,
+      });
 
       const index = 5;
       const size = await doublylist.size();
@@ -53,7 +57,9 @@ export const run = async () => {
     });
 
     it("[HAPPY] correct removal from the tail", async function () {
-      const { doublylist } = await deployLightWeightDoublyList({ autoList: true });
+      const {doublylist} = await deployLightWeightDoublyList({
+        autoList: true,
+      });
 
       const tail = await doublylist.tail();
       const size = await doublylist.size();
@@ -68,7 +74,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] unable to remove unreal index", async function () {
-      const { doublylist } = await deployLightWeightDoublyList();
+      const {doublylist} = await deployLightWeightDoublyList();
       await doublylist.remove(1);
       expect(await doublylist.size()).to.equal(0);
     });
