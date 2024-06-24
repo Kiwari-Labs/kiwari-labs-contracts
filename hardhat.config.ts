@@ -12,7 +12,7 @@ import glob from "glob";
 import {subtask} from "hardhat/config";
 import {TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS} from "hardhat/builtin-tasks/task-names";
 
-import "@bonadocs/docgen";
+import "solidity-docgen";
 
 const WALLET_PRIVATE_KEY = process.env.WALLET_PRIVATE_KEY || "";
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";
@@ -62,10 +62,7 @@ const config: HardhatUserConfig = {
   },
   warnings: "warn",
   docgen: {
-    // projectName: "",
-    // projectDescription: "",
-    outputDir: "./bonadocs",
-    deploymentAddresses: {},
+    outputDir: "./docs",
   },
 };
 
