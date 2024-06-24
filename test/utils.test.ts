@@ -72,7 +72,13 @@ const deployDoublyListSelector = async function (light: boolean, autoList: boole
   };
 };
 
-const deploySlidingWindowSelector = async function (light: boolean) {
+const deploySlidingWindowSelector = async function (
+  light: boolean,
+  startBlockNumber: number,
+  blockPeriod: number,
+  frameSize: number,
+  slotSize: number,
+) {
   const type = light ? LIGHT_WEIGHT_SLIDING_WINDOW_CONTRACT : SLIDING_WINDOW_CONTRACT;
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 
@@ -80,11 +86,9 @@ const deploySlidingWindowSelector = async function (light: boolean) {
 
   let slidingWindow;
   if (light) {
-    // TODO: Load from Constant file.
-    slidingWindow = await SlidingWindow.deploy(4, 4, 4);
+    slidingWindow = await SlidingWindow.deploy(startBlockNumber, blockPeriod, frameSize, slotSize);
   } else {
-    // TODO: Load from Constant file.
-    slidingWindow = await SlidingWindow.deploy(4, 4, 4);
+    slidingWindow = await SlidingWindow.deploy(startBlockNumber, blockPeriod, frameSize, slotSize);
   }
 
   await slidingWindow.deployed();
@@ -126,10 +130,20 @@ export const deployDoublyList = async function ({autoList = false, len = 10} = {
   return deployDoublyListSelector(false, autoList, len);
 };
 
-export const deployLightWeightSlidingWindow = async function (blockPeriod = 4, frameSize = 4, slotSize = 4) {
-  return deploySlidingWindowSelector(true);
+export const deployLightWeightSlidingWindow = async function ({
+  startBlockNumber = 0, // start at a current block.number
+  blockPeriod = 400, // 400ms per block
+  frameSize = 8, // total 8 slot
+  slotSize = 4, // 4 slot per era
+}) {
+  return deploySlidingWindowSelector(true, startBlockNumber, blockPeriod, frameSize, slotSize);
 };
 
-export const deploySlidingWindow = async function (blockPeriod = 4, frameSize = 4, slotSize = 4) {
-  return deploySlidingWindowSelector(false);
+export const deploySlidingWindow = async function ({
+  startBlockNumber = 0, // start at a current block.number
+  blockPeriod = 400, // 400ms per block
+  frameSize = 8, // total 8 slot
+  slotSize = 4, // 4 slot per era
+}) {
+  return deploySlidingWindowSelector(false, startBlockNumber, blockPeriod, frameSize, slotSize);
 };
