@@ -28,13 +28,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
 
     SlidingWindow.SlidingWindowState private _slidingWindow;
 
-    error ERC20InsufficientBalance(address from, uint256 fromBalance, uint256 value);
-    error ERC20InvalidSender(address from);
-    error ERC20InvalidReceiver(address to);
-    // error ERC20InvalidApprover(address(0));
-    // error ERC20InvalidSpender(address(0));
-    // error ERC20InsufficientAllowance(spender, currentAllowance, value);
-
     /// @notice Constructor function to initialize the token contract with specified parameters.
     /// @param name_ The name of the token.
     /// @param symbol_ The symbol of the token.
@@ -235,12 +228,11 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint8 toSlot,
         uint256 blockNumber
     ) internal {
-        Slot storage _recipient = _retailBalances[to][toEra][toSlot];
-        Slot storage _sender = _retailBalances[from][fromEra][fromSlot];
         uint256 fromBalance = balanceOf(from);
         if (fromBalance < value) {
             revert ERC20InsufficientBalance(from, fromBalance, value);
         }
+        Slot storage _sender = _retailBalances[from][fromEra][fromSlot];
         uint256 key = _getFirstUnexpiredBlockBalance(
             _sender.list,
             blockNumber,
@@ -261,6 +253,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         if (fromBalance < value) {
             _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
         } else {
+            Slot storage _recipient = _retailBalances[to][toEra][toSlot];
             unchecked {
                 fromBalance -= value;
                 if (fromBalance == 0) {
@@ -482,7 +475,9 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     /// @param to The address to which tokens are being transferred.
     /// @param value The amount of tokens being transferred.
     function _customTransfer(address from, address to, uint256 value) internal {
-        require(to != address(0), "ERC20: transfer to the zero address");
+        if (to == address(0)) {
+            revert ERC20InvalidReceiver(address(0));
+        }
         // hook before transfer
         _beforeTokenTransfer(from, to, value);
         uint256 selector = (_wholeSale[to] ? 2 : 0) | (_wholeSale[from] ? 1 : 0);
@@ -549,13 +544,13 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     /// @param from The address sending tokens.
     /// @param to The address receiving tokens.
     /// @param amount The amount of tokens being transferred.
-    function _beforeTokenTransfer(address from, address to, uint amount) internal virtual override {}
+    function _beforeTokenTransfer(address from, address to, uint amount) internal virtual {}
 
     /// @notice Abstract hook called after every token transfer operation.
     /// @param from The address sending tokens.
     /// @param to The address receiving tokens.
     /// @param amount The amount of tokens being transferred.
-    function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual override {}
+    function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual {}
 
     /// @inheritdoc ISlidingWindow
     function blockPerEra() external view override returns (uint40) {
