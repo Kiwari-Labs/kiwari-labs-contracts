@@ -1,5 +1,5 @@
 {
-  "license": "No-License",
+  "license": "BUSL-1.1",
   "scripts": {
     "clean": "npx hardhat clean && rm -rf cache coverage coverage.json",
     "compile": "npm run clean && npx hardhat compile --force",
