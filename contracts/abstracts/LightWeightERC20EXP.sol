@@ -133,8 +133,10 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     ) private view returns (uint256 key) {
         key = list.head();
         unchecked {
-            // @bug infinity loops found.
             while (blockNumber - key >= expirationPeriodInBlockLength) {
+                if (key == 0) {
+                    break;
+                }
                 key = list.next(key);
             }
         }
@@ -160,27 +162,23 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     ) internal view returns (uint256 balance) {
         if (fromEra == toEra) {
             balance = _bufferSlotBalance(account, fromEra, fromSlot, blockNumber);
-        } else if (fromEra < toEra) {
+            if (fromSlot < toSlot) {
+                balance += _slotBalance(account, fromEra, fromSlot + 1, toSlot);
+            }
+        } else {
             // totalBlockBalance calcurate only buffer era/slot.
             // keep it simple stupid first by spliting into 3 part then sum.
             // part1: calulate balance at fromEra in naive in naive way O(n)
             unchecked {
-                for (uint8 i = fromSlot; i < 4; i++) {
-                    if (i == fromSlot) {
-                        balance += _bufferSlotBalance(account, fromEra, i, blockNumber);
-                    } else {
-                        balance += _retailBalances[account][fromEra][i].slotBalance;
-                    }
+                balance += _bufferSlotBalance(account, fromEra, fromSlot, blockNumber);
+                if (fromSlot < 3) {
+                    balance += _slotBalance(account, fromEra, fromSlot + 1, 3);
                 }
-            }
-            // part2: calulate balance betaween fromEra and toEra in naive way O(n)
-            unchecked {
-                for (uint256 j = fromEra + 1; j < toEra; j++) {
-                    balance += _slotBalance(account, j, 0, 3);
+                // part2: calulate balance betaween fromEra and toEra in naive way O(n)
+                for (uint256 era = fromEra + 1; era < toEra; era++) {
+                    balance += _slotBalance(account, era, 0, 3);
                 }
-            }
-            // part3:calulate balance at toEra in navie way O(n)
-            unchecked {
+                // part3:calulate balance at toEra in navie way O(n)
                 balance += _slotBalance(account, toEra, 0, toSlot);
             }
         }
