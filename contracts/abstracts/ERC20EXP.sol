@@ -132,6 +132,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     ) private view returns (uint256 key) {
         key = list.head();
         unchecked {
+            // @bug infinity loops found.
             while (blockNumber - key >= expirationPeriodInBlockLength) {
                 key = list.next(key);
             }
@@ -174,7 +175,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             // part2: calulate balance betaween fromEra and toEra in naive way O(n)
             unchecked {
                 for (uint256 j = fromEra + 1; j < toEra; j++) {
-                    balance += _slotBalance(account, j, 0, 4);
+                    balance += _slotBalance(account, j, 0, 3);
                 }
             }
             // part3:calulate balance at toEra in navie way O(n)
@@ -251,6 +252,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             }
         }
         if (fromBalance < value) {
+            // @bug fix expire token can be bypass.
             _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
         } else {
             unchecked {
