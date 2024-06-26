@@ -235,7 +235,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint8 toSlot,
         uint256 blockNumber
     ) internal {
-        Slot storage _recipient = _retailBalances[to][toEra][toSlot];
         Slot storage _sender = _retailBalances[from][fromEra][fromSlot];
         uint256 fromBalance = balanceOf(from);
         if (fromBalance < value) {
@@ -247,20 +246,8 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             _slidingWindow.getFrameSizeInBlockLength()
         );
         fromBalance = _sender.blockBalances[key];
-        if (fromBalance == 0) {
-            unchecked {
-                if (fromSlot < 3) {
-                    fromSlot++;
-                } else {
-                    fromSlot = 0;
-                    fromEra++;
-                }
-            }
-        }
-        if (fromBalance < value) {
-            // @bug fix expire token can be bypass.
-            _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
-        } else {
+        if (fromBalance >= value) {
+            Slot storage _recipient = _retailBalances[to][toEra][toSlot];
             unchecked {
                 _sender.blockBalances[key] -= value;
                 if (_sender.blockBalances[key] == 0) {
@@ -269,6 +256,19 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 _recipient.blockBalances[key] += value;
                 _recipient.list.insert(key, abi.encode(""));
             }
+        } else {
+            if (fromBalance == 0) {
+                unchecked {
+                    if (fromSlot < 3) {
+                        fromSlot++;
+                    } else {
+                        fromSlot = 0;
+                        fromEra++;
+                    }
+                }
+            }
+            // @bug fix expire token can be bypass.
+            _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
         }
         emit Transfer(from, to, value);
     }
