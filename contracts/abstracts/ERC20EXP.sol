@@ -74,9 +74,8 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint8 endSlot
     ) private view returns (uint256 balance) {
         unchecked {
-            while (startSlot <= endSlot) {
+            for (; startSlot <= endSlot; startSlot++) {
                 balance += _retailBalances[account][era][startSlot].slotBalance;
-                startSlot++;
             }
         }
     }
@@ -159,16 +158,16 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint8 toSlot,
         uint256 blockNumber
     ) internal view returns (uint256 balance) {
-        if (fromEra == toEra) {
-            balance = _bufferSlotBalance(account, fromEra, fromSlot, blockNumber);
-            if (fromSlot < toSlot) {
-                balance += _slotBalance(account, fromEra, fromSlot + 1, toSlot);
-            }
-        } else if (fromEra < toEra) {
-            // totalBlockBalance calcurate only buffer era/slot.
-            // keep it simple stupid first by spliting into 3 part then sum.
-            // part1: calulate balance at fromEra in naive in naive way O(n)
-            unchecked {
+        unchecked {
+            if (fromEra == toEra) {
+                balance = _bufferSlotBalance(account, fromEra, fromSlot, blockNumber);
+                if (fromSlot < toSlot) {
+                    balance += _slotBalance(account, fromEra, fromSlot + 1, toSlot);
+                }
+            } else if (fromEra < toEra) {
+                // totalBlockBalance calcurate only buffer era/slot.
+                // keep it simple stupid first by spliting into 3 part then sum.
+                // part1: calulate balance at fromEra in naive in naive way O(n)
                 uint8 maxSlotCache = _slidingWindow._slotSize - 1;
                 balance += _bufferSlotBalance(account, fromEra, fromSlot, blockNumber);
                 if (fromSlot < 3) {

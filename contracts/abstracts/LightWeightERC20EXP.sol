@@ -75,9 +75,8 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint8 endSlot
     ) private view returns (uint256 balance) {
         unchecked {
-            while (startSlot <= endSlot) {
+            for (; startSlot <= endSlot; startSlot++) {
                 balance += _retailBalances[account][era][startSlot].slotBalance;
-                startSlot++;
             }
         }
     }
@@ -160,16 +159,16 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint8 toSlot,
         uint256 blockNumber
     ) internal view returns (uint256 balance) {
-        if (fromEra == toEra) {
-            balance = _bufferSlotBalance(account, fromEra, fromSlot, blockNumber);
-            if (fromSlot < toSlot) {
-                balance += _slotBalance(account, fromEra, fromSlot + 1, toSlot);
-            }
-        } else {
-            // totalBlockBalance calcurate only buffer era/slot.
-            // keep it simple stupid first by spliting into 3 part then sum.
-            // part1: calulate balance at fromEra in naive in naive way O(n)
-            unchecked {
+        unchecked {
+            if (fromEra == toEra) {
+                balance = _bufferSlotBalance(account, fromEra, fromSlot, blockNumber);
+                if (fromSlot < toSlot) {
+                    balance += _slotBalance(account, fromEra, fromSlot + 1, toSlot);
+                }
+            } else {
+                // totalBlockBalance calcurate only buffer era/slot.
+                // keep it simple stupid first by spliting into 3 part then sum.
+                // part1: calulate balance at fromEra in naive in naive way O(n)
                 balance += _bufferSlotBalance(account, fromEra, fromSlot, blockNumber);
                 if (fromSlot < 3) {
                     balance += _slotBalance(account, fromEra, fromSlot + 1, 3);
@@ -238,21 +237,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             _slidingWindow.getFrameSizeInBlockLength()
         );
         fromBalance = _sender.blockBalances[key];
-        assembly {
-            if iszero(fromBalance) {
-                if lt(fromSlot, 3) {
-                    fromSlot := add(fromSlot, 1)
-                }
-                if eq(fromSlot, 3) {
-                    fromSlot := 0
-                    fromEra := sub(fromEra, 1)
-                }
-            }
-        }
-        if (fromBalance < value) {
-            // @bug fix expire token can be bypass.
-            _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
-        } else {
+        if (fromBalance >= value) {
             Slot storage _recipient = _retailBalances[to][toEra][toSlot];
             unchecked {
                 fromBalance -= value;
@@ -263,6 +248,20 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 _recipient.blockBalances[key] += value;
                 _recipient.list.insert(key);
             }
+        } else {
+            assembly {
+                if iszero(fromBalance) {
+                    if lt(fromSlot, 3) {
+                        fromSlot := add(fromSlot, 1)
+                    }
+                    if eq(fromSlot, 3) {
+                        fromSlot := 0
+                        fromEra := sub(fromEra, 1)
+                    }
+                }
+            }
+            // @bug fix expire token can be bypass.
+            _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
         }
         emit Transfer(from, to, value);
     }
