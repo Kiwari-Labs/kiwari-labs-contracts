@@ -25,7 +25,7 @@ export const run = async () => {
       expect(balanceBob).to.equal(100);
     });
 
-    it("[HAPPY] correct transfer", async function () {
+    it("[HAPPY] correct bulk transfer", async function () {
       // TODO: add test case (suitable logic and event response).
       const {erc20exp, alice, bob} = await deployERC20EXP();
       const aliceAddress = await alice.getAddress();

@@ -246,31 +246,42 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             _slidingWindow.getFrameSizeInBlockLength()
         );
         fromBalance = _sender.blockBalances[key];
-        if (fromBalance >= value) {
-            Slot storage _recipient = _retailBalances[to][toEra][toSlot];
+        if (fromBalance == 0) {
+            // move to next era or slot
             unchecked {
-                _sender.blockBalances[key] -= value;
-                if (_sender.blockBalances[key] == 0) {
-                    _sender.list.remove(key);
+                if (fromSlot < 3) {
+                    fromSlot++;
+                } else {
+                    fromSlot = 0;
+                    fromEra++;
                 }
-                _recipient.blockBalances[key] += value;
-                _recipient.list.insert(key, abi.encode(""));
             }
+            _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
+        } else if (fromBalance >= value) {
+            Slot storage _recipient = _retailBalances[to][fromEra][fromSlot];
+            _directTransfer(_sender, _recipient, value, key);
         } else {
-            if (fromBalance == 0) {
-                unchecked {
-                    if (fromSlot < 3) {
-                        fromSlot++;
-                    } else {
-                        fromSlot = 0;
-                        fromEra++;
-                    }
-                }
-            }
             // @bug fix expire token can be bypass.
             _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
         }
         emit Transfer(from, to, value);
+    }
+
+    /// @notice use for preventing stack too deep in update retail balance by spliting into small function.
+    /// @dev private function to perform a direct transfer of tokens by key.
+    /// @param sender The slot storage of the sender.
+    /// @param recipient The slot storage of the recipient.
+    /// @param value The amount of tokens to transfer.
+    /// @param key The key associated with the block balance.
+    function _directTransfer(Slot storage sender, Slot storage recipient, uint256 value, uint256 key) private {
+        unchecked {
+            sender.blockBalances[key] -= value;
+            if (sender.blockBalances[key] == 0) {
+                sender.list.remove(key);
+            }
+            recipient.blockBalances[key] += value;
+            recipient.list.insert(key, abi.encode(""));
+        }
     }
 
     /// @notice Transfers tokens from one account to another in a first-in-first-out manner across specified eras and slots.
