@@ -31,7 +31,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     /// @param name_ The name of the token.
     /// @param symbol_ The symbol of the token.
     /// @param blockNumber_ The starting block number for the sliding window.
-    /// @param blockTime_ The duration of each block in seconds.
+    /// @param blockTime_ The duration of each block in milliseconds..
     /// @param expirePeriod_ The expiration period of each block in the sliding window, in blocks.
     constructor(
         string memory name_,
