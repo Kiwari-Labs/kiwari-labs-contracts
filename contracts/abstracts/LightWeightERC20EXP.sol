@@ -247,24 +247,57 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         );
         fromBalance = _sender.blockBalances[key];
         if (fromBalance == 0) {
-            assembly {
-                if lt(fromSlot, 3) {
-                    fromSlot := add(fromSlot, 1)
-                }
-                if eq(fromSlot, 3) {
-                    fromSlot := 0
-                    fromEra := add(fromEra, 1)
-                }
-            }
-            _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
+            _handleTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
         } else if (fromBalance >= value) {
             Slot storage _recipient = _retailBalances[to][fromEra][fromSlot];
             _directTransfer(_sender, _recipient, value, key);
         } else {
-            // @bug fix expire token can be bypass.
-            _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
+            Slot storage _recipient = _retailBalances[to][fromEra][fromSlot];
+            uint256 remainingValue = _transferFromSlotStartFromKey(_sender, _recipient, value, key);
+            if (remainingValue > 0) {
+                _handleTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
+            }
         }
         emit Transfer(from, to, value);
+    }
+
+    function _transferFromSlotStartFromKey(
+        Slot storage sender,
+        Slot storage recipient,
+        uint256 value,
+        uint256 key
+    ) private returns (uint256 blockBalance) {
+        // Loop until value is transferred or end of slot is reached
+        uint256[] memory blocks = sender.list.pathToTail(key);
+        unchecked {
+            uint256 length = blocks.length;
+            uint256 blockKey;
+            for (uint256 i = 0; i < length && value > 0; i++) {
+                blockKey = blocks[i];
+                blockBalance = sender.blockBalances[blockKey];
+                if (blockBalance > 0) {
+                    if (blockBalance >= value) {
+                        sender.blockBalances[blockKey] -= value;
+                        if (sender.blockBalances[blockKey] == 0) {
+                            sender.list.remove(blockKey);
+                        }
+                        recipient.blockBalances[blockKey] += value;
+                        recipient.slotBalance += value;
+                        recipient.list.insert(blockKey);
+                        value = 0;
+                        break;
+                    } else {
+                        sender.blockBalances[blockKey] = 0;
+                        sender.list.remove(blockKey);
+                        recipient.blockBalances[blockKey] += blockBalance;
+                        recipient.slotBalance += blockBalance;
+                        recipient.list.insert(blockKey);
+                        value -= blockBalance;
+                    }
+                }
+            }
+        }
+        return value;
     }
 
     /// @notice use for preventing stack too deep in update retail balance by spliting into small function.
@@ -282,6 +315,35 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             recipient.blockBalances[key] += value;
             recipient.list.insert(key);
         }
+    }
+
+    /// @notice use for preventing stack too deep in update retail balance by spliting into small function.
+    /// @dev private function to handle token transfer when sender's balance is not enough.
+    /// @param from The address from which tokens are transferred.
+    /// @param to The address to which tokens are transferred.
+    /// @param value The amount of tokens to transfer.
+    /// @param fromEra The era (time period) of the sender's balance.
+    /// @param toEra The era (time period) of the recipient's balance.
+    /// @param fromSlot The slot index of the sender's balance.
+    /// @param toSlot The slot index of the recipient's balance.
+    function _handleTransfer(
+        address from,
+        address to,
+        uint256 value,
+        uint256 fromEra,
+        uint256 toEra,
+        uint8 fromSlot,
+        uint8 toSlot
+    ) private {
+        unchecked {
+            if (fromSlot < 3) {
+                fromSlot++;
+            } else {
+                fromSlot = 0;
+                fromEra++;
+            }
+        }
+        _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
     }
 
     /// @notice Transfers tokens from one account to another in a first-in-first-out manner across specified eras and slots.
@@ -314,9 +376,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                     value = _transferFromSlot(from, to, value, era, slot);
                 }
             }
-        }
-        if (value > 0) {
-            revert ERC20InsufficientBalance(from, 0, value);
         }
     }
 
@@ -378,6 +437,9 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         if (spendable) {
             _mint(to, value);
         } else {
+            if (to == address(0)) {
+                revert ERC20InvalidReceiver(address(0));
+            }
             _updateReceiveBalance(address(0), to, value);
         }
     }
