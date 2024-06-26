@@ -235,11 +235,11 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint8 toSlot,
         uint256 blockNumber
     ) internal {
-        Slot storage _sender = _retailBalances[from][fromEra][fromSlot];
         uint256 fromBalance = balanceOf(from);
         if (fromBalance < value) {
             revert ERC20InsufficientBalance(from, fromBalance, value);
         }
+        Slot storage _sender = _retailBalances[from][fromEra][fromSlot];
         uint256 key = _getFirstUnexpiredBlockBalance(
             _sender.list,
             blockNumber,
@@ -488,13 +488,13 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     /// @param to The address to which tokens are being transferred.
     /// @param value The amount of tokens being transferred.
     function _customTransfer(address from, address to, uint256 value) internal {
-        if (to == address(0)) {
-            revert ERC20InvalidReceiver(address(0));
-        }
         // hook before transfer
         _beforeTokenTransfer(from, to, value);
         uint256 selector = (_wholeSale[to] ? 2 : 0) | (_wholeSale[from] ? 1 : 0);
         if (selector == 0) {
+            if (to == address(0)) {
+                revert ERC20InvalidReceiver(address(0));
+            }
             uint256 blockNumberCache = _blockNumberProvider();
             (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumberCache);
             _updateRetailBalance(from, to, value, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
