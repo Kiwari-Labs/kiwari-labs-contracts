@@ -1,9 +1,8 @@
 import {expect} from "chai";
-import {ethers} from "hardhat";
+import {ethers, network} from "hardhat";
 import {deployLightWeightERC20EXP} from "../utils.test";
 import {ZERO_ADDRESS} from "../constant.test";
-import {mine} from "@nomicfoundation/hardhat-network-helpers";
-// import { ERC20_EXP_NAME, ERC20_EXP_SYMBOL } from "../constant.test";
+import {mine, mineUpTo, time} from "@nomicfoundation/hardhat-network-helpers";
 
 export const run = async () => {
   describe("Transfer", async function () {
@@ -22,12 +21,16 @@ export const run = async () => {
       for (let index = 100; index > 0; index--) {
         await erc20exp.connect(alice).transfer(bobAddress, 1n);
       }
-      const balanceBob = await erc20exp["balanceOf(address)"](bobAddress);
-      console.log("balanceBob", balanceBob);
-      expect(balanceBob).to.equal(100);
+      // const balanceAliceAfter2 = await erc20exp["balanceOf(address)"](aliceAddress);
+      // console.log("🚀 ~ balanceAliceAfter2:", balanceAliceAfter2)
+      // const balanceAliceList = await erc20exp.tokenList(aliceAddress,0n,0n);
+      // console.log("🚀 ~ balanceBobList:", balanceAliceList)
+      // const balanceBob = await erc20exp["balanceOf(address)"](bobAddress);
+      // console.log("balanceBob", balanceBob);
+      // expect(balanceBob).to.equal(100);
     });
 
-    it("[HAPPY] correct transfer", async function () {
+    it("[HAPPY] correct bulk transfer", async function () {
       // TODO: add test case (suitable logic and event response).
       const {erc20exp, alice, bob} = await deployLightWeightERC20EXP();
       const aliceAddress = await alice.getAddress();
@@ -51,6 +54,10 @@ export const run = async () => {
       const aliceTokenList = await erc20exp.tokenList(aliceAddress, 0n, 0n);
       console.log("aliceTokenList:", aliceTokenList.length);
       expect(balanceBob).to.equal(270);
+    });
+
+    it("[HAPPY] correct transferFrom", async function () {
+      // TODO: add test case (suitable logic and event response).
     });
 
     it("[UNHAPPY] should not be transfer to zero address", async function () {

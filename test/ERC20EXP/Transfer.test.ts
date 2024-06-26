@@ -1,9 +1,7 @@
 import {expect} from "chai";
-import {ethers} from "hardhat";
 import {deployERC20EXP} from "../utils.test";
 import {ZERO_ADDRESS} from "../constant.test";
-import {mine} from "@nomicfoundation/hardhat-network-helpers";
-// import { ERC20_EXP_NAME, ERC20_EXP_SYMBOL } from "../constant.test";
+import {mine, mineUpTo, time} from "@nomicfoundation/hardhat-network-helpers";
 
 export const run = async () => {
   describe("Transfer", async function () {
@@ -51,6 +49,10 @@ export const run = async () => {
       const aliceTokenList = await erc20exp.tokenList(aliceAddress, 0n, 0n);
       console.log("aliceTokenList:", aliceTokenList.length);
       expect(balanceBob).to.equal(270);
+    });
+
+    it("[HAPPY] correct transferFrom", async function () {
+      // TODO: add test case (suitable logic and event response).
     });
 
     it("[UNHAPPY] should not be transfer to zero address", async function () {

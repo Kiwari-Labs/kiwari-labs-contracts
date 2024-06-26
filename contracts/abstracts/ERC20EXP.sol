@@ -422,10 +422,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         if (to == address(0)) {
             revert ERC20InvalidSender(address(0));
         }
-        uint256 fromBalance = balanceOf(to);
-        if (fromBalance < value) {
-            revert ERC20InsufficientBalance(to, fromBalance, value);
-        }
         uint256 blockNumberCache = _blockNumberProvider();
         (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumberCache);
         _updateRetailBalance(to, address(0), value, fromEra, toEra, fromSlot, toSlot, blockNumberCache);

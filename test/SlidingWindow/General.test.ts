@@ -24,7 +24,7 @@ export const run = async () => {
       const {slidingWindow} = await deploySlidingWindow({slotSize});
       expect(await slidingWindow.getSlotPerEra()).to.equal(slotSize);
     });
-    
+
     it("[HAPPY] query frame size in block length", async function () {
       const blockPeriod = 400;
       const slotSize = 4;
