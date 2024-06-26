@@ -192,10 +192,19 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     /// @param value The amount of tokens to be transferred, minted, or burned.
     function _updateReceiveBalance(address from, address to, uint256 value) internal virtual {
         unchecked {
+            uint256 balance = _receiveBalances[from];
             if (from == address(0)) {
                 // mint non-expirable token to receive balance.
                 _receiveBalances[to] += value;
+            } else if (to == address(0)) {
+                if (balance < value) {
+                    revert ERC20InsufficientBalance(from, balance, value);
+                }
+                _receiveBalances[from] -= value;
             } else {
+                if (balance < value) {
+                    revert ERC20InsufficientBalance(from, balance, value);
+                }
                 // burn non-expirable token from receive balance.
                 _receiveBalances[from] -= value;
                 // update non-expirable token from and to receive balance.
@@ -260,6 +269,12 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                     }
                 }
             }
+            // _sender = _retailBalances[from][fromEra][fromSlot];
+            // uint256 key = _getFirstUnexpiredBlockBalance(
+            //     _sender.list,
+            //     blockNumber,
+            //     _slidingWindow.getFrameSizeInBlockLength()
+            // );
             // @bug fix expire token can be bypass.
             _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
         }

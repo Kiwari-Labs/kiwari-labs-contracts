@@ -1,23 +1,11 @@
 import {expect} from "chai";
-import {ethers} from "hardhat";
 import {deployLightWeightERC20EXP} from "../utils.test";
 import {ZERO_ADDRESS} from "../constant.test";
-import {mine} from "@nomicfoundation/hardhat-network-helpers";
-// import { ERC20_EXP_NAME, ERC20_EXP_SYMBOL } from "../constant.test";
 
 export const run = async () => {
   describe("Mint", async function () {
     it("[HAPPY] correct mint", async function () {
       // TODO: add test case (suitable logic and event response).
-      const {erc20exp, alice} = await deployLightWeightERC20EXP();
-      const aliceAddress = await alice.getAddress();
-      const before = await erc20exp["balanceOf(address)"](aliceAddress);
-      await expect(await erc20exp.mintRetail(aliceAddress, 1000n))
-        .to.emit(erc20exp, "Transfer")
-        .withArgs(ZERO_ADDRESS, aliceAddress, 1000n);
-      const after = await erc20exp["balanceOf(address)"](aliceAddress);
-      expect(before).to.equal(0);
-      expect(after).to.equal(1000n);
     });
 
     it("[UNHAPPY] mint to zero address", async function () {
@@ -27,31 +15,45 @@ export const run = async () => {
 
   describe("Mint To Wholesaler", async function () {
     it("[HAPPY] correct mint", async function () {
-      // TODO: add test case (suitable logic and event response).
-      // const { erc20exp, alice } = await deployLightWeightERC20EXP();
-      // const aliceAddress = await alice.getAddress();
-      // await expect(erc20exp.mintWholeSale(aliceAddress, 1))
-      // .to.be.emit(erc20exp,"Transfer")
-      // .withArgs(ZERO_ADDRESS, aliceAddress, 1);
+      const {erc20exp, alice} = await deployLightWeightERC20EXP();
+      const aliceAddress = await alice.getAddress();
+      await expect(erc20exp.grantWholeSale(aliceAddress))
+        .to.emit(erc20exp, "GrantWholeSale")
+        .withArgs(aliceAddress, true);
+      await expect(erc20exp.mintSpentWholeSale(aliceAddress, 1))
+        .to.be.emit(erc20exp, "Transfer")
+        .withArgs(ZERO_ADDRESS, aliceAddress, 1);
+      await expect(erc20exp.mintUnspentWholeSale(aliceAddress, 1))
+        .to.be.emit(erc20exp, "Transfer")
+        .withArgs(ZERO_ADDRESS, aliceAddress, 1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).to.equal(2);
     });
 
     it("[UNHAPPY] mint to zero address", async function () {
-      // TODO: add test case (suitable logic and event response).
-      //  const { erc20exp } = await deployLightWeightERC20EXP();
-      //  await expect(erc20exp.mintWholeSale(ZERO_ADDRESS, 1)).to.be.revertedWith("ERC20: mint to the zero address");
+      const {erc20exp} = await deployLightWeightERC20EXP();
+      await expect(erc20exp.grantWholeSale(ZERO_ADDRESS))
+        .to.emit(erc20exp, "GrantWholeSale")
+        .withArgs(ZERO_ADDRESS, true);
+      await expect(erc20exp.mintSpentWholeSale(ZERO_ADDRESS, 1)).to.be.revertedWithCustomError(
+        erc20exp,
+        "ERC20InvalidReceiver",
+      );
+      await expect(erc20exp.mintSpentWholeSale(ZERO_ADDRESS, 1)).to.be.revertedWithCustomError(
+        erc20exp,
+        "ERC20InvalidReceiver",
+      );
     });
 
-    it("[UNHAPPY] mint to non-wholesaler", async function () {
-      // TODO: add test case (suitable logic and event response).
-      // const { erc20exp, bob } = await deployLightWeightERC20EXP();
-      // const bobAddress = await bob.getAddress();
-      // await expect(erc20exp.mintWholeSale(ZERO_ADDRESS, 1)).to.be.revertedWith("ERC20: mint to the zero address");
+    it("[UNHAPPY] mint to non-wholesaler address", async function () {
+      const {erc20exp} = await deployLightWeightERC20EXP();
+      await expect(erc20exp.mintUnspentWholeSale(ZERO_ADDRESS, 1)).to.revertedWith(
+        "can't mint non-expirable token to non wholesale account",
+      );
     });
   });
 
   describe("Mint To Retailer", async function () {
     it("[HAPPY] correct mint", async function () {
-      // TODO: add test case (suitable logic and event response).
       const {erc20exp, alice} = await deployLightWeightERC20EXP();
       const aliceAddress = await alice.getAddress();
       await expect(erc20exp.mintRetail(aliceAddress, 1))
@@ -62,7 +64,6 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] mint to zero address", async function () {
-      // TODO: add test case (suitable logic and event response).
       const {erc20exp} = await deployLightWeightERC20EXP();
       await expect(erc20exp.mintRetail(ZERO_ADDRESS, 1))
         .to.be.revertedWithCustomError(erc20exp, "ERC20InvalidReceiver")
@@ -70,13 +71,14 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] mint to non-retailer", async function () {
-      // TODO: add test case (suitable logic and event response).
       const {erc20exp, alice} = await deployLightWeightERC20EXP();
-      const bobAddress = await alice.getAddress();
-      // await erc20exp.grantWholeSale(bobAddress,true);
-      await erc20exp.mintRetail(bobAddress, 1000);
-      // await expect(erc20exp.mintRetail(bobAddress, 1)).to.be
-      //.revertedWith("can't mint non-expirable token to non wholesale account");
+      const aliceAddress = await alice.getAddress();
+      await expect(erc20exp.grantWholeSale(aliceAddress))
+        .to.emit(erc20exp, "GrantWholeSale")
+        .withArgs(aliceAddress, true);
+      await expect(erc20exp.mintRetail(aliceAddress, 1)).to.be.revertedWith(
+        "can't mint expirable token to non retail account",
+      );
     });
   });
 };
