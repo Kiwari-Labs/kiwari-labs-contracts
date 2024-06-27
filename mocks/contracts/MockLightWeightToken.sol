@@ -14,4 +14,24 @@ contract MockLightWeightToken is ERC20Expirable {
     function mintRetail(address to, uint256 value) public {
         _mintRetail(to, value);
     }
+
+    function burnRetail(address to, uint256 value) public {
+        _burnRetail(to, value);
+    }
+
+    function mintSpentWholeSale(address to, uint256 value) public {
+        _mintWholeSale(to, value, true);
+    }
+
+    function mintUnspentWholeSale(address to, uint256 value) public {
+        _mintWholeSale(to, value, false);
+    }
+
+    function burnSpentWholeSale(address to, uint256 value) public {
+        _burnWholeSale(to, value, true);
+    }
+
+    function burnUnspentWholeSale(address to, uint256 value) public {
+        _burnWholeSale(to, value, false);
+    }
 }

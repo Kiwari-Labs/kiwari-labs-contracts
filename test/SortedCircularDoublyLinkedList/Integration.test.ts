@@ -1,11 +1,11 @@
-import { expect } from "chai";
-import { deployDoublyList, padIndexToData } from "../utils.test";
+import {expect} from "chai";
+import {deployDoublyList, padIndexToData} from "../utils.test";
 
 export const run = async () => {
   describe("Integration", async function () {
     it("[HAPPY] correct integration", async function () {
       const len = 10;
-      const { doublylist } = await deployDoublyList({
+      const {doublylist} = await deployDoublyList({
         autoList: true,
         len: len,
       });

@@ -1,5 +1,5 @@
-import { Contract, Signer } from "ethers";
-import { ethers } from "hardhat";
+import {Contract, Signer} from "ethers";
+import {ethers} from "hardhat";
 
 import {
   ERC20_EXP_CONTRACT,
@@ -11,17 +11,14 @@ import {
   LIGHT_WEIGHT_SLIDING_WINDOW_CONTRACT,
   LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT,
   SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT,
-  SLIDING_WINDOW_CONTRACT
+  SLIDING_WINDOW_CONTRACT,
 } from "./constant.test";
 
 const deployERC20Selector = async function (light: boolean) {
   const type = light ? LIGHT_WEIGHT_ERC20_EXP_CONTRACT : ERC20_EXP_CONTRACT;
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 
-  const ERC20EXP = await ethers.getContractFactory(
-    type,
-    deployer,
-  );
+  const ERC20EXP = await ethers.getContractFactory(type, deployer);
   const erc20exp = await ERC20EXP.deploy(
     ERC20_EXP_NAME,
     ERC20_EXP_SYMBOL,
@@ -37,16 +34,15 @@ const deployERC20Selector = async function (light: boolean) {
     bob,
     jame,
   };
-}
+};
 
 const deployDoublyListSelector = async function (light: boolean, autoList: boolean, len: number) {
-  const type = light ? LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT : SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT;
+  const type = light
+    ? LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT
+    : SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT;
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 
-  const DoublyList = await ethers.getContractFactory(
-    type,
-    deployer,
-  );
+  const DoublyList = await ethers.getContractFactory(type, deployer);
   const doublylist = await DoublyList.deploy();
   await doublylist.deployed();
 
@@ -76,22 +72,23 @@ const deployDoublyListSelector = async function (light: boolean, autoList: boole
   };
 };
 
-const deploySlidingWindowSelector = async function (light: boolean) {
+const deploySlidingWindowSelector = async function (
+  light: boolean,
+  startBlockNumber: number,
+  blockPeriod: number,
+  frameSize: number,
+  slotSize: number,
+) {
   const type = light ? LIGHT_WEIGHT_SLIDING_WINDOW_CONTRACT : SLIDING_WINDOW_CONTRACT;
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 
-  const SlidingWindow = await ethers.getContractFactory(
-    type,
-    deployer,
-  );
+  const SlidingWindow = await ethers.getContractFactory(type, deployer);
 
   let slidingWindow;
   if (light) {
-    // TODO: Load from Constant file.
-    slidingWindow = await SlidingWindow.deploy(4, 4, 4);
+    slidingWindow = await SlidingWindow.deploy(startBlockNumber, blockPeriod, frameSize, slotSize);
   } else {
-    // TODO: Load from Constant file.
-    slidingWindow = await SlidingWindow.deploy(4, 4, 4);
+    slidingWindow = await SlidingWindow.deploy(startBlockNumber, blockPeriod, frameSize, slotSize);
   }
 
   await slidingWindow.deployed();
@@ -125,19 +122,28 @@ export const deployLightWeightERC20EXP = async function () {
   return deployERC20Selector(true);
 };
 
-export const deployLightWeightDoublyList = async function ({ autoList = false, len = 10 } = {}) {
+export const deployLightWeightDoublyList = async function ({autoList = false, len = 10} = {}) {
   return deployDoublyListSelector(true, autoList, len);
 };
 
-export const deployLightWeightSlidingWindow = async function () {
-  return deploySlidingWindowSelector(true);
-}
-
-export const deploySlidingWindow = async function () {
-  return deploySlidingWindowSelector(false);
-};
-
-export const deployDoublyList = async function ({ autoList = false, len = 10 } = {}) {
+export const deployDoublyList = async function ({autoList = false, len = 10} = {}) {
   return deployDoublyListSelector(false, autoList, len);
 };
 
+export const deployLightWeightSlidingWindow = async function ({
+  startBlockNumber = 0, // start at a current block.number
+  blockPeriod = 400, // 400ms per block
+  frameSize = 8, // total 8 slot
+  slotSize = 4, // 4 slot per era
+}) {
+  return deploySlidingWindowSelector(true, startBlockNumber, blockPeriod, frameSize, slotSize);
+};
+
+export const deploySlidingWindow = async function ({
+  startBlockNumber = 0, // start at a current block.number
+  blockPeriod = 400, // 400ms per block
+  frameSize = 8, // total 8 slot
+  slotSize = 4, // 4 slot per era
+}) {
+  return deploySlidingWindowSelector(false, startBlockNumber, blockPeriod, frameSize, slotSize);
+};

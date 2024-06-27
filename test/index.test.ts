@@ -8,8 +8,10 @@ import * as SortedCircularDoublyLinkedList from "./SortedCircularDoublyLinkedLis
 describe("Scenario", async function () {
   ERC20EXP.run();
   LightWeightERC20EXP.run();
-  LightWeightSlidingWindow.run();
-  LightWeightSortedCircularDoublyLinkedList.run();
+
   SlidingWindow.run();
+  LightWeightSlidingWindow.run();
+
   SortedCircularDoublyLinkedList.run();
+  LightWeightSortedCircularDoublyLinkedList.run();
 });

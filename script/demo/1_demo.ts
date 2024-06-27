@@ -1,6 +1,6 @@
-import { mine } from "@nomicfoundation/hardhat-network-helpers";
-import { parseEther } from "ethers/lib/utils";
-import { network, ethers } from "hardhat";
+import {mine} from "@nomicfoundation/hardhat-network-helpers";
+import {parseEther} from "ethers/lib/utils";
+import {network, ethers} from "hardhat";
 
 // @TODO before demostrate.
 // import alice private key to wallet.
@@ -40,26 +40,26 @@ async function main() {
   // console.log("alice:",aliceAddress,"balance:", aliceBalance.toString());
   // console.log("2: grant wholesale address to charlie");
   // await erc20exp.connect(charlie).grantWholeSale(charliesAddress);
-// To skip block
-await network.provider.send("hardhat_mine", [10000000]);
+  // To skip block
+  await network.provider.send("hardhat_mine", [10000000]);
 
-//   console.log("currentBlock:", await ethers.provider.getBlockNumber());
-//   console.log("alice transfer to bob");
-//   await erc20exp.connect(alice).transfer(bob.getAddress(),100);
-//   const bobBalance = await erc20exp["balanceOf(address)"](bobAddress);
-//   console.log("bobBalance:", bobBalance.toString());
-//   const aliceBalanceAfter = await erc20exp["balanceOf(address)"](aliceAddress);
-//   console.log("aliceBalanceAfter:", aliceBalanceAfter.toString());
-//   const era = await erc20exp.blockPerEra();
-//   await network.provider.send("hardhat_mine", [10000000]);
-//   console.log("skip to expire block");
-//   console.log("currentBlock:", await ethers.provider.getBlockNumber());
+  //   console.log("currentBlock:", await ethers.provider.getBlockNumber());
+  //   console.log("alice transfer to bob");
+  //   await erc20exp.connect(alice).transfer(bob.getAddress(),100);
+  //   const bobBalance = await erc20exp["balanceOf(address)"](bobAddress);
+  //   console.log("bobBalance:", bobBalance.toString());
+  //   const aliceBalanceAfter = await erc20exp["balanceOf(address)"](aliceAddress);
+  //   console.log("aliceBalanceAfter:", aliceBalanceAfter.toString());
+  //   const era = await erc20exp.blockPerEra();
+  //   await network.provider.send("hardhat_mine", [10000000]);
+  //   console.log("skip to expire block");
+  //   console.log("currentBlock:", await ethers.provider.getBlockNumber());
 
-//   const aliceBalanceZero = await erc20exp["balanceOf(address)"](aliceAddress);
-//   const bobBalanceZero = await erc20exp["balanceOf(address)"](bobAddress);
+  //   const aliceBalanceZero = await erc20exp["balanceOf(address)"](aliceAddress);
+  //   const bobBalanceZero = await erc20exp["balanceOf(address)"](bobAddress);
 
-//   console.log("aliceBalanceAfter:", aliceBalanceZero.toString());
-//   console.log("bobBalanceAfter:", bobBalanceZero.toString());
+  //   console.log("aliceBalanceAfter:", aliceBalanceZero.toString());
+  //   console.log("bobBalanceAfter:", bobBalanceZero.toString());
 }
 
 main()

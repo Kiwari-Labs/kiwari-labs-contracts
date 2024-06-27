@@ -87,15 +87,6 @@ library SortedCircularDoublyLinkedList {
         }
     }
 
-    /// @param self The linked list.
-    /// @param index The index at which to insert the data.
-    /// @param prev_ The previous node before the index.
-    /// @param next_ The next node after the index.
-    function _setNode(List storage self, uint256 index, uint256 prev_, uint256 next_) private {
-        self._nodes[index][PREV] = prev_;
-        self._nodes[index][NEXT] = next_;
-    }
-
     /// @notice Check if a node exists in the linked list.
     /// @dev This function checks if a node exists in the linked list by the specified index.
     /// @param self The linked list.
@@ -133,16 +124,20 @@ library SortedCircularDoublyLinkedList {
             uint256 tmpSize = self._size;
             self._data[index] = data;
             if (tmpSize == SENTINEL) {
-                _setNode(self, SENTINEL, index, index);
-                _setNode(self, index, SENTINEL, SENTINEL);
+                self._nodes[SENTINEL][NEXT] = index;
+                self._nodes[SENTINEL][PREV] = index;
+                self._nodes[index][PREV] = SENTINEL;
+                self._nodes[index][NEXT] = SENTINEL;
             } else if (index < tmpHead) {
                 self._nodes[SENTINEL][NEXT] = index;
                 self._nodes[tmpHead][PREV] = index;
-                _setNode(self, index, SENTINEL, tmpHead);
+                self._nodes[index][PREV] = SENTINEL;
+                self._nodes[index][NEXT] = tmpHead;
             } else if (index > tmpTail) {
                 self._nodes[SENTINEL][PREV] = index;
                 self._nodes[tmpTail][NEXT] = index;
-                _setNode(self, index, tmpTail, SENTINEL);
+                self._nodes[index][PREV] = tmpTail;
+                self._nodes[index][NEXT] = SENTINEL;
             } else {
                 uint256 tmpCurr;
                 if (index - tmpHead <= tmpTail - index) {
@@ -159,7 +154,8 @@ library SortedCircularDoublyLinkedList {
                 uint256 tmpPrev = self._nodes[tmpCurr][PREV];
                 self._nodes[tmpPrev][NEXT] = index;
                 self._nodes[tmpCurr][PREV] = index;
-                _setNode(self, index, tmpPrev, tmpCurr);
+                self._nodes[index][PREV] = tmpPrev;
+                self._nodes[index][NEXT] = tmpCurr;
             }
             unchecked {
                 self._size = tmpSize + 1;
@@ -177,9 +173,10 @@ library SortedCircularDoublyLinkedList {
             // remove the node from between existing nodes.
             uint256 tmpPrev = self._nodes[index][PREV];
             uint256 tmpNext = self._nodes[index][NEXT];
+            self._nodes[index][NEXT] = SENTINEL;
+            self._nodes[index][PREV] = SENTINEL;
             self._nodes[tmpPrev][NEXT] = tmpNext;
             self._nodes[tmpNext][PREV] = tmpPrev;
-            _setNode(self, index, SENTINEL, SENTINEL);
             self._data[index] = EMPTY;
             unchecked {
                 self._size--;
@@ -197,7 +194,8 @@ library SortedCircularDoublyLinkedList {
             uint256 tmpSize = self._size;
             while (tmpCurr != index) {
                 uint256 tmpNext = self._nodes[tmpCurr][NEXT];
-                _setNode(self, tmpCurr, SENTINEL, SENTINEL);
+                self._nodes[tmpCurr][NEXT] = SENTINEL;
+                self._nodes[tmpCurr][PREV] = SENTINEL;
                 self._data[tmpCurr] = EMPTY;
                 tmpCurr = tmpNext;
                 unchecked {
@@ -270,7 +268,7 @@ library SortedCircularDoublyLinkedList {
     /// @notice Get the indices of nodes in ascending order.
     /// @dev This function returns an array containing the indices of nodes in ascending order.
     /// @param self The linked list.
-    /// @return asc An array containing the indices of nodes in ascending order.
+    /// @return An array containing the indices of nodes in ascending order.
     function ascending(List storage self) internal view returns (uint256[] memory) {
         return _traversal(self, PREV);
     }
