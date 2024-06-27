@@ -12,6 +12,26 @@ contract MockSlidingWindow {
         slidingWindow.updateSlidingWindow(blockPeriod, frameSize, slotSize);
     }
 
+    function updateWindow(uint24 blockTime, uint8 frameSize, uint8 slotSize) public {
+        slidingWindow.updateSlidingWindow(blockTime, frameSize, slotSize);
+    }
+
+    function setStartBlock(uint256 startBlock) public {
+        slidingWindow._startBlockNumber = startBlock;
+    }
+
+    function getFrame(
+        uint256 blockNumber
+    ) public view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
+        return slidingWindow.frame(blockNumber);
+    }
+
+    function getSafeFrame(
+        uint256 blockNumber
+    ) public view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
+        return slidingWindow.safeFrame(blockNumber);
+    }
+
     function getBlockPerEra() public view returns (uint40) {
         return slidingWindow.getBlockPerEra();
     }
