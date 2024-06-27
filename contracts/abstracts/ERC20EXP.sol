@@ -310,9 +310,9 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     function _directTransfer(Slot storage sender, Slot storage recipient, uint256 value, uint256 key) private {
         unchecked {
             uint256 balance = sender.blockBalances[key] - value;
+            sender.blockBalances[key] = balance;
             if (balance == 0) {
                 sender.list.remove(key);
-                sender.blockBalances[key] = 0;
             }
             recipient.blockBalances[key] += value;
             recipient.list.insert(key, abi.encodePacked(""));
