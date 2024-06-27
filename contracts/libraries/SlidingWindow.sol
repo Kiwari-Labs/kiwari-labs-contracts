@@ -52,6 +52,7 @@ library SlidingWindow {
             uint256 startblockNumberCache = self._startBlockNumber;
             uint40 blockPerYearCache = self._blockPerEra;
             if (blockNumber > startblockNumberCache) {
+                // @bug should check diff self._blockPerEra and self._blockPerSlot * self._slotSize
                 slot = uint8(
                     ((blockNumber - startblockNumberCache) % blockPerYearCache) / (blockPerYearCache / self._slotSize)
                 );

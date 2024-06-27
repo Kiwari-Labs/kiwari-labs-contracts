@@ -48,6 +48,7 @@ library SlidingWindow {
         unchecked {
             uint256 startblockNumberCache = self._startBlockNumber;
             uint40 blockPerYearCache = self._blockPerEra;
+            // @bug should check diff self._blockPerEra and self._blockPerSlot * 4
             assembly {
                 switch gt(blockNumber, startblockNumberCache)
                 case 1 {
