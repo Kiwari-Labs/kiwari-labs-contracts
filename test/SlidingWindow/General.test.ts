@@ -86,5 +86,244 @@ export const run = async () => {
       expect(getFrameSizeInEraAndSlotLength[0]).to.equal(0);
       expect(getFrameSizeInEraAndSlotLength[1]).to.equal(frameSize % slotSize);
     });
+
+    it("[HAPPY] get era and slot", async function () {
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+
+      /* 
+        blockPerEra = 78892315
+        blockPerSlot = 19723078
+        frameSizeInBlockLength = 39446156
+        slotSize = 4
+      */
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber: 100, blockPeriod, slotSize, frameSize});
+
+      const blockNumber = 82892315;
+
+      const [era, slot] = await slidingWindow.getCurrentEraAndSlot(blockNumber);
+
+      expect(era).to.equal(1);
+      expect(slot).to.equal(0);
+    });
+
+    it("[HAPPY] calculate the frame correctly", async function () {
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+
+      /* 
+        blockPerEra = 78892315
+        blockPerSlot = 19723078
+        frameSizeInBlockLength = 39446156
+        slotSize = 4
+      */
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber: 100, blockPeriod, slotSize, frameSize});
+
+      const blockNumber = 82892315;
+
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.getFrame(blockNumber);
+      const [curEra, curSlot] = await slidingWindow.getCurrentEraAndSlot(blockNumber);
+
+      expect(toEra).to.equal(curEra);
+      expect(toSlot).to.equal(curSlot);
+      expect(fromEra).to.equal(0);
+      expect(fromSlot).to.equal(2);
+    });
+
+    it("[HAPPY] calculate the frame correctly (if blockNumber less than frameSizeInBlockLengthCache)", async function () {
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+
+      /* 
+        blockPerEra = 78892315
+        blockPerSlot = 19723078
+        frameSizeInBlockLength = 39446156
+        slotSize = 4
+      */
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber: 100, blockPeriod, slotSize, frameSize});
+
+      const blockNumber = 35446156;
+
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.getFrame(blockNumber);
+      const [curEra, curSlot] = await slidingWindow.getCurrentEraAndSlot(blockNumber);
+
+      expect(toEra).to.equal(curEra);
+      expect(toSlot).to.equal(curSlot);
+      expect(fromEra).to.equal(0);
+      expect(fromSlot).to.equal(0);
+    });
+
+    it("[HAPPY] calculate the safe frame correctly (if era equal to 0)", async function () {
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+
+      /* 
+        blockPerEra = 78892315
+        blockPerSlot = 19723078
+        frameSizeInBlockLength = 39446156
+        slotSize = 4
+      */
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber: 100, blockPeriod, slotSize, frameSize});
+
+      const blockNumber = 78892315;
+
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.getSafeFrame(blockNumber);
+      const [curEra, curSlot] = await slidingWindow.getCurrentEraAndSlot(blockNumber);
+
+      expect(toEra).to.equal(curEra);
+      expect(toSlot).to.equal(curSlot);
+      expect(fromEra).to.equal(0);
+      expect(fromSlot).to.equal(1);
+    });
+
+    it("[HAPPY] calculate the safe frame correctly (if era and slot are more than 0, but slot is not less than slotPerEraCache)", async function () {
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+
+      /* 
+        blockPerEra = 78892315
+        blockPerSlot = 19723078
+        frameSizeInBlockLength = 39446156
+        slotSize = 4
+      */
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber: 100, blockPeriod, slotSize, frameSize});
+
+      const blockNumber = 187784800;
+
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.getSafeFrame(blockNumber);
+      const [curEra, curSlot] = await slidingWindow.getCurrentEraAndSlot(blockNumber);
+
+      expect(toEra).to.equal(curEra);
+      expect(toSlot).to.equal(curSlot);
+      expect(fromSlot).to.equal(3);
+      expect(fromEra).to.equal(0);
+    });
+
+    it("[HAPPY] calculate the safe frame correctly (if era and slot are more than 0, and slot is more than slotPerEraCache)", async function () {
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+
+      /* 
+        blockPerEra = 78892315
+        blockPerSlot = 19723078
+        frameSizeInBlockLength = 39446156
+        slotSize = 4
+      */
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber: 100, blockPeriod, slotSize, frameSize});
+
+      const blockNumber = 167784800;
+
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.getSafeFrame(blockNumber);
+      const [curEra, curSlot] = await slidingWindow.getCurrentEraAndSlot(blockNumber);
+
+      expect(toEra).to.equal(curEra);
+      expect(toSlot).to.equal(curSlot);
+      expect(fromSlot).to.equal(1);
+      expect(fromEra).to.equal(1);
+    });
+
+    it("[UNHAPPY] revert with InvalidBlockTime (less than minimum)", async function () {
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+      const startBlockNumber = 100;
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+      const invalidBlockTime = 10;
+
+      await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize, slotSize)).to.be.revertedWithCustomError(
+        slidingWindow,
+        "InvalidBlockTime",
+      );
+    });
+
+    it("[UNHAPPY] revert with InvalidBlockTime (more than maximum)", async function () {
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+      const startBlockNumber = 100;
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+      const invalidBlockTime = 600_001;
+
+      await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize, slotSize)).to.be.revertedWithCustomError(
+        slidingWindow,
+        "InvalidBlockTime",
+      );
+    });
+
+    it("[UNHAPPY] revert with InvalidFrameSize (less than minimum)", async function () {
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+      const startBlockNumber = 100;
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+      const invalidFrameSize = 0;
+
+      await expect(
+        slidingWindow.updateWindow(startBlockNumber, invalidFrameSize, slotSize),
+      ).to.be.revertedWithCustomError(slidingWindow, "InvalidFrameSize");
+    });
+
+    it("[UNHAPPY] revert with InvalidFrameSize (more than maximum)", async function () {
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+      const startBlockNumber = 100;
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+      const invalidFrameSize = 65;
+
+      await expect(
+        slidingWindow.updateWindow(startBlockNumber, invalidFrameSize, slotSize),
+      ).to.be.revertedWithCustomError(slidingWindow, "InvalidFrameSize");
+    });
+
+    it("[UNHAPPY] revert with InvalidSlotPerEra (less than minimum)", async function () {
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+      const startBlockNumber = 100;
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+      const InvalidSlotPerEra = 0;
+
+      await expect(
+        slidingWindow.updateWindow(startBlockNumber, frameSize, InvalidSlotPerEra),
+      ).to.be.revertedWithCustomError(slidingWindow, "InvalidSlotPerEra");
+    });
+
+    it("[UNHAPPY] revert with InvalidSlotPerEra (more than maximum)", async function () {
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+      const startBlockNumber = 100;
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+      const InvalidSlotPerEra = 13;
+
+      await expect(
+        slidingWindow.updateWindow(startBlockNumber, frameSize, InvalidSlotPerEra),
+      ).to.be.revertedWithCustomError(slidingWindow, "InvalidSlotPerEra");
+    });
   });
 };
