@@ -108,9 +108,11 @@ library SlidingWindow {
             revert InvalidSlotPerEra();
         }
         unchecked {
-            self._blockPerEra = YEAR_IN_MILLI_SECONDS / blockTime;
-            self._blockPerSlot = self._blockPerEra / slotSize;
-            self._frameSizeInBlockLength = self._blockPerSlot * frameSize;
+            uint40 blockPerEraCache = YEAR_IN_MILLI_SECONDS / blockTime;
+            uint40 blockPerSlotCache = blockPerEraCache / slotSize;
+            self._blockPerEra = blockPerEraCache;
+            self._blockPerSlot = blockPerSlotCache;
+            self._frameSizeInBlockLength = blockPerSlotCache * frameSize;
             self._slotSize = slotSize;
             if (frameSize <= slotSize) {
                 self._frameSizeInEraAndSlotLength[0] = 0;
@@ -160,23 +162,6 @@ library SlidingWindow {
                 blocks = blockNumber - frameSizeInBlockLengthCache;
             }
         }
-    }
-
-    /// @notice Calculates the current era and slot within the sliding window based on the given block number.
-    /// @dev This function computes both the era and slot using the provided block number and the sliding
-    /// window state parameters such as _startBlockNumber, _blockPerEra, and _slotSize. It delegates era
-    /// calculation to the `calculateEra` function and slot calculation to the `calculateSlot` function.
-    /// The era represents the number of complete eras that have passed since the sliding window started,
-    /// while the slot indicates the specific position within the current era.
-    /// @param self The sliding window state to use for calculations.
-    /// @param blockNumber The block number to calculate the era and slot from.
-    /// @return era The current era derived from the block number.
-    /// @return slot The current slot within the era derived from the block number.
-    function currentEraAndSlot(
-        SlidingWindowState storage self,
-        uint256 blockNumber
-    ) internal view returns (uint256 era, uint8 slot) {
-        (era, slot) = calculateEraAndSlot(self, blockNumber);
     }
 
     /// @notice Determines the sliding window frame based on the provided block number.

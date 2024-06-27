@@ -252,7 +252,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             Slot storage _recipient = _retailBalances[to][fromEra][fromSlot];
             _directTransfer(_sender, _recipient, value, key);
         } else {
-        
             Slot storage _recipient = _retailBalances[to][fromEra][fromSlot];
             uint256 remainingValue = _transferFromSlotStartFromKey(_sender, _recipient, value, key);
             if (remainingValue > 0) {
@@ -268,7 +267,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint256 value,
         uint256 key
     ) private returns (uint256 blockBalance) {
-        /// Loop until value is transferred or end of slot is reached
+        // Loop until value is transferred or end of slot is reached
         bytes memory emptyBytes = abi.encodePacked("");
         uint256[] memory blocks = sender.list.pathToTail(key);
         unchecked {
@@ -368,14 +367,14 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint8 fromSlot,
         uint8 toSlot
     ) internal {
-        uint256 remainingValue = value;
+        bytes memory emptyBytes = abi.encodePacked("");
         unchecked {
             for (uint256 era = fromEra; era <= toEra; era++) {
                 uint8 startSlot = (era == fromEra) ? fromSlot : 0;
                 uint8 endSlot = (era == toEra) ? toSlot : 3;
                 for (uint8 slot = startSlot; slot <= endSlot; slot++) {
-                    if (remainingValue == 0) break;
-                    remainingValue = _transferFromSlot(from, to, remainingValue, era, slot, abi.encodePacked(""));
+                    if (value == 0) break;
+                    value = _transferFromSlot(from, to, value, era, slot, emptyBytes);
                 }
             }
         }
@@ -396,26 +395,24 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint256 era,
         uint8 slot,
         bytes memory emptyBytes
-    ) internal returns (uint256) {
+    ) internal returns (uint256 blockBalance) {
         Slot storage _sender = _retailBalances[from][era][slot];
         Slot storage _recipient = _retailBalances[to][era][slot];
         uint256[] memory blocks = _sender.list.ascending();
+        uint256 length = blocks.length;
         unchecked {
-            uint256 length = blocks.length;
             for (uint256 i = 0; i < length && remainingValue > 0; i++) {
                 uint256 blockKey = blocks[i];
-                uint256 blockBalance = _sender.blockBalances[blockKey];
+                blockBalance = _sender.blockBalances[blockKey];
                 if (blockBalance > 0) {
                     if (blockBalance >= remainingValue) {
                         _sender.blockBalances[blockKey] -= remainingValue;
                         _recipient.blockBalances[blockKey] += remainingValue;
                         _recipient.slotBalance += remainingValue;
-
                         if (_sender.blockBalances[blockKey] == 0) {
                             _sender.list.remove(blockKey);
                         }
                         _recipient.list.insert(blockKey, emptyBytes);
-
                         remainingValue = 0;
                         break;
                     } else {
@@ -424,7 +421,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                         _recipient.slotBalance += blockBalance;
                         _sender.list.remove(blockKey);
                         _recipient.list.insert(blockKey, emptyBytes);
-
                         remainingValue -= blockBalance;
                     }
                 }
@@ -508,17 +504,17 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     /// @inheritdoc IERC20EXP
     function revokeWholeSale(address to) public virtual override {
         require(_wholeSale[to], "can't revoke non-wholesale");
-        _wholeSale[to] = false;
-        uint256 spendableBalance = super.balanceOf(to);
-        uint256 receiveBalance = _receiveBalances[to];
-        if (spendableBalance > 0) {
+        uint256 balance = super.balanceOf(to);
+        if (balance > 0) {
             // clean spendable balance
-            _burn(to, spendableBalance);
+            _burn(to, balance);
         }
-        if (_receiveBalances[to] > 0) {
+        uint256 receiveBalance = _receiveBalances[to];
+        if (receiveBalance > 0) {
             // clean receive balance
             _updateReceiveBalance(to, address(0), receiveBalance);
         }
+        _wholeSale[to] = false;
         emit GrantWholeSale(to, false);
     }
 

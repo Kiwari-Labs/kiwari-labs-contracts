@@ -30,7 +30,7 @@ library SlidingWindow {
     /// @param self The sliding window state.
     /// @param blockNumber The block number for which to calculate the era.
     /// @return era corresponding to the given block number.
-    function calculateEra(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint256 era) {
+    function _calculateEra(SlidingWindowState storage self, uint256 blockNumber) private view returns (uint256 era) {
         unchecked {
             uint256 startblockNumberCache = self._startBlockNumber;
             // Calculate era based on the difference between the current block and start block
@@ -44,7 +44,7 @@ library SlidingWindow {
     /// @param self The sliding window state.
     /// @param blockNumber The block number for which to calculate the slot.
     /// @return slot corresponding to the given block number.
-    function calculateSlot(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint8 slot) {
+    function _calculateSlot(SlidingWindowState storage self, uint256 blockNumber) private view returns (uint8 slot) {
         unchecked {
             uint256 startblockNumberCache = self._startBlockNumber;
             uint40 blockPerYearCache = self._blockPerEra;
@@ -109,8 +109,9 @@ library SlidingWindow {
         SlidingWindowState storage self,
         uint256 blockNumber
     ) internal view returns (uint256 era, uint8 slot) {
-        era = calculateEra(self, blockNumber);
-        slot = calculateSlot(self, blockNumber);
+        era = _calculateEra(self, blockNumber);
+        slot = _calculateSlot(self, blockNumber);
+        return (era, slot);
     }
 
     /// @notice Calculates the difference between the current block number and the start of the sliding window frame.
@@ -125,10 +126,11 @@ library SlidingWindow {
         SlidingWindowState storage self,
         uint256 blockNumber
     ) internal view returns (uint256 blocks) {
-        uint256 blockLenghtCache = getFrameSizeInBlockLength(self);
+        uint256 frameSizeInBlockLengthCache = self._frameSizeInBlockLength;
         unchecked {
-            if (blockNumber >= blockLenghtCache) {
-                blocks = blockNumber - blockLenghtCache;
+            if (blockNumber >= frameSizeInBlockLengthCache) {
+                // If the current block is beyond the expiration period
+                blocks = blockNumber - frameSizeInBlockLengthCache;
             }
         }
     }
@@ -166,7 +168,9 @@ library SlidingWindow {
         SlidingWindowState storage self,
         uint256 blockNumber
     ) internal view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
-        (fromEra, toEra, fromSlot, toSlot) = frame(self, blockNumber);
+        (toEra, toSlot) = calculateEraAndSlot(self, blockNumber);
+        blockNumber = calculateBlockDifferent(self, blockNumber);
+        (fromEra, fromSlot) = calculateEraAndSlot(self, blockNumber);
         assembly {
             if and(gt(fromEra, 0), gt(fromSlot, 0)) {
                 if lt(fromSlot, 3) {

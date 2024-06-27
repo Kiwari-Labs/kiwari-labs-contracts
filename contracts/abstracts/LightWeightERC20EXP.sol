@@ -97,7 +97,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     /// @param blockNumber The current block number for determining balance validity.
     /// @return balance The total buffered balance within the specified era and slot.
     /// @custom:inefficientgasusedappetite This function can consume significant gas due to potentially
-    ///                               iterating through a large array of block indices.
+    /// iterating through a large array of block indices.
     function _bufferSlotBalance(
         address account,
         uint256 era,
@@ -165,7 +165,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 if (fromSlot < toSlot) {
                     balance += _slotBalance(account, fromEra, fromSlot + 1, toSlot);
                 }
-            } else {
+            } else if (fromEra < toEra) {
                 // totalBlockBalance calcurate only buffer era/slot.
                 // keep it simple stupid first by spliting into 3 part then sum.
                 // part1: calulate balance at fromEra in naive in naive way O(n)
@@ -308,9 +308,10 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     /// @param key The key associated with the block balance.
     function _directTransfer(Slot storage sender, Slot storage recipient, uint256 value, uint256 key) private {
         unchecked {
-            sender.blockBalances[key] -= value;
-            if (sender.blockBalances[key] == 0) {
+            uint256 balance = sender.blockBalances[key] - value;
+            if (balance == 0) {
                 sender.list.remove(key);
+                sender.blockBalances[key] = 0;
             }
             recipient.blockBalances[key] += value;
             recipient.list.insert(key);
@@ -370,9 +371,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 uint8 startSlot = (era == fromEra) ? fromSlot : 0;
                 uint8 endSlot = (era == toEra) ? toSlot : 3;
                 for (uint8 slot = startSlot; slot <= endSlot; slot++) {
-                    if (value == 0) {
-                        break;
-                    }
+                    if (value == 0) break;
                     value = _transferFromSlot(from, to, value, era, slot);
                 }
             }
