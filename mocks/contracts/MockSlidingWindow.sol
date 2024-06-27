@@ -32,6 +32,9 @@ contract MockSlidingWindow {
         return slidingWindow.safeFrame(blockNumber);
     }
 
+    function getCurrentEraAndSlot(uint256 blockNumber) public view returns (uint256 era, uint8 slot) {
+        return slidingWindow.currentEraAndSlot(blockNumber);
+    }
     function getBlockPerEra() public view returns (uint40) {
         return slidingWindow.getBlockPerEra();
     }
