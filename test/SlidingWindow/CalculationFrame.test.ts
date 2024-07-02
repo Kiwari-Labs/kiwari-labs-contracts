@@ -105,7 +105,7 @@ export const run = async () => {
       expect(toSlot).to.equal(1);
     });
 
-    it("[HAPPY] correct calculate era and slot if the current block is in the last day period of the first era", async function () {
+    it("[HAPPY] correct calculate frame if the current block is in the last day period of the first era", async function () {
       const startBlockNumber = 0;
       const blockPeriod = 400;
       const slotSize = 4;
@@ -151,7 +151,7 @@ export const run = async () => {
       }
     });
 
-    it("[HAPPY] correct calculate era and slot if the current block is in the first day period of the second era", async function () {
+    it("[HAPPY] correct calculate frame if the current block is in the first day period of the second era", async function () {
       const startBlockNumber = 0;
       const blockPeriod = 400;
       const slotSize = 4;
