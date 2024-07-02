@@ -2,7 +2,7 @@ import {expect} from "chai";
 import {deploySlidingWindow} from "../utils.test";
 
 export const run = async () => {
-  describe.only("CalculationFrame", async function () {
+  describe("CalculationFrame", async function () {
     it("[HAPPY] correct calculate frame if the current block is in the second slot period of the first era", async function () {
       const startBlockNumber = 0;
       const blockPeriod = 400;
