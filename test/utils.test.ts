@@ -42,6 +42,7 @@ const deployDoublyListSelector = async function (light: boolean, autoList: boole
   const type = light
     ? LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT
     : SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT;
+
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 
   const DoublyList = await ethers.getContractFactory(type, deployer);
@@ -51,7 +52,7 @@ const deployDoublyListSelector = async function (light: boolean, autoList: boole
   // To automatically generate the list.
   // [1, 2, 3, ... , 8, 9, 10]
   if (autoList) {
-    if (type == LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT) {
+    if (type === LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT) {
       for (let i = 0; i < len; i++) {
         const index = i + 1;
         await doublylist.insert(index);
@@ -104,7 +105,11 @@ const deploySlidingWindowSelector = async function (
   };
 };
 
-export const padIndexToData = function (index: Number) {};
+export const padIndexToData = function (index: Number) {
+  // The padding is applied from the start of this string (output: 0x0001).
+  return `0x${index.toString().padStart(4, "0")}`;
+};
+
 
 export const calculateSlidingWindowState = function ({
   startBlockNumber = 100,
