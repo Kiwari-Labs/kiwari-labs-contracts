@@ -111,7 +111,7 @@ export const run = async () => {
       const frameSize = 2;
       const startBlockNumber = 0;
 
-      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, frameSize, slotSize});
 
       const invalidBlockTime = MINIMUM_BLOCKTIME_IN_MILLI_SECONDS - 1;
 
@@ -127,7 +127,7 @@ export const run = async () => {
       const frameSize = 2;
       const startBlockNumber = 0;
 
-      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, frameSize, slotSize});
 
       const invalidBlockTime = MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS + 1;
 
@@ -143,7 +143,7 @@ export const run = async () => {
       const frameSize = 2;
       const startBlockNumber = 0;
 
-      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, frameSize, slotSize});
 
       const invalidFrameSize = MINIMUM_FRAME_SIZE - 1;
 
@@ -159,7 +159,7 @@ export const run = async () => {
       const frameSize = 2;
       const startBlockNumber = 0;
 
-      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, frameSize, slotSize});
 
       const invalidFrameSize = MAXIMUM_FRAME_SIZE + 1;
 
@@ -169,33 +169,33 @@ export const run = async () => {
       );
     });
 
-    it("[UNHAPPY] update window reverts if the frame size is less than the minimum", async function () {
+    it("[UNHAPPY] update window reverts if the slot size is less than the minimum", async function () {
       const blockPeriod = 400;
       const slotSize = 4;
       const frameSize = 2;
       const startBlockNumber = 0;
 
-      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, frameSize, slotSize});
 
       const invalidSlotPerEra = MINIMUM_SLOT_PER_ERA - 1;
 
-      await expect(slidingWindow.updateWindow(blockPeriod, slotSize, invalidSlotPerEra)).to.be.revertedWithCustomError(
+      await expect(slidingWindow.updateWindow(blockPeriod, frameSize, invalidSlotPerEra)).to.be.revertedWithCustomError(
         slidingWindow,
         INVALID_SLOT_PER_ERA,
       );
     });
 
-    it("[UNHAPPY] update window reverts if the frame size is more than maximum", async function () {
+    it("[UNHAPPY] update window reverts if the slot size is more than maximum", async function () {
       const blockPeriod = 400;
       const slotSize = 4;
       const frameSize = 2;
       const startBlockNumber = 0;
 
-      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, frameSize, slotSize});
 
       const invalidSlotPerEra = MAXIMUM_SLOT_PER_ERA + 1;
 
-      await expect(slidingWindow.updateWindow(blockPeriod, slotSize, invalidSlotPerEra)).to.be.revertedWithCustomError(
+      await expect(slidingWindow.updateWindow(blockPeriod, frameSize, invalidSlotPerEra)).to.be.revertedWithCustomError(
         slidingWindow,
         INVALID_SLOT_PER_ERA,
       );
