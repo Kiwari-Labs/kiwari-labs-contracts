@@ -21,3 +21,12 @@ export const MAXIMUM_FRAME_SIZE = 64;
 export const MINIMUM_BLOCKTIME_IN_MILLI_SECONDS = 100;
 export const MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000;
 export const YEAR_IN_MILLI_SECONDS = 31_556_926_000;
+
+export interface SlidingWindowState {
+  _blockPerEra: Number;
+  _blockPerSlot: Number;
+  _frameSizeInBlockLength: Number;
+  _frameSizeInEraAndSlotLength: Array<Number>;
+  _slotSize: Number;
+  _startBlockNumber: Number;
+}

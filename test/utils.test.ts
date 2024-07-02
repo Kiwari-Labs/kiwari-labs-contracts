@@ -12,6 +12,8 @@ import {
   LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT,
   SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT,
   SLIDING_WINDOW_CONTRACT,
+  SlidingWindowState,
+  YEAR_IN_MILLI_SECONDS,
 } from "./constant.test";
 
 const deployERC20Selector = async function (light: boolean) {
@@ -102,9 +104,42 @@ const deploySlidingWindowSelector = async function (
   };
 };
 
-export const padIndexToData = function (index: Number) {
-  // The padding is applied from the start of this string (output: 0x0001).
-  return `0x${index.toString().padStart(4, "0")}`;
+export const padIndexToData = function (index: Number) {};
+
+export const calculateSlidingWindowState = function ({
+  startBlockNumber = 100,
+  blockPeriod = 400,
+  frameSize = 8,
+  slotSize = 4,
+}): SlidingWindowState {
+  const self: SlidingWindowState = {
+    _blockPerEra: 0,
+    _blockPerSlot: 0,
+    _frameSizeInBlockLength: 0,
+    _frameSizeInEraAndSlotLength: [],
+    _slotSize: 0,
+    _startBlockNumber: 0,
+  };
+
+  self._startBlockNumber = startBlockNumber;
+
+  // Why 'Math.floor', Since Solidity always rounds down.
+  const blockPerEraCache = Math.floor(YEAR_IN_MILLI_SECONDS / blockPeriod);
+  const blockPerSlotCache = Math.floor(blockPerEraCache / slotSize);
+
+  self._blockPerEra = blockPerEraCache;
+  self._blockPerSlot = blockPerSlotCache;
+  self._frameSizeInBlockLength = blockPerSlotCache * frameSize;
+  self._slotSize = slotSize;
+  if (frameSize <= slotSize) {
+    self._frameSizeInEraAndSlotLength[0] = 0;
+    self._frameSizeInEraAndSlotLength[1] = frameSize;
+  } else {
+    self._frameSizeInEraAndSlotLength[0] = frameSize / slotSize;
+    self._frameSizeInEraAndSlotLength[1] = frameSize % slotSize;
+  }
+
+  return self;
 };
 
 export const getAddress = async function (account: Signer | Contract) {
@@ -131,7 +166,7 @@ export const deployDoublyList = async function ({autoList = false, len = 10} = {
 };
 
 export const deployLightWeightSlidingWindow = async function ({
-  startBlockNumber = 0, // start at a current block.number
+  startBlockNumber = 100, // start at a current block.number
   blockPeriod = 400, // 400ms per block
   frameSize = 8, // total 8 slot
   slotSize = 4, // 4 slot per era
@@ -140,7 +175,7 @@ export const deployLightWeightSlidingWindow = async function ({
 };
 
 export const deploySlidingWindow = async function ({
-  startBlockNumber = 0, // start at a current block.number
+  startBlockNumber = 100, // start at a current block.number
   blockPeriod = 400, // 400ms per block
   frameSize = 8, // total 8 slot
   slotSize = 4, // 4 slot per era
