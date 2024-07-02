@@ -3,6 +3,40 @@ import {deploySlidingWindow} from "../utils.test";
 
 export const run = async () => {
   describe("CalculationSafeFrame", async function () {
+    it("[HAPPY] correct calculate safe frame if the current block is in the first slot period of the first era", async function () {
+      const startBlockNumber = 0;
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+
+      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // |-------------- 78892315 --------------|   <-- era 1.
+      // [-----39446156-----]                       <-- windows size equal to 2 slot.
+      // ---------x
+      // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
+      //     [0]       [1]       [2]       [3]
+      //    ^
+      //    |
+      //    |
+      //    * <-- the current block.
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+      const blockNumber = 19723078 * 0.5;
+
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
+
+      expect(toEra).to.equal(curEra);
+      expect(toSlot).to.equal(curSlot);
+
+      expect(fromEra).to.equal(0);
+      expect(toEra).to.equal(0);
+
+      expect(fromSlot).to.equal(0);
+      expect(toSlot).to.equal(0);
+    });
+
     it("[HAPPY] correct calculate safe frame if the current block is in the second slot period of the first era", async function () {
       const startBlockNumber = 0;
       const blockPeriod = 400;
@@ -71,6 +105,74 @@ export const run = async () => {
       expect(toSlot).to.equal(2);
     });
 
+    it("[HAPPY] correct calculate safe frame if the current block is in the fourth slot period of the first era", async function () {
+      const startBlockNumber = 0;
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+
+      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // |-------------- 78892315 --------------|   <-- era 1.
+      //                     [-----39446156-----]   <-- windows size equal to 2 slot.
+      // x---buf---x----------------------------x
+      // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
+      //     [0]       [1]       [2]       [3]
+      //                                  ^
+      //                                  |
+      //                                  |
+      //                                  * <-- the current block.
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+      const blockNumber = 19723078 * 3.5;
+
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
+
+      expect(toEra).to.equal(curEra);
+      expect(toSlot).to.equal(curSlot);
+
+      expect(fromEra).to.equal(0);
+      expect(toEra).to.equal(0);
+
+      expect(fromSlot).to.equal(0);
+      expect(toSlot).to.equal(3);
+    });
+
+    it("[HAPPY] correct calculate safe frame if the current block is in the first slot period of the second era", async function () {
+      const startBlockNumber = 0;
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+
+      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
+      //                               [-----39446156-----]                                 <-- windows size equal to 2 slot.
+      //           x---buf---x----------------------------x
+      // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 8 slot.
+      //     [0]       [1]       [2]       [3]        [0]       [1]       [2]       [3]
+      //                                            ^
+      //                                            |
+      //                                            |
+      //                                            * <-- the current block.
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+      const blockNumber = 19723078 * 4.5;
+
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
+
+      expect(toEra).to.equal(curEra);
+      expect(toSlot).to.equal(curSlot);
+
+      expect(fromEra).to.equal(0);
+      expect(toEra).to.equal(1);
+
+      expect(fromSlot).to.equal(1);
+      expect(toSlot).to.equal(0);
+    });
+
     it("[HAPPY] correct calculate safe frame if the current block is in the second slot period of the second era", async function () {
       const startBlockNumber = 0;
       const blockPeriod = 400;
@@ -80,7 +182,7 @@ export const run = async () => {
       // blocks in year equl to 78892315 since blocktime equl to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
       //                                         [-----39446156-----]                       <-- windows size equal to 2 slot.
-      //                               x----------------------------x
+      //                     x---buf---x----------------------------x
       // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 8 slot.
       //     [0]       [1]       [2]       [3]        [0]       [1]       [2]       [3]
       //                                                      ^
@@ -101,8 +203,212 @@ export const run = async () => {
       expect(fromEra).to.equal(0);
       expect(toEra).to.equal(1);
 
-      expect(fromSlot).to.equal(3);
+      expect(fromSlot).to.equal(2);
       expect(toSlot).to.equal(1);
+    });
+
+    it("[HAPPY] correct calculate safe frame if the current block is in the third slot period of the second era", async function () {
+      const startBlockNumber = 0;
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+
+      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
+      //                                                   [-----39446156-----]             <-- windows size equal to 2 slot.
+      //                               x---buf---x----------------------------x
+      // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 8 slot.
+      //     [0]       [1]       [2]       [3]        [0]       [1]       [2]       [3]
+      //                                                                ^
+      //                                                                |
+      //                                                                |
+      //                                                                * <-- the current block.
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+      const blockNumber = 19723078 * 6.5;
+
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
+
+      expect(toEra).to.equal(curEra);
+      expect(toSlot).to.equal(curSlot);
+
+      expect(fromEra).to.equal(0);
+      expect(toEra).to.equal(1);
+
+      expect(fromSlot).to.equal(3);
+      expect(toSlot).to.equal(2);
+    });
+
+    it("[HAPPY] correct calculate safe frame if the current block is in the fourth slot period of the second era", async function () {
+      const startBlockNumber = 0;
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+
+      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
+      //                                                             [-----39446156-----]   <-- windows size equal to 2 slot.
+      //                                         x---buf---x----------------------------x
+      // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 8 slot.
+      //     [0]       [1]       [2]       [3]        [0]       [1]       [2]       [3]
+      //                                                                          ^
+      //                                                                          |
+      //                                                                          |
+      //                                                                          * <-- the current block.
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+      const blockNumber = 19723078 * 7.5;
+
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
+
+      expect(toEra).to.equal(curEra);
+      expect(toSlot).to.equal(curSlot);
+
+      expect(fromEra).to.equal(1);
+      expect(toEra).to.equal(1);
+
+      expect(fromSlot).to.equal(0);
+      expect(toSlot).to.equal(3);
+    });
+
+    it("[HAPPY] correct calculate safe frame if the current block is in the first slot period of the third era", async function () {
+      const startBlockNumber = 0;
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+
+      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // |-------------- 78892315 --------------||-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 3.
+      //                                                                       [-----39446156-----]                                 <-- windows size equal to 2 slot.
+      //                                                   x---buf---x----------------------------x
+      // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 12 slot.
+      //     [0]       [1]       [2]       [3]        [0]       [1]       [2]       [3]      [0]       [1]       [2]       [3]
+      //                                                                                    ^
+      //                                                                                    |
+      //                                                                                    |
+      //                                                                                    * <-- the current block.
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+      const blockNumber = 19723078 * 8.5;
+
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
+
+      expect(toEra).to.equal(curEra);
+      expect(toSlot).to.equal(curSlot);
+
+      expect(fromEra).to.equal(1);
+      expect(toEra).to.equal(2);
+
+      expect(fromSlot).to.equal(1);
+      expect(toSlot).to.equal(0);
+    });
+
+    it("[HAPPY] correct calculate safe frame if the current block is in the second slot period of the third era", async function () {
+      const startBlockNumber = 0;
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+
+      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // |-------------- 78892315 --------------||-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 3.
+      //                                                                                 [-----39446156-----]                       <-- windows size equal to 2 slot.
+      //                                                             x---buf---x----------------------------x
+      // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 12 slot.
+      //     [0]       [1]       [2]       [3]        [0]       [1]       [2]       [3]      [0]       [1]       [2]       [3]
+      //                                                                                              ^
+      //                                                                                              |
+      //                                                                                              |
+      //                                                                                              * <-- the current block.
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+      const blockNumber = 19723078 * 9.5;
+
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
+
+      expect(toEra).to.equal(curEra);
+      expect(toSlot).to.equal(curSlot);
+
+      expect(fromEra).to.equal(1);
+      expect(toEra).to.equal(2);
+
+      expect(fromSlot).to.equal(2);
+      expect(toSlot).to.equal(1);
+    });
+
+    it("[HAPPY] correct calculate safe frame if the current block is in the third slot period of the third era", async function () {
+      const startBlockNumber = 0;
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+
+      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // |-------------- 78892315 --------------||-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 3.
+      //                                                                                           [-----39446156-----]             <-- windows size equal to 2 slot.
+      //                                                                       x---buf---x----------------------------x
+      // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 12 slot.
+      //     [0]       [1]       [2]       [3]        [0]       [1]       [2]       [3]      [0]       [1]       [2]       [3]
+      //                                                                                                        ^
+      //                                                                                                        |
+      //                                                                                                        |
+      //                                                                                                        * <-- the current block.
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+      const blockNumber = 19723078 * 10.5;
+
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
+
+      expect(toEra).to.equal(curEra);
+      expect(toSlot).to.equal(curSlot);
+
+      expect(fromEra).to.equal(1);
+      expect(toEra).to.equal(2);
+
+      expect(fromSlot).to.equal(3);
+      expect(toSlot).to.equal(2);
+    });
+
+    it("[HAPPY] correct calculate safe frame if the current block is in the fourth slot period of the third era", async function () {
+      const startBlockNumber = 0;
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+
+      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // |-------------- 78892315 --------------||-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 3.
+      //                                                                                                     [-----39446156-----]   <-- windows size equal to 2 slot.
+      //                                                                                 x---buf---x----------------------------x
+      // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 12 slot.
+      //     [0]       [1]       [2]       [3]        [0]       [1]       [2]       [3]      [0]       [1]       [2]       [3]
+      //                                                                                                                  ^
+      //                                                                                                                  |
+      //                                                                                                                  |
+      //                                                                                                                  * <-- the current block.
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+      const blockNumber = 19723078 * 11.5;
+
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
+
+      expect(toEra).to.equal(curEra);
+      expect(toSlot).to.equal(curSlot);
+
+      expect(fromEra).to.equal(2);
+      expect(toEra).to.equal(2);
+
+      expect(fromSlot).to.equal(0);
+      expect(toSlot).to.equal(3);
     });
 
     it("[HAPPY] correct calculate safe frame if the current block is in the last day period of the first era", async function () {
@@ -114,7 +420,7 @@ export const run = async () => {
       // blocks in year equl to 78892315 since blocktime equl to 400ms.
       // |-------------- 78892315 --------------|   <-- era 1.
       //                     [-----39446156-----]   <-- windows size equal to 2 slot.
-      //           x----------------------------x
+      // x---buf---x----------------------------x
       // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
       //     [0]       [1]       [2]       [3]
       //                                        ^
@@ -139,14 +445,14 @@ export const run = async () => {
       for (let i = 0; i < blockNumberList.length; i++) {
         const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumberList[i]);
         const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumberList[i]);
-  
+
         expect(toEra).to.equal(curEra);
         expect(toSlot).to.equal(curSlot);
-  
+
         expect(fromEra).to.equal(0);
         expect(toEra).to.equal(0);
-  
-        expect(fromSlot).to.equal(1);
+
+        expect(fromSlot).to.equal(0);
         expect(toSlot).to.equal(3);
       }
     });
@@ -160,9 +466,9 @@ export const run = async () => {
       // blocks in year equl to 78892315 since blocktime equl to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
       //                               [-----39446156-----]                                 <-- windows size equal to 2 slot.
-      //                     x----------------------------x
+      //           x---buf---x----------------------------x
       // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 8 slot.
-      //     [0]       [1]       [2]       [3]       [4]       [5]       [6]       [7]
+      //     [0]       [1]       [2]       [3]       [0]       [1]       [2]       [3]
       //                                          ^
       //                                          |
       //                                          |
@@ -185,15 +491,15 @@ export const run = async () => {
       for (let i = 0; i < blockNumberList.length; i++) {
         const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumberList[i]);
         const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumberList[i]);
-  
+
         expect(toEra).to.equal(curEra);
         expect(toSlot).to.equal(curSlot);
-  
+
         expect(fromEra).to.equal(0);
         expect(toEra).to.equal(1);
-  
-        expect(fromSlot).to.equal(2);
-        expect(toSlot).to.equal(4);
+
+        expect(fromSlot).to.equal(1);
+        expect(toSlot).to.equal(0);
       }
     });
   });
