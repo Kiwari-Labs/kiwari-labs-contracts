@@ -59,28 +59,18 @@ library SlidingWindow {
         }
     }
 
-    /// @notice Adjusts the era and slot to handle buffer operations within the sliding window.
+    /// @notice Adjusts the block number to handle buffer operations within the sliding window.
     /// @param self The sliding window state.
-    /// @param era The current era.
-    /// @param slot The current slot.
-    /// @return Updated era and slot after adjustment.
-    function _frameBuffer(
-        SlidingWindowState storage self,
-        uint256 era,
-        uint8 slot
-    ) private view returns (uint256, uint8) {
+    /// @param blockNumber The current block number.
+    /// @return Updated block number after adjustment.
+    function _frameBuffer(SlidingWindowState storage self, uint256 blockNumber) private view returns (uint256) {
         unchecked {
-            uint8 slotPerEraCache = self._slotSize - 1;
-            if (era > 0 && slot > 0) {
-                if (slot < slotPerEraCache) {
-                    slot--;
-                } else {
-                    era--;
-                    slot = slotPerEraCache;
-                }
+            uint256 blockPerSlotCache = self._blockPerSlot;
+            if (blockNumber > blockPerSlotCache) {
+                blockNumber = blockNumber - blockPerSlotCache;
             }
         }
-        return (era, slot);
+        return blockNumber;
     }
 
     /// @notice Updates the parameters of the sliding window based on the given block time and frame size.
@@ -199,8 +189,8 @@ library SlidingWindow {
     ) internal view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
         (toEra, toSlot) = calculateEraAndSlot(self, blockNumber);
         blockNumber = calculateBlockDifferent(self, blockNumber);
+        blockNumber = _frameBuffer(self, blockNumber);
         (fromEra, fromSlot) = calculateEraAndSlot(self, blockNumber);
-        (fromEra, fromSlot) = _frameBuffer(self, fromEra, fromSlot);
     }
 
     /// @notice Retrieves the number of blocks per era from the sliding window state.
