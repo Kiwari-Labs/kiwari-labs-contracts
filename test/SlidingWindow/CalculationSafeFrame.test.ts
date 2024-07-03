@@ -2,7 +2,7 @@ import {expect} from "chai";
 import {deploySlidingWindow} from "../utils.test";
 
 export const run = async () => {
-  describe("CalculationSafeFrame", async function () {
+  describe.only("CalculationSafeFrame", async function () {
     it("[HAPPY] correct calculate safe frame if the current block is in the first slot period of the first era", async function () {
       const startBlockNumber = 0;
       const blockPeriod = 400;
@@ -22,7 +22,7 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
-      const blockNumber = 19723078 * 0.5;
+      const blockNumber = Math.floor(19723078 * 0.5);
 
       const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
@@ -56,7 +56,7 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
-      const blockNumber = 19723078 * 1.5;
+      const blockNumber = Math.floor(19723078 * 1.5);
 
       const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
@@ -90,7 +90,7 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
-      const blockNumber = 19723078 * 2.5;
+      const blockNumber = Math.floor(19723078 * 2.5);
 
       const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
@@ -124,7 +124,7 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
-      const blockNumber = 19723078 * 3.5;
+      const blockNumber = Math.floor(19723078 * 3.5);
 
       const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
@@ -158,7 +158,7 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
-      const blockNumber = 19723078 * 4.5;
+      const blockNumber = Math.floor(19723078 * 4.5);
 
       const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
@@ -192,7 +192,7 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
-      const blockNumber = 19723078 * 5.5;
+      const blockNumber = Math.floor(19723078 * 5.5);
 
       const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
@@ -226,7 +226,7 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
-      const blockNumber = 19723078 * 6.5;
+      const blockNumber = Math.floor(19723078 * 6.5);
 
       const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
@@ -260,7 +260,7 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
-      const blockNumber = 19723078 * 7.5;
+      const blockNumber = Math.floor(19723078 * 7.5);
 
       const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
@@ -294,7 +294,7 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
-      const blockNumber = 19723078 * 8.5;
+      const blockNumber = Math.floor(19723078 * 8.5);
 
       const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
@@ -328,7 +328,7 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
-      const blockNumber = 19723078 * 9.5;
+      const blockNumber = Math.floor(19723078 * 9.5);
 
       const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
@@ -362,7 +362,7 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
-      const blockNumber = 19723078 * 10.5;
+      const blockNumber = Math.floor(19723078 * 10.5);
 
       const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
@@ -396,7 +396,7 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
-      const blockNumber = 19723078 * 11.5;
+      const blockNumber = Math.floor(19723078 * 11.5);
 
       const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
