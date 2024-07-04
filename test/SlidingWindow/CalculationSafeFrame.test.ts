@@ -479,7 +479,7 @@ export const run = async () => {
 
       // blocks in year equl to 78892315 since blocktime equl to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
-      //                               [-----39446156-----]                                 <-- windows size equal to 2 slot.
+      //                               [-----39446156-----]                                 <-- windows size equal to 3 slot.
       //           x---buf---x----------------------------x
       // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 8 slot.
       //     [0]       [1]       [2]       [3]       [0]       [1]       [2]       [3]
@@ -561,7 +561,7 @@ export const run = async () => {
 
       // blocks in year equl to 78892315 since blocktime equl to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
-      //                               [----------59169234----------]                       <-- windows size equal to 2 slot.
+      //                               [----------59169234----------]                       <-- windows size equal to 3 slot.
       //           x---buf---x--------------------------------------x
       // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 8 slot.
       //     [0]       [1]       [2]       [3]        [0]       [1]       [2]       [3]
@@ -596,7 +596,7 @@ export const run = async () => {
 
       // blocks in year equl to 78892315 since blocktime equl to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
-      //                                         [-------------- 78892315 --------------]   <-- windows size equal to 2 slot.
+      //                                         [-------------- 78892315 --------------]   <-- windows size equal to 4 slot.
       //                     x---buf---x------------------------------------------------x
       // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 8 slot.
       //     [0]       [1]       [2]       [3]        [0]       [1]       [2]       [3]
@@ -631,7 +631,7 @@ export const run = async () => {
 
       // blocks in year equl to 78892315 since blocktime equl to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
-      //                     [-------------- 78892315 --------------]                       <-- windows size equal to 2 slot.
+      //                     [-------------- 78892315 --------------]                       <-- windows size equal to 4 slot.
       // x---buf---x------------------------------------------------x
       // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 8 slot.
       //     [0]       [1]       [2]       [3]        [0]       [1]       [2]       [3]
@@ -666,7 +666,7 @@ export const run = async () => {
 
       // blocks in year equl to 78892315 since blocktime equl to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
-      //                     [------------------- 59169234 -------------------]             <-- windows size equal to 2 slot.
+      //                     [------------------- 98615390 -------------------]             <-- windows size equal to 5 slot.
       // x---buf---x----------------------------------------------------------x
       // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 8 slot.
       //     [0]       [1]       [2]       [3]        [0]       [1]       [2]       [3]
@@ -701,7 +701,7 @@ export const run = async () => {
 
       // blocks in year equl to 78892315 since blocktime equl to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 3.
-      //                                                                       [------------------- 59169234 -------------------]   <-- windows size equal to 2 slot.
+      //                                                                       [------------------- 98615390 -------------------]   <-- windows size equal to 5 slot.
       //                                                   x---buf---x----------------------------------------------------------x
       // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 12 slot.
       //     [0]       [1]       [2]       [3]       [0]       [1]       [2]       [3]       [0]       [1]       [2]       [3]
@@ -725,6 +725,41 @@ export const run = async () => {
 
       expect(fromSlot).to.equal(1);
       expect(toSlot).to.equal(3);
+    });
+
+    it("[HAPPY] correct calculate safe frame if frame size equal to 3 and slot size equal to 5", async function () {
+      const startBlockNumber = 100;
+      const blockPeriod = 400;
+      const slotSize = 5;
+      const frameSize = 3;
+      const blockPeriodSlot = 15778463;
+
+      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // |------------------- 78892315 -------------------||------------------- 78892315 -------------------|   <-- era 2.
+      //                               [--------- 47335389 ---------]                                           <-- windows size equal to 3 slot.
+      //           x---buf---x--------------------------------------x
+      // {15778463}{15778463}{15778463}{15778463}{15778463}{15778463}{15778463}{15778463}{15778463}{15778463}   <-- 8 slot.
+      //     [0]       [1]       [2]       [3]       [4]       [0]       [1]       [2]       [3]       [4]   
+      //                                                      ^
+      //                                                      |
+      //                                                      |
+      //                                                      * <-- the current block.
+
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+      const blockNumber = Math.floor(blockPeriodSlot * 5.5) + startBlockNumber;
+
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
+
+      expect(toEra).to.equal(curEra);
+      expect(toSlot).to.equal(curSlot);
+
+      expect(fromEra).to.equal(0);
+      expect(toEra).to.equal(1);
+
+      expect(fromSlot).to.equal(1);
+      expect(toSlot).to.equal(0);
     });
   });
 };
