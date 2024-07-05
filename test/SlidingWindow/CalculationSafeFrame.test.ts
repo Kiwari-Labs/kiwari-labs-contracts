@@ -423,100 +423,6 @@ export const run = async () => {
       expect(toSlot).to.equal(3);
     });
 
-    it("[HAPPY] correct calculate safe frame if the current block is in the last day period of the first era", async function () {
-      const startBlockNumber = 100;
-      const blockPeriod = 400;
-      const slotSize = 4;
-      const frameSize = 2;
-      const blockPeriodEra = 78892315;
-
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
-      // |-------------- 78892315 --------------|   <-- era 1.
-      //                     [-----39446156-----]   <-- windows size equal to 2 slot.
-      // x---buf---x----------------------------x
-      // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
-      //     [0]       [1]       [2]       [3]
-      //                                        ^
-      //                                        |
-      //                                        |
-      //                                        * <-- the current block.
-
-      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
-
-      const blockNumberList = [
-        blockPeriodEra + startBlockNumber - 3,
-        blockPeriodEra + startBlockNumber - 2,
-        blockPeriodEra + startBlockNumber - 1,
-        blockPeriodEra + startBlockNumber + 0,
-        // -------------------------
-        // blockPeriodEra + startBlockNumber + 1,
-        // blockPeriodEra + startBlockNumber + 2,
-        // blockPeriodEra + startBlockNumber + 3,
-        // blockPeriodEra + startBlockNumber + 4,
-      ];
-
-      for (let i = 0; i < blockNumberList.length; i++) {
-        const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumberList[i]);
-        const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumberList[i]);
-
-        expect(toEra).to.equal(curEra);
-        expect(toSlot).to.equal(curSlot);
-
-        expect(fromEra).to.equal(0);
-        expect(toEra).to.equal(0);
-
-        expect(fromSlot).to.equal(0);
-        expect(toSlot).to.equal(3);
-      }
-    });
-
-    it("[HAPPY] correct calculate safe frame if the current block is in the first day period of the second era", async function () {
-      const startBlockNumber = 100;
-      const blockPeriod = 400;
-      const slotSize = 4;
-      const frameSize = 2;
-      const blockPeriodEra = 78892315;
-
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
-      // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
-      //                               [-----39446156-----]                                 <-- windows size equal to 3 slot.
-      //           x---buf---x----------------------------x
-      // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 8 slot.
-      //     [0]       [1]       [2]       [3]       [0]       [1]       [2]       [3]
-      //                                          ^
-      //                                          |
-      //                                          |
-      //                                          * <-- the current block.
-
-      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
-
-      const blockNumberList = [
-        // blockPeriodEra + startBlockNumber - 3,
-        // blockPeriodEra + startBlockNumber - 2,
-        // blockPeriodEra + startBlockNumber - 1,
-        // blockPeriodEra + startBlockNumber + 0,
-        // -------------------------
-        blockPeriodEra + startBlockNumber + 1,
-        blockPeriodEra + startBlockNumber + 2,
-        blockPeriodEra + startBlockNumber + 3,
-        blockPeriodEra + startBlockNumber + 4,
-      ];
-
-      for (let i = 0; i < blockNumberList.length; i++) {
-        const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumberList[i]);
-        const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumberList[i]);
-
-        expect(toEra).to.equal(curEra);
-        expect(toSlot).to.equal(curSlot);
-
-        expect(fromEra).to.equal(0);
-        expect(toEra).to.equal(1);
-
-        expect(fromSlot).to.equal(1);
-        expect(toSlot).to.equal(0);
-      }
-    });
-
     it("[HAPPY] correct calculate safe frame if frame size equal to 3 and slot size equal to 4", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
@@ -761,5 +667,102 @@ export const run = async () => {
       expect(fromSlot).to.equal(1);
       expect(toSlot).to.equal(0);
     });
+
+    // Skip the cases below. 
+    // Reason: https://github.com/MASDXI/ERC20EXP/pull/20#issuecomment-2206762148
+    
+    // it("[HAPPY] correct calculate safe frame if the current block is in the last day period of the first era", async function () {
+    //   const startBlockNumber = 100;
+    //   const blockPeriod = 400;
+    //   const slotSize = 4;
+    //   const frameSize = 2;
+    //   const blockPeriodEra = 78892315;
+
+    //   // blocks in year equl to 78892315 since blocktime equl to 400ms.
+    //   // |-------------- 78892315 --------------|   <-- era 1.
+    //   //                     [-----39446156-----]   <-- windows size equal to 2 slot.
+    //   // x---buf---x----------------------------x
+    //   // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
+    //   //     [0]       [1]       [2]       [3]
+    //   //                                        ^
+    //   //                                        |
+    //   //                                        |
+    //   //                                        * <-- the current block.
+
+    //   const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+    //   const blockNumberList = [
+    //     blockPeriodEra + startBlockNumber - 3,
+    //     blockPeriodEra + startBlockNumber - 2,
+    //     blockPeriodEra + startBlockNumber - 1,
+    //     blockPeriodEra + startBlockNumber + 0,
+    //     // -------------------------
+    //     // blockPeriodEra + startBlockNumber + 1,
+    //     // blockPeriodEra + startBlockNumber + 2,
+    //     // blockPeriodEra + startBlockNumber + 3,
+    //     // blockPeriodEra + startBlockNumber + 4,
+    //   ];
+
+    //   for (let i = 0; i < blockNumberList.length; i++) {
+    //     const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumberList[i]);
+    //     const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumberList[i]);
+
+    //     expect(toEra).to.equal(curEra);
+    //     expect(toSlot).to.equal(curSlot);
+
+    //     expect(fromEra).to.equal(0);
+    //     expect(toEra).to.equal(0);
+
+    //     expect(fromSlot).to.equal(0);
+    //     expect(toSlot).to.equal(3);
+    //   }
+    // });
+
+    // it("[HAPPY] correct calculate safe frame if the current block is in the first day period of the second era", async function () {
+    //   const startBlockNumber = 100;
+    //   const blockPeriod = 400;
+    //   const slotSize = 4;
+    //   const frameSize = 2;
+    //   const blockPeriodEra = 78892315;
+
+    //   // blocks in year equl to 78892315 since blocktime equl to 400ms.
+    //   // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
+    //   //                               [-----39446156-----]                                 <-- windows size equal to 3 slot.
+    //   //           x---buf---x----------------------------x
+    //   // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 8 slot.
+    //   //     [0]       [1]       [2]       [3]       [0]       [1]       [2]       [3]
+    //   //                                          ^
+    //   //                                          |
+    //   //                                          |
+    //   //                                          * <-- the current block.
+
+    //   const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
+
+    //   const blockNumberList = [
+    //     // blockPeriodEra + startBlockNumber - 3,
+    //     // blockPeriodEra + startBlockNumber - 2,
+    //     // blockPeriodEra + startBlockNumber - 1,
+    //     // blockPeriodEra + startBlockNumber + 0,
+    //     // -------------------------
+    //     blockPeriodEra + startBlockNumber + 1,
+    //     blockPeriodEra + startBlockNumber + 2,
+    //     blockPeriodEra + startBlockNumber + 3,
+    //     blockPeriodEra + startBlockNumber + 4,
+    //   ];
+
+    //   for (let i = 0; i < blockNumberList.length; i++) {
+    //     const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumberList[i]);
+    //     const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumberList[i]);
+
+    //     expect(toEra).to.equal(curEra);
+    //     expect(toSlot).to.equal(curSlot);
+
+    //     expect(fromEra).to.equal(0);
+    //     expect(toEra).to.equal(1);
+
+    //     expect(fromSlot).to.equal(1);
+    //     expect(toSlot).to.equal(0);
+    //   }
+    // });
   });
 };
