@@ -207,7 +207,7 @@ export const run = async () => {
       expect(toSlot).to.equal(1);
     });
 
-    // Skip the cases below. 
+    // Skip the cases below.
     // Reason: https://github.com/MASDXI/ERC20EXP/pull/20#issuecomment-2206762148
 
     // it("[HAPPY] correct calculate frame if the current block is in the last day period of the first era", async function () {
