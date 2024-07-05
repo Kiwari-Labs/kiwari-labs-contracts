@@ -63,6 +63,20 @@ library SlidingWindow {
         }
     }
 
+    /// @notice Adjusts the block number to handle buffer operations within the sliding window.
+    /// @param self The sliding window state.
+    /// @param blockNumber The current block number.
+    /// @return Updated block number after adjustment.
+    function _frameBuffer(SlidingWindowState storage self, uint256 blockNumber) private view returns (uint256) {
+        unchecked {
+            uint256 blockPerSlotCache = self._blockPerSlot;
+            if (blockNumber > blockPerSlotCache) {
+                blockNumber = blockNumber - blockPerSlotCache;
+            }
+        }
+        return blockNumber;
+    }
+
     /// @notice Updates the parameters of the sliding window based on the given block time and frame size.
     /// @dev This function adjusts internal parameters such as blockPerEra, blockPerSlot, and frame sizes
     /// based on the provided blockTime and frameSize. It ensures that block time is within valid limits
@@ -170,18 +184,8 @@ library SlidingWindow {
     ) internal view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
         (toEra, toSlot) = calculateEraAndSlot(self, blockNumber);
         blockNumber = calculateBlockDifferent(self, blockNumber);
+        blockNumber = _frameBuffer(self, blockNumber);
         (fromEra, fromSlot) = calculateEraAndSlot(self, blockNumber);
-        assembly {
-            if and(gt(fromEra, 0), gt(fromSlot, 0)) {
-                if lt(fromSlot, 3) {
-                    fromSlot := sub(fromSlot, 1)
-                }
-                if eq(fromSlot, 3) {
-                    fromEra := sub(fromEra, 1)
-                    fromSlot := sub(SLOT_PER_ERA, 1)
-                }
-            }
-        }
     }
 
     /// @notice Retrieves the number of blocks per era from the sliding window state.
