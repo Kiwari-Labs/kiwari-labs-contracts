@@ -130,7 +130,7 @@ export const calculateLightWeightSlidingWindowState = function ({
   self._startBlockNumber = startBlockNumber;
 
   // Why 'Math.floor', Since Solidity always rounds down.
-  const blockPerEraCache = Math.floor(YEAR_IN_MILLI_SECONDS / blockPeriod);
+  const blockPerSlotCache = Math.floor(YEAR_IN_MILLI_SECONDS / blockPeriod) >> TWO_BITS;
   // Assume block per year equal to 78892315.
   // Convert 78892315 into its binary: 100101110011010011011111011
   // Shift the bits to the right by 2 positions: 100101110011010011011111011 >> 2
@@ -138,7 +138,7 @@ export const calculateLightWeightSlidingWindowState = function ({
   // Convert this binary number back to decimal: 19723078
   // This is because shifting 78892315 to the right by 2 bits 
   // results in 19723078, which is the floor value of 78892315 / 4.
-  const blockPerSlotCache = blockPerEraCache >> TWO_BITS;
+  const blockPerEraCache = blockPerSlotCache << TWO_BITS;
 
   self._blockPerEra = blockPerEraCache;
   self._blockPerSlot = blockPerSlotCache;
@@ -179,8 +179,8 @@ export const calculateSlidingWindowState = function ({
   self._startBlockNumber = startBlockNumber;
 
   // Why 'Math.floor', Since Solidity always rounds down.
-  const blockPerEraCache = Math.floor(YEAR_IN_MILLI_SECONDS / blockPeriod);
-  const blockPerSlotCache = Math.floor(blockPerEraCache / slotSize);
+  const blockPerSlotCache = Math.floor(Math.floor(YEAR_IN_MILLI_SECONDS / blockPeriod) / slotSize);
+  const blockPerEraCache = blockPerSlotCache * slotSize;
 
   self._blockPerEra = blockPerEraCache;
   self._blockPerSlot = blockPerSlotCache;
