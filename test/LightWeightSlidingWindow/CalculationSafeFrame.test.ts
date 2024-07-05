@@ -478,7 +478,7 @@ export const run = async () => {
       expect(fromSlot).to.equal(1);
       expect(toSlot).to.equal(1);
     });
-    
+
     it("[HAPPY] correct calculate safe frame if frame size equal to slot size", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
@@ -615,9 +615,9 @@ export const run = async () => {
       expect(toSlot).to.equal(3);
     });
 
-    // Skip the cases below. 
+    // Skip the cases below.
     // Reason: https://github.com/MASDXI/ERC20EXP/pull/20#issuecomment-2206762148
-    
+
     // it("[HAPPY] correct calculate safe frame if the current block is in the last day period of the first era", async function () {
     //   const startBlockNumber = 100;
     //   const blockPeriod = 400;

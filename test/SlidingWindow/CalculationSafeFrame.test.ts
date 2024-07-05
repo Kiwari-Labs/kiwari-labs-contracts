@@ -492,7 +492,7 @@ export const run = async () => {
       expect(fromSlot).to.equal(1);
       expect(toSlot).to.equal(1);
     });
-    
+
     it("[HAPPY] correct calculate safe frame if frame size equal to slot size", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
@@ -645,7 +645,7 @@ export const run = async () => {
       //                               [--------- 47335389 ---------]                                           <-- windows size equal to 3 slot.
       //           x---buf---x--------------------------------------x
       // {15778463}{15778463}{15778463}{15778463}{15778463}{15778463}{15778463}{15778463}{15778463}{15778463}   <-- 8 slot.
-      //     [0]       [1]       [2]       [3]       [4]       [0]       [1]       [2]       [3]       [4]   
+      //     [0]       [1]       [2]       [3]       [4]       [0]       [1]       [2]       [3]       [4]
       //                                                      ^
       //                                                      |
       //                                                      |
@@ -668,9 +668,9 @@ export const run = async () => {
       expect(toSlot).to.equal(0);
     });
 
-    // Skip the cases below. 
+    // Skip the cases below.
     // Reason: https://github.com/MASDXI/ERC20EXP/pull/20#issuecomment-2206762148
-    
+
     // it("[HAPPY] correct calculate safe frame if the current block is in the last day period of the first era", async function () {
     //   const startBlockNumber = 100;
     //   const blockPeriod = 400;

@@ -136,7 +136,7 @@ export const calculateLightWeightSlidingWindowState = function ({
   // Shift the bits to the right by 2 positions: 100101110011010011011111011 >> 2
   // After shifting: 001001011100110100110111110
   // Convert this binary number back to decimal: 19723078
-  // This is because shifting 78892315 to the right by 2 bits 
+  // This is because shifting 78892315 to the right by 2 bits
   // results in 19723078, which is the floor value of 78892315 / 4.
   const blockPerSlotCache = blockPerEraCache >> TWO_BITS;
 
@@ -144,18 +144,18 @@ export const calculateLightWeightSlidingWindowState = function ({
   self._blockPerSlot = blockPerSlotCache;
   self._frameSizeInBlockLength = blockPerSlotCache * frameSize;
   if (frameSize <= SLOT_PER_ERA) {
-      self._frameSizeInEraAndSlotLength[0] = 0;
-      self._frameSizeInEraAndSlotLength[1] = frameSize;
+    self._frameSizeInEraAndSlotLength[0] = 0;
+    self._frameSizeInEraAndSlotLength[1] = frameSize;
   } else {
-      // Assume frame size equal to 2.
-      // The number 2 in binary is [10].
-      // Shifting [10] to the right by 2 positions results is [00].
-      // Convert this binary number back to decimal: 0
-      self._frameSizeInEraAndSlotLength[0] = frameSize >> TWO_BITS;
-      // The number 2 in binary is 10.
-      // The number 3 in binary is 11.
-      // The binary result of 2 & 3 is 10, which is 2 in decimal.
-      self._frameSizeInEraAndSlotLength[1] = frameSize & THREE_BITS;
+    // Assume frame size equal to 2.
+    // The number 2 in binary is [10].
+    // Shifting [10] to the right by 2 positions results is [00].
+    // Convert this binary number back to decimal: 0
+    self._frameSizeInEraAndSlotLength[0] = frameSize >> TWO_BITS;
+    // The number 2 in binary is 10.
+    // The number 3 in binary is 11.
+    // The binary result of 2 & 3 is 10, which is 2 in decimal.
+    self._frameSizeInEraAndSlotLength[1] = frameSize & THREE_BITS;
   }
 
   return self;
