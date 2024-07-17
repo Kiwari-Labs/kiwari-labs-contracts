@@ -9,8 +9,11 @@ export const LIGHT_WEIGHT_SLIDING_WINDOW_CONTRACT = "MockLightWeightSlidingWindo
 export const SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT = "MockSortedCircularDoublyLinkedList";
 export const LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT = "MockLightWeightSortedCircularDoublyLinkedList";
 
-export const ERC20_EXP_BLOCK_PERIOD = "4000";
 export const ERC20_EXP_EXPIRE_PERIOD = "4";
+
+export const ERC20_EXP_BLOCK_PERIOD = "400";
+export const ERC20_EXP_FRAME_SIZE = "2";
+export const ERC20_EXP_SLOT_SIZE = "4";
 export const ERC20_EXP_NAME = "PointToken";
 export const ERC20_EXP_SYMBOL = "POINT";
 
@@ -28,6 +31,8 @@ export const YEAR_IN_MILLI_SECONDS = 31_556_926_000;
 export const INVALID_BLOCK_TIME = "InvalidBlockTime";
 export const INVALID_FRAME_SIZ = "InvalidFrameSize";
 export const INVALID_SLOT_PER_ERA = "InvalidSlotPerEra";
+
+export const EVENT_TRANSFER = "Transfer";
 
 export interface SlidingWindowState extends LightWeightSlidingWindowState {
   _slotSize: Number;

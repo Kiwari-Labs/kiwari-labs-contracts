@@ -10,7 +10,7 @@ export const run = async () => {
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------|   <-- era 1.
       // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
       //     [0]       [1]       [2]       [3]
@@ -41,7 +41,7 @@ export const run = async () => {
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------|   <-- era 1.
       // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
       //     [0]       [1]       [2]       [3]
@@ -72,7 +72,7 @@ export const run = async () => {
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------|   <-- era 1.
       // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
       //     [0]       [1]       [2]       [3]
@@ -103,7 +103,7 @@ export const run = async () => {
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------|   <-- era 1.
       // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
       //     [0]       [1]       [2]       [3]
@@ -134,7 +134,7 @@ export const run = async () => {
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
       // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 8 slot.
       //     [0]       [1]       [2]       [3]       [0]       [1]       [2]       [3]
@@ -158,8 +158,7 @@ export const run = async () => {
       }
     });
 
-
-    // Skip the cases below. 
+    // Skip the cases below.
     // Reason: https://github.com/MASDXI/ERC20EXP/pull/20#issuecomment-2206762148
 
     // it("[HAPPY] correct calculate era and slot if the current block is in the last day period of the first era", async function () {
@@ -169,7 +168,7 @@ export const run = async () => {
     //   const frameSize = 2;
     //   const blockPeriodEra = 78892315;
 
-    //   // blocks in year equl to 78892315 since blocktime equl to 400ms.
+    //   // blocks in year equal to 78892315 since blocktime equal to 400ms.
     //   // |-------------- 78892315 --------------|   <-- era 1.
     //   // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
     //   //     [0]       [1]       [2]       [3]
@@ -206,7 +205,7 @@ export const run = async () => {
     //   const frameSize = 2;
     //   const blockPeriodEra = 78892315;
 
-    //   // blocks in year equl to 78892315 since blocktime equl to 400ms.
+    //   // blocks in year equal to 78892315 since blocktime equal to 400ms.
     //   // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
     //   // {19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}{19723078}   <-- 8 slot.
     //   //     [0]       [1]       [2]       [3]       [0]       [1]       [2]       [3]

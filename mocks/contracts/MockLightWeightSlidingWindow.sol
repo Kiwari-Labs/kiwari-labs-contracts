@@ -16,10 +16,6 @@ contract MockLightWeightSlidingWindow {
         slidingWindow.updateSlidingWindow(blockTime, frameSize);
     }
 
-    function setStartBlock(uint256 startBlock) public {
-        slidingWindow._startBlockNumber = startBlock;
-    }
-
     function frame(
         uint256 blockNumber
     ) public view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {

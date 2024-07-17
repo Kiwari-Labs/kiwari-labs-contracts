@@ -1,10 +1,10 @@
 import {Contract, Signer} from "ethers";
 import {ethers} from "hardhat";
+import {mine, time} from "@nomicfoundation/hardhat-network-helpers";
 
 import {
   ERC20_EXP_CONTRACT,
   ERC20_EXP_BLOCK_PERIOD,
-  ERC20_EXP_EXPIRE_PERIOD,
   ERC20_EXP_NAME,
   ERC20_EXP_SYMBOL,
   LIGHT_WEIGHT_ERC20_EXP_CONTRACT,
@@ -18,7 +18,44 @@ import {
   TWO_BITS,
   SLOT_PER_ERA,
   THREE_BITS,
+  ERC20_EXP_FRAME_SIZE,
+  ERC20_EXP_SLOT_SIZE,
+  ERC20_EXP_EXPIRE_PERIOD,
 } from "./constant.test";
+
+export const latestBlock = async function () {
+  return await time.latestBlock();
+};
+
+export const mineBlock = async function (blocks: number = 1, options: {interval?: number} = {}) {
+  await mine(blocks, options);
+};
+
+export const skipToBlock = async function (target: number) {
+  await mine(target - (await time.latestBlock()));
+};
+
+const deployPureERC20 = async function () {
+  const [deployer, alice, bob, jame] = await ethers.getSigners();
+
+  const ERC20EXP = await ethers.getContractFactory("MockPureERC20EXP", deployer);
+  const erc20exp = await ERC20EXP.deploy(
+    ERC20_EXP_NAME,
+    ERC20_EXP_SYMBOL,
+    ERC20_EXP_BLOCK_PERIOD,
+    ERC20_EXP_FRAME_SIZE,
+    ERC20_EXP_SLOT_SIZE,
+  );
+  await erc20exp.deployed();
+
+  return {
+    erc20exp,
+    deployer,
+    alice,
+    bob,
+    jame,
+  };
+};
 
 const deployERC20Selector = async function (light: boolean) {
   const type = light ? LIGHT_WEIGHT_ERC20_EXP_CONTRACT : ERC20_EXP_CONTRACT;
@@ -136,7 +173,7 @@ export const calculateLightWeightSlidingWindowState = function ({
   // Shift the bits to the right by 2 positions: 100101110011010011011111011 >> 2
   // After shifting: 001001011100110100110111110
   // Convert this binary number back to decimal: 19723078
-  // This is because shifting 78892315 to the right by 2 bits 
+  // This is because shifting 78892315 to the right by 2 bits
   // results in 19723078, which is the floor value of 78892315 / 4.
   const blockPerEraCache = blockPerSlotCache << TWO_BITS;
 
@@ -144,18 +181,18 @@ export const calculateLightWeightSlidingWindowState = function ({
   self._blockPerSlot = blockPerSlotCache;
   self._frameSizeInBlockLength = blockPerSlotCache * frameSize;
   if (frameSize <= SLOT_PER_ERA) {
-      self._frameSizeInEraAndSlotLength[0] = 0;
-      self._frameSizeInEraAndSlotLength[1] = frameSize;
+    self._frameSizeInEraAndSlotLength[0] = 0;
+    self._frameSizeInEraAndSlotLength[1] = frameSize;
   } else {
-      // Assume frame size equal to 2.
-      // The number 2 in binary is [10].
-      // Shifting [10] to the right by 2 positions results is [00].
-      // Convert this binary number back to decimal: 0
-      self._frameSizeInEraAndSlotLength[0] = frameSize >> TWO_BITS;
-      // The number 2 in binary is 10.
-      // The number 3 in binary is 11.
-      // The binary result of 2 & 3 is 10, which is 2 in decimal.
-      self._frameSizeInEraAndSlotLength[1] = frameSize & THREE_BITS;
+    // Assume frame size equal to 2.
+    // The number 2 in binary is [10].
+    // Shifting [10] to the right by 2 positions results is [00].
+    // Convert this binary number back to decimal: 0
+    self._frameSizeInEraAndSlotLength[0] = frameSize >> TWO_BITS;
+    // The number 2 in binary is 10.
+    // The number 3 in binary is 11.
+    // The binary result of 2 & 3 is 10, which is 2 in decimal.
+    self._frameSizeInEraAndSlotLength[1] = frameSize & THREE_BITS;
   }
 
   return self;
@@ -202,6 +239,10 @@ export const getAddress = async function (account: Signer | Contract) {
     return account.address.toLowerCase();
   }
   return (await account.getAddress()).toLowerCase();
+};
+
+export const deployPureERC20EXP = async function () {
+  return deployPureERC20();
 };
 
 export const deployERC20EXP = async function () {

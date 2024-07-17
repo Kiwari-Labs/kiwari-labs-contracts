@@ -6,8 +6,8 @@ import * as CalculationSafeFrame from "./CalculationSafeFrame.test";
 export const run = async () => {
   describe("LightWeightSlidingWindow", async function () {
     General.run();
-    CalculationEraAndSlot.run()
-    CalculationFrame.run()
-    CalculationSafeFrame.run()
+    CalculationEraAndSlot.run();
+    CalculationFrame.run();
+    CalculationSafeFrame.run();
   });
 };
