@@ -78,6 +78,8 @@ export const run = async () => {
       // Ensure we are in [era: 0, slot 3].
       [era, slot] = await erc20exp.currentEraAndSlot();
       console.log(era, slot);
+      expect(era).equal(1);
+      expect(slot).equal(0);
     });
 
     // it("[UNHAPPY] mint to zero address", async function () {
