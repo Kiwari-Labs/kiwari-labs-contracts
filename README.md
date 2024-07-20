@@ -52,7 +52,6 @@ yarn test
 | test:Unit test all function                                                                                                        | ✓    |     |
 | test:Gas Benchmark test                                                                                                            | ✓    |     |
 | test:Acceptance/E2E test                                                                                                           | ✓    |     |
-| bug:Case block per era more than or less than block per slot \* slot per era (rounding error)                                      | ✓    |     |
 | feat:[Change expirePeriod from length of slot into length of blocks](https://github.com/MASDXI/ERC20EXP/issues/4#issue-2234558942) |      | ✓   |
 | feat:[Change remove WholeSale for non-expire balance](https://github.com/MASDXI/ERC20EXP/issues/9)                                 |      | ✓   |
 
