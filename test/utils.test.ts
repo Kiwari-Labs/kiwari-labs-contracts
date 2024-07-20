@@ -35,17 +35,11 @@ export const skipToBlock = async function (target: number) {
   await mine(target - (await time.latestBlock()));
 };
 
-const deployPureERC20 = async function () {
+const deployPureERC20 = async function (blockPeriod: number, frameSize: number, slotSize: number) {
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 
   const ERC20EXP = await ethers.getContractFactory("MockPureERC20EXP", deployer);
-  const erc20exp = await ERC20EXP.deploy(
-    ERC20_EXP_NAME,
-    ERC20_EXP_SYMBOL,
-    ERC20_EXP_BLOCK_PERIOD,
-    ERC20_EXP_FRAME_SIZE,
-    ERC20_EXP_SLOT_SIZE,
-  );
+  const erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize, slotSize);
   await erc20exp.deployed();
 
   return {
@@ -241,8 +235,12 @@ export const getAddress = async function (account: Signer | Contract) {
   return (await account.getAddress()).toLowerCase();
 };
 
-export const deployPureERC20EXP = async function () {
-  return deployPureERC20();
+export const deployPureERC20EXP = async function ({
+  blockPeriod = 400, // 400ms per block
+  frameSize = 2, // frame size 2 slot
+  slotSize = 4, // 4 slot per era
+}) {
+  return deployPureERC20(blockPeriod, frameSize, slotSize);
 };
 
 export const deployERC20EXP = async function () {
