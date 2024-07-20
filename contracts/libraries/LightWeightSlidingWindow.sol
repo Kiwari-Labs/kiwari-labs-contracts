@@ -48,6 +48,7 @@ library SlidingWindow {
         unchecked {
             uint256 startblockNumberCache = self._startBlockNumber;
             uint40 blockPerYearCache = self._blockPerEra;
+            // @bug should check diff self._blockPerEra and self._blockPerSlot * 4
             assembly {
                 switch gt(blockNumber, startblockNumberCache)
                 case 1 {
@@ -94,8 +95,9 @@ library SlidingWindow {
             revert InvalidFrameSize();
         }
         unchecked {
-            uint40 blockPerEraCache = YEAR_IN_MILLI_SECONDS / blockTime;
-            uint40 blockPerSlotCache = blockPerEraCache >> TWO_BITS;
+            /// @custom:truncate https://docs.soliditylang.org/en/latest/types.html#division
+            uint40 blockPerSlotCache = (YEAR_IN_MILLI_SECONDS / blockTime) >> TWO_BITS;
+            uint40 blockPerEraCache = blockPerSlotCache << TWO_BITS;
             self._blockPerEra = blockPerEraCache;
             self._blockPerSlot = blockPerSlotCache;
             self._frameSizeInBlockLength = blockPerSlotCache * frameSize;

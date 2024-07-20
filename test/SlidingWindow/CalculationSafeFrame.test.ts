@@ -10,7 +10,7 @@ export const run = async () => {
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------|   <-- era 1.
       // [-----39446156-----]                       <-- windows size equal to 2 slot.
       // ---------x
@@ -45,7 +45,7 @@ export const run = async () => {
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------|   <-- era 1.
       // [-----39446156-----]                       <-- windows size equal to 2 slot.
       // -------------------x
@@ -80,7 +80,7 @@ export const run = async () => {
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------|   <-- era 1.
       //           [-----39446156-----]             <-- windows size equal to 2 slot.
       // x----------------------------x
@@ -115,7 +115,7 @@ export const run = async () => {
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------|   <-- era 1.
       //                     [-----39446156-----]   <-- windows size equal to 2 slot.
       // x---buf---x----------------------------x
@@ -150,7 +150,7 @@ export const run = async () => {
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
       //                               [-----39446156-----]                                 <-- windows size equal to 2 slot.
       //           x---buf---x----------------------------x
@@ -185,7 +185,7 @@ export const run = async () => {
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
       //                                         [-----39446156-----]                       <-- windows size equal to 2 slot.
       //                     x---buf---x----------------------------x
@@ -220,7 +220,7 @@ export const run = async () => {
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
       //                                                   [-----39446156-----]             <-- windows size equal to 2 slot.
       //                               x---buf---x----------------------------x
@@ -255,7 +255,7 @@ export const run = async () => {
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
       //                                                             [-----39446156-----]   <-- windows size equal to 2 slot.
       //                                         x---buf---x----------------------------x
@@ -290,7 +290,7 @@ export const run = async () => {
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 3.
       //                                                                       [-----39446156-----]                                 <-- windows size equal to 2 slot.
       //                                                   x---buf---x----------------------------x
@@ -325,7 +325,7 @@ export const run = async () => {
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 3.
       //                                                                                 [-----39446156-----]                       <-- windows size equal to 2 slot.
       //                                                             x---buf---x----------------------------x
@@ -360,7 +360,7 @@ export const run = async () => {
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 3.
       //                                                                                           [-----39446156-----]             <-- windows size equal to 2 slot.
       //                                                                       x---buf---x----------------------------x
@@ -395,7 +395,7 @@ export const run = async () => {
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 3.
       //                                                                                                     [-----39446156-----]   <-- windows size equal to 2 slot.
       //                                                                                 x---buf---x----------------------------x
@@ -430,7 +430,7 @@ export const run = async () => {
       const frameSize = 3;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
       //                                         [----------59169234----------]             <-- windows size equal to 2 slot.
       //                     x---buf---x--------------------------------------x
@@ -465,7 +465,7 @@ export const run = async () => {
       const frameSize = 3;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
       //                               [----------59169234----------]                       <-- windows size equal to 3 slot.
       //           x---buf---x--------------------------------------x
@@ -500,7 +500,7 @@ export const run = async () => {
       const frameSize = 4;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
       //                                         [-------------- 78892315 --------------]   <-- windows size equal to 4 slot.
       //                     x---buf---x------------------------------------------------x
@@ -535,7 +535,7 @@ export const run = async () => {
       const frameSize = 4;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
       //                     [-------------- 78892315 --------------]                       <-- windows size equal to 4 slot.
       // x---buf---x------------------------------------------------x
@@ -570,7 +570,7 @@ export const run = async () => {
       const frameSize = 5;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
       //                     [------------------- 98615390 -------------------]             <-- windows size equal to 5 slot.
       // x---buf---x----------------------------------------------------------x
@@ -605,7 +605,7 @@ export const run = async () => {
       const frameSize = 5;
       const blockPeriodSlot = 19723078;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 3.
       //                                                                       [------------------- 98615390 -------------------]   <-- windows size equal to 5 slot.
       //                                                   x---buf---x----------------------------------------------------------x
@@ -640,7 +640,7 @@ export const run = async () => {
       const frameSize = 3;
       const blockPeriodSlot = 15778463;
 
-      // blocks in year equl to 78892315 since blocktime equl to 400ms.
+      // blocks in year equal to 78892315 since blocktime equal to 400ms.
       // |------------------- 78892315 -------------------||------------------- 78892315 -------------------|   <-- era 2.
       //                               [--------- 47335389 ---------]                                           <-- windows size equal to 3 slot.
       //           x---buf---x--------------------------------------x
@@ -678,7 +678,7 @@ export const run = async () => {
     //   const frameSize = 2;
     //   const blockPeriodEra = 78892315;
 
-    //   // blocks in year equl to 78892315 since blocktime equl to 400ms.
+    //   // blocks in year equal to 78892315 since blocktime equal to 400ms.
     //   // |-------------- 78892315 --------------|   <-- era 1.
     //   //                     [-----39446156-----]   <-- windows size equal to 2 slot.
     //   // x---buf---x----------------------------x
@@ -725,7 +725,7 @@ export const run = async () => {
     //   const frameSize = 2;
     //   const blockPeriodEra = 78892315;
 
-    //   // blocks in year equl to 78892315 since blocktime equl to 400ms.
+    //   // blocks in year equal to 78892315 since blocktime equal to 400ms.
     //   // |-------------- 78892315 --------------||-------------- 78892315 --------------|   <-- era 2.
     //   //                               [-----39446156-----]                                 <-- windows size equal to 3 slot.
     //   //           x---buf---x----------------------------x
