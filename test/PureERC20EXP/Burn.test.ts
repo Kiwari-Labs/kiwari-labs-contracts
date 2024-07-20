@@ -3,8 +3,8 @@ import {deployPureERC20EXP, mineBlock, skipToBlock} from "../utils.test";
 import {EVENT_TRANSFER, ZERO_ADDRESS} from "../constant.test";
 
 export const run = async () => {
-  describe("Mint", async function () {
-    it("[HAPPY] mint correctly tokens into slot 0, 1 of era 0", async function () {
+  describe("Burn", async function () {
+    it("[HAPPY] burn correctly if mint tokens into slot 0, 1 of era 0", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -64,6 +64,10 @@ export const run = async () => {
       // Right now, the balance must be 2.
       expect(await erc20exp.balanceOf(aliceAddress)).equal(2);
 
+      // Expectation is that the token will be burning from the head of the linked list.
+      await erc20exp.burn(aliceAddress, amount);
+      expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
+
       // Skip to the expiry period of token 1.
       await skipToBlock(expectExp[0]);
 
@@ -77,7 +81,7 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
     });
 
-    it("[HAPPY] mint correctly tokens into slot 1, 2 of era 0", async function () {
+    it("[HAPPY] burn correctly if mint tokens into slot 1, 2 of era 0", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -140,6 +144,10 @@ export const run = async () => {
       // Right now, the balance must be 2.
       expect(await erc20exp.balanceOf(aliceAddress)).equal(2);
 
+      // Expectation is that the token will be burning from the head of the linked list.
+      await erc20exp.burn(aliceAddress, amount);
+      expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
+
       // Skip to the expiry period of token 1.
       await skipToBlock(expectExp[0]);
 
@@ -153,7 +161,7 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
     });
 
-    it("[HAPPY] mint correctly tokens into slot 2, 3 of era 0", async function () {
+    it("[HAPPY] burn correctly if mint tokens into slot 2, 3 of era 0", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -224,11 +232,15 @@ export const run = async () => {
       // Right now, the balance must be 4.
       expect(await erc20exp.balanceOf(aliceAddress)).equal(4);
 
+      // Expectation is that the token will be burning from the head of the linked list.
+      await erc20exp.burn(aliceAddress, 3);
+      expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
+
       // Skip to the expiry period of token 1,2.
       await skipToBlock(expectExp[0]);
 
-      // Right now, the balance must be 2.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(2);
+      // Right now, the balance must be 1. Because we have burned 3 tokens before.
+      expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 3,4.
       await skipToBlock(expectExp[1]);
@@ -237,7 +249,7 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
     });
 
-    it("[HAPPY] mint correctly tokens into slot 0, 1 of era 0 when frame size full era", async function () {
+    it("[HAPPY] burn correctly if mint tokens into slot 0, 1 of era 0 when frame size full era", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -297,6 +309,10 @@ export const run = async () => {
       // Right now, the balance must be 2.
       expect(await erc20exp.balanceOf(aliceAddress)).equal(2);
 
+      // Expectation is that the token will be burning from the head of the linked list.
+      await erc20exp.burn(aliceAddress, amount);
+      expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
+
       // Skip to the expiry period of token 1.
       await skipToBlock(expectExp[0]);
 
@@ -310,7 +326,7 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
     });
 
-    it("[HAPPY] mint correctly tokens into slot 1, 2 of era 0 when frame size full era", async function () {
+    it("[HAPPY] burn correctly if mint tokens into slot 1, 2 of era 0 when frame size full era", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -373,6 +389,10 @@ export const run = async () => {
       // Right now, the balance must be 2.
       expect(await erc20exp.balanceOf(aliceAddress)).equal(2);
 
+      // Expectation is that the token will be burning from the head of the linked list.
+      await erc20exp.burn(aliceAddress, amount);
+      expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
+
       // Skip to the expiry period of token 1.
       await skipToBlock(expectExp[0]);
 
@@ -386,7 +406,7 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
     });
 
-    it("[HAPPY] mint correctly tokens into slot 2, 3 of era 0 when frame size full era", async function () {
+    it("[HAPPY] burn correctly if mint tokens into slot 2, 3 of era 0 when frame size full era", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -457,11 +477,15 @@ export const run = async () => {
       // Right now, the balance must be 4.
       expect(await erc20exp.balanceOf(aliceAddress)).equal(4);
 
+      // Expectation is that the token will be burning from the head of the linked list.
+      await erc20exp.burn(aliceAddress, 3);
+      expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
+
       // Skip to the expiry period of token 1,2.
       await skipToBlock(expectExp[0]);
 
-      // Right now, the balance must be 2.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(2);
+      // Right now, the balance must be 1. Because we have burned 3 tokens before.
+      expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 3,4.
       await skipToBlock(expectExp[1]);
@@ -470,7 +494,7 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
     });
 
-    it("[HAPPY] mint correctly tokens into slot 0, 1 of era 0 when frame size over era", async function () {
+    it("[HAPPY] burn correctly if mint tokens into slot 0, 1 of era 0 when frame size over era", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -530,6 +554,10 @@ export const run = async () => {
       // Right now, the balance must be 2.
       expect(await erc20exp.balanceOf(aliceAddress)).equal(2);
 
+      // Expectation is that the token will be burning from the head of the linked list.
+      await erc20exp.burn(aliceAddress, amount);
+      expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
+
       // Skip to the expiry period of token 1.
       await skipToBlock(expectExp[0]);
 
@@ -543,7 +571,7 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
     });
 
-    it("[HAPPY] mint correctly tokens into slot 1, 2 of era 0 when frame size over era", async function () {
+    it("[HAPPY] burn correctly if mint tokens into slot 1, 2 of era 0 when frame size over era", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -606,6 +634,10 @@ export const run = async () => {
       // Right now, the balance must be 2.
       expect(await erc20exp.balanceOf(aliceAddress)).equal(2);
 
+      // Expectation is that the token will be burning from the head of the linked list.
+      await erc20exp.burn(aliceAddress, amount);
+      expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
+
       // Skip to the expiry period of token 1.
       await skipToBlock(expectExp[0]);
 
@@ -619,7 +651,7 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
     });
 
-    it("[HAPPY] mint correctly tokens into slot 2, 3 of era 0 when frame size over era", async function () {
+    it("[HAPPY] burn correctly if mint tokens into slot 2, 3 of era 0 when frame size over era", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -690,11 +722,15 @@ export const run = async () => {
       // Right now, the balance must be 4.
       expect(await erc20exp.balanceOf(aliceAddress)).equal(4);
 
+      // Expectation is that the token will be burning from the head of the linked list.
+      await erc20exp.burn(aliceAddress, 3);
+      expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
+
       // Skip to the expiry period of token 1,2.
       await skipToBlock(expectExp[0]);
 
-      // Right now, the balance must be 2.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(2);
+      // Right now, the balance must be 1. Because we have burned 3 tokens before.
+      expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 3,4.
       await skipToBlock(expectExp[1]);
@@ -703,15 +739,15 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
     });
 
-    it("[UNHAPPY] mint to zero address", async function () {
+    it("[UNHAPPY] burn from zero address", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
       const {erc20exp} = await deployPureERC20EXP({});
 
-      expect(erc20exp.mint(ZERO_ADDRESS, 1))
-        .to.be.revertedWithCustomError(erc20exp, "ERC20InvalidReceiver")
+      expect(erc20exp.burn(ZERO_ADDRESS, 1))
+        .to.be.revertedWithCustomError(erc20exp, "ERC20InvalidSender")
         .withArgs(ZERO_ADDRESS);
     });
   });

@@ -226,18 +226,20 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
                     unchecked {
                         while (key > 0 && pendingValue != 0) {
                             uint256 blockBalancesCache = _spender.blockBalances[key];
+
                             if (blockBalancesCache <= pendingValue) {
                                 pendingValue -= blockBalancesCache;
                                 _spender.slotBalance -= blockBalancesCache;
                                 _spender.blockBalances[key] = 0;
-                                _spender.list.remove(key);
+
+                                key = _spender.list.next(key);
+                                _spender.list.remove(_spender.list.previous(key));
                             } else {
                                 _spender.slotBalance -= pendingValue;
                                 _spender.blockBalances[key] -= pendingValue;
+
                                 pendingValue = 0;
                             }
-
-                            key = _spender.list.next(key);
                         }
 
                         slot = (slot + 1) % _slidingWindow._slotSize;
@@ -265,20 +267,23 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
                                 pendingValue -= blockBalancesCache;
                                 _spender.slotBalance -= blockBalancesCache;
                                 _spender.blockBalances[key] = 0;
-                                _spender.list.remove(key);
+
                                 _recipient.slotBalance += blockBalancesCache;
                                 _recipient.blockBalances[key] = blockBalancesCache;
                                 _recipient.list.insert(key, (""));
+
+                                key = _spender.list.next(key);
+                                _spender.list.remove(_spender.list.previous(key));
                             } else {
                                 _spender.slotBalance -= pendingValue;
                                 _spender.blockBalances[key] -= pendingValue;
+
                                 _recipient.slotBalance += pendingValue;
                                 _recipient.blockBalances[key] = pendingValue;
                                 _recipient.list.insert(key, (""));
+
                                 pendingValue = 0;
                             }
-
-                            key = _spender.list.next(key);
                         }
 
                         slot = (slot + 1) % _slidingWindow._slotSize;

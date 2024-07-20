@@ -16,6 +16,10 @@ contract MockPureERC20EXP is ERC20Expirable {
         _mint(to, value);
     }
 
+    function burn(address from, uint256 value) public {
+        _burn(from, value);
+    }
+
     // function burnRetail(address to, uint256 value) public {
     //     _burnRetail(to, value);
     // }
