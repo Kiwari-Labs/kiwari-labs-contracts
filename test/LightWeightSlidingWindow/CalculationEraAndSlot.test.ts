@@ -3,7 +3,7 @@ import {deployLightWeightSlidingWindow} from "../utils.test";
 
 export const run = async () => {
   describe("CalculationEraAndSlot", async function () {
-    it("[HAPPY] correct calculate era and slot if the current block is in the first slot period of the first era", async function () {
+    it("[HAPPY] calculate correctly era and slot if the current block is in the first slot period of the first era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 2;
@@ -33,7 +33,7 @@ export const run = async () => {
       }
     });
 
-    it("[HAPPY] correct calculate era and slot if the current block is in the second slot period of the first era", async function () {
+    it("[HAPPY] calculate correctly era and slot if the current block is in the second slot period of the first era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 2;
@@ -63,7 +63,7 @@ export const run = async () => {
       }
     });
 
-    it("[HAPPY] correct calculate era and slot if the current block is in the third slot period of the first era", async function () {
+    it("[HAPPY] calculate correctly era and slot if the current block is in the third slot period of the first era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 2;
@@ -93,7 +93,7 @@ export const run = async () => {
       }
     });
 
-    it("[HAPPY] correct calculate era and slot if the current block is in the fourth slot period of the first era", async function () {
+    it("[HAPPY] calculate correctly era and slot if the current block is in the fourth slot period of the first era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 2;
@@ -123,7 +123,7 @@ export const run = async () => {
       }
     });
 
-    it("[HAPPY] correct calculate era and slot if the current block is in the first slot period of the second era", async function () {
+    it("[HAPPY] calculate correctly era and slot if the current block is in the first slot period of the second era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 2;
@@ -156,7 +156,7 @@ export const run = async () => {
     // Skip the cases below.
     // Reason: https://github.com/MASDXI/ERC20EXP/pull/20#issuecomment-2206762148
 
-    // it("[HAPPY] correct calculate era and slot if the current block is in the last day period of the first era", async function () {
+    // it("[HAPPY] calculate correctly era and slot if the current block is in the last day period of the first era", async function () {
     //   const startBlockNumber = 100;
     //   const blockPeriod = 400;
     //   const frameSize = 2;
@@ -192,7 +192,7 @@ export const run = async () => {
     //   }
     // });
 
-    // it("[HAPPY] correct calculate era and slot if the current block is in the first day period of the second era", async function () {
+    // it("[HAPPY] calculate correctly era and slot if the current block is in the first day period of the second era", async function () {
     //   const startBlockNumber = 100;
     //   const blockPeriod = 400;
     //   const frameSize = 2;
