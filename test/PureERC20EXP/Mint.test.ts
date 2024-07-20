@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {deployPureERC20EXP, latestBlock, mineBlock, skipToBlock} from "../utils.test";
+import {deployPureERC20EXP, mineBlock, skipToBlock} from "../utils.test";
 import {EVENT_TRANSFER, ZERO_ADDRESS} from "../constant.test";
 
 export const run = async () => {
@@ -701,6 +701,18 @@ export const run = async () => {
 
       // right now, the balance must be 0.
       expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
+    });
+
+    it("[UNHAPPY] mint to zero address", async function () {
+      // Start at block 100.
+      const startBlockNumber = 100;
+
+      await mineBlock(startBlockNumber);
+      const {erc20exp} = await deployPureERC20EXP({});
+
+      expect(erc20exp.mint(ZERO_ADDRESS, 1))
+        .to.be.revertedWithCustomError(erc20exp, "ERC20InvalidReceiver")
+        .withArgs(ZERO_ADDRESS);
     });
   });
 };
