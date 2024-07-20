@@ -3,7 +3,7 @@ import {deployDoublyList} from "../utils.test";
 
 export const run = async () => {
   describe("Sorting", async function () {
-    it("[HAPPY] correct ascend sorting", async function () {
+    it("[HAPPY] asc sort correctly", async function () {
       const {doublylist} = await deployDoublyList({autoList: true, len: 5});
       const sorted = await doublylist.ascending();
       for (let i = 0; i < sorted.length; i++) {
@@ -11,7 +11,7 @@ export const run = async () => {
       }
     });
 
-    it("[HAPPY] correct descend sorting", async function () {
+    it("[HAPPY] des sort correctly", async function () {
       const {doublylist} = await deployDoublyList({autoList: true, len: 5});
       const sorted = await doublylist.descending();
       for (let i = 0; i < sorted.length; i++) {

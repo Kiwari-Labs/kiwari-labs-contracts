@@ -3,7 +3,7 @@ import {deployDoublyList, padIndexToData} from "../utils.test";
 
 export const run = async () => {
   describe("Integration", async function () {
-    it("[HAPPY] correct integration", async function () {
+    it("[HAPPY] integration correctly", async function () {
       const len = 10;
       const {doublylist} = await deployDoublyList({
         autoList: true,

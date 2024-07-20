@@ -4,7 +4,7 @@ import {data as mockData} from "../../mocks/data/shuffle_273_number";
 
 export const run = async () => {
   describe("Insertion", async function () {
-    it("[HAPPY] correct one insertion", async function () {
+    it("[HAPPY] one insert correctly", async function () {
       const {doublylist} = await deployDoublyList();
       const index = 1;
       const data = padIndexToData(index);
@@ -13,7 +13,7 @@ export const run = async () => {
       expect(await doublylist.size()).to.equal(1);
     });
 
-    it("[HAPPY] correct multi insertion", async function () {
+    it("[HAPPY] multi insert correctly", async function () {
       const {doublylist} = await deployDoublyList();
 
       const len = 10;
@@ -26,7 +26,7 @@ export const run = async () => {
       expect(await doublylist.size()).to.equal(len);
     });
 
-    it("[HAPPY] correct multi insertion shuffle", async function () {
+    it("[HAPPY] shuffle insertion correctly", async function () {
       const {doublylist} = await deployDoublyList();
       for (let i = 0; i < mockData.length; i++) {
         const index = i + 1;
@@ -37,7 +37,7 @@ export const run = async () => {
       expect(await doublylist.size()).to.equal(mockData.length);
     });
 
-    it("[HAPPY] correct insertion at the head", async function () {
+    it("[HAPPY] insert correctly at the head", async function () {
       const {doublylist} = await deployDoublyList();
 
       let index = 2;
@@ -53,7 +53,7 @@ export const run = async () => {
       expect(await doublylist.tail()).to.equal(2);
     });
 
-    it("[HAPPY] correct insertion at the tail", async function () {
+    it("[HAPPY] insert correctly at the tail", async function () {
       const {doublylist} = await deployDoublyList();
 
       let index = 1;
@@ -69,7 +69,7 @@ export const run = async () => {
       expect(await doublylist.tail()).to.equal(2);
     });
 
-    it("[HAPPY] correct insertion between head and tail", async function () {
+    it("[HAPPY] insert correctly between head and tail", async function () {
       const {doublylist} = await deployDoublyList();
 
       let index = 1;

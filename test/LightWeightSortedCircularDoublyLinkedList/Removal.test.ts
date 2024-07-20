@@ -3,7 +3,7 @@ import {deployLightWeightDoublyList} from "../utils.test";
 
 export const run = async () => {
   describe("Removal", async function () {
-    it("[HAPPY] correct removal", async function () {
+    it("[HAPPY] remove correctly", async function () {
       const {doublylist} = await deployLightWeightDoublyList();
 
       const index = 1;
@@ -14,7 +14,7 @@ export const run = async () => {
       expect(await doublylist.size()).to.equal(0);
     });
 
-    it("[HAPPY] correct removal from the head", async function () {
+    it("[HAPPY] remove correctly from the head", async function () {
       const {doublylist} = await deployLightWeightDoublyList({
         autoList: true,
       });
@@ -34,7 +34,7 @@ export const run = async () => {
       expect(node.next).to.equal(0);
     });
 
-    it("[HAPPY] correct removal of a node", async function () {
+    it("[HAPPY] remove correctly of a node", async function () {
       const {doublylist} = await deployLightWeightDoublyList({
         autoList: true,
       });
@@ -56,7 +56,7 @@ export const run = async () => {
       }
     });
 
-    it("[HAPPY] correct removal from the tail", async function () {
+    it("[HAPPY] remove correctly from the tail", async function () {
       const {doublylist} = await deployLightWeightDoublyList({
         autoList: true,
       });
