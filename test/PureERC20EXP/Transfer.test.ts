@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {deployPureERC20EXP, latestBlock, mineBlock, skipToBlock} from "../utils.test";
+import {deployPureERC20EXP, mineBlock, skipToBlock} from "../utils.test";
 import {EVENT_TRANSFER, ZERO_ADDRESS} from "../constant.test";
 
 export const run = async () => {
