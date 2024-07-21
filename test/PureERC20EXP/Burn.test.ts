@@ -3,7 +3,7 @@ import {deployPureERC20EXP, mineBlock, skipToBlock} from "../utils.test";
 import {EVENT_TRANSFER, ZERO_ADDRESS} from "../constant.test";
 
 export const run = async () => {
-  describe.only("Burn", async function () {
+  describe("Burn", async function () {
     it("[HAPPY] burn correctly if mint tokens into slot 0, 1 of era 0", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
