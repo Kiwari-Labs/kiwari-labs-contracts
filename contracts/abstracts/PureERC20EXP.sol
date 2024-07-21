@@ -159,9 +159,10 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
                 fromEra++;
             }
 
+            // It is not possible if the fromEra is more than toEra.
             if (fromEra == toEra) {
                 balance += _slotBalance(account, fromEra, fromSlot, toSlot);
-            } else if (fromEra < toEra) {
+            } else {
                 // keep it simple stupid first by spliting into 3 part then sum.
                 // part1: calulate balance at fromEra in naive in naive way O(n)
                 uint8 maxSlotCache = _slidingWindow._slotSize - 1;
@@ -214,7 +215,7 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
 
             if (to == address(0)) {
                 // burn expirable token.
-                while ((era < toEra || (era == toEra && slot <= toSlot)) && pendingValue != 0) {
+                while ((era < toEra || (era == toEra && slot <= toSlot)) && pendingValue > 0) {
                     Slot storage _spender = _balances[from][era][slot];
 
                     uint256 key = _getFirstUnexpiredBlockBalance(
@@ -224,7 +225,7 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
                     );
 
                     unchecked {
-                        while (key > 0 && pendingValue != 0) {
+                        while (key > 0 && pendingValue > 0) {
                             uint256 blockBalancesCache = _spender.blockBalances[key];
 
                             if (blockBalancesCache <= pendingValue) {
@@ -250,7 +251,7 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
                 }
             } else {
                 // transfer expirable token.
-                while ((era < toEra || (era == toEra && slot <= toSlot)) && pendingValue != 0) {
+                while ((era < toEra || (era == toEra && slot <= toSlot)) && pendingValue > 0) {
                     Slot storage _spender = _balances[from][era][slot];
                     Slot storage _recipient = _balances[to][era][slot];
 
@@ -261,8 +262,9 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
                     );
 
                     unchecked {
-                        while (key > 0 && pendingValue != 0) {
+                        while (key > 0 && pendingValue > 0) {
                             uint256 blockBalancesCache = _spender.blockBalances[key];
+
                             if (blockBalancesCache <= pendingValue) {
                                 pendingValue -= blockBalancesCache;
                                 _spender.slotBalance -= blockBalancesCache;
