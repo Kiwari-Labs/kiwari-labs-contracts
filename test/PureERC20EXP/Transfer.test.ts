@@ -1207,5 +1207,29 @@ export const run = async () => {
       // Because Bob's 10 tokens have expired.
       expect(await erc20exp.balanceOf(bobAddress)).equal(0);
     });
+
+    it("[UNHAPPY] transfer from zero address", async function () {
+      // Start at block 100.
+      const startBlockNumber = 100;
+
+      await mineBlock(startBlockNumber);
+      const {erc20exp, alice} = await deployPureERC20EXP({});
+
+      expect(erc20exp.connect(ZERO_ADDRESS).transfer(await alice.getAddress(), 1))
+        .to.be.revertedWithCustomError(erc20exp, "ERC20InvalidSender")
+        .withArgs(ZERO_ADDRESS);
+    });
+
+    it("[UNHAPPY] transfer to zero address", async function () {
+      // Start at block 100.
+      const startBlockNumber = 100;
+
+      await mineBlock(startBlockNumber);
+      const {erc20exp, alice} = await deployPureERC20EXP({});
+
+      expect(erc20exp.connect(await alice.getAddress()).transfer(ZERO_ADDRESS, 1))
+        .to.be.revertedWithCustomError(erc20exp, "ERC20InvalidReceiver")
+        .withArgs(ZERO_ADDRESS);
+    });
   });
 };
