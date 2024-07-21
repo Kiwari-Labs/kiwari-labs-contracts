@@ -3,7 +3,7 @@ import {deployPureERC20EXP, mineBlock, skipToBlock} from "../utils.test";
 import {EVENT_TRANSFER, ZERO_ADDRESS} from "../constant.test";
 
 export const run = async () => {
-  describe("Burn", async function () {
+  describe.only("Burn", async function () {
     it("[HAPPY] burn correctly if mint tokens into slot 0, 1 of era 0", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
@@ -65,7 +65,9 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await erc20exp.burn(aliceAddress, amount);
+      await expect(erc20exp.burn(aliceAddress, amount))
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .withArgs(aliceAddress, ZERO_ADDRESS, amount);
       expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1.
@@ -145,7 +147,9 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await erc20exp.burn(aliceAddress, amount);
+      await expect(erc20exp.burn(aliceAddress, amount))
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .withArgs(aliceAddress, ZERO_ADDRESS, amount);
       expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1.
@@ -233,7 +237,9 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(4);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await erc20exp.burn(aliceAddress, 3);
+      await expect(erc20exp.burn(aliceAddress, 3))
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .withArgs(aliceAddress, ZERO_ADDRESS, 3);
       expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1,2.
@@ -310,7 +316,9 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await erc20exp.burn(aliceAddress, amount);
+      await expect(erc20exp.burn(aliceAddress, amount))
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .withArgs(aliceAddress, ZERO_ADDRESS, amount);
       expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1.
@@ -390,7 +398,9 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await erc20exp.burn(aliceAddress, amount);
+      await expect(erc20exp.burn(aliceAddress, amount))
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .withArgs(aliceAddress, ZERO_ADDRESS, amount);
       expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1.
@@ -478,7 +488,9 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(4);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await erc20exp.burn(aliceAddress, 3);
+      await expect(erc20exp.burn(aliceAddress, 3))
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .withArgs(aliceAddress, ZERO_ADDRESS, 3);
       expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1,2.
@@ -555,7 +567,9 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await erc20exp.burn(aliceAddress, amount);
+      await expect(erc20exp.burn(aliceAddress, amount))
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .withArgs(aliceAddress, ZERO_ADDRESS, amount);
       expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1.
@@ -635,7 +649,9 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await erc20exp.burn(aliceAddress, amount);
+      await expect(erc20exp.burn(aliceAddress, amount))
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .withArgs(aliceAddress, ZERO_ADDRESS, amount);
       expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1.
@@ -723,7 +739,9 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(4);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await erc20exp.burn(aliceAddress, 3);
+      await expect(erc20exp.burn(aliceAddress, 3))
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .withArgs(aliceAddress, ZERO_ADDRESS, 3);
       expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1,2.
