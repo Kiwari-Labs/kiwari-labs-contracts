@@ -34,8 +34,8 @@ interface ISlidingWindow {
     function getFrameSizeInBlockLength() external view returns (uint40);
 
     /// @notice Returns the size of the sliding window frame in slots.
-    /// @return frameSizeInSlotLegth Size of the frame in slots.
-    function getFrameSizeInSlotLegth() external view returns (uint8);
+    /// @return frameSizeInSlotLength Size of the frame in slots.
+    function getFrameSizeInSlotLength() external view returns (uint8);
 
     /// @notice Returns the size of the sliding window frame in eras.
     /// @return frameSizeInEraLength Size of the frame in eras.

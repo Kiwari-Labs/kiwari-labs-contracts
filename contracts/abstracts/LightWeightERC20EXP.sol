@@ -650,7 +650,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     }
 
     /// @inheritdoc ISlidingWindow
-    function getFrameSizeInSlotLegth() external view override returns (uint8) {
+    function getFrameSizeInSlotLength() external view override returns (uint8) {
         return _slidingWindow.getFrameSizeInSlotLength();
     }
 
