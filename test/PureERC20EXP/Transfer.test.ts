@@ -1,6 +1,12 @@
 import {expect} from "chai";
 import {deployPureERC20EXP, mineBlock, skipToBlock} from "../utils.test";
-import {EVENT_TRANSFER, ZERO_ADDRESS} from "../constant.test";
+import {
+  ERC20_INSUFFICIENT_BALANCE,
+  ERC20_INVALID_RECEIVER,
+  ERC20_INVALID_SENDER,
+  EVENT_TRANSFER,
+  ZERO_ADDRESS,
+} from "../constant.test";
 
 export const run = async () => {
   describe("Transfer", async function () {
@@ -1216,7 +1222,7 @@ export const run = async () => {
       const {erc20exp, alice} = await deployPureERC20EXP({});
 
       expect(erc20exp.connect(ZERO_ADDRESS).transfer(await alice.getAddress(), 1))
-        .to.be.revertedWithCustomError(erc20exp, "ERC20InvalidSender")
+        .to.be.revertedWithCustomError(erc20exp, ERC20_INVALID_SENDER)
         .withArgs(ZERO_ADDRESS);
     });
 
@@ -1227,9 +1233,21 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp, alice} = await deployPureERC20EXP({});
 
-      expect(erc20exp.connect(await alice.getAddress()).transfer(ZERO_ADDRESS, 1))
-        .to.be.revertedWithCustomError(erc20exp, "ERC20InvalidReceiver")
+      expect(erc20exp.connect(alice).transfer(ZERO_ADDRESS, 1))
+        .to.be.revertedWithCustomError(erc20exp, ERC20_INVALID_RECEIVER)
         .withArgs(ZERO_ADDRESS);
+    });
+
+    it("[UNHAPPY] insufficient balance", async function () {
+      // Start at block 100.
+      const startBlockNumber = 100;
+
+      await mineBlock(startBlockNumber);
+      const {erc20exp, alice, bob} = await deployPureERC20EXP({});
+
+      expect(erc20exp.connect(alice).transfer(await bob.getAddress(), 1))
+        .to.be.revertedWithCustomError(erc20exp, ERC20_INSUFFICIENT_BALANCE)
+        .withArgs(await alice.getAddress(), 0, 1);
     });
   });
 };

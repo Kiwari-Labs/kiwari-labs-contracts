@@ -32,6 +32,10 @@ export const INVALID_BLOCK_TIME = "InvalidBlockTime";
 export const INVALID_FRAME_SIZ = "InvalidFrameSize";
 export const INVALID_SLOT_PER_ERA = "InvalidSlotPerEra";
 
+export const ERC20_INVALID_SENDER = "ERC20InvalidSender";
+export const ERC20_INVALID_RECEIVER = "ERC20InvalidReceiver";
+export const ERC20_INSUFFICIENT_BALANCE = "ERC20InsufficientBalance";
+
 export const EVENT_TRANSFER = "Transfer";
 
 export interface SlidingWindowState extends LightWeightSlidingWindowState {
