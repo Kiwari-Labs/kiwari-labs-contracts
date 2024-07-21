@@ -266,10 +266,10 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
                             if (blockBalancesCache <= pendingValue) {
                                 pendingValue -= blockBalancesCache;
                                 _spender.slotBalance -= blockBalancesCache;
-                                _spender.blockBalances[key] = 0;
+                                _spender.blockBalances[key] -= blockBalancesCache;
 
                                 _recipient.slotBalance += blockBalancesCache;
-                                _recipient.blockBalances[key] = blockBalancesCache;
+                                _recipient.blockBalances[key] += blockBalancesCache;
                                 _recipient.list.insert(key, (""));
 
                                 key = _spender.list.next(key);
@@ -279,7 +279,7 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
                                 _spender.blockBalances[key] -= pendingValue;
 
                                 _recipient.slotBalance += pendingValue;
-                                _recipient.blockBalances[key] = pendingValue;
+                                _recipient.blockBalances[key] += pendingValue;
                                 _recipient.list.insert(key, (""));
 
                                 pendingValue = 0;
