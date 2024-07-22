@@ -7,9 +7,10 @@ pragma solidity >=0.5.0 <0.9.0;
 import "../libraries/SlidingWindow.sol";
 import "../libraries/SortedCircularDoublyLinkedList.sol";
 import "../interfaces/ISlidingWindow.sol";
+import "../interfaces/IPureERC20EXP.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-abstract contract ERC20Expirable is ERC20, ISlidingWindow {
+abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
     using SortedCircularDoublyLinkedList for SortedCircularDoublyLinkedList.List;
     using SlidingWindow for SlidingWindow.SlidingWindowState;
 
@@ -41,28 +42,31 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
         _slidingWindow.updateSlidingWindow(blockTime_, frameSize_, slotSize_);
     }
 
+    /// @notice Allows for the override _frame to use either the frame or safeFrame.
     /// @dev Determines the sliding window frame based on the provided block number.
-    /// @notice Allowing for override detector to be the frame or safe frame.
-    /// @param blockNumber The block number used as a reference point for computing detector.
-    /// @return fromEra The starting era of the detector.
-    /// @return toEra The ending era of the detector.
-    /// @return fromSlot The starting slot within the starting era of the detector.
-    /// @return toSlot The ending slot within the ending era of the detector.
-    function _detector(
+    /// @param blockNumber The block number used as a reference point for computing the frame.
+    /// @return fromEra The starting era of the frame.
+    /// @return toEra The ending era of the frame.
+    /// @return fromSlot The starting slot within the starting era of the frame.
+    /// @return toSlot The ending slot within the ending era of the frame.
+    function _frame(
         uint256 blockNumber
     ) internal view virtual returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
         return _slidingWindow.frame(blockNumber);
     }
 
+    /// @notice Allows for override in subsecond blocktime network.
     /// @dev Returns the current block number.
-    /// @notice ALlowing for override in subsecond blocktime network.
     /// @return The current network block number.
     function _blockNumberProvider() internal view virtual returns (uint256) {
         return block.number;
     }
 
-    /// @dev Retrieves the total slot balance for the specified account and era,
+    /// @notice Retrieves the total slot balance for the specified account and era,
     /// iterating through the range of slots from startSlot to endSlot inclusive.
+    /// This function reads slot balances stored in a mapping `_balances`.
+    /// @dev This function assumes that the provided `startSlot` is less than or equal to `endSlot`.
+    /// It calculates the cumulative balance by summing the `slotBalance` of each slot within the specified range.
     /// @param account The address of the account for which the balance is being queried.
     /// @param era The era (time period) from which to retrieve balances.
     /// @param startSlot The starting slot index within the era to retrieve balances.
@@ -79,11 +83,14 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
                 balance += _balances[account][era][startSlot].slotBalance;
             }
         }
+        return balance;
     }
 
-    /// @dev Calculates the total balance within a specific era and slot for the given account,
-    /// considering all block balances that have not expired relative to the current blockNumber.
-    /// This function loops through a sorted list of block indices and sums up corresponding balances.
+    /// @notice Calculates the total buffered balance within a specific era and slot for the given account,
+    /// considering all block balances that have not expired relative to the current block number.
+    /// This function iterates through a sorted list of block indices and sums up corresponding balances.
+    /// @dev This function is used to determine the total buffered balance for an account within a specific era and slot.
+    /// It loops through a sorted list of block indices stored in `_spender.list` and sums up the balances from `_spender.blockBalances`.
     /// @param account The address of the account for which the balance is being calculated.
     /// @param era The era (time period) from which to retrieve balances.
     /// @param slot The specific slot within the era to retrieve balances.
@@ -111,9 +118,11 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
         }
     }
 
-    /// @dev Finds the first valid block balance index in a sorted list of block numbers.
-    /// The index is considered valid if the block number difference between the current blockNumber
+    /// @notice Finds the index of the first valid block balance in a sorted list of block numbers.
+    /// A block balance index is considered valid if the difference between the current blockNumber
     /// and the block number at the index (key) is less than the expirationPeriodInBlockLength.
+    /// @dev This function is used to determine the first valid block balance index within a sorted circular doubly linked list.
+    /// It iterates through the list starting from the head and stops when it finds a valid index or reaches the end of the list.
     /// @param list The sorted circular doubly linked list of block numbers.
     /// @param blockNumber The current block number.
     /// @param expirationPeriodInBlockLength The maximum allowed difference between blockNumber and the key.
@@ -177,15 +186,11 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
         }
     }
 
-    /// @notice Returns the available balance of tokens for a given account.
-    /// @dev Calculates and returns the available balance based on the frame.
-    /// @inheritdoc IERC20
-    function balanceOf(address account) public view virtual override returns (uint256) {
-        uint256 blockNumberCache = _blockNumberProvider();
-        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _detector(blockNumberCache);
-        return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
-    }
-
+    /// @notice Internal function to update token balances during token transfers or operations.
+    /// @dev Handles various scenarios including minting, burning, and transferring tokens with expiration logic.
+    /// @param from The address from which tokens are being transferred (or minted/burned).
+    /// @param to The address to which tokens are being transferred (or burned to if `to` is `zero address`).
+    /// @param value The amount of tokens being transferred, minted, or burned.
     function _update(address from, address to, uint256 value) internal virtual override {
         // hook before transfer
         _beforeTokenTransfer(from, to, value);
@@ -202,7 +207,7 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
             }
             _recipient.list.insert(blockNumberCache, (""));
         } else {
-            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _detector(blockNumberCache);
+            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
             uint256 balance = _lookBackBalance(from, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
             if (balance < value) {
                 revert ERC20InsufficientBalance(from, balance, value);
@@ -303,33 +308,40 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
         _afterTokenTransfer(from, to, value);
     }
 
-    /// @dev Retrieves the list of token balances stored for the specified account, era, and slot.
-    /// @param account The address of the account for which the token list is being retrieved.
-    /// @param era The era (time period) within which the token balances are stored.
-    /// @param slot The slot index within the specified era for which the token balances are stored.
-    /// @return list Returns an array of token balances in ascending order of block numbers.
-    function tokenList(address account, uint256 era, uint8 slot) public view virtual returns (uint256[] memory) {
-        return _balances[account][era][slot].list.ascending();
-    }
-
-    /// @notice Returns 0 as there is no actual total supply due to token expiration.
-    /// @inheritdoc IERC20
-    function totalSupply() public pure override returns (uint256) {
-        /* @note If not overridden, totalSupply will only count spendable balances of all _wholeSale accounts. */
-        return 0;
+    /// @inheritdoc IPureERC20EXP
+    function tokenList(address account, uint256 era, uint8 slot) public view virtual returns (uint256[] memory list) {
+        list = _balances[account][era][slot].list.ascending();
     }
 
     /// @notice Abstract hook called before every token transfer operation.
+    /// @dev This function is called before every token transfer operation for additional checks or actions.
     /// @param from The address sending tokens.
     /// @param to The address receiving tokens.
     /// @param amount The amount of tokens being transferred.
     function _beforeTokenTransfer(address from, address to, uint amount) internal virtual {}
 
     /// @notice Abstract hook called after every token transfer operation.
+    /// @dev This function is called after every token transfer operation for additional processing or logging.
     /// @param from The address sending tokens.
     /// @param to The address receiving tokens.
     /// @param amount The amount of tokens being transferred.
     function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual {}
+
+    /// @notice Returns 0 as there is no actual total supply due to token expiration.
+    /// @dev This function returns the total supply of tokens, which is constant and set to 0.
+    /// @inheritdoc IERC20
+    function totalSupply() public pure override returns (uint256) {
+        return 0;
+    }
+
+    /// @notice Returns the available balance of tokens for a given account.
+    /// @dev Calculates and returns the available balance based on the frame.
+    /// @inheritdoc IERC20
+    function balanceOf(address account) public view virtual override returns (uint256) {
+        uint256 blockNumberCache = _blockNumberProvider();
+        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
+        return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
+    }
 
     /// @inheritdoc ISlidingWindow
     function blockPerEra() external view virtual override returns (uint40) {
