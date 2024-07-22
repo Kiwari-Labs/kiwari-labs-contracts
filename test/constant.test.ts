@@ -28,6 +28,8 @@ export const MINIMUM_BLOCKTIME_IN_MILLI_SECONDS = 100;
 export const MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000;
 export const YEAR_IN_MILLI_SECONDS = 31_556_926_000;
 
+export const DAY_IN_MILLI_SECONDS = 86_400_000;
+
 export const INVALID_BLOCK_TIME = "InvalidBlockTime";
 export const INVALID_FRAME_SIZ = "InvalidFrameSize";
 export const INVALID_SLOT_PER_ERA = "InvalidSlotPerEra";
