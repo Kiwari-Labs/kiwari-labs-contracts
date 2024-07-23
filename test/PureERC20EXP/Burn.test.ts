@@ -871,10 +871,15 @@ export const run = async () => {
       expect(era).equal(1);
       expect(slot).equal(0);
 
-      // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc20exp.burn(aliceAddress, amount))
+      // Mint into [era: 1, slot 0].
+      await expect(erc20exp.mint(aliceAddress, amount))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
-        .withArgs(aliceAddress, ZERO_ADDRESS, amount);
+        .withArgs(ZERO_ADDRESS, aliceAddress, amount);
+
+      // Expectation is that the token will be burning from the head of the linked list.
+      await expect(erc20exp.burn(aliceAddress, amount + amount))
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .withArgs(aliceAddress, ZERO_ADDRESS, amount + amount);
       expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
     });
 
