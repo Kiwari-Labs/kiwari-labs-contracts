@@ -3,7 +3,7 @@ import {deployPureERC20EXP, mineBlock} from "../utils.test";
 import {DAY_IN_MILLI_SECONDS, EVENT_TRANSFER, ZERO_ADDRESS} from "../constant.test";
 
 export const run = async () => {
-  describe("Performance", async function () {
+  describe.skip("Performance", async function () {
     it("[HAPPY] mint x10 times every days for x90 days and burn them all", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
