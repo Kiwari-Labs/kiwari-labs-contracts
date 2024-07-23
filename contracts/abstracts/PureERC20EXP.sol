@@ -163,6 +163,7 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
     ) private view returns (uint256 balance) {
         unchecked {
             balance = _bufferSlotBalance(account, fromEra, fromSlot, blockNumber);
+            // Go to the next slot. Increase the era if the slot is over the limit.
             fromSlot = (fromSlot + 1) % _slidingWindow._slotSize;
             if (fromSlot == 0) {
                 fromEra++;
@@ -172,15 +173,15 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
             if (fromEra == toEra) {
                 balance += _slotBalance(account, fromEra, fromSlot, toSlot);
             } else {
-                // keep it simple stupid first by spliting into 3 part then sum.
-                // part1: calulate balance at fromEra in naive in naive way O(n)
+                // Keep it simple stupid first by spliting into 3 part then sum.
+                // Part1: calulate balance at fromEra in naive in naive way O(n)
                 uint8 maxSlotCache = _slidingWindow._slotSize - 1;
                 balance += _slotBalance(account, fromEra, fromSlot, maxSlotCache);
-                // part2: calulate balance betaween fromEra and toEra in naive way O(n)
+                // Part2: calulate balance betaween fromEra and toEra in naive way O(n)
                 for (uint256 era = fromEra + 1; era < toEra; era++) {
                     balance += _slotBalance(account, era, 0, maxSlotCache);
                 }
-                // part3:calulate balance at toEra in navie way O(n)
+                // Part3:calulate balance at toEra in navie way O(n)
                 balance += _slotBalance(account, toEra, 0, toSlot);
             }
         }
@@ -192,13 +193,13 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
     /// @param to The address to which tokens are being transferred (or burned to if `to` is `zero address`).
     /// @param value The amount of tokens being transferred, minted, or burned.
     function _update(address from, address to, uint256 value) internal virtual override {
-        // hook before transfer
+        // Hook before transfer
         _beforeTokenTransfer(from, to, value);
 
         uint256 blockNumberCache = _blockNumberProvider();
 
         if (from == address(0)) {
-            // mint expirable token.
+            // Mint expirable token.
             (uint256 currentEra, uint8 currentSlot) = _slidingWindow.calculateEraAndSlot(blockNumberCache);
             Slot storage _recipient = _balances[to][currentEra][currentSlot];
             unchecked {
@@ -213,15 +214,13 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
                 revert ERC20InsufficientBalance(from, balance, value);
             }
 
-            uint256 era = fromEra;
-            uint8 slot = fromSlot;
-
             uint256 pendingValue = value;
+            uint256 balanceCache = 0;
 
             if (to == address(0)) {
-                // burn expirable token.
-                while ((era < toEra || (era == toEra && slot <= toSlot)) && pendingValue > 0) {
-                    Slot storage _spender = _balances[from][era][slot];
+                // Burn expirable token.
+                while ((fromEra < toEra || (fromEra == toEra && fromSlot <= toSlot)) && pendingValue > 0) {
+                    Slot storage _spender = _balances[from][fromEra][fromSlot];
 
                     uint256 key = _getFirstUnexpiredBlockBalance(
                         _spender.list,
@@ -229,36 +228,41 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
                         _slidingWindow.getFrameSizeInBlockLength()
                     );
 
-                    unchecked {
-                        while (key > 0 && pendingValue > 0) {
-                            uint256 blockBalancesCache = _spender.blockBalances[key];
+                    while (key > 0 && pendingValue > 0) {
+                        balanceCache = _spender.blockBalances[key];
 
-                            if (blockBalancesCache <= pendingValue) {
-                                pendingValue -= blockBalancesCache;
-                                _spender.slotBalance -= blockBalancesCache;
-                                _spender.blockBalances[key] = 0;
-
-                                key = _spender.list.next(key);
-                                _spender.list.remove(_spender.list.previous(key));
-                            } else {
+                        if (balanceCache <= pendingValue) {
+                            unchecked {
+                                pendingValue -= balanceCache;
+                                _spender.slotBalance -= balanceCache;
+                                _spender.blockBalances[key] -= balanceCache;
+                            }
+                            key = _spender.list.next(key);
+                            _spender.list.remove(_spender.list.previous(key));
+                        } else {
+                            unchecked {
                                 _spender.slotBalance -= pendingValue;
                                 _spender.blockBalances[key] -= pendingValue;
-
-                                pendingValue = 0;
                             }
+                            pendingValue = 0;
                         }
+                    }
 
-                        slot = (slot + 1) % _slidingWindow._slotSize;
-                        if (slot == 0) {
-                            era++;
+                    // Go to the next slot. Increase the era if the slot is over the limit.
+                    if (pendingValue > 0) {
+                        unchecked {
+                            fromSlot = (fromSlot + 1) % _slidingWindow._slotSize;
+                            if (fromSlot == 0) {
+                                fromEra++;
+                            }
                         }
                     }
                 }
             } else {
-                // transfer expirable token.
-                while ((era < toEra || (era == toEra && slot <= toSlot)) && pendingValue > 0) {
-                    Slot storage _spender = _balances[from][era][slot];
-                    Slot storage _recipient = _balances[to][era][slot];
+                // Transfer expirable token.
+                while ((fromEra < toEra || (fromEra == toEra && fromSlot <= toSlot)) && pendingValue > 0) {
+                    Slot storage _spender = _balances[from][fromEra][fromSlot];
+                    Slot storage _recipient = _balances[to][fromEra][fromSlot];
 
                     uint256 key = _getFirstUnexpiredBlockBalance(
                         _spender.list,
@@ -266,36 +270,41 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
                         _slidingWindow.getFrameSizeInBlockLength()
                     );
 
-                    unchecked {
-                        while (key > 0 && pendingValue > 0) {
-                            uint256 blockBalancesCache = _spender.blockBalances[key];
+                    while (key > 0 && pendingValue > 0) {
+                        balanceCache = _spender.blockBalances[key];
 
-                            if (blockBalancesCache <= pendingValue) {
-                                pendingValue -= blockBalancesCache;
-                                _spender.slotBalance -= blockBalancesCache;
-                                _spender.blockBalances[key] -= blockBalancesCache;
+                        if (balanceCache <= pendingValue) {
+                            unchecked {
+                                pendingValue -= balanceCache;
+                                _spender.slotBalance -= balanceCache;
+                                _spender.blockBalances[key] -= balanceCache;
 
-                                _recipient.slotBalance += blockBalancesCache;
-                                _recipient.blockBalances[key] += blockBalancesCache;
+                                _recipient.slotBalance += balanceCache;
+                                _recipient.blockBalances[key] += balanceCache;
                                 _recipient.list.insert(key, (""));
-
-                                key = _spender.list.next(key);
-                                _spender.list.remove(_spender.list.previous(key));
-                            } else {
+                            }
+                            key = _spender.list.next(key);
+                            _spender.list.remove(_spender.list.previous(key));
+                        } else {
+                            unchecked {
                                 _spender.slotBalance -= pendingValue;
                                 _spender.blockBalances[key] -= pendingValue;
 
                                 _recipient.slotBalance += pendingValue;
                                 _recipient.blockBalances[key] += pendingValue;
-                                _recipient.list.insert(key, (""));
-
-                                pendingValue = 0;
                             }
+                            _recipient.list.insert(key, (""));
+                            pendingValue = 0;
                         }
+                    }
 
-                        slot = (slot + 1) % _slidingWindow._slotSize;
-                        if (slot == 0) {
-                            era++;
+                    // Go to the next slot. Increase the era if the slot is over the limit.
+                    if (pendingValue > 0) {
+                        unchecked {
+                            fromSlot = (fromSlot + 1) % _slidingWindow._slotSize;
+                            if (fromSlot == 0) {
+                                fromEra++;
+                            }
                         }
                     }
                 }
@@ -304,7 +313,7 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
 
         emit Transfer(from, to, value);
 
-        // hook after transfer
+        // Hook after transfer
         _afterTokenTransfer(from, to, value);
     }
 
