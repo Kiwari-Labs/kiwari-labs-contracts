@@ -5,7 +5,7 @@ import * as Transfer from "./Transfer.test";
 import * as Performance from "./Performance.test";
 
 export const run = async () => {
-  describe.only("ERC20EXP", async function () {
+  describe("ERC20EXP", async function () {
     General.run();
     Mint.run();
     Burn.run();
