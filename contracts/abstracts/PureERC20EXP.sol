@@ -8,11 +8,15 @@ import "../libraries/SlidingWindow.sol";
 import "../libraries/SortedCircularDoublyLinkedList.sol";
 import "../interfaces/ISlidingWindow.sol";
 import "../interfaces/IPureERC20EXP.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
+abstract contract ERC20Expirable is IERC20Metadata, IERC20Errors, IPureERC20EXP, ISlidingWindow {
     using SortedCircularDoublyLinkedList for SortedCircularDoublyLinkedList.List;
     using SlidingWindow for SlidingWindow.SlidingWindowState;
+
+    string private _name;
+    string private _symbol;
 
     /// @notice Struct representing a slot containing balances mapped by blocks.
     struct Slot {
@@ -22,6 +26,7 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
     }
 
     mapping(address => mapping(uint256 => mapping(uint8 => Slot))) private _balances;
+    mapping(address => mapping(address => uint256)) private _allowances;
 
     SlidingWindow.SlidingWindowState private _slidingWindow;
 
@@ -37,7 +42,9 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
         uint16 blockTime_,
         uint8 frameSize_,
         uint8 slotSize_
-    ) ERC20(name_, symbol_) {
+    ) {
+        _name = name_;
+        _symbol = symbol_;
         _slidingWindow._startBlockNumber = blockNumber_;
         _slidingWindow.updateSlidingWindow(blockTime_, frameSize_, slotSize_);
     }
@@ -192,16 +199,18 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
     /// @param from The address from which tokens are being transferred (or minted/burned).
     /// @param to The address to which tokens are being transferred (or burned to if `to` is `zero address`).
     /// @param value The amount of tokens being transferred, minted, or burned.
-    function _update(address from, address to, uint256 value) internal virtual override {
+    function _update(address from, address to, uint256 value) internal virtual{
         // Hook before transfer
         _beforeTokenTransfer(from, to, value);
 
         uint256 blockNumberCache = _blockNumberProvider();
+        
+        uint256 blocLengthCache = _slidingWindow.getFrameSizeInBlockLength();
 
         if (from == address(0)) {
             // Mint expirable token.
             (uint256 currentEra, uint8 currentSlot) = _slidingWindow.calculateEraAndSlot(blockNumberCache);
-            Slot storage _recipient = _balances[to][currentEra][currentSlot];
+            Slot storage _recipient = _balances[to][currentEra][currentSlot];uint8 slotSizeCache = _slidingWindow._slotSize;
             unchecked {
                 _recipient.slotBalance += value;
                 _recipient.blockBalances[blockNumberCache] += value;
@@ -225,7 +234,7 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
                     uint256 key = _getFirstUnexpiredBlockBalance(
                         _spender.list,
                         blockNumberCache,
-                        _slidingWindow.getFrameSizeInBlockLength()
+                        blocLengthCache
                     );
 
                     while (key > 0 && pendingValue > 0) {
@@ -251,7 +260,7 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
                     // Go to the next slot. Increase the era if the slot is over the limit.
                     if (pendingValue > 0) {
                         unchecked {
-                            fromSlot = (fromSlot + 1) % _slidingWindow._slotSize;
+                            fromSlot = (fromSlot + 1) % slotSizeCache;
                             if (fromSlot == 0) {
                                 fromEra++;
                             }
@@ -267,7 +276,7 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
                     uint256 key = _getFirstUnexpiredBlockBalance(
                         _spender.list,
                         blockNumberCache,
-                        _slidingWindow.getFrameSizeInBlockLength()
+                        blocLengthCache
                     );
 
                     while (key > 0 && pendingValue > 0) {
@@ -301,7 +310,7 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
                     // Go to the next slot. Increase the era if the slot is over the limit.
                     if (pendingValue > 0) {
                         unchecked {
-                            fromSlot = (fromSlot + 1) % _slidingWindow._slotSize;
+                            fromSlot = (fromSlot + 1) % slotSizeCache;
                             if (fromSlot == 0) {
                                 fromEra++;
                             }
@@ -315,6 +324,16 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
 
         // Hook after transfer
         _afterTokenTransfer(from, to, value);
+    }
+
+    // @TODO Natspec
+    function _mint(address account, uint256 value) internal {
+        _update(address(0), account, value);
+    }
+
+    // @TODO Natspec
+    function _burn(address account, uint256 value) internal {
+        _update(account, address(0), value);
     }
 
     /// @inheritdoc IPureERC20EXP
@@ -343,6 +362,26 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
         return 0;
     }
 
+    /// @inheritdoc IERC20Metadata
+    function name() public view override returns (string memory) {
+        return _name;
+    }
+
+    /// @inheritdoc IERC20Metadata
+    function symbol() public view override returns (string memory) {
+        return _symbol;
+    }
+
+    /// @inheritdoc IERC20Metadata
+    function decimals() public pure override returns (uint8) {
+        return 18;
+    }
+
+    /// @inheritdoc IERC20
+    function allowance(address owner, address spender) public view override returns (uint256) {
+        return _allowances[owner][spender];
+    }
+
     /// @notice Returns the available balance of tokens for a given account.
     /// @dev Calculates and returns the available balance based on the frame.
     /// @inheritdoc IERC20
@@ -350,6 +389,31 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
         uint256 blockNumberCache = _blockNumberProvider();
         (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
         return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
+    }
+
+    /// @inheritdoc IERC20
+    function transfer(address to, uint256 value) public override returns (bool) {
+        address from = msg.sender;
+        _update(from, to, value);
+        return true;
+    }
+
+    /// @inheritdoc IERC20
+    // @TODO add logic
+    function transferFrom(address from, address to, uint256 value) public override returns (bool) {
+        // ...
+        // _spendAllowance(from, to, value);
+        _update(from, to, value);
+        return true;
+    }
+
+    /// @inheritdoc IERC20
+    // @TODO add logic
+    function approve(address spender, uint256 value) public override returns (bool) {
+        // ...
+        // _updateAllowance(owner, spender, value);
+
+        return true;
     }
 
     /// @inheritdoc ISlidingWindow
