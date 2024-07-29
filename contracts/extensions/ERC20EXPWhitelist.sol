@@ -4,14 +4,12 @@ pragma solidity >=0.5.0 <0.9.0;
 /// @title ERC20EXP abstract contract with Unexpirable token address exeption.
 /// @author Kiwari Labs
 
-import "./SlidingWindow.sol";
+import "../abstracts/SlidingWindow.sol";
 import "../libraries/SortedCircularDoublyLinkedList.sol";
 import "../interfaces/IERC20EXP.sol";
-// import "../extension/ERC20ExecptionRole.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-// abstract contract ERC20Expirable is ERC20, IERC20EXP, SlidingWindow {
-abstract contract ERC20Expirable is ERC20, IERC20EXP, SlidingWindow {
+abstract contract ERC20EXPWhitelist is ERC20, IERC20EXP, SlidingWindow {
     using SortedCircularDoublyLinkedList for SortedCircularDoublyLinkedList.List;
 
     /// @notice Struct representing a slot containing balances mapped by blocks.

@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.5.0 <0.9.0;
 
-/// @title ERC20EXP abstract contract with Unexpirable token address exeption.
+/// @title LightWeight ERC20EXP Abstract Contract with Unexpirable token address exeption.
 /// @author Kiwari Labs
+/// @notice Abstract contract implementing a Lightweight Sliding Window and a Lightweight Sorted Circular Doubly Linked List.
 
-import "./SlidingWindow.sol";
-import "../libraries/SortedCircularDoublyLinkedList.sol";
+import "../abstracts/LightWeightSlidingWindow.sol";
+import "../libraries/LightWeightSortedCircularDoublyLinkedList.sol";
 import "../interfaces/IERC20EXP.sol";
-// import "../extension/ERC20ExecptionRole.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-// abstract contract ERC20Expirable is ERC20, IERC20EXP, SlidingWindow {
-abstract contract ERC20Expirable is ERC20, IERC20EXP, SlidingWindow {
+abstract contract ERC20EXPWhitelist is ERC20, IERC20EXP, SlidingWindow {
     using SortedCircularDoublyLinkedList for SortedCircularDoublyLinkedList.List;
 
     /// @notice Struct representing a slot containing balances mapped by blocks.
@@ -37,7 +36,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, SlidingWindow {
         uint256 blockNumber_,
         uint16 blockTime_,
         uint8 expirePeriod_
-    ) ERC20(name_, symbol_) SlidingWindow(blockNumber_, blockTime_, expirePeriod_, 4) {}
+    ) ERC20(name_, symbol_) SlidingWindow(blockNumber_, blockTime_, expirePeriod_) {}
 
     /// @notice Always returns 0 for non-wholesale accounts.
     /// @dev Returns the available balance for the given account.
@@ -152,14 +151,13 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, SlidingWindow {
                 // totalBlockBalance calcurate only buffer era/slot.
                 // keep it simple stupid first by spliting into 3 part then sum.
                 // part1: calulate balance at fromEra in naive in naive way O(n)
-                uint8 maxSlotCache = _getSlotPerEra() - 1;
                 balance += _bufferSlotBalance(account, fromEra, fromSlot, blockNumber);
                 if (fromSlot < 3) {
-                    balance += _slotBalance(account, fromEra, fromSlot + 1, maxSlotCache);
+                    balance += _slotBalance(account, fromEra, fromSlot + 1, 3);
                 }
                 // part2: calulate balance betaween fromEra and toEra in naive way O(n)
                 for (uint256 era = fromEra + 1; era < toEra; era++) {
-                    balance += _slotBalance(account, era, 0, maxSlotCache);
+                    balance += _slotBalance(account, era, 0, 3);
                 }
                 // part3:calulate balance at toEra in navie way O(n)
                 balance += _slotBalance(account, toEra, 0, toSlot);
@@ -248,7 +246,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, SlidingWindow {
         uint256 key
     ) private returns (uint256 blockBalance) {
         // Loop until value is transferred or end of slot is reached
-        bytes memory emptyBytes = abi.encodePacked("");
         uint256[] memory blocks = sender.list.pathToTail(key);
         unchecked {
             uint256 length = blocks.length;
@@ -264,7 +261,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, SlidingWindow {
                         }
                         recipient.blockBalances[blockKey] += value;
                         recipient.slotBalance += value;
-                        recipient.list.insert(blockKey, emptyBytes);
+                        recipient.list.insert(blockKey);
                         value = 0;
                         break;
                     } else {
@@ -272,7 +269,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, SlidingWindow {
                         sender.list.remove(blockKey);
                         recipient.blockBalances[blockKey] += blockBalance;
                         recipient.slotBalance += blockBalance;
-                        recipient.list.insert(blockKey, emptyBytes);
+                        recipient.list.insert(blockKey);
                         value -= blockBalance;
                     }
                 }
@@ -290,12 +287,12 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, SlidingWindow {
     function _directTransfer(Slot storage sender, Slot storage recipient, uint256 value, uint256 key) private {
         unchecked {
             uint256 balance = sender.blockBalances[key] - value;
-            sender.blockBalances[key] = balance;
             if (balance == 0) {
                 sender.list.remove(key);
+                sender.blockBalances[key] = 0;
             }
             recipient.blockBalances[key] += value;
-            recipient.list.insert(key, abi.encodePacked(""));
+            recipient.list.insert(key);
         }
     }
 
@@ -347,14 +344,13 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, SlidingWindow {
         uint8 fromSlot,
         uint8 toSlot
     ) internal {
-        bytes memory emptyBytes = abi.encodePacked("");
         unchecked {
             for (uint256 era = fromEra; era <= toEra; era++) {
                 uint8 startSlot = (era == fromEra) ? fromSlot : 0;
                 uint8 endSlot = (era == toEra) ? toSlot : 3;
                 for (uint8 slot = startSlot; slot <= endSlot; slot++) {
                     if (value == 0) break;
-                    value = _transferFromSlot(from, to, value, era, slot, emptyBytes);
+                    value = _transferFromSlot(from, to, value, era, slot);
                 }
             }
         }
@@ -373,8 +369,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, SlidingWindow {
         address to,
         uint256 remainingValue,
         uint256 era,
-        uint8 slot,
-        bytes memory emptyBytes
+        uint8 slot
     ) internal returns (uint256 blockBalance) {
         Slot storage _sender = _retailBalances[from][era][slot];
         Slot storage _recipient = _retailBalances[to][era][slot];
@@ -392,7 +387,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, SlidingWindow {
                         if (_sender.blockBalances[blockKey] == 0) {
                             _sender.list.remove(blockKey);
                         }
-                        _recipient.list.insert(blockKey, emptyBytes);
+                        _recipient.list.insert(blockKey);
                         remainingValue = 0;
                         break;
                     } else {
@@ -400,7 +395,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, SlidingWindow {
                         _recipient.blockBalances[blockKey] += blockBalance;
                         _recipient.slotBalance += blockBalance;
                         _sender.list.remove(blockKey);
-                        _recipient.list.insert(blockKey, emptyBytes);
+                        _recipient.list.insert(blockKey);
                         remainingValue -= blockBalance;
                     }
                 }
@@ -455,7 +450,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, SlidingWindow {
         unchecked {
             _recipient.slotBalance += value;
             _recipient.blockBalances[blockNumberCache] += value;
-            _recipient.list.insert(blockNumberCache, abi.encodePacked(""));
+            _recipient.list.insert(blockNumberCache);
         }
         emit Transfer(address(0), to, value);
     }

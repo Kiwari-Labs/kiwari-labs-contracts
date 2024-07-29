@@ -4,10 +4,10 @@ import {
   INVALID_BLOCK_TIME,
   INVALID_FRAME_SIZE,
   INVALID_SLOT_PER_ERA,
-  MAXIMUM_BLOCK_TIME_IN_MILLISECONDS ,
+  MAXIMUM_BLOCK_TIME_IN_MILLISECONDS,
   MAXIMUM_FRAME_SIZE,
   MAXIMUM_SLOT_PER_ERA,
-  MINIMUM_BLOCK_TIME_IN_MILLISECONDS ,
+  MINIMUM_BLOCK_TIME_IN_MILLISECONDS,
   MINIMUM_FRAME_SIZE,
   MINIMUM_SLOT_PER_ERA,
 } from "../constant.test";
@@ -83,7 +83,7 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, frameSize, slotSize});
 
-      const invalidBlockTime = MINIMUM_BLOCK_TIME_IN_MILLISECONDS  - 1;
+      const invalidBlockTime = MINIMUM_BLOCK_TIME_IN_MILLISECONDS - 1;
 
       await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize, slotSize)).to.be.revertedWithCustomError(
         slidingWindow,
@@ -99,7 +99,7 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, frameSize, slotSize});
 
-      const invalidBlockTime = MAXIMUM_BLOCK_TIME_IN_MILLISECONDS  + 1;
+      const invalidBlockTime = MAXIMUM_BLOCK_TIME_IN_MILLISECONDS + 1;
 
       await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize, slotSize)).to.be.revertedWithCustomError(
         slidingWindow,

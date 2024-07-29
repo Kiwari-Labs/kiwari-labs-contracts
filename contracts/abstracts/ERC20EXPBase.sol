@@ -10,7 +10,7 @@ import "../interfaces/IERC20EXPBase.sol";
 import "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-abstract contract ERC20Expirable is IERC20Metadata, IERC20Errors, IERC20EXPBase, SlidingWindow {
+abstract contract ERC20EXPBase is IERC20Metadata, IERC20Errors, IERC20EXPBase, SlidingWindow {
     using SortedCircularDoublyLinkedList for SortedCircularDoublyLinkedList.List;
 
     string private _name;

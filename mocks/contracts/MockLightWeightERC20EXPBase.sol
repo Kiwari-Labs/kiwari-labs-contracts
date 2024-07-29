@@ -3,13 +3,13 @@ pragma solidity >=0.5.0 <0.9.0;
 
 import "../../contracts/abstracts/LightWeightERC20EXPBase.sol";
 
-contract MockLightWeightERC20EXPBase is ERC20Expirable {
+contract MockLightWeightERC20EXPBase is ERC20EXPBase {
     constructor(
         string memory _name,
         string memory _symbol,
         uint16 blockTime_,
         uint8 frameSize_
-    ) ERC20Expirable(_name, _symbol, block.number, blockTime_, frameSize_) {}
+    ) ERC20EXPBase(_name, _symbol, block.number, blockTime_, frameSize_) {}
 
     function mint(address to, uint256 value) public {
         _mint(to, value);

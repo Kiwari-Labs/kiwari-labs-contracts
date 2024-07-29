@@ -12,9 +12,9 @@ library SlidingWindow {
     uint8 private constant MAXIMUM_SLOT_PER_ERA = 12;
     uint8 private constant MINIMUM_FRAME_SIZE = 1;
     uint8 private constant MAXIMUM_FRAME_SIZE = 64;
-    uint8 private constant MINIMUM_BLOCK_TIME_IN_MILLISECONDS  = 100;
-    uint24 private constant MAXIMUM_BLOCK_TIME_IN_MILLISECONDS  = 600_000;
-    uint40 private constant YEAR_IN_MILLISECONDS  = 31_556_926_000;
+    uint8 private constant MINIMUM_BLOCK_TIME_IN_MILLISECONDS = 100;
+    uint24 private constant MAXIMUM_BLOCK_TIME_IN_MILLISECONDS = 600_000;
+    uint40 private constant YEAR_IN_MILLISECONDS = 31_556_926_000;
 
     struct SlidingWindowState {
         uint40 _blockPerEra;
@@ -110,7 +110,7 @@ library SlidingWindow {
         uint8 frameSize,
         uint8 slotSize
     ) internal {
-        if (blockTime < MINIMUM_BLOCK_TIME_IN_MILLISECONDS  || blockTime > MAXIMUM_BLOCK_TIME_IN_MILLISECONDS ) {
+        if (blockTime < MINIMUM_BLOCK_TIME_IN_MILLISECONDS || blockTime > MAXIMUM_BLOCK_TIME_IN_MILLISECONDS) {
             revert InvalidBlockTime();
         }
         if (frameSize < MINIMUM_FRAME_SIZE || frameSize > MAXIMUM_FRAME_SIZE) {
@@ -121,7 +121,7 @@ library SlidingWindow {
         }
         unchecked {
             /// @custom:truncate https://docs.soliditylang.org/en/latest/types.html#division
-            uint40 blockPerSlotCache = (YEAR_IN_MILLISECONDS  / blockTime) / slotSize;
+            uint40 blockPerSlotCache = (YEAR_IN_MILLISECONDS / blockTime) / slotSize;
             uint40 blockPerEraCache = blockPerSlotCache * slotSize;
             self._blockPerEra = blockPerEraCache;
             self._blockPerSlot = blockPerSlotCache;

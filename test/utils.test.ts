@@ -3,17 +3,17 @@ import {ethers} from "hardhat";
 import {mine, time} from "@nomicfoundation/hardhat-network-helpers";
 
 import {
-  ERC20_EXP_CONTRACT,
+  ERC20_EXP_WHITELIST_CONTRACT,
   ERC20_EXP_BLOCK_PERIOD,
   ERC20_EXP_NAME,
   ERC20_EXP_SYMBOL,
-  LIGHT_WEIGHT_ERC20_EXP_CONTRACT,
+  LIGHT_WEIGHT_ERC20_EXP_WHITELIST_CONTRACT,
   LIGHT_WEIGHT_SLIDING_WINDOW_CONTRACT,
   LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT,
   SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT,
   SLIDING_WINDOW_CONTRACT,
   SlidingWindowState,
-  YEAR_IN_MILLISECONDS ,
+  YEAR_IN_MILLISECONDS,
   LightWeightSlidingWindowState,
   TWO_BITS,
   SLOT_PER_ERA,
@@ -21,6 +21,8 @@ import {
   ERC20_EXP_FRAME_SIZE,
   ERC20_EXP_SLOT_SIZE,
   ERC20_EXP_EXPIRE_PERIOD,
+  LIGHT_WEIGHT_ERC20_EXP_BASE_CONTRACT,
+  ERC20_EXP_BASE_CONTRACT,
 } from "./constant.test";
 
 export const latestBlock = async function () {
@@ -35,11 +37,22 @@ export const skipToBlock = async function (target: number) {
   await mine(target - (await time.latestBlock()));
 };
 
-const deployPureERC20 = async function (blockPeriod: number, frameSize: number, slotSize: number) {
+const deployERC20BaseSelector = async function (
+  light: boolean,
+  blockPeriod: number,
+  frameSize: number,
+  slotSize: number,
+) {
+  const type = light ? LIGHT_WEIGHT_ERC20_EXP_BASE_CONTRACT : ERC20_EXP_BASE_CONTRACT;
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 
-  const ERC20EXP = await ethers.getContractFactory("MockERC20EXPBase", deployer);
-  const erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize, slotSize);
+  const ERC20EXP = await ethers.getContractFactory(type, deployer);
+  let erc20exp;
+  if (light) {
+    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize);
+  } else {
+    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize, slotSize);
+  }
   await erc20exp.deployed();
 
   return {
@@ -51,17 +64,18 @@ const deployPureERC20 = async function (blockPeriod: number, frameSize: number, 
   };
 };
 
-const deployERC20Selector = async function (light: boolean) {
-  const type = light ? LIGHT_WEIGHT_ERC20_EXP_CONTRACT : ERC20_EXP_CONTRACT;
+const deployERC20WhiteListSelector = async function (light: boolean) {
+  const type = light ? LIGHT_WEIGHT_ERC20_EXP_WHITELIST_CONTRACT : ERC20_EXP_WHITELIST_CONTRACT;
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 
   const ERC20EXP = await ethers.getContractFactory(type, deployer);
-  const erc20exp = await ERC20EXP.deploy(
-    ERC20_EXP_NAME,
-    ERC20_EXP_SYMBOL,
-    ERC20_EXP_BLOCK_PERIOD,
-    ERC20_EXP_EXPIRE_PERIOD,
-  );
+  let erc20exp;
+  if (light) {
+    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, ERC20_EXP_BLOCK_PERIOD, ERC20_EXP_EXPIRE_PERIOD);
+  } else {
+    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, ERC20_EXP_BLOCK_PERIOD, ERC20_EXP_EXPIRE_PERIOD);
+    // @TODO refactor to support customized slot size.
+  }
   await erc20exp.deployed();
 
   return {
@@ -161,7 +175,7 @@ export const calculateLightWeightSlidingWindowState = function ({
   self._startBlockNumber = startBlockNumber;
 
   // Why 'Math.floor', Since Solidity always rounds down.
-  const blockPerSlotCache = Math.floor(YEAR_IN_MILLISECONDS  / blockPeriod) >> TWO_BITS;
+  const blockPerSlotCache = Math.floor(YEAR_IN_MILLISECONDS / blockPeriod) >> TWO_BITS;
   // Assume block per year equal to 78892315.
   // Convert 78892315 into its binary: 100101110011010011011111011
   // Shift the bits to the right by 2 positions: 100101110011010011011111011 >> 2
@@ -210,7 +224,7 @@ export const calculateSlidingWindowState = function ({
   self._startBlockNumber = startBlockNumber;
 
   // Why 'Math.floor', Since Solidity always rounds down.
-  const blockPerSlotCache = Math.floor(Math.floor(YEAR_IN_MILLISECONDS  / blockPeriod) / slotSize);
+  const blockPerSlotCache = Math.floor(Math.floor(YEAR_IN_MILLISECONDS / blockPeriod) / slotSize);
   const blockPerEraCache = blockPerSlotCache * slotSize;
 
   self._blockPerEra = blockPerEraCache;
@@ -240,15 +254,23 @@ export const deployERC20EXPBase = async function ({
   frameSize = 2, // frame size 2 slot
   slotSize = 4, // 4 slot per era
 }) {
-  return deployPureERC20(blockPeriod, frameSize, slotSize);
+  return deployERC20BaseSelector(false, blockPeriod, frameSize, slotSize);
+};
+
+export const deployLightWeightERC20EXPBase = async function ({
+  blockPeriod = 400, // 400ms per block
+  frameSize = 2, // frame size 2 slot
+  slotSize = 4, // 4 slot per era
+}) {
+  return deployERC20BaseSelector(true, blockPeriod, frameSize, slotSize);
 };
 
 export const deployERC20EXP = async function () {
-  return deployERC20Selector(false);
+  return deployERC20WhiteListSelector(false);
 };
 
 export const deployLightWeightERC20EXP = async function () {
-  return deployERC20Selector(true);
+  return deployERC20WhiteListSelector(true);
 };
 
 export const deployLightWeightDoublyList = async function ({autoList = false, len = 10} = {}) {
