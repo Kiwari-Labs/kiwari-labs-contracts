@@ -3,7 +3,7 @@ import {deployLightWeightDoublyList} from "../utils.test";
 
 export const run = async () => {
   describe("Sorting", async function () {
-    it("[HAPPY] correct ascend sorting", async function () {
+    it("[HAPPY] asc sort correctly", async function () {
       const {doublylist} = await deployLightWeightDoublyList({
         autoList: true,
         len: 5,
@@ -14,7 +14,7 @@ export const run = async () => {
       }
     });
 
-    it("[HAPPY] correct descend sorting", async function () {
+    it("[HAPPY] des sort correctly", async function () {
       const {doublylist} = await deployLightWeightDoublyList({
         autoList: true,
         len: 5,

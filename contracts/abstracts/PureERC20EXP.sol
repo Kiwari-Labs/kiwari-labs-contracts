@@ -6,12 +6,11 @@ pragma solidity >=0.5.0 <0.9.0;
 
 import "../libraries/SlidingWindow.sol";
 import "../libraries/SortedCircularDoublyLinkedList.sol";
-// import "../interfaces/IERC20EXP.sol";
 import "../interfaces/ISlidingWindow.sol";
+import "../interfaces/IPureERC20EXP.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-// import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-abstract contract ERC20Expirable is ERC20, ISlidingWindow {
+abstract contract ERC20Expirable is ERC20, ISlidingWindow, IPureERC20EXP {
     using SortedCircularDoublyLinkedList for SortedCircularDoublyLinkedList.List;
     using SlidingWindow for SlidingWindow.SlidingWindowState;
 
@@ -43,15 +42,31 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
         _slidingWindow.updateSlidingWindow(blockTime_, frameSize_, slotSize_);
     }
 
+    /// @notice Allows for the override _frame to use either the frame or safeFrame.
+    /// @dev Determines the sliding window frame based on the provided block number.
+    /// @param blockNumber The block number used as a reference point for computing the frame.
+    /// @return fromEra The starting era of the frame.
+    /// @return toEra The ending era of the frame.
+    /// @return fromSlot The starting slot within the starting era of the frame.
+    /// @return toSlot The ending slot within the ending era of the frame.
+    function _frame(
+        uint256 blockNumber
+    ) internal view virtual returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
+        return _slidingWindow.frame(blockNumber);
+    }
+
+    /// @notice Allows for override in subsecond blocktime network.
     /// @dev Returns the current block number.
-    /// @notice ALlowing for override in subsecond blocktime network.
     /// @return The current network block number.
     function _blockNumberProvider() internal view virtual returns (uint256) {
         return block.number;
     }
 
-    /// @dev Retrieves the total slot balance for the specified account and era,
+    /// @notice Retrieves the total slot balance for the specified account and era,
     /// iterating through the range of slots from startSlot to endSlot inclusive.
+    /// This function reads slot balances stored in a mapping `_balances`.
+    /// @dev This function assumes that the provided `startSlot` is less than or equal to `endSlot`.
+    /// It calculates the cumulative balance by summing the `slotBalance` of each slot within the specified range.
     /// @param account The address of the account for which the balance is being queried.
     /// @param era The era (time period) from which to retrieve balances.
     /// @param startSlot The starting slot index within the era to retrieve balances.
@@ -68,11 +83,14 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
                 balance += _balances[account][era][startSlot].slotBalance;
             }
         }
+        return balance;
     }
 
-    /// @dev Calculates the total balance within a specific era and slot for the given account,
-    /// considering all block balances that have not expired relative to the current blockNumber.
-    /// This function loops through a sorted list of block indices and sums up corresponding balances.
+    /// @notice Calculates the total buffered balance within a specific era and slot for the given account,
+    /// considering all block balances that have not expired relative to the current block number.
+    /// This function iterates through a sorted list of block indices and sums up corresponding balances.
+    /// @dev This function is used to determine the total buffered balance for an account within a specific era and slot.
+    /// It loops through a sorted list of block indices stored in `_spender.list` and sums up the balances from `_spender.blockBalances`.
     /// @param account The address of the account for which the balance is being calculated.
     /// @param era The era (time period) from which to retrieve balances.
     /// @param slot The specific slot within the era to retrieve balances.
@@ -100,9 +118,11 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
         }
     }
 
-    /// @dev Finds the first valid block balance index in a sorted list of block numbers.
-    /// The index is considered valid if the block number difference between the current blockNumber
+    /// @notice Finds the index of the first valid block balance in a sorted list of block numbers.
+    /// A block balance index is considered valid if the difference between the current blockNumber
     /// and the block number at the index (key) is less than the expirationPeriodInBlockLength.
+    /// @dev This function is used to determine the first valid block balance index within a sorted circular doubly linked list.
+    /// It iterates through the list starting from the head and stops when it finds a valid index or reaches the end of the list.
     /// @param list The sorted circular doubly linked list of block numbers.
     /// @param blockNumber The current block number.
     /// @param expirationPeriodInBlockLength The maximum allowed difference between blockNumber and the key.
@@ -123,8 +143,8 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
         }
     }
 
-    /// @notice Optimized to assume fromEra and fromSlot are already buffered, covering the gap between fromEra and toEra
-    ///    using slotBalance and summing to balance.
+    /// @notice Optimized to assume fromEra and fromSlot are already buffered, covering
+    /// the gap between fromEra and toEra using slotBalance and summing to balance.
     /// @dev Returns the available balance from the given account, eras, and slots.
     /// @param account The address of the account for which the balance is being queried.
     /// @param fromEra The starting era for the balance lookup.
@@ -140,484 +160,197 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
         uint8 fromSlot,
         uint8 toSlot,
         uint256 blockNumber
-    ) internal view returns (uint256 balance) {
+    ) private view returns (uint256 balance) {
         unchecked {
             balance = _bufferSlotBalance(account, fromEra, fromSlot, blockNumber);
-            if (fromSlot < toSlot) {
-                // Skip buffer slot.
-                balance += _slotBalance(account, fromEra, fromSlot + 1, toSlot);
+            // Go to the next slot. Increase the era if the slot is over the limit.
+            fromSlot = (fromSlot + 1) % _slidingWindow._slotSize;
+            if (fromSlot == 0) {
+                fromEra++;
             }
-            // if (fromEra == toEra) {
-            //     balance = _bufferSlotBalance(account, fromEra, fromSlot, blockNumber);
-            //     if (fromSlot < toSlot) {
-            //         balance += _slotBalance(account, fromEra, fromSlot + 1, toSlot);
-            //     }
-            // } else if (fromEra < toEra) {
-            //     // totalBlockBalance calcurate only buffer era/slot.
-            //     // keep it simple stupid first by spliting into 3 part then sum.
-            //     // part1: calulate balance at fromEra in naive in naive way O(n)
-            //     uint8 maxSlotCache = _slidingWindow._slotSize - 1;
-            //     balance += _bufferSlotBalance(account, fromEra, fromSlot, blockNumber);
-            //     if (fromSlot < 3) {
-            //         balance += _slotBalance(account, fromEra, fromSlot + 1, maxSlotCache);
-            //     }
-            //     // part2: calulate balance betaween fromEra and toEra in naive way O(n)
-            //     for (uint256 era = fromEra + 1; era < toEra; era++) {
-            //         balance += _slotBalance(account, era, 0, maxSlotCache);
-            //     }
-            //     // part3:calulate balance at toEra in navie way O(n)
-            //     balance += _slotBalance(account, toEra, 0, toSlot);
-            // }
+
+            // It is not possible if the fromEra is more than toEra.
+            if (fromEra == toEra) {
+                balance += _slotBalance(account, fromEra, fromSlot, toSlot);
+            } else {
+                // Keep it simple stupid first by spliting into 3 part then sum.
+                // Part1: calulate balance at fromEra in naive in naive way O(n)
+                uint8 maxSlotCache = _slidingWindow._slotSize - 1;
+                balance += _slotBalance(account, fromEra, fromSlot, maxSlotCache);
+                // Part2: calulate balance betaween fromEra and toEra in naive way O(n)
+                for (uint256 era = fromEra + 1; era < toEra; era++) {
+                    balance += _slotBalance(account, era, 0, maxSlotCache);
+                }
+                // Part3:calulate balance at toEra in navie way O(n)
+                balance += _slotBalance(account, toEra, 0, toSlot);
+            }
         }
     }
 
-    // /// @notice Updates the retail balance by transferring a specified value of tokens from one account to another.
-    // /// @dev This function checks the balance and performs the transfer either directly or through a FIFO transfer method
-    // /// if the balance in the specified slot is insufficient. It also handles balance expiry and slot management.
-    // /// @param from The address of the account from which tokens are being transferred.
-    // /// @param to The address of the account to which tokens are being transferred.
-    // /// @param value The amount of tokens to be transferred.
-    // /// @param fromEra The era from which the transfer starts.
-    // /// @param toEra The era to which the transfer ends.
-    // /// @param fromSlot The slot within the starting era from which the transfer starts.
-    // /// @param toSlot The slot within the ending era to which the transfer ends.
-    // /// @param blockNumber The current block number used to determine the validity of the transfer.
-    // function _updateRetailBalance(
-    //     address from,
-    //     address to,
-    //     uint256 value,
-    //     uint256 fromEra,
-    //     uint256 toEra,
-    //     uint8 fromSlot,
-    //     uint8 toSlot,
-    //     uint256 blockNumber
-    // ) internal {
-    //     uint256 fromBalance = balanceOf(from);
-    //     if (fromBalance < value) {
-    //         revert ERC20InsufficientBalance(from, fromBalance, value);
-    //     }
-    //     Slot storage _sender = _retailBalances[from][fromEra][fromSlot];
-    //     uint256 key = _getFirstUnexpiredBlockBalance(
-    //         _sender.list,
-    //         blockNumber,
-    //         _slidingWindow.getFrameSizeInBlockLength()
-    //     );
-    //     fromBalance = _sender.blockBalances[key];
-    //     if (fromBalance == 0) {
-    //         _handleTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
-    //     } else if (fromBalance >= value) {
-    //         Slot storage _recipient = _retailBalances[to][fromEra][fromSlot];
-    //         _directTransfer(_sender, _recipient, value, key);
-    //     } else {
-    //         Slot storage _recipient = _retailBalances[to][fromEra][fromSlot];
-    //         uint256 remainingValue = _transferFromSlotStartFromKey(_sender, _recipient, value, key);
-    //         if (remainingValue > 0) {
-    //             _handleTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
-    //         }
-    //     }
-    //     emit Transfer(from, to, value);
-    // }
-
-    // function _transferFromSlotStartFromKey(
-    //     Slot storage sender,
-    //     Slot storage recipient,
-    //     uint256 value,
-    //     uint256 key
-    // ) private returns (uint256 blockBalance) {
-    //     // Loop until value is transferred or end of slot is reached
-    //     bytes memory emptyBytes = abi.encodePacked("");
-    //     uint256[] memory blocks = sender.list.pathToTail(key);
-    //     unchecked {
-    //         uint256 length = blocks.length;
-    //         uint256 blockKey;
-    //         for (uint256 i = 0; i < length && value > 0; i++) {
-    //             blockKey = blocks[i];
-    //             blockBalance = sender.blockBalances[blockKey];
-    //             if (blockBalance > 0) {
-    //                 if (blockBalance >= value) {
-    //                     sender.blockBalances[blockKey] -= value;
-    //                     if (sender.blockBalances[blockKey] == 0) {
-    //                         sender.list.remove(blockKey);
-    //                     }
-    //                     recipient.blockBalances[blockKey] += value;
-    //                     recipient.slotBalance += value;
-    //                     recipient.list.insert(blockKey, emptyBytes);
-    //                     value = 0;
-    //                     break;
-    //                 } else {
-    //                     sender.blockBalances[blockKey] = 0;
-    //                     sender.list.remove(blockKey);
-    //                     recipient.blockBalances[blockKey] += blockBalance;
-    //                     recipient.slotBalance += blockBalance;
-    //                     recipient.list.insert(blockKey, emptyBytes);
-    //                     value -= blockBalance;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return value;
-    // }
-
-    // /// @notice use for preventing stack too deep in update retail balance by spliting into small function.
-    // /// @dev private function to perform a direct transfer of tokens by key.
-    // /// @param sender The slot storage of the sender.
-    // /// @param recipient The slot storage of the recipient.
-    // /// @param value The amount of tokens to transfer.
-    // /// @param key The key associated with the block balance.
-    // function _directTransfer(Slot storage sender, Slot storage recipient, uint256 value, uint256 key) private {
-    //     unchecked {
-    //         uint256 balance = sender.blockBalances[key] - value;
-    //         sender.blockBalances[key] = balance;
-    //         if (balance == 0) {
-    //             sender.list.remove(key);
-    //         }
-    //         recipient.blockBalances[key] += value;
-    //         recipient.list.insert(key, abi.encodePacked(""));
-    //     }
-    // }
-
-    // /// @notice use for preventing stack too deep in update retail balance by spliting into small function.
-    // /// @dev private function to handle token transfer when sender's balance is not enough.
-    // /// @param from The address from which tokens are transferred.
-    // /// @param to The address to which tokens are transferred.
-    // /// @param value The amount of tokens to transfer.
-    // /// @param fromEra The era (time period) of the sender's balance.
-    // /// @param toEra The era (time period) of the recipient's balance.
-    // /// @param fromSlot The slot index of the sender's balance.
-    // /// @param toSlot The slot index of the recipient's balance.
-    // function _handleTransfer(
-    //     address from,
-    //     address to,
-    //     uint256 value,
-    //     uint256 fromEra,
-    //     uint256 toEra,
-    //     uint8 fromSlot,
-    //     uint8 toSlot
-    // ) private {
-    //     unchecked {
-    //         if (fromSlot < 3) {
-    //             fromSlot++;
-    //         } else {
-    //             fromSlot = 0;
-    //             fromEra++;
-    //         }
-    //     }
-    //     _firstInFirstOutTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
-    // }
-
-    // /// @notice Transfers tokens from one account to another in a first-in-first-out manner across specified eras and slots.
-    // /// @dev This function performs a transfer by iterating through the eras and slots, transferring the specified value
-    // /// in a FIFO order until the value is exhausted or all slots are processed.
-    // /// @param from The address of the account from which tokens are being transferred.
-    // /// @param to The address of the account to which tokens are being transferred.
-    // /// @param value The total amount of tokens to be transferred.
-    // /// @param fromEra The starting era from which the transfer should begin.
-    // /// @param toEra The ending era up to which the transfer should be processed.
-    // /// @param fromSlot The starting slot within the starting era.
-    // /// @param toSlot The ending slot within the ending era.
-    // function _firstInFirstOutTransfer(
-    //     address from,
-    //     address to,
-    //     uint256 value,
-    //     uint256 fromEra,
-    //     uint256 toEra,
-    //     uint8 fromSlot,
-    //     uint8 toSlot
-    // ) internal {
-    //     bytes memory emptyBytes = abi.encodePacked("");
-    //     unchecked {
-    //         for (uint256 era = fromEra; era <= toEra; era++) {
-    //             uint8 startSlot = (era == fromEra) ? fromSlot : 0;
-    //             uint8 endSlot = (era == toEra) ? toSlot : 3;
-    //             for (uint8 slot = startSlot; slot <= endSlot; slot++) {
-    //                 if (value == 0) break;
-    //                 value = _transferFromSlot(from, to, value, era, slot, emptyBytes);
-    //             }
-    //         }
-    //     }
-    // }
-
-    // /// @notice Transfers a specified value of tokens from one slot to another, adjusting balances accordingly.
-    // /// @dev Transfers tokens from the sender's slot balance to the recipient's slot balance in a FIFO manner.
-    // /// @param from The address of the account from which tokens are being transferred.
-    // /// @param to The address of the account to which tokens are being transferred.
-    // /// @param remainingValue The amount of tokens to be transferred.
-    // /// @param era The era from which the tokens are being transferred.
-    // /// @param slot The slot within the era from which the tokens are being transferred.
-    // /// @return blockBalance The remaining value that could not be transferred due to insufficient balance.
-    // function _transferFromSlot(
-    //     address from,
-    //     address to,
-    //     uint256 remainingValue,
-    //     uint256 era,
-    //     uint8 slot,
-    //     bytes memory emptyBytes
-    // ) internal returns (uint256 blockBalance) {
-    //     Slot storage _sender = _retailBalances[from][era][slot];
-    //     Slot storage _recipient = _retailBalances[to][era][slot];
-    //     uint256[] memory blocks = _sender.list.ascending();
-    //     uint256 length = blocks.length;
-    //     unchecked {
-    //         for (uint256 i = 0; i < length && remainingValue > 0; i++) {
-    //             uint256 blockKey = blocks[i];
-    //             blockBalance = _sender.blockBalances[blockKey];
-    //             if (blockBalance > 0) {
-    //                 if (blockBalance >= remainingValue) {
-    //                     _sender.blockBalances[blockKey] -= remainingValue;
-    //                     _recipient.blockBalances[blockKey] += remainingValue;
-    //                     _recipient.slotBalance += remainingValue;
-    //                     if (_sender.blockBalances[blockKey] == 0) {
-    //                         _sender.list.remove(blockKey);
-    //                     }
-    //                     _recipient.list.insert(blockKey, emptyBytes);
-    //                     remainingValue = 0;
-    //                     break;
-    //                 } else {
-    //                     _sender.blockBalances[blockKey] = 0;
-    //                     _recipient.blockBalances[blockKey] += blockBalance;
-    //                     _recipient.slotBalance += blockBalance;
-    //                     _sender.list.remove(blockKey);
-    //                     _recipient.list.insert(blockKey, emptyBytes);
-    //                     remainingValue -= blockBalance;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return remainingValue;
-    // }
-
-    // /// @notice Only allows minting non-expirable tokens to wholesale accounts.
-    // /// @dev Mints new tokens directly to a wholesale account.
-    // /// @param to The address of the wholesale account to mint tokens to.
-    // /// @param value The amount of tokens to mint.
-    // /// @param spendable Set to true to mint tokens to spendable balance, false to mint to receive balance.
-    // function _mintWholeSale(address to, uint256 value, bool spendable) internal virtual {
-    //     require(_wholeSale[to], "can't mint non-expirable token to non wholesale account");
-    //     if (spendable) {
-    //         _mint(to, value);
-    //     } else {
-    //         if (to == address(0)) {
-    //             revert ERC20InvalidReceiver(address(0));
-    //         }
-    //         _updateReceiveBalance(address(0), to, value);
-    //     }
-    // }
-
-    // /// @notice Only allows burning non-expirable tokens from wholesale accounts.
-    // /// @dev Directly burns tokens from a wholesale account.
-    // /// @param to The address of the wholesale account from which tokens will be burned.
-    // /// @param value The amount of tokens to burn.
-    // /// @param spendable Set to true to burn tokens from spendable balance, false to burn from receive balance.
-    // function _burnWholeSale(address to, uint256 value, bool spendable) internal virtual {
-    //     require(_wholeSale[to], "can't burn non-expirable token to non wholesale account");
-    //     if (spendable) {
-    //         _burn(to, value);
-    //     } else {
-    //         _updateReceiveBalance(to, address(0), value);
-    //     }
-    // }
-
-    // /// @notice Cannot mint expirable tokens to wholesale accounts.
-    // /// @dev Mints new tokens directly to a retail account.
-    // /// @param to The address of the retail account receiving the minted tokens.
-    // /// @param value The amount of tokens to mint.
-    // function _mintRetail(address to, uint256 value) internal virtual {
-    //     require(!_wholeSale[to], "can't mint expirable token to non retail account");
-    //     if (to == address(0)) {
-    //         revert ERC20InvalidReceiver(address(0));
-    //     }
-    //     uint256 blockNumberCache = _blockNumberProvider();
-    //     (uint256 currentEra, uint8 currentSlot) = _slidingWindow.calculateEraAndSlot(blockNumberCache);
-    //     Slot storage _recipient = _retailBalances[to][currentEra][currentSlot];
-    //     unchecked {
-    //         _recipient.slotBalance += value;
-    //         _recipient.blockBalances[blockNumberCache] += value;
-    //         _recipient.list.insert(blockNumberCache, abi.encodePacked(""));
-    //     }
-    //     emit Transfer(address(0), to, value);
-    // }
-
-    // /// @notice Cannot burn expirable tokens from wholesale accounts.
-    // /// @dev Burns tokens directly from a retail account.
-    // /// @param to The address of the retail account from which tokens are burned.
-    // /// @param value The amount of tokens to burn.
-    // function _burnRetail(address to, uint256 value) internal virtual {
-    //     require(!_wholeSale[to], "can't burn expirable token to non retail account");
-    //     if (to == address(0)) {
-    //         revert ERC20InvalidSender(address(0));
-    //     }
-    //     uint256 blockNumberCache = _blockNumberProvider();
-    //     (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumberCache);
-    //     _updateRetailBalance(to, address(0), value, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
-    // }
-
-    // //// @inheritdoc IERC20EXP
-    // function grantWholeSale(address to) public virtual override {
-    //     require(!_wholeSale[to], "can't grant exist wholesale");
-    //     _wholeSale[to] = true;
-    //     emit GrantWholeSale(to, true);
-    // }
-
-    // /// @inheritdoc IERC20EXP
-    // function revokeWholeSale(address to) public virtual override {
-    //     require(_wholeSale[to], "can't revoke non-wholesale");
-    //     uint256 balance = super.balanceOf(to);
-    //     if (balance > 0) {
-    //         // clean spendable balance
-    //         _burn(to, balance);
-    //     }
-    //     uint256 receiveBalance = _receiveBalances[to];
-    //     if (receiveBalance > 0) {
-    //         // clean receive balance
-    //         _updateReceiveBalance(to, address(0), receiveBalance);
-    //     }
-    //     _wholeSale[to] = false;
-    //     emit GrantWholeSale(to, false);
-    // }
-
-    /// @notice Returns the available balance of tokens for a given account.
-    /// @dev If the account is a wholesale account, returns the spendable balance.
-    /// Otherwise, calculates and returns the available balance based on the safe frame.
-    /// @inheritdoc IERC20
-    function balanceOf(address account) public view override returns (uint256) {
-        uint256 blockNumberCache = _blockNumberProvider();
-        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumberCache);
-        return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
-    }
-
-    // /// @inheritdoc IERC20EXP
-    // function balanceOf(
-    //     address account,
-    //     uint256 fromEra,
-    //     uint8 fromSlot,
-    //     uint256 toEra,
-    //     uint8 toSlot
-    // ) public view override returns (uint256) {
-    //     // for whole account ignore fromEra, fromSlot, toEra and toSlot
-    //     if (_wholeSale[account]) {
-    //         return _unSafeBalanceOf(account, true);
-    //     } else {
-    //         return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, _blockNumberProvider());
-    //     }
-    // }
-
-    // /// @notice Performs a custom token transfer operation using safe balanceOf for calculating available balances.
-    // /// @custom:inefficientgasusedappetite Emits 2 transfer events which may result in inefficient gas usage.
-    // /// @param from The address from which tokens are being transferred.
-    // /// @param to The address to which tokens are being transferred.
-    // /// @param value The amount of tokens being transferred.
-    // function _customTransfer(address from, address to, uint256 value) internal {
-    //     // hook before transfer
-    //     _beforeTokenTransfer(from, to, value);
-
-    //     uint256 selector = (_wholeSale[to] ? 2 : 0) | (_wholeSale[from] ? 1 : 0);
-    //     if (selector == 0) {
-    //         if (to == address(0)) {
-    //             revert ERC20InvalidReceiver(address(0));
-    //         }
-    //         uint256 blockNumberCache = _blockNumberProvider();
-    //         (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumberCache);
-    //         _updateRetailBalance(from, to, value, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
-    //     } else if (selector == 1) {
-    //         // consolidate by burning retail balance and mint non-expirable to whole receive balance.
-    //         _burnRetail(from, value);
-    //         _mintWholeSale(to, value, false);
-    //     } else if (selector == 2) {
-    //         // consolidate by burning wholesale spendable balance and mint expirable to retail balance.
-    //         _burn(from, value);
-    //         _mintRetail(to, value);
-    //     } else {
-    //         // wholesale to wholesale transfer.
-    //         _transfer(from, to, value);
-    //     }
-
-    //     // hook after transfer
-    //     _afterTokenTransfer(from, to, value);
-    // }
-
+    /// @notice Internal function to update token balances during token transfers or operations.
+    /// @dev Handles various scenarios including minting, burning, and transferring tokens with expiration logic.
+    /// @param from The address from which tokens are being transferred (or minted/burned).
+    /// @param to The address to which tokens are being transferred (or burned to if `to` is `zero address`).
+    /// @param value The amount of tokens being transferred, minted, or burned.
     function _update(address from, address to, uint256 value) internal virtual override {
-        // hook before transfer
+        // Hook before transfer
         _beforeTokenTransfer(from, to, value);
 
         uint256 blockNumberCache = _blockNumberProvider();
 
-        (uint256 currentEra, uint8 currentSlot) = _slidingWindow.calculateEraAndSlot(blockNumberCache);
-
-        // (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumberCache);
-
-        // Slot storage _sender = _retailBalances[from][fromEra][fromSlot];
-        // uint256 key = _getFirstUnexpiredBlockBalance(
-        //     _sender.list,
-        //     blockNumberCache,
-        //     _slidingWindow.getFrameSizeInBlockLength()
-        // );
-
-        // Slot storage _sender = _retailBalances[from][currentEra][currentSlot];
-        Slot storage _recipient = _balances[to][currentEra][currentSlot];
-
-        // uint256 balance = 0;
-        // uint256 balance = _lookBackBalance(from, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
-
-        // uint256 key = _getFirstUnexpiredBlockBalance(
-        //     _sender.list,
-        //     blockNumberCache,
-        //     _slidingWindow.getFrameSizeInBlockLength()
-        // );
-
         if (from == address(0)) {
-            // mint expirable token.
-            _recipient.slotBalance += value;
-            _recipient.blockBalances[blockNumberCache] += value;
-            _recipient.list.insert(blockNumberCache, abi.encodePacked(""));
-        } else if (to == address(0)) {
-            // // burn expirable token.
-            // if (balance < value) {
-            //     revert ERC20InsufficientBalance(from, balance, value);
-            // }
-            // _balances[from] -= value;
+            // Mint expirable token.
+            (uint256 currentEra, uint8 currentSlot) = _slidingWindow.calculateEraAndSlot(blockNumberCache);
+            Slot storage _recipient = _balances[to][currentEra][currentSlot];
+            unchecked {
+                _recipient.slotBalance += value;
+                _recipient.blockBalances[blockNumberCache] += value;
+            }
+            _recipient.list.insert(blockNumberCache, (""));
         } else {
-            // if (balance < value) {
-            //     revert ERC20InsufficientBalance(from, balance, value);
-            // }
-            // // burn non-expirable token from receive balance.
-            // _balances[from] -= value;
-            // // update non-expirable token from and to receive balance.
-            // _balances[to] += value;
+            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
+            uint256 balance = _lookBackBalance(from, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
+            if (balance < value) {
+                revert ERC20InsufficientBalance(from, balance, value);
+            }
+
+            uint256 pendingValue = value;
+            uint256 balanceCache = 0;
+
+            if (to == address(0)) {
+                // Burn expirable token.
+                while ((fromEra < toEra || (fromEra == toEra && fromSlot <= toSlot)) && pendingValue > 0) {
+                    Slot storage _spender = _balances[from][fromEra][fromSlot];
+
+                    uint256 key = _getFirstUnexpiredBlockBalance(
+                        _spender.list,
+                        blockNumberCache,
+                        _slidingWindow.getFrameSizeInBlockLength()
+                    );
+
+                    while (key > 0 && pendingValue > 0) {
+                        balanceCache = _spender.blockBalances[key];
+
+                        if (balanceCache <= pendingValue) {
+                            unchecked {
+                                pendingValue -= balanceCache;
+                                _spender.slotBalance -= balanceCache;
+                                _spender.blockBalances[key] -= balanceCache;
+                            }
+                            key = _spender.list.next(key);
+                            _spender.list.remove(_spender.list.previous(key));
+                        } else {
+                            unchecked {
+                                _spender.slotBalance -= pendingValue;
+                                _spender.blockBalances[key] -= pendingValue;
+                            }
+                            pendingValue = 0;
+                        }
+                    }
+
+                    // Go to the next slot. Increase the era if the slot is over the limit.
+                    if (pendingValue > 0) {
+                        unchecked {
+                            fromSlot = (fromSlot + 1) % _slidingWindow._slotSize;
+                            if (fromSlot == 0) {
+                                fromEra++;
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Transfer expirable token.
+                while ((fromEra < toEra || (fromEra == toEra && fromSlot <= toSlot)) && pendingValue > 0) {
+                    Slot storage _spender = _balances[from][fromEra][fromSlot];
+                    Slot storage _recipient = _balances[to][fromEra][fromSlot];
+
+                    uint256 key = _getFirstUnexpiredBlockBalance(
+                        _spender.list,
+                        blockNumberCache,
+                        _slidingWindow.getFrameSizeInBlockLength()
+                    );
+
+                    while (key > 0 && pendingValue > 0) {
+                        balanceCache = _spender.blockBalances[key];
+
+                        if (balanceCache <= pendingValue) {
+                            unchecked {
+                                pendingValue -= balanceCache;
+                                _spender.slotBalance -= balanceCache;
+                                _spender.blockBalances[key] -= balanceCache;
+
+                                _recipient.slotBalance += balanceCache;
+                                _recipient.blockBalances[key] += balanceCache;
+                                _recipient.list.insert(key, (""));
+                            }
+                            key = _spender.list.next(key);
+                            _spender.list.remove(_spender.list.previous(key));
+                        } else {
+                            unchecked {
+                                _spender.slotBalance -= pendingValue;
+                                _spender.blockBalances[key] -= pendingValue;
+
+                                _recipient.slotBalance += pendingValue;
+                                _recipient.blockBalances[key] += pendingValue;
+                            }
+                            _recipient.list.insert(key, (""));
+                            pendingValue = 0;
+                        }
+                    }
+
+                    // Go to the next slot. Increase the era if the slot is over the limit.
+                    if (pendingValue > 0) {
+                        unchecked {
+                            fromSlot = (fromSlot + 1) % _slidingWindow._slotSize;
+                            if (fromSlot == 0) {
+                                fromEra++;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         emit Transfer(from, to, value);
 
-        // hook after transfer
+        // Hook after transfer
         _afterTokenTransfer(from, to, value);
     }
 
-    /// @dev Retrieves the list of token balances stored for the specified account, era, and slot.
-    /// @param account The address of the account for which the token list is being retrieved.
-    /// @param era The era (time period) within which the token balances are stored.
-    /// @param slot The slot index within the specified era for which the token balances are stored.
-    /// @return list Returns an array of token balances in ascending order of block numbers.
-    function tokenList(address account, uint256 era, uint8 slot) public view returns (uint256[] memory) {
-        return _balances[account][era][slot].list.ascending();
-    }
-
-    /// @notice Returns 0 as there is no actual total supply due to token expiration.
-    /// @inheritdoc IERC20
-    function totalSupply() public pure virtual override returns (uint256) {
-        /* @note If not overridden, totalSupply will only count spendable balances of all _wholeSale accounts. */
-        return 0;
+    /// @inheritdoc IPureERC20EXP
+    function tokenList(address account, uint256 era, uint8 slot) public view virtual returns (uint256[] memory list) {
+        list = _balances[account][era][slot].list.ascending();
     }
 
     /// @notice Abstract hook called before every token transfer operation.
+    /// @dev This function is called before every token transfer operation for additional checks or actions.
     /// @param from The address sending tokens.
     /// @param to The address receiving tokens.
     /// @param amount The amount of tokens being transferred.
     function _beforeTokenTransfer(address from, address to, uint amount) internal virtual {}
 
     /// @notice Abstract hook called after every token transfer operation.
+    /// @dev This function is called after every token transfer operation for additional processing or logging.
     /// @param from The address sending tokens.
     /// @param to The address receiving tokens.
     /// @param amount The amount of tokens being transferred.
     function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual {}
+
+    /// @notice Returns 0 as there is no actual total supply due to token expiration.
+    /// @dev This function returns the total supply of tokens, which is constant and set to 0.
+    /// @inheritdoc IERC20
+    function totalSupply() public pure override returns (uint256) {
+        return 0;
+    }
+
+    /// @notice Returns the available balance of tokens for a given account.
+    /// @dev Calculates and returns the available balance based on the frame.
+    /// @inheritdoc IERC20
+    function balanceOf(address account) public view virtual override returns (uint256) {
+        uint256 blockNumberCache = _blockNumberProvider();
+        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
+        return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
+    }
 
     /// @inheritdoc ISlidingWindow
     function blockPerEra() external view virtual override returns (uint40) {
@@ -640,7 +373,7 @@ abstract contract ERC20Expirable is ERC20, ISlidingWindow {
     }
 
     /// @inheritdoc ISlidingWindow
-    function getFrameSizeInSlotLegth() external view virtual override returns (uint8) {
+    function getFrameSizeInSlotLength() external view virtual override returns (uint8) {
         return _slidingWindow.getFrameSizeInSlotLength();
     }
 

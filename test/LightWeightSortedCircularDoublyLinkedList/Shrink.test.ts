@@ -3,7 +3,7 @@ import {deployLightWeightDoublyList} from "../utils.test";
 
 export const run = async () => {
   describe("Shrink", async function () {
-    it("[HAPPY] correct shrink of even linked list", async function () {
+    it("[HAPPY] shrink correctly of even linked list", async function () {
       const {doublylist} = await deployLightWeightDoublyList({
         autoList: true,
         len: 10,
@@ -21,7 +21,7 @@ export const run = async () => {
       expect(node.next).to.equal(0);
     });
 
-    it("[HAPPY] correct shrink of odd linked list", async function () {
+    it("[HAPPY] shrink correctly of odd linked list", async function () {
       const {doublylist} = await deployLightWeightDoublyList({
         autoList: true,
         len: 9,
@@ -39,7 +39,7 @@ export const run = async () => {
       expect(node.next).to.equal(0);
     });
 
-    it("[UNHAPPY] correct shrink of empty linked list", async function () {
+    it("[UNHAPPY] shrink correctly of empty linked list", async function () {
       const {doublylist} = await deployLightWeightDoublyList({});
       await doublylist.shrink(1);
       expect(await doublylist.size()).to.equal(0);

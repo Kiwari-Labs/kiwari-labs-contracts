@@ -3,7 +3,7 @@ import {deployDoublyList, padIndexToData} from "../utils.test";
 
 export const run = async () => {
   describe("Removal", async function () {
-    it("[HAPPY] correct removal", async function () {
+    it("[HAPPY] remove correctly", async function () {
       const {doublylist} = await deployDoublyList();
 
       const index = 1;
@@ -15,7 +15,7 @@ export const run = async () => {
       expect(await doublylist.size()).to.equal(0);
     });
 
-    it("[HAPPY] correct removal from the head", async function () {
+    it("[HAPPY] remove correctly from the head", async function () {
       const {doublylist} = await deployDoublyList({autoList: true});
 
       const head = await doublylist.head();
@@ -34,7 +34,7 @@ export const run = async () => {
       expect(node.data).to.equal("0x");
     });
 
-    it("[HAPPY] correct removal of a node", async function () {
+    it("[HAPPY] remove correctly of a node", async function () {
       const {doublylist} = await deployDoublyList({autoList: true});
 
       const index = 5;
@@ -54,7 +54,7 @@ export const run = async () => {
       }
     });
 
-    it("[HAPPY] correct removal from the tail", async function () {
+    it("[HAPPY] remove correctly from the tail", async function () {
       const {doublylist} = await deployDoublyList({autoList: true});
 
       const tail = await doublylist.tail();

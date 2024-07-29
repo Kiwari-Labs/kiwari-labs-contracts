@@ -3,7 +3,7 @@ import {deployLightWeightSlidingWindow} from "../utils.test";
 
 export const run = async () => {
   describe("CalculationSafeFrame", async function () {
-    it("[HAPPY] correct calculate safe frame if the current block is in the first slot period of the first era", async function () {
+    it("[HAPPY] calculate correctly safe frame if the current block is in the first slot period of the first era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 2;
@@ -37,7 +37,7 @@ export const run = async () => {
       expect(toSlot).to.equal(0);
     });
 
-    it("[HAPPY] correct calculate safe frame if the current block is in the second slot period of the first era", async function () {
+    it("[HAPPY] calculate correctly safe frame if the current block is in the second slot period of the first era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 2;
@@ -71,7 +71,7 @@ export const run = async () => {
       expect(toSlot).to.equal(1);
     });
 
-    it("[HAPPY] correct calculate safe frame if the current block is in the third slot period of the first era", async function () {
+    it("[HAPPY] calculate correctly safe frame if the current block is in the third slot period of the first era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 2;
@@ -105,7 +105,7 @@ export const run = async () => {
       expect(toSlot).to.equal(2);
     });
 
-    it("[HAPPY] correct calculate safe frame if the current block is in the fourth slot period of the first era", async function () {
+    it("[HAPPY] calculate correctly safe frame if the current block is in the fourth slot period of the first era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 2;
@@ -139,7 +139,7 @@ export const run = async () => {
       expect(toSlot).to.equal(3);
     });
 
-    it("[HAPPY] correct calculate safe frame if the current block is in the first slot period of the second era", async function () {
+    it("[HAPPY] calculate correctly safe frame if the current block is in the first slot period of the second era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 2;
@@ -173,7 +173,7 @@ export const run = async () => {
       expect(toSlot).to.equal(0);
     });
 
-    it("[HAPPY] correct calculate safe frame if the current block is in the second slot period of the second era", async function () {
+    it("[HAPPY] calculate correctly safe frame if the current block is in the second slot period of the second era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 2;
@@ -207,7 +207,7 @@ export const run = async () => {
       expect(toSlot).to.equal(1);
     });
 
-    it("[HAPPY] correct calculate safe frame if the current block is in the third slot period of the second era", async function () {
+    it("[HAPPY] calculate correctly safe frame if the current block is in the third slot period of the second era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 2;
@@ -241,7 +241,7 @@ export const run = async () => {
       expect(toSlot).to.equal(2);
     });
 
-    it("[HAPPY] correct calculate safe frame if the current block is in the fourth slot period of the second era", async function () {
+    it("[HAPPY] calculate correctly safe frame if the current block is in the fourth slot period of the second era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 2;
@@ -275,7 +275,7 @@ export const run = async () => {
       expect(toSlot).to.equal(3);
     });
 
-    it("[HAPPY] correct calculate safe frame if the current block is in the first slot period of the third era", async function () {
+    it("[HAPPY] calculate correctly safe frame if the current block is in the first slot period of the third era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 2;
@@ -309,7 +309,7 @@ export const run = async () => {
       expect(toSlot).to.equal(0);
     });
 
-    it("[HAPPY] correct calculate safe frame if the current block is in the second slot period of the third era", async function () {
+    it("[HAPPY] calculate correctly safe frame if the current block is in the second slot period of the third era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 2;
@@ -343,7 +343,7 @@ export const run = async () => {
       expect(toSlot).to.equal(1);
     });
 
-    it("[HAPPY] correct calculate safe frame if the current block is in the third slot period of the third era", async function () {
+    it("[HAPPY] calculate correctly safe frame if the current block is in the third slot period of the third era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 2;
@@ -377,7 +377,7 @@ export const run = async () => {
       expect(toSlot).to.equal(2);
     });
 
-    it("[HAPPY] correct calculate safe frame if the current block is in the fourth slot period of the third era", async function () {
+    it("[HAPPY] calculate correctly safe frame if the current block is in the fourth slot period of the third era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 2;
@@ -411,7 +411,7 @@ export const run = async () => {
       expect(toSlot).to.equal(3);
     });
 
-    it("[HAPPY] correct calculate safe frame if frame size equal to 3 and slot size equal to 4", async function () {
+    it("[HAPPY] calculate correctly safe frame if frame size equal to 3 and slot size equal to 4", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 3;
@@ -445,7 +445,7 @@ export const run = async () => {
       expect(toSlot).to.equal(2);
     });
 
-    it("[HAPPY] correct calculate safe frame if frame size equal to 3 and slot size equal to 4 when the frame is in between both era", async function () {
+    it("[HAPPY] calculate correctly safe frame if frame size equal to 3 and slot size equal to 4 when the frame is in between both era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 3;
@@ -479,7 +479,7 @@ export const run = async () => {
       expect(toSlot).to.equal(1);
     });
 
-    it("[HAPPY] correct calculate safe frame if frame size equal to slot size", async function () {
+    it("[HAPPY] calculate correctly safe frame if frame size equal to slot size", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 4;
@@ -513,7 +513,7 @@ export const run = async () => {
       expect(toSlot).to.equal(3);
     });
 
-    it("[HAPPY] correct calculate safe frame if frame size equal to slot size when the frame is in between both era", async function () {
+    it("[HAPPY] calculate correctly safe frame if frame size equal to slot size when the frame is in between both era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 4;
@@ -547,7 +547,7 @@ export const run = async () => {
       expect(toSlot).to.equal(1);
     });
 
-    it("[HAPPY] correct calculate safe frame if frame size equal to 5 and slot size equal to 4", async function () {
+    it("[HAPPY] calculate correctly safe frame if frame size equal to 5 and slot size equal to 4", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 5;
@@ -581,7 +581,7 @@ export const run = async () => {
       expect(toSlot).to.equal(2);
     });
 
-    it("[HAPPY] correct calculate safe frame if frame size equal to 5 and slot size equal to 4 when the current block is in third era", async function () {
+    it("[HAPPY] calculate correctly safe frame if frame size equal to 5 and slot size equal to 4 when the current block is in third era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const frameSize = 5;
@@ -618,7 +618,7 @@ export const run = async () => {
     // Skip the cases below.
     // Reason: https://github.com/MASDXI/ERC20EXP/pull/20#issuecomment-2206762148
 
-    // it("[HAPPY] correct calculate safe frame if the current block is in the last day period of the first era", async function () {
+    // it("[HAPPY] calculate correctly safe frame if the current block is in the last day period of the first era", async function () {
     //   const startBlockNumber = 100;
     //   const blockPeriod = 400;
     //   const frameSize = 2;
@@ -664,7 +664,7 @@ export const run = async () => {
     //   }
     // });
 
-    // it("[HAPPY] correct calculate safe frame if the current block is in the first day period of the second era", async function () {
+    // it("[HAPPY] calculate correctly safe frame if the current block is in the first day period of the second era", async function () {
     //   const startBlockNumber = 100;
     //   const blockPeriod = 400;
     //   const frameSize = 2;

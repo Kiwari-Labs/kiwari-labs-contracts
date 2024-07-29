@@ -16,23 +16,7 @@ contract MockPureERC20EXP is ERC20Expirable {
         _mint(to, value);
     }
 
-    // function burnRetail(address to, uint256 value) public {
-    //     _burnRetail(to, value);
-    // }
-
-    // function mintSpentWholeSale(address to, uint256 value) public {
-    //     _mintWholeSale(to, value, true);
-    // }
-
-    // function mintUnspentWholeSale(address to, uint256 value) public {
-    //     _mintWholeSale(to, value, false);
-    // }
-
-    // function burnSpentWholeSale(address to, uint256 value) public {
-    //     _burnWholeSale(to, value, true);
-    // }
-
-    // function burnUnspentWholeSale(address to, uint256 value) public {
-    //     _burnWholeSale(to, value, false);
-    // }
+    function burn(address from, uint256 value) public {
+        _burn(from, value);
+    }
 }
