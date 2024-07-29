@@ -78,7 +78,7 @@ export const run = async () => {
       expect(currentEraAndSlot.era).to.equal(0);
       expect(currentEraAndSlot.slot).to.equal(0);
 
-      await mineUpTo((await erc20exp.blockPerSlot()) + 10); // rounding error bypass.
+      await mineUpTo((await erc20exp.getBlockPerSlot()) + 1);
 
       currentEraAndSlot = await erc20exp.currentEraAndSlot();
       expect(currentEraAndSlot.era).to.equal(0);

@@ -2,12 +2,12 @@ import {expect} from "chai";
 import {deploySlidingWindow, calculateSlidingWindowState} from "../utils.test";
 import {
   INVALID_BLOCK_TIME,
-  INVALID_FRAME_SIZ,
+  INVALID_FRAME_SIZE,
   INVALID_SLOT_PER_ERA,
-  MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS,
+  MAXIMUM_BLOCK_TIME_IN_MILLISECONDS ,
   MAXIMUM_FRAME_SIZE,
   MAXIMUM_SLOT_PER_ERA,
-  MINIMUM_BLOCKTIME_IN_MILLI_SECONDS,
+  MINIMUM_BLOCK_TIME_IN_MILLISECONDS ,
   MINIMUM_FRAME_SIZE,
   MINIMUM_SLOT_PER_ERA,
 } from "../constant.test";
@@ -83,7 +83,7 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, frameSize, slotSize});
 
-      const invalidBlockTime = MINIMUM_BLOCKTIME_IN_MILLI_SECONDS - 1;
+      const invalidBlockTime = MINIMUM_BLOCK_TIME_IN_MILLISECONDS  - 1;
 
       await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize, slotSize)).to.be.revertedWithCustomError(
         slidingWindow,
@@ -99,7 +99,7 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, frameSize, slotSize});
 
-      const invalidBlockTime = MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS + 1;
+      const invalidBlockTime = MAXIMUM_BLOCK_TIME_IN_MILLISECONDS  + 1;
 
       await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize, slotSize)).to.be.revertedWithCustomError(
         slidingWindow,
@@ -119,7 +119,7 @@ export const run = async () => {
 
       await expect(slidingWindow.updateWindow(blockPeriod, invalidFrameSize, slotSize)).to.be.revertedWithCustomError(
         slidingWindow,
-        INVALID_FRAME_SIZ,
+        INVALID_FRAME_SIZE,
       );
     });
 
@@ -135,7 +135,7 @@ export const run = async () => {
 
       await expect(slidingWindow.updateWindow(blockPeriod, invalidFrameSize, slotSize)).to.be.revertedWithCustomError(
         slidingWindow,
-        INVALID_FRAME_SIZ,
+        INVALID_FRAME_SIZE,
       );
     });
 

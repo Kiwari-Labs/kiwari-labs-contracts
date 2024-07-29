@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {calculateSlidingWindowState, deployPureERC20EXP, mineBlock} from "../utils.test";
+import {calculateSlidingWindowState, deployERC20EXPBase, mineBlock} from "../utils.test";
 import {ERC20_EXP_NAME, ERC20_EXP_SYMBOL} from "../constant.test";
 
 export const run = async () => {
@@ -7,29 +7,29 @@ export const run = async () => {
     it("[HAPPY] query block per era", async function () {
       const blockPeriod = 400;
 
-      const {erc20exp} = await deployPureERC20EXP({blockPeriod});
+      const {erc20exp} = await deployERC20EXPBase({blockPeriod});
 
       const self = calculateSlidingWindowState({blockPeriod});
-      expect(await erc20exp.blockPerEra()).to.equal(self._blockPerEra);
+      expect(await erc20exp.getBlockPerEra()).to.equal(self._blockPerEra);
     });
 
     it("[HAPPY] query block per slot", async function () {
       const blockPeriod = 400;
       const slotSize = 4;
 
-      const {erc20exp} = await deployPureERC20EXP({blockPeriod, slotSize});
+      const {erc20exp} = await deployERC20EXPBase({blockPeriod, slotSize});
 
       const self = calculateSlidingWindowState({blockPeriod, slotSize});
-      expect(await erc20exp.blockPerSlot()).to.equal(self._blockPerSlot);
+      expect(await erc20exp.getBlockPerSlot()).to.equal(self._blockPerSlot);
     });
 
     it("[HAPPY] query slot per era", async function () {
       const slotSize = 4;
 
-      const {erc20exp} = await deployPureERC20EXP({slotSize});
+      const {erc20exp} = await deployERC20EXPBase({slotSize});
 
       const self = calculateSlidingWindowState({slotSize});
-      expect(await erc20exp.slotPerEra()).to.equal(self._slotSize);
+      expect(await erc20exp.getSlotPerEra()).to.equal(self._slotSize);
     });
 
     it("[HAPPY] query frame size in block length", async function () {
@@ -37,7 +37,7 @@ export const run = async () => {
       const slotSize = 4;
       const frameSize = 2;
 
-      const {erc20exp} = await deployPureERC20EXP({blockPeriod, slotSize, frameSize});
+      const {erc20exp} = await deployERC20EXPBase({blockPeriod, slotSize, frameSize});
 
       const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
       expect(await erc20exp.getFrameSizeInBlockLength()).to.equal(self._frameSizeInBlockLength);
@@ -48,7 +48,7 @@ export const run = async () => {
       const slotSize = 4;
       const frameSize = 2;
 
-      const {erc20exp} = await deployPureERC20EXP({blockPeriod, slotSize, frameSize});
+      const {erc20exp} = await deployERC20EXPBase({blockPeriod, slotSize, frameSize});
 
       const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
       expect(await erc20exp.getFrameSizeInEraLength()).to.equal(self._frameSizeInEraAndSlotLength[0]);
@@ -59,7 +59,7 @@ export const run = async () => {
       const slotSize = 4;
       const frameSize = 2;
 
-      const {erc20exp} = await deployPureERC20EXP({blockPeriod, slotSize, frameSize});
+      const {erc20exp} = await deployERC20EXPBase({blockPeriod, slotSize, frameSize});
 
       const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
       expect(await erc20exp.getFrameSizeInSlotLength()).to.equal(self._frameSizeInEraAndSlotLength[1]);
@@ -70,7 +70,7 @@ export const run = async () => {
       const slotSize = 4;
       const frameSize = 2;
 
-      const {erc20exp} = await deployPureERC20EXP({blockPeriod, slotSize, frameSize});
+      const {erc20exp} = await deployERC20EXPBase({blockPeriod, slotSize, frameSize});
 
       const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
 
@@ -90,7 +90,7 @@ export const run = async () => {
       const slotSize = 4;
       const frameSize = 2;
 
-      const {erc20exp} = await deployPureERC20EXP({blockPeriod, slotSize, frameSize});
+      const {erc20exp} = await deployERC20EXPBase({blockPeriod, slotSize, frameSize});
 
       const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
 
@@ -106,19 +106,19 @@ export const run = async () => {
     });
 
     it("[HAPPY] query name", async function () {
-      const {erc20exp} = await deployPureERC20EXP({});
+      const {erc20exp} = await deployERC20EXPBase({});
 
       expect(await erc20exp.name()).to.equal(ERC20_EXP_NAME);
     });
 
     it("[HAPPY] query symbol", async function () {
-      const {erc20exp} = await deployPureERC20EXP({});
+      const {erc20exp} = await deployERC20EXPBase({});
 
       expect(await erc20exp.symbol()).to.equal(ERC20_EXP_SYMBOL);
     });
 
     it("[HAPPY] query total supply", async function () {
-      const {erc20exp} = await deployPureERC20EXP({});
+      const {erc20exp} = await deployERC20EXPBase({});
 
       // Due to token can expiration there is no actual totalSupply.
       expect(await erc20exp.totalSupply()).to.equal(0);

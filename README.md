@@ -45,6 +45,13 @@ Run the tests:
 yarn test
 ```
 
+Run the tests coverage:
+
+```
+yarn coverage
+```
+`**NOTE: require at least 4GB of RAM to run tests coverage.`
+
 ### TODO List
 
 | Task                                                                                                                               | High | Low |

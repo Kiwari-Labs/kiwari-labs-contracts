@@ -1,40 +1,33 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.5.0 <0.9.0;
 
-/// @title Extended ERC20 Interface for ERC20EXP tokens with Unexpirable token address exeption.
+/// @title Extended ERC20 Interface for ERC20EXPBase tokens
 /// @author Kiwari Labs
-/// @notice This interface defines additional functionalities for ERC20EXP tokens.
+/// @notice This interface defines additional functionalities for ERC20EXPBase tokens.
 
-interface IERC20EXP {
-    /// @notice Emitted when wholesale status is granted or revoked for an account.
-    /// @param account The account for which wholesale status is affected.
-    /// @param isWholesale `true` if wholesale status is granted; `false` if revoked.
-    event GrantWholeSale(address indexed account, bool indexed isWholesale);
-
-    /// @notice Grants wholesale status to an account, allowing it to receive non-expirable tokens.
-    /// @param to The address of the account to grant wholesale status.
-    function grantWholeSale(address to) external;
-
-    /// @notice Revokes wholesale status from an account, clearing all existing balances.
-    /// @param to The address of the account from which wholesale status is being revoked.
-    function revokeWholeSale(address to) external;
+interface IERC20EXPBase {
+    /// @notice Retrieves an array of token balances stored for a specific account, era, and slot.
+    /// @dev Retrieves the list of token balances stored for the specified account, era, and slot, sorted in ascending order.
+    /// @param account The address of the account for which the token balances are being retrieved.
+    /// @param era The era (time period) within which the token balances are stored.
+    /// @param slot The slot index within the specified era for which the token balances are stored.
+    /// @return list The array of token balances sorted in ascending order based on block numbers.
+    function tokenList(address account, uint256 era, uint8 slot) external view returns (uint256[] memory list);
 
     /// @notice Returns the available balance of tokens for a given account within the specified eras and slots.
-    /// @dev If the account is a wholesale account, ignores the provided eras and slots and returns the spendable balance.
-    /// Otherwise, calculates and returns the available balance based on the specified eras and slots.
     /// @param account The address of the account for which the balance is being queried.
     /// @param fromEra The starting era for the balance lookup.
     /// @param fromSlot The starting slot within the starting era for the balance lookup.
     /// @param toEra The ending era for the balance lookup.
     /// @param toSlot The ending slot within the ending era for the balance lookup.
     /// @return uint256 The available balance.
-    function balanceOf(
-        address account,
-        uint256 fromEra,
-        uint8 fromSlot,
-        uint256 toEra,
-        uint8 toSlot
-    ) external returns (uint256);
+    // function balanceOf(
+    //     address account,
+    //     uint256 fromEra,
+    //     uint8 fromSlot,
+    //     uint256 toEra,
+    //     uint8 toSlot
+    // ) external returns (uint256);
 
     /// @dev Overloaded function to retrieve either safe or unsafe balance of an account.
     /// @param account The address of the account for which the balance is being queried.

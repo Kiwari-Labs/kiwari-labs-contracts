@@ -24,7 +24,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 0.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);
@@ -58,7 +58,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 1.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);
@@ -92,7 +92,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 2.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);
@@ -126,7 +126,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 3.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);
@@ -160,7 +160,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 4.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);
@@ -194,7 +194,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 5.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);
@@ -228,7 +228,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 6.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);
@@ -262,7 +262,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 7.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);
@@ -296,7 +296,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 8.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);
@@ -330,7 +330,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 9.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);
@@ -364,7 +364,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 10.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);
@@ -398,7 +398,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 11.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);
@@ -432,7 +432,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 6.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);
@@ -466,7 +466,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 5.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);
@@ -500,7 +500,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 7.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);
@@ -534,7 +534,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 5.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);
@@ -568,7 +568,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 6.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);
@@ -602,7 +602,7 @@ export const run = async () => {
 
       const blockNumber = Math.floor(blockPeriodSlot * 11.5) + startBlockNumber;
 
-      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow.safeFrame(blockNumber);
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame(uint256)"](blockNumber);
       const [curEra, curSlot] = await slidingWindow.calculateEraAndSlot(blockNumber);
 
       expect(toEra).to.equal(curEra);

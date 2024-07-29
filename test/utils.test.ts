@@ -13,7 +13,7 @@ import {
   SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT,
   SLIDING_WINDOW_CONTRACT,
   SlidingWindowState,
-  YEAR_IN_MILLI_SECONDS,
+  YEAR_IN_MILLISECONDS ,
   LightWeightSlidingWindowState,
   TWO_BITS,
   SLOT_PER_ERA,
@@ -38,7 +38,7 @@ export const skipToBlock = async function (target: number) {
 const deployPureERC20 = async function (blockPeriod: number, frameSize: number, slotSize: number) {
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 
-  const ERC20EXP = await ethers.getContractFactory("MockPureERC20EXP", deployer);
+  const ERC20EXP = await ethers.getContractFactory("MockERC20EXPBase", deployer);
   const erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize, slotSize);
   await erc20exp.deployed();
 
@@ -81,8 +81,8 @@ const deployDoublyListSelector = async function (light: boolean, autoList: boole
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 
   const DoublyList = await ethers.getContractFactory(type, deployer);
-  const doublylist = await DoublyList.deploy();
-  await doublylist.deployed();
+  const doublyList = await DoublyList.deploy();
+  await doublyList.deployed();
 
   // To automatically generate the list.
   // [1, 2, 3, ... , 8, 9, 10]
@@ -90,19 +90,19 @@ const deployDoublyListSelector = async function (light: boolean, autoList: boole
     if (type === LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT) {
       for (let i = 0; i < len; i++) {
         const index = i + 1;
-        await doublylist.insert(index);
+        await doublyList.insert(index);
       }
     } else {
       for (let i = 0; i < len; i++) {
         const index = i + 1;
         const data = padIndexToData(index);
-        await doublylist.insert(index, data);
+        await doublyList.insert(index, data);
       }
     }
   }
 
   return {
-    doublylist,
+    doublyList,
     deployer,
     alice,
     bob,
@@ -161,7 +161,7 @@ export const calculateLightWeightSlidingWindowState = function ({
   self._startBlockNumber = startBlockNumber;
 
   // Why 'Math.floor', Since Solidity always rounds down.
-  const blockPerSlotCache = Math.floor(YEAR_IN_MILLI_SECONDS / blockPeriod) >> TWO_BITS;
+  const blockPerSlotCache = Math.floor(YEAR_IN_MILLISECONDS  / blockPeriod) >> TWO_BITS;
   // Assume block per year equal to 78892315.
   // Convert 78892315 into its binary: 100101110011010011011111011
   // Shift the bits to the right by 2 positions: 100101110011010011011111011 >> 2
@@ -210,7 +210,7 @@ export const calculateSlidingWindowState = function ({
   self._startBlockNumber = startBlockNumber;
 
   // Why 'Math.floor', Since Solidity always rounds down.
-  const blockPerSlotCache = Math.floor(Math.floor(YEAR_IN_MILLI_SECONDS / blockPeriod) / slotSize);
+  const blockPerSlotCache = Math.floor(Math.floor(YEAR_IN_MILLISECONDS  / blockPeriod) / slotSize);
   const blockPerEraCache = blockPerSlotCache * slotSize;
 
   self._blockPerEra = blockPerEraCache;
@@ -235,7 +235,7 @@ export const getAddress = async function (account: Signer | Contract) {
   return (await account.getAddress()).toLowerCase();
 };
 
-export const deployPureERC20EXP = async function ({
+export const deployERC20EXPBase = async function ({
   blockPeriod = 400, // 400ms per block
   frameSize = 2, // frame size 2 slot
   slotSize = 4, // 4 slot per era

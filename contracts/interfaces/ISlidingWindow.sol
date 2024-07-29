@@ -18,11 +18,11 @@ interface ISlidingWindow {
 
     /// @notice Returns the number of blocks per era.
     /// @return blockPerEra Number of blocks per era.
-    function blockPerEra() external view returns (uint40);
+    function getBlockPerEra() external view returns (uint40);
 
     /// @notice Returns the number of blocks per slot.
     /// @return blockPerSlot Number of blocks per slot.
-    function blockPerSlot() external view returns (uint40);
+    function getBlockPerSlot() external view returns (uint40);
 
     /// @notice Returns the current era and slot within the sliding window.
     /// @return era Current era number.
@@ -57,5 +57,9 @@ interface ISlidingWindow {
 
     /// @notice Returns the number of slots per era.
     /// @return slotPerEra Number of slots per era.
-    function slotPerEra() external view returns (uint8);
+    function getSlotPerEra() external view returns (uint8);
+
+    /// @notice Retrieves the frame size in era and slot length from the sliding window state.
+    /// @return An array containing frame size in era and slot length.
+    function getFrameSizeInEraAndSlotLength() external view returns (uint8[2] memory);
 }

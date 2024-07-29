@@ -12,9 +12,9 @@ library SlidingWindow {
     uint8 private constant MAXIMUM_SLOT_PER_ERA = 12;
     uint8 private constant MINIMUM_FRAME_SIZE = 1;
     uint8 private constant MAXIMUM_FRAME_SIZE = 64;
-    uint8 private constant MINIMUM_BLOCKTIME_IN_MILLI_SECONDS = 100;
-    uint24 private constant MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS = 600_000;
-    uint40 private constant YEAR_IN_MILLI_SECONDS = 31_556_926_000;
+    uint8 private constant MINIMUM_BLOCK_TIME_IN_MILLISECONDS  = 100;
+    uint24 private constant MAXIMUM_BLOCK_TIME_IN_MILLISECONDS  = 600_000;
+    uint40 private constant YEAR_IN_MILLISECONDS  = 31_556_926_000;
 
     struct SlidingWindowState {
         uint40 _blockPerEra;
@@ -28,6 +28,27 @@ library SlidingWindow {
     error InvalidBlockTime();
     error InvalidFrameSize();
     error InvalidSlotPerEra();
+
+    /// @notice Calculates the difference between the current block number and the start of the sliding window frame.
+    /// @dev This function computes the difference in blocks between the current block number and the start of
+    /// the sliding window frame, as defined by `_frameSizeInBlockLength` in the sliding window state `self`.
+    /// It checks if the `blockNumber` is greater than or equal to `_frameSizeInBlockLength`. If true, it calculates
+    /// the difference; otherwise, it returns zero blocks indicating the block number is within the sliding window frame.
+    /// @param self The sliding window state to use for calculations.
+    /// @param blockNumber The current block number to calculate the difference from.
+    /// @return blocks The difference in blocks between the current block and the start of the sliding window frame.
+    function _calculateBlockDifferent(
+        SlidingWindowState storage self,
+        uint256 blockNumber
+    ) private view returns (uint256 blocks) {
+        uint256 frameSizeInBlockLengthCache = self._frameSizeInBlockLength;
+        unchecked {
+            if (blockNumber >= frameSizeInBlockLengthCache) {
+                // If the current block is beyond the expiration period
+                blocks = blockNumber - frameSizeInBlockLengthCache;
+            }
+        }
+    }
 
     /// @notice Calculates the era based on the provided block number and sliding window state.
     /// @param self The sliding window state.
@@ -78,7 +99,7 @@ library SlidingWindow {
     /// @dev This function adjusts internal parameters such as blockPerEra, blockPerSlot, and frame sizes
     /// based on the provided blockTime and frameSize. It ensures that block time is within valid limits
     /// and frame size is appropriate for the sliding window. The calculations depend on constants like
-    /// YEAR_IN_MILLI_SECONDS, MINIMUM_BLOCKTIME_IN_MILLI_SECONDS, MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS,
+    /// YEAR_IN_MILLISECONDS , MINIMUM_BLOCK_TIME_IN_MILLISECONDS , MAXIMUM_BLOCK_TIME_IN_MILLISECONDS ,
     /// MINIMUM_FRAME_SIZE, MAXIMUM_FRAME_SIZE, and SLOT_PER_ERA.
     /// @param self The sliding window state to update.
     /// @param blockTime The time duration of each block in milliseconds.
@@ -89,7 +110,7 @@ library SlidingWindow {
         uint8 frameSize,
         uint8 slotSize
     ) internal {
-        if (blockTime < MINIMUM_BLOCKTIME_IN_MILLI_SECONDS || blockTime > MAXIMUM_BLOCKTIME_IN_MILLI_SECONDS) {
+        if (blockTime < MINIMUM_BLOCK_TIME_IN_MILLISECONDS  || blockTime > MAXIMUM_BLOCK_TIME_IN_MILLISECONDS ) {
             revert InvalidBlockTime();
         }
         if (frameSize < MINIMUM_FRAME_SIZE || frameSize > MAXIMUM_FRAME_SIZE) {
@@ -100,7 +121,7 @@ library SlidingWindow {
         }
         unchecked {
             /// @custom:truncate https://docs.soliditylang.org/en/latest/types.html#division
-            uint40 blockPerSlotCache = (YEAR_IN_MILLI_SECONDS / blockTime) / slotSize;
+            uint40 blockPerSlotCache = (YEAR_IN_MILLISECONDS  / blockTime) / slotSize;
             uint40 blockPerEraCache = blockPerSlotCache * slotSize;
             self._blockPerEra = blockPerEraCache;
             self._blockPerSlot = blockPerSlotCache;
@@ -135,31 +156,10 @@ library SlidingWindow {
         return (era, slot);
     }
 
-    /// @notice Calculates the difference between the current block number and the start of the sliding window frame.
-    /// @dev This function computes the difference in blocks between the current block number and the start of
-    /// the sliding window frame, as defined by `_frameSizeInBlockLength` in the sliding window state `self`.
-    /// It checks if the `blockNumber` is greater than or equal to `_frameSizeInBlockLength`. If true, it calculates
-    /// the difference; otherwise, it returns zero blocks indicating the block number is within the sliding window frame.
-    /// @param self The sliding window state to use for calculations.
-    /// @param blockNumber The current block number to calculate the difference from.
-    /// @return blocks The difference in blocks between the current block and the start of the sliding window frame.
-    function calculateBlockDifferent(
-        SlidingWindowState storage self,
-        uint256 blockNumber
-    ) internal view returns (uint256 blocks) {
-        uint256 frameSizeInBlockLengthCache = self._frameSizeInBlockLength;
-        unchecked {
-            if (blockNumber >= frameSizeInBlockLengthCache) {
-                // If the current block is beyond the expiration period
-                blocks = blockNumber - frameSizeInBlockLengthCache;
-            }
-        }
-    }
-
     /// @notice Determines the sliding window frame based on the provided block number.
     /// @dev This function computes the sliding window frame based on the provided `blockNumber` and the state `self`.
     /// It determines the `toEra` and `toSlot` using `calculateEraAndSlot`, then calculates the block difference
-    /// using `calculateBlockDifferent` to adjust the `blockNumber`. Finally, it computes the `fromEra` and `fromSlot`
+    /// using `_calculateBlockDifferent` to adjust the `blockNumber`. Finally, it computes the `fromEra` and `fromSlot`
     /// using `calculateEraAndSlot` with the adjusted `blockNumber`, completing the determination of the sliding window frame.
     /// @param self The sliding window state to use for calculations.
     /// @param blockNumber The current block number to calculate the sliding window frame from.
@@ -172,7 +172,7 @@ library SlidingWindow {
         uint256 blockNumber
     ) internal view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
         (toEra, toSlot) = calculateEraAndSlot(self, blockNumber);
-        blockNumber = calculateBlockDifferent(self, blockNumber);
+        blockNumber = _calculateBlockDifferent(self, blockNumber);
         (fromEra, fromSlot) = calculateEraAndSlot(self, blockNumber);
     }
 
@@ -190,7 +190,7 @@ library SlidingWindow {
         uint256 blockNumber
     ) internal view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
         (toEra, toSlot) = calculateEraAndSlot(self, blockNumber);
-        blockNumber = calculateBlockDifferent(self, blockNumber);
+        blockNumber = _calculateBlockDifferent(self, blockNumber);
         blockNumber = _frameBuffer(self, blockNumber);
         (fromEra, fromSlot) = calculateEraAndSlot(self, blockNumber);
     }
