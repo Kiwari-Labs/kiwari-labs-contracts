@@ -4,14 +4,15 @@ pragma solidity >=0.5.0 <0.9.0;
 /// @title ERC20EXP Base abstract contract
 /// @author Kiwari Labs
 
-import "./SlidingWindow.sol";
-import "../libraries/SortedCircularDoublyLinkedList.sol";
-import "../interfaces/IERC20EXPBase.sol";
-import "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {SlidingWindow} from "./SlidingWindow.sol";
+import {SortedCircularDoublyLinkedList as SCDLL} from "../libraries/SortedCircularDoublyLinkedList.sol";
+import {IERC20EXPBase} from "../interfaces/IERC20EXPBase.sol";
+import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-abstract contract ERC20EXPBase is IERC20Metadata, IERC20Errors, IERC20EXPBase, SlidingWindow {
-    using SortedCircularDoublyLinkedList for SortedCircularDoublyLinkedList.List;
+abstract contract ERC20EXPBase is IERC20, IERC20Metadata, IERC20Errors, IERC20EXPBase, SlidingWindow {
+    using SCDLL for SCDLL.List;
 
     string private _name;
     string private _symbol;
@@ -20,7 +21,7 @@ abstract contract ERC20EXPBase is IERC20Metadata, IERC20Errors, IERC20EXPBase, S
     struct Slot {
         uint256 slotBalance;
         mapping(uint256 => uint256) blockBalances;
-        SortedCircularDoublyLinkedList.List list;
+        SCDLL.List list;
     }
 
     mapping(address => mapping(uint256 => mapping(uint8 => Slot))) private _balances;
@@ -105,7 +106,7 @@ abstract contract ERC20EXPBase is IERC20Metadata, IERC20Errors, IERC20EXPBase, S
     /// @param expirationPeriodInBlockLength The maximum allowed difference between blockNumber and the key.
     /// @return key The index of the first valid block balance.
     function _getFirstUnexpiredBlockBalance(
-        SortedCircularDoublyLinkedList.List storage list,
+        SCDLL.List storage list,
         uint256 blockNumber,
         uint256 expirationPeriodInBlockLength
     ) private view returns (uint256 key) {
