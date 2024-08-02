@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.5.0 <0.9.0;
 
-/// @title Fusuma (襖) is an implemation sliding window algorithm in Solidity, Fusuma sliding and relying on block-height rather than block-timestmap.
+/// @title An implemation sliding window algorithm in Solidity, the sliding frame relying on block-height rather than block-timestmap.
 /// @author Kiwari Labs
-/// @notice Fusuma designed to compatible with subsecond blocktime on both Layer 1 Network (L1) and Layer 2 Network (L2).
-// inspiration
+/// @notice This library designed to compatible with subsecond blocktime on both Layer 1 Network (L1) and Layer 2 Network (L2).
+// inspiration:
 // https://github.com/stonecoldpat/slidingwindow
 
 library SlidingWindow {

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.5.0 <0.9.0;
 
-/// @title Shoji (障子) is a lightweight version of the Fusuma. Shoji provide efficiency and handy sliding window algorithm.
+/// @title A lightweight version of the Sliding Window Algorithm. this contract provide efficiency and handy sliding window algorithm.
 /// @author Kiwari Labs
-/// @notice Some parameter in Fusuma was pre-define as a constant variable in Shoji.
+/// @notice Some parameter was pre-define as a constant variable.
 
 library SlidingWindow {
     uint8 private constant TWO_BITS = 2;
