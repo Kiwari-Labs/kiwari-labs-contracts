@@ -61,7 +61,7 @@ yarn coverage
 | test:Gas Benchmark test                                                                                                            | ✓    |     |
 | test:Acceptance/E2E test                                                                                                           | ✓    |     |
 | feat:[Change expirePeriod from length of slot into length of blocks](https://github.com/MASDXI/ERC20EXP/issues/4#issue-2234558942) |      | ✓   |
-| feat:[issue9](https://github.com/MASDXI/ERC20EXP/issues/9),[pullrequest](https://github.com/MASDXI/ERC20EXP/pull/23)               | ✓    | ✓   |
+| feat:[issue9](https://github.com/MASDXI/ERC20EXP/issues/9),[pullrequest](https://github.com/MASDXI/ERC20EXP/pull/23)               | ✓    |     |
 
 ## License
 
