@@ -26,7 +26,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       gas: 40_000_000,
       gasPrice: 9_000_000_000,
-      blockGasLimit: 0x1fffffffffffff,
+      blockGasLimit: 0xfffff448, // unsigned integer 32 bit.
     },
     localhost: {
       url: "http://127.0.0.1:8545",
@@ -49,7 +49,7 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 148,
+        runs: 256,
       },
     },
   },

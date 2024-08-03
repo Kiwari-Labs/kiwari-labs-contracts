@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.5.0 <0.9.0;
 
-/// @title A lightweight version of Engawa.
+/// @title A lightweight version of Sorted Circular Doubly Linked List.
 /// @author Kiwari Labs
 /// @notice This version reduce gas by remove embedded bytes data from node and less overhead compared to the original version.
 

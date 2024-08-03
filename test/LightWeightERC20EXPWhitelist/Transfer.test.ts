@@ -1,13 +1,14 @@
 import {expect} from "chai";
-import {deployERC20EXP} from "../utils.test";
+import {deployLightWeightERC20EXP} from "../utils.test";
 import {ZERO_ADDRESS} from "../constant.test";
 import {parseEther} from "ethers/lib/utils";
+import {network} from "hardhat";
 import {reset, time, mineUpTo} from "@nomicfoundation/hardhat-network-helpers";
 
 export const run = async () => {
   describe("Transfer", async function () {
     it("[HAPPY] correct transfer", async function () {
-      const {erc20exp, alice, bob} = await deployERC20EXP();
+      const {erc20exp, alice, bob} = await deployLightWeightERC20EXP();
 
       const oneEther = parseEther("1.0");
       const aliceAddress = await alice.getAddress();
@@ -29,7 +30,7 @@ export const run = async () => {
     });
 
     it("[HAPPY] correct bulk transfer", async function () {
-      const {erc20exp, alice, bob} = await deployERC20EXP();
+      const {erc20exp, alice, bob} = await deployLightWeightERC20EXP();
 
       const oneEther = parseEther("1.0");
       const bulkEther = parseEther("273.0");
@@ -63,7 +64,7 @@ export const run = async () => {
     it("[HAPPY] correct bulk transfer across slot", async function () {
       await reset();
       expect(await time.latestBlock()).to.equal(0);
-      const {erc20exp, alice, bob} = await deployERC20EXP();
+      const {erc20exp, alice, bob} = await deployLightWeightERC20EXP();
 
       const oneEther = parseEther("1.0");
       const twoEther = parseEther("2.0");
@@ -78,7 +79,7 @@ export const run = async () => {
       expect(currentEraAndSlot.era).to.equal(0);
       expect(currentEraAndSlot.slot).to.equal(0);
 
-      await mineUpTo((await erc20exp.blockPerSlot()) + 10); // rounding error bypass.
+      await mineUpTo((await erc20exp.getBlockPerSlot()) + 1);
 
       currentEraAndSlot = await erc20exp.currentEraAndSlot();
       expect(currentEraAndSlot.era).to.equal(0);

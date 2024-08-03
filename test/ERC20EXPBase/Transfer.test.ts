@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {deployPureERC20EXP, mineBlock, skipToBlock} from "../utils.test";
+import {deployERC20EXPBase, mineBlock, skipToBlock} from "../utils.test";
 import {
   ERC20_INSUFFICIENT_BALANCE,
   ERC20_INVALID_RECEIVER,
@@ -15,9 +15,9 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc20exp, alice, bob} = await deployPureERC20EXP({frameSize: 2, slotSize: 4});
+      const {erc20exp, alice, bob} = await deployERC20EXPBase({frameSize: 2, slotSize: 4});
 
-      const blockPerSlot = await erc20exp.blockPerSlot();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
@@ -162,9 +162,9 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc20exp, alice, bob} = await deployPureERC20EXP({frameSize: 4, slotSize: 4});
+      const {erc20exp, alice, bob} = await deployERC20EXPBase({frameSize: 4, slotSize: 4});
 
-      const blockPerSlot = await erc20exp.blockPerSlot();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
@@ -309,9 +309,9 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc20exp, alice, bob} = await deployPureERC20EXP({frameSize: 6, slotSize: 4});
+      const {erc20exp, alice, bob} = await deployERC20EXPBase({frameSize: 6, slotSize: 4});
 
-      const blockPerSlot = await erc20exp.blockPerSlot();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
@@ -456,9 +456,9 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc20exp, alice, bob} = await deployPureERC20EXP({frameSize: 8, slotSize: 4});
+      const {erc20exp, alice, bob} = await deployERC20EXPBase({frameSize: 8, slotSize: 4});
 
-      const blockPerSlot = await erc20exp.blockPerSlot();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
@@ -603,9 +603,9 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc20exp, alice, bob} = await deployPureERC20EXP({frameSize: 2, slotSize: 4});
+      const {erc20exp, alice, bob} = await deployERC20EXPBase({frameSize: 2, slotSize: 4});
 
-      const blockPerSlot = await erc20exp.blockPerSlot();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
@@ -757,9 +757,9 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc20exp, alice, bob} = await deployPureERC20EXP({frameSize: 4, slotSize: 4});
+      const {erc20exp, alice, bob} = await deployERC20EXPBase({frameSize: 4, slotSize: 4});
 
-      const blockPerSlot = await erc20exp.blockPerSlot();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
@@ -911,9 +911,9 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc20exp, alice, bob} = await deployPureERC20EXP({frameSize: 6, slotSize: 4});
+      const {erc20exp, alice, bob} = await deployERC20EXPBase({frameSize: 6, slotSize: 4});
 
-      const blockPerSlot = await erc20exp.blockPerSlot();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
@@ -1065,9 +1065,9 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc20exp, alice, bob} = await deployPureERC20EXP({frameSize: 8, slotSize: 4});
+      const {erc20exp, alice, bob} = await deployERC20EXPBase({frameSize: 8, slotSize: 4});
 
-      const blockPerSlot = await erc20exp.blockPerSlot();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
@@ -1150,7 +1150,7 @@ export const run = async () => {
       //                               |10,      |10       |
       //                               |Bob      |         |
       //                               |         |         | 10, 10
-      
+
       // Right now, the balance of Alice and Bob must be 20.
       expect(await erc20exp.balanceOf(aliceAddress)).equal(amount * 2);
       expect(await erc20exp.balanceOf(bobAddress)).equal(amount * 2);
@@ -1222,7 +1222,7 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc20exp, alice} = await deployPureERC20EXP({});
+      const {erc20exp, alice} = await deployERC20EXPBase({});
 
       expect(erc20exp.connect(ZERO_ADDRESS).transfer(await alice.getAddress(), 1))
         .to.be.revertedWithCustomError(erc20exp, ERC20_INVALID_SENDER)
@@ -1234,7 +1234,7 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc20exp, alice} = await deployPureERC20EXP({});
+      const {erc20exp, alice} = await deployERC20EXPBase({});
 
       expect(erc20exp.connect(alice).transfer(ZERO_ADDRESS, 1))
         .to.be.revertedWithCustomError(erc20exp, ERC20_INVALID_RECEIVER)
@@ -1246,7 +1246,7 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc20exp, alice, bob} = await deployPureERC20EXP({});
+      const {erc20exp, alice, bob} = await deployERC20EXPBase({});
 
       expect(erc20exp.connect(alice).transfer(await bob.getAddress(), 1))
         .to.be.revertedWithCustomError(erc20exp, ERC20_INSUFFICIENT_BALANCE)

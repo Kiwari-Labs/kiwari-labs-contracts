@@ -45,6 +45,14 @@ Run the tests:
 yarn test
 ```
 
+Run the tests coverage:
+
+```
+yarn coverage
+```
+
+`**NOTE: require at least 4GB of RAM to run tests coverage.`
+
 ### TODO List
 
 | Task                                                                                                                               | High | Low |
@@ -53,7 +61,7 @@ yarn test
 | test:Gas Benchmark test                                                                                                            | ✓    |     |
 | test:Acceptance/E2E test                                                                                                           | ✓    |     |
 | feat:[Change expirePeriod from length of slot into length of blocks](https://github.com/MASDXI/ERC20EXP/issues/4#issue-2234558942) |      | ✓   |
-| feat:[Change remove WholeSale for non-expire balance](https://github.com/MASDXI/ERC20EXP/issues/9)                                 |      | ✓   |
+| feat:[issue9](https://github.com/MASDXI/ERC20EXP/issues/9),[pullrequest](https://github.com/MASDXI/ERC20EXP/pull/23)               | ✓    | ✓   |
 
 ## License
 

@@ -1,18 +1,16 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.5.0 <0.9.0;
 
-/// @title ERC20EXP abstract contract
+/// @title ERC20EXP abstract contract with Unexpirable token address exeption.
 /// @author Kiwari Labs
 
-import "../libraries/SlidingWindow.sol";
+import "../abstracts/SlidingWindow.sol";
 import "../libraries/SortedCircularDoublyLinkedList.sol";
 import "../interfaces/IERC20EXP.sol";
-import "../interfaces/ISlidingWindow.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
+abstract contract ERC20EXPWhitelist is ERC20, IERC20EXP, SlidingWindow {
     using SortedCircularDoublyLinkedList for SortedCircularDoublyLinkedList.List;
-    using SlidingWindow for SlidingWindow.SlidingWindowState;
 
     /// @notice Struct representing a slot containing balances mapped by blocks.
     struct Slot {
@@ -24,8 +22,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     mapping(address => bool) private _wholeSale;
     mapping(address => uint256) private _receiveBalances;
     mapping(address => mapping(uint256 => mapping(uint8 => Slot))) private _retailBalances;
-
-    SlidingWindow.SlidingWindowState private _slidingWindow;
 
     /// @notice Constructor function to initialize the token contract with specified parameters.
     /// @param name_ The name of the token.
@@ -39,10 +35,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint256 blockNumber_,
         uint16 blockTime_,
         uint8 expirePeriod_
-    ) ERC20(name_, symbol_) {
-        _slidingWindow._startBlockNumber = blockNumber_;
-        _slidingWindow.updateSlidingWindow(blockTime_, expirePeriod_, 4);
-    }
+    ) ERC20(name_, symbol_) SlidingWindow(blockNumber_, blockTime_, expirePeriod_, 4) {}
 
     /// @notice Always returns 0 for non-wholesale accounts.
     /// @dev Returns the available balance for the given account.
@@ -80,13 +73,6 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         }
     }
 
-    /// @dev Returns the current block number.
-    /// @notice ALlowing for override in subsecond blocktime network.
-    /// @return The current network block number.
-    function _blockNumberProvider() internal view virtual returns (uint256) {
-        return block.number;
-    }
-
     /// @dev Calculates the total balance within a specific era and slot for the given account,
     /// considering all block balances that have not expired relative to the current blockNumber.
     /// This function loops through a sorted list of block indices and sums up corresponding balances.
@@ -104,11 +90,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
         uint256 blockNumber
     ) private view returns (uint256 balance) {
         Slot storage _spender = _retailBalances[account][era][slot];
-        uint256 key = _getFirstUnexpiredBlockBalance(
-            _spender.list,
-            blockNumber,
-            _slidingWindow.getFrameSizeInBlockLength()
-        );
+        uint256 key = _getFirstUnexpiredBlockBalance(_spender.list, blockNumber, _getFrameSizeInBlockLength());
         while (key > 0) {
             unchecked {
                 balance += _spender.blockBalances[key];
@@ -168,7 +150,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 // totalBlockBalance calcurate only buffer era/slot.
                 // keep it simple stupid first by spliting into 3 part then sum.
                 // part1: calulate balance at fromEra in naive in naive way O(n)
-                uint8 maxSlotCache = _slidingWindow._slotSize - 1;
+                uint8 maxSlotCache = _getSlotPerEra() - 1;
                 balance += _bufferSlotBalance(account, fromEra, fromSlot, blockNumber);
                 if (fromSlot < 3) {
                     balance += _slotBalance(account, fromEra, fromSlot + 1, maxSlotCache);
@@ -240,11 +222,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             revert ERC20InsufficientBalance(from, fromBalance, value);
         }
         Slot storage _sender = _retailBalances[from][fromEra][fromSlot];
-        uint256 key = _getFirstUnexpiredBlockBalance(
-            _sender.list,
-            blockNumber,
-            _slidingWindow.getFrameSizeInBlockLength()
-        );
+        uint256 key = _getFirstUnexpiredBlockBalance(_sender.list, blockNumber, _getFrameSizeInBlockLength());
         fromBalance = _sender.blockBalances[key];
         if (fromBalance == 0) {
             _handleTransfer(from, to, value, fromEra, toEra, fromSlot, toSlot);
@@ -470,7 +448,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             revert ERC20InvalidReceiver(address(0));
         }
         uint256 blockNumberCache = _blockNumberProvider();
-        (uint256 currentEra, uint8 currentSlot) = _slidingWindow.calculateEraAndSlot(blockNumberCache);
+        (uint256 currentEra, uint8 currentSlot) = _calculateEraAndSlot(blockNumberCache);
         Slot storage _recipient = _retailBalances[to][currentEra][currentSlot];
         unchecked {
             _recipient.slotBalance += value;
@@ -490,7 +468,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             revert ERC20InvalidSender(address(0));
         }
         uint256 blockNumberCache = _blockNumberProvider();
-        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumberCache);
+        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safeFrame(blockNumberCache);
         _updateRetailBalance(to, address(0), value, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
     }
 
@@ -528,7 +506,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
             return _unSafeBalanceOf(account, true);
         } else {
             uint256 blockNumberCache = _blockNumberProvider();
-            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumberCache);
+            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safeFrame(blockNumberCache);
             return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
         }
     }
@@ -563,7 +541,7 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
                 revert ERC20InvalidReceiver(address(0));
             }
             uint256 blockNumberCache = _blockNumberProvider();
-            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindow.safeFrame(blockNumberCache);
+            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safeFrame(blockNumberCache);
             _updateRetailBalance(from, to, value, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
         } else if (selector == 1) {
             // consolidate by burning retail balance and mint non-expirable to whole receive balance.
@@ -631,49 +609,4 @@ abstract contract ERC20Expirable is ERC20, IERC20EXP, ISlidingWindow {
     /// @param to The address receiving tokens.
     /// @param amount The amount of tokens being transferred.
     function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual {}
-
-    /// @inheritdoc ISlidingWindow
-    function blockPerEra() external view override returns (uint40) {
-        return _slidingWindow._blockPerEra;
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function blockPerSlot() external view override returns (uint40) {
-        return _slidingWindow._blockPerSlot;
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function currentEraAndSlot() external view override returns (uint256 era, uint8 slot) {
-        return _slidingWindow.calculateEraAndSlot(_blockNumberProvider());
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function getFrameSizeInBlockLength() external view override returns (uint40) {
-        return _slidingWindow.getFrameSizeInBlockLength();
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function getFrameSizeInSlotLength() external view override returns (uint8) {
-        return _slidingWindow.getFrameSizeInSlotLength();
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function getFrameSizeInEraLength() external view override returns (uint8) {
-        return _slidingWindow.getFrameSizeInEraLength();
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function frame() external view override returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
-        return _slidingWindow.frame(_blockNumberProvider());
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function safeFrame() external view override returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
-        return _slidingWindow.safeFrame(_blockNumberProvider());
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function slotPerEra() external view override returns (uint8) {
-        return _slidingWindow.getSlotPerEra();
-    }
 }
