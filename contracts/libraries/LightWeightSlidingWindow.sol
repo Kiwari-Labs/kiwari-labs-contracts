@@ -48,6 +48,8 @@ library SlidingWindow {
     }
 
     /// @notice Calculates the era based on the provided block number and sliding window state.
+    /// @dev Computes the era by determining the difference between the current block number and the start block number,
+    /// then dividing this difference by the number of blocks per era. Uses unchecked arithmetic for performance considerations.
     /// @param self The sliding window state.
     /// @param blockNumber The block number for which to calculate the era.
     /// @return era corresponding to the given block number.
@@ -62,6 +64,10 @@ library SlidingWindow {
     }
 
     /// @notice Calculates the slot based on the provided block number and sliding window state.
+    /// @dev Uses inline assembly to compute the slot. The calculation is based on the difference between
+    /// the current block number and the start block number, the number of blocks per era, and the slot size.
+    /// The `switch` statement handles whether the block number is greater than the start block number.
+    /// Uses unchecked arithmetic for performance considerations.
     /// @param self The sliding window state.
     /// @param blockNumber The block number for which to calculate the slot.
     /// @return slot corresponding to the given block number.
@@ -69,7 +75,6 @@ library SlidingWindow {
         unchecked {
             uint256 startblockNumberCache = self._startBlockNumber;
             uint40 blockPerYearCache = self._blockPerEra;
-            // @bug should check diff self._blockPerEra and self._blockPerSlot * 4
             assembly {
                 switch gt(blockNumber, startblockNumberCache)
                 case 1 {
@@ -86,6 +91,9 @@ library SlidingWindow {
     }
 
     /// @notice Adjusts the block number to handle buffer operations within the sliding window.
+    /// @dev The adjustment is based on the number of blocks per slot. If the current block number
+    /// is greater than the number of blocks per slot, it subtracts the block per slot from
+    /// the block number to obtain the adjusted block number.
     /// @param self The sliding window state.
     /// @param blockNumber The current block number.
     /// @return Updated block number after adjustment.
@@ -191,6 +199,7 @@ library SlidingWindow {
     }
 
     /// @notice Retrieves the number of blocks per era from the sliding window state.
+    /// @dev Uses the sliding window state to fetch the blocks per era.
     /// @param self The sliding window state.
     /// @return The number of blocks per era.
     function getBlockPerEra(SlidingWindowState storage self) internal view returns (uint40) {
@@ -198,6 +207,7 @@ library SlidingWindow {
     }
 
     /// @notice Retrieves the number of blocks per slot from the sliding window state.
+    /// @dev Uses the sliding window state to fetch the blocks per slot.
     /// @param self The sliding window state.
     /// @return The number of blocks per slot.
     function getBlockPerSlot(SlidingWindowState storage self) internal view returns (uint40) {
@@ -205,6 +215,7 @@ library SlidingWindow {
     }
 
     /// @notice Retrieves the frame size in block length from the sliding window state.
+    /// @dev Uses the sliding window state to fetch the frame size in terms of block length.
     /// @param self The sliding window state.
     /// @return The frame size in block length.
     function getFrameSizeInBlockLength(SlidingWindowState storage self) internal view returns (uint40) {
@@ -212,6 +223,7 @@ library SlidingWindow {
     }
 
     /// @notice Retrieves the frame size in era length from the sliding window state.
+    /// @dev Uses the sliding window state to fetch the frame size in terms of era length.
     /// @param self The sliding window state.
     /// @return The frame size in era length.
     function getFrameSizeInEraLength(SlidingWindowState storage self) internal view returns (uint8) {
@@ -219,6 +231,7 @@ library SlidingWindow {
     }
 
     /// @notice Retrieves the frame size in slot length from the sliding window state.
+    /// @dev Uses the sliding window state to fetch the frame size in terms of slot length.
     /// @param self The sliding window state.
     /// @return The frame size in slot length.
     function getFrameSizeInSlotLength(SlidingWindowState storage self) internal view returns (uint8) {
@@ -226,6 +239,7 @@ library SlidingWindow {
     }
 
     /// @notice Retrieves the frame size in era and slot length from the sliding window state.
+    /// @dev Uses the sliding window state to fetch the frame size in terms of era and slot length.
     /// @param self The sliding window state.
     /// @return An array containing frame size in era and slot length.
     function getFrameSizeInEraAndSlotLength(SlidingWindowState storage self) internal view returns (uint8[2] memory) {
@@ -233,6 +247,7 @@ library SlidingWindow {
     }
 
     /// @notice Retrieves the number of slots per era, which is a constant value.
+    /// @dev This function returns the slots per era, which is a constant value.
     /// @return The number of slots per era.
     function getSlotPerEra() internal pure returns (uint8) {
         return SLOT_PER_ERA;

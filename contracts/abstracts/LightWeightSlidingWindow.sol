@@ -19,6 +19,8 @@ abstract contract SlidingWindow is ISlidingWindow {
 
     /// @notice Allows for override in subsecond blocktime network.
     /// @dev Returns the current block number.
+    /// This function can be overridden in derived contracts to provide custom
+    /// block number logic, useful in networks with subsecond block times.
     /// @return The current network block number.
     function _blockNumberProvider() internal view returns (uint256) {
         return block.number;
@@ -80,36 +82,42 @@ abstract contract SlidingWindow is ISlidingWindow {
     }
 
     /// @notice Retrieves the number of blocks per era from the sliding window state.
+    /// @dev Uses the sliding window state to fetch the blocks per era.
     /// @return The number of blocks per era.
     function _getBlockPerEra() internal view returns (uint40) {
         return _slidingWindow.getBlockPerEra();
     }
 
     /// @notice Retrieves the number of blocks per slot from the sliding window state.
+    /// @dev Uses the sliding window state to fetch the blocks per slot.
     /// @return The number of blocks per slot.
     function _getBlockPerSlot() internal view returns (uint40) {
         return _slidingWindow.getBlockPerSlot();
     }
 
     /// @notice Retrieves the frame size in block length from the sliding window state.
+    /// @dev Uses the sliding window state to fetch the frame size in terms of block length.
     /// @return The frame size in block length.
     function _getFrameSizeInBlockLength() internal view returns (uint40) {
         return _slidingWindow.getFrameSizeInBlockLength();
     }
 
     /// @notice Retrieves the frame size in era length from the sliding window state.
+    /// @dev Uses the sliding window state to fetch the frame size in terms of era length.
     /// @return The frame size in era length.
     function _getFrameSizeInEraLength() internal view returns (uint8) {
         return _slidingWindow.getFrameSizeInEraLength();
     }
 
     /// @notice Retrieves the frame size in slot length from the sliding window state.
+    /// @dev Uses the sliding window state to fetch the frame size in terms of slot length.
     /// @return The frame size in slot length.
     function _getFrameSizeInSlotLength() internal view returns (uint8) {
         return _slidingWindow.getFrameSizeInSlotLength();
     }
 
     /// @notice Retrieves the frame size in era and slot length from the sliding window state.
+    /// @dev Uses the sliding window state to fetch the frame size in terms of era and slot length.
     /// @return An array containing frame size in era and slot length.
     function _getFrameSizeInEraAndSlotLength() internal view returns (uint8[2] memory) {
         return _slidingWindow.getFrameSizeInEraAndSlotLength();
@@ -124,38 +132,8 @@ abstract contract SlidingWindow is ISlidingWindow {
     }
 
     /// @inheritdoc ISlidingWindow
-    function getBlockPerEra() external view override returns (uint40) {
-        return _getBlockPerEra();
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function getBlockPerSlot() external view override returns (uint40) {
-        return _getBlockPerSlot();
-    }
-
-    /// @inheritdoc ISlidingWindow
     function currentEraAndSlot() external view override returns (uint256 era, uint8 slot) {
         return _calculateEraAndSlot(_blockNumberProvider());
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function getFrameSizeInBlockLength() external view override returns (uint40) {
-        return _getFrameSizeInBlockLength();
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function getFrameSizeInSlotLength() external view override returns (uint8) {
-        return _getFrameSizeInSlotLength();
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function getFrameSizeInEraLength() external view override returns (uint8) {
-        return _getFrameSizeInEraLength();
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function getFrameSizeInEraAndSlotLength() external view returns (uint8[2] memory) {
-        return _getFrameSizeInEraAndSlotLength();
     }
 
     /// @inheritdoc ISlidingWindow
@@ -166,6 +144,36 @@ abstract contract SlidingWindow is ISlidingWindow {
     /// @inheritdoc ISlidingWindow
     function safeFrame() external view override returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
         return _safeFrame(_blockNumberProvider());
+    }
+
+    /// @inheritdoc ISlidingWindow
+    function getBlockPerEra() external view override returns (uint40) {
+        return _getBlockPerEra();
+    }
+
+    /// @inheritdoc ISlidingWindow
+    function getBlockPerSlot() external view override returns (uint40) {
+        return _getBlockPerSlot();
+    }
+
+    /// @inheritdoc ISlidingWindow
+    function getFrameSizeInBlockLength() external view override returns (uint40) {
+        return _getFrameSizeInBlockLength();
+    }
+
+    /// @inheritdoc ISlidingWindow
+    function getFrameSizeInEraLength() external view override returns (uint8) {
+        return _getFrameSizeInEraLength();
+    }
+
+    /// @inheritdoc ISlidingWindow
+    function getFrameSizeInSlotLength() external view override returns (uint8) {
+        return _getFrameSizeInSlotLength();
+    }
+
+    /// @inheritdoc ISlidingWindow
+    function getFrameSizeInEraAndSlotLength() external view returns (uint8[2] memory) {
+        return _getFrameSizeInEraAndSlotLength();
     }
 
     /// @inheritdoc ISlidingWindow

@@ -16,30 +16,10 @@ interface ISlidingWindow {
     /// @param newFrameSizeInBlocks New frame size in blocks.
     event FrameSizeUpdated(uint256 oldFrameSizeInBlocks, uint256 newFrameSizeInBlocks);
 
-    /// @notice Returns the number of blocks per era.
-    /// @return blockPerEra Number of blocks per era.
-    function getBlockPerEra() external view returns (uint40);
-
-    /// @notice Returns the number of blocks per slot.
-    /// @return blockPerSlot Number of blocks per slot.
-    function getBlockPerSlot() external view returns (uint40);
-
     /// @notice Returns the current era and slot within the sliding window.
     /// @return era Current era number.
     /// @return slot Current slot number.
     function currentEraAndSlot() external view returns (uint256 era, uint8 slot);
-
-    /// @notice Returns the size of the sliding window frame in blocks.
-    /// @return frameSizeInBlockLength Size of the frame in blocks.
-    function getFrameSizeInBlockLength() external view returns (uint40);
-
-    /// @notice Returns the size of the sliding window frame in slots.
-    /// @return frameSizeInSlotLength Size of the frame in slots.
-    function getFrameSizeInSlotLength() external view returns (uint8);
-
-    /// @notice Returns the size of the sliding window frame in eras.
-    /// @return frameSizeInEraLength Size of the frame in eras.
-    function getFrameSizeInEraLength() external view returns (uint8);
 
     /// @notice Returns the current frame boundaries in terms of eras and slots.
     /// @return fromEra Starting era of the current frame.
@@ -55,11 +35,31 @@ interface ISlidingWindow {
     /// @return toSlot Ending slot within the ending era of the safe frame.
     function safeFrame() external view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot);
 
-    /// @notice Returns the number of slots per era.
-    /// @return slotPerEra Number of slots per era.
-    function getSlotPerEra() external view returns (uint8);
+    /// @notice Returns the number of blocks per era.
+    /// @return blockPerEra Number of blocks per era.
+    function getBlockPerEra() external view returns (uint40);
+
+    /// @notice Returns the number of blocks per slot.
+    /// @return blockPerSlot Number of blocks per slot.
+    function getBlockPerSlot() external view returns (uint40);
+
+    /// @notice Returns the size of the sliding window frame in blocks.
+    /// @return frameSizeInBlockLength Size of the frame in blocks.
+    function getFrameSizeInBlockLength() external view returns (uint40);
+
+    /// @notice Returns the size of the sliding window frame in eras.
+    /// @return frameSizeInEraLength Size of the frame in eras.
+    function getFrameSizeInEraLength() external view returns (uint8);
+
+    /// @notice Returns the size of the sliding window frame in slots.
+    /// @return frameSizeInSlotLength Size of the frame in slots.
+    function getFrameSizeInSlotLength() external view returns (uint8);
 
     /// @notice Retrieves the frame size in era and slot length from the sliding window state.
     /// @return An array containing frame size in era and slot length.
     function getFrameSizeInEraAndSlotLength() external view returns (uint8[2] memory);
+
+    /// @notice Returns the number of slots per era.
+    /// @return slotPerEra Number of slots per era.
+    function getSlotPerEra() external view returns (uint8);
 }
