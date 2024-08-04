@@ -97,6 +97,7 @@ library SortedCircularDoublyLinkedList {
     }
 
     /// @notice Get the index of the next node in the list.
+    /// @dev Accesses the `_nodes` mapping in the `List` structure to get the index of the next node.
     /// @param self The list.
     /// @param index The index of the current node.
     /// @return The index of the next node.
@@ -105,6 +106,7 @@ library SortedCircularDoublyLinkedList {
     }
 
     /// @notice Get the index of the previous node in the list.
+    /// @dev Accesses the `_nodes` mapping in the `List` structure to get the index of the previous node.
     /// @param self The list.
     /// @param index The index of the current node.
     /// @return The index of the previous node.
