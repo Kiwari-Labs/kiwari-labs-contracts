@@ -1,12 +1,12 @@
 import {expect} from "chai";
-import {deployERC20EXPBase, mineBlock, skipToBlock} from "../utils.test";
+import {deployERC20EXPBase, mineBlock, skipToBlock} from "../../utils.test";
 import {
   ERC20_INSUFFICIENT_BALANCE,
   ERC20_INVALID_RECEIVER,
   ERC20_INVALID_SENDER,
   EVENT_TRANSFER,
   ZERO_ADDRESS,
-} from "../constant.test";
+} from "../../constant.test";
 
 export const run = async () => {
   describe("Transfer", async function () {

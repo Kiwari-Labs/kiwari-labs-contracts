@@ -1,6 +1,6 @@
 import {expect} from "chai";
-import {calculateSlidingWindowState, deployERC20EXPBase, mineBlock} from "../utils.test";
-import {ERC20_EXP_NAME, ERC20_EXP_SYMBOL} from "../constant.test";
+import {calculateSlidingWindowState, deployERC20EXPBase, mineBlock} from "../../utils.test";
+import {ERC20_EXP_NAME, ERC20_EXP_SYMBOL} from "../../constant.test";
 
 export const run = async () => {
   describe("General", async function () {
