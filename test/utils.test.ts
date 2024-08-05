@@ -18,8 +18,6 @@ import {
   TWO_BITS,
   SLOT_PER_ERA,
   THREE_BITS,
-  ERC20_EXP_FRAME_SIZE,
-  ERC20_EXP_SLOT_SIZE,
   ERC20_EXP_EXPIRE_PERIOD,
   LIGHT_WEIGHT_ERC20_EXP_BASE_CONTRACT,
   ERC20_EXP_BASE_CONTRACT,
@@ -27,6 +25,7 @@ import {
   SLIDING_WINDOW_LIBRARY_CONTRACT,
 } from "./constant.test";
 
+// tools
 export const latestBlock = async function () {
   return await time.latestBlock();
 };
@@ -37,86 +36,6 @@ export const mineBlock = async function (blocks: number = 1, options: {interval?
 
 export const skipToBlock = async function (target: number) {
   await mine(target - (await time.latestBlock()));
-};
-
-const deployERC20BaseSelector = async function (
-  light: boolean,
-  blockPeriod: number,
-  frameSize: number,
-  slotSize: number,
-) {
-  const type = light ? LIGHT_WEIGHT_ERC20_EXP_BASE_CONTRACT : ERC20_EXP_BASE_CONTRACT;
-  const [deployer, alice, bob, jame] = await ethers.getSigners();
-
-  const ERC20EXP = await ethers.getContractFactory(type, deployer);
-  let erc20exp;
-  if (light) {
-    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize);
-  } else {
-    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize, slotSize);
-  }
-  await erc20exp.deployed();
-
-  return {
-    erc20exp,
-    deployer,
-    alice,
-    bob,
-    jame,
-  };
-};
-
-const deployERC20WhiteListSelector = async function (light: boolean) {
-  const type = light ? LIGHT_WEIGHT_ERC20_EXP_WHITELIST_CONTRACT : ERC20_EXP_WHITELIST_CONTRACT;
-  const [deployer, alice, bob, jame] = await ethers.getSigners();
-
-  const ERC20EXP = await ethers.getContractFactory(type, deployer);
-  let erc20exp;
-  if (light) {
-    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, ERC20_EXP_BLOCK_PERIOD, ERC20_EXP_EXPIRE_PERIOD);
-  } else {
-    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, ERC20_EXP_BLOCK_PERIOD, ERC20_EXP_EXPIRE_PERIOD);
-    // @TODO refactor to support customized slot size.
-  }
-  await erc20exp.deployed();
-
-  return {
-    erc20exp,
-    deployer,
-    alice,
-    bob,
-    jame,
-  };
-};
-
-const deploySlidingWindowSelector = async function (
-  light: boolean,
-  startBlockNumber: number,
-  blockPeriod: number,
-  frameSize: number,
-  slotSize?: number,
-) {
-  const type = light ? LIGHT_WEIGHT_SLIDING_WINDOW_CONTRACT : SLIDING_WINDOW_CONTRACT;
-  const [deployer, alice, bob, jame] = await ethers.getSigners();
-
-  const SlidingWindow = await ethers.getContractFactory(type, deployer);
-
-  let slidingWindow;
-  if (light) {
-    slidingWindow = await SlidingWindow.deploy(startBlockNumber, blockPeriod, frameSize);
-  } else {
-    slidingWindow = await SlidingWindow.deploy(startBlockNumber, blockPeriod, frameSize, slotSize);
-  }
-
-  await slidingWindow.deployed();
-
-  return {
-    slidingWindow,
-    deployer,
-    alice,
-    bob,
-    jame,
-  };
 };
 
 export const padIndexToData = function (index: Number) {
@@ -214,6 +133,106 @@ export const getAddress = async function (account: Signer | Contract) {
   return (await account.getAddress()).toLowerCase();
 };
 
+// abstracts
+
+const deploySlidingWindowSelector = async function (
+  light: boolean,
+  startBlockNumber: number,
+  blockPeriod: number,
+  frameSize: number,
+  slotSize?: number,
+) {
+  const type = light ? LIGHT_WEIGHT_SLIDING_WINDOW_CONTRACT : SLIDING_WINDOW_CONTRACT;
+  const [deployer, alice, bob, jame] = await ethers.getSigners();
+
+  const SlidingWindow = await ethers.getContractFactory(type, deployer);
+
+  let slidingWindow;
+  if (light) {
+    slidingWindow = await SlidingWindow.deploy(startBlockNumber, blockPeriod, frameSize);
+  } else {
+    slidingWindow = await SlidingWindow.deploy(startBlockNumber, blockPeriod, frameSize, slotSize);
+  }
+
+  await slidingWindow.deployed();
+
+  return {
+    slidingWindow,
+    deployer,
+    alice,
+    bob,
+    jame,
+  };
+};
+
+export const deployLightWeightSlidingWindow = async function ({
+  startBlockNumber = 100, // start at a current block.number
+  blockPeriod = 400, // 400ms per block
+  frameSize = 2, // frame size 2 slot
+}) {
+  return deploySlidingWindowSelector(true, startBlockNumber, blockPeriod, frameSize);
+};
+
+export const deploySlidingWindow = async function ({
+  startBlockNumber = 100, // start at a current block.number
+  blockPeriod = 400, // 400ms per block
+  frameSize = 2, // frame size 2 slot
+  slotSize = 4, // 4 slot per era
+}) {
+  return deploySlidingWindowSelector(false, startBlockNumber, blockPeriod, frameSize, slotSize);
+};
+
+// TODO: Re-test the cases below. //////////////////////////////////
+const deployERC20BaseSelector = async function (
+  light: boolean,
+  blockPeriod: number,
+  frameSize: number,
+  slotSize: number,
+) {
+  const type = light ? LIGHT_WEIGHT_ERC20_EXP_BASE_CONTRACT : ERC20_EXP_BASE_CONTRACT;
+  const [deployer, alice, bob, jame] = await ethers.getSigners();
+
+  const ERC20EXP = await ethers.getContractFactory(type, deployer);
+  let erc20exp;
+  if (light) {
+    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize);
+  } else {
+    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize, slotSize);
+  }
+  await erc20exp.deployed();
+
+  return {
+    erc20exp,
+    deployer,
+    alice,
+    bob,
+    jame,
+  };
+};
+
+const deployERC20WhiteListSelector = async function (light: boolean) {
+  const type = light ? LIGHT_WEIGHT_ERC20_EXP_WHITELIST_CONTRACT : ERC20_EXP_WHITELIST_CONTRACT;
+  const [deployer, alice, bob, jame] = await ethers.getSigners();
+
+  const ERC20EXP = await ethers.getContractFactory(type, deployer);
+  let erc20exp;
+  if (light) {
+    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, ERC20_EXP_BLOCK_PERIOD, ERC20_EXP_EXPIRE_PERIOD);
+  } else {
+    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, ERC20_EXP_BLOCK_PERIOD, ERC20_EXP_EXPIRE_PERIOD);
+    // @TODO refactor to support customized slot size.
+  }
+  await erc20exp.deployed();
+
+  return {
+    erc20exp,
+    deployer,
+    alice,
+    bob,
+    jame,
+  };
+};
+
 export const deployERC20EXPBase = async function ({
   blockPeriod = 400, // 400ms per block
   frameSize = 2, // frame size 2 slot
@@ -237,23 +256,7 @@ export const deployERC20EXP = async function () {
 export const deployLightWeightERC20EXP = async function () {
   return deployERC20WhiteListSelector(true);
 };
-
-export const deployLightWeightSlidingWindow = async function ({
-  startBlockNumber = 100, // start at a current block.number
-  blockPeriod = 400, // 400ms per block
-  frameSize = 2, // frame size 2 slot
-}) {
-  return deploySlidingWindowSelector(true, startBlockNumber, blockPeriod, frameSize);
-};
-
-export const deploySlidingWindow = async function ({
-  startBlockNumber = 100, // start at a current block.number
-  blockPeriod = 400, // 400ms per block
-  frameSize = 2, // frame size 2 slot
-  slotSize = 4, // 4 slot per era
-}) {
-  return deploySlidingWindowSelector(false, startBlockNumber, blockPeriod, frameSize, slotSize);
-};
+//////////////////////////////////////////////////////////////////////
 
 // libraries
 const deployDoublyListLibrarySelector = async function (light: boolean, autoList: boolean, len: number) {
