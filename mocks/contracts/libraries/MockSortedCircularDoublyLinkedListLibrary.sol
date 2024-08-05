@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.5.0 <0.9.0;
 
-import "../../contracts/libraries/SortedCircularDoublyLinkedList.sol";
+import "../../../contracts/libraries/SortedCircularDoublyLinkedList.sol";
 
-contract MockSortedCircularDoublyLinkedList {
+contract MockSortedCircularDoublyLinkedListLibrary {
     using SortedCircularDoublyLinkedList for SortedCircularDoublyLinkedList.List;
 
     SortedCircularDoublyLinkedList.List public list;

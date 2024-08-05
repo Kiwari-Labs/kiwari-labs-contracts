@@ -1,11 +1,11 @@
 import {expect} from "chai";
-import {deployLightWeightDoublyList} from "../utils.test";
+import {deployDoublyListLibrary, padIndexToData} from "../../utils.test";
 
 export const run = async () => {
   describe("Integration", async function () {
     it("[HAPPY] integration correctly", async function () {
       const len = 10;
-      const {doublyList} = await deployLightWeightDoublyList({
+      const {doublyList} = await deployDoublyListLibrary({
         autoList: true,
         len: len,
       });
@@ -21,7 +21,8 @@ export const run = async () => {
 
       for (let i = 0; i < len; i++) {
         const index = i + 1;
-        await doublyList.insert(index);
+        const data = padIndexToData(index);
+        await doublyList.insert(index, data);
         expect(await doublyList.exist(index)).to.equal(true);
       }
     });

@@ -9,8 +9,8 @@ import {
   ERC20_EXP_SYMBOL,
   LIGHT_WEIGHT_ERC20_EXP_WHITELIST_CONTRACT,
   LIGHT_WEIGHT_SLIDING_WINDOW_CONTRACT,
-  LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT,
-  SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT,
+  LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_LIBRARY_CONTRACT,
+  SORTED_CIRCULAR_DOUBLY_LINKED_LIST_LIBRARY_CONTRACT,
   SLIDING_WINDOW_CONTRACT,
   SlidingWindowState,
   YEAR_IN_MILLISECONDS,
@@ -23,6 +23,8 @@ import {
   ERC20_EXP_EXPIRE_PERIOD,
   LIGHT_WEIGHT_ERC20_EXP_BASE_CONTRACT,
   ERC20_EXP_BASE_CONTRACT,
+  LIGHT_WEIGHT_SLIDING_WINDOW_LIBRARY_CONTRACT,
+  SLIDING_WINDOW_LIBRARY_CONTRACT,
 } from "./constant.test";
 
 export const latestBlock = async function () {
@@ -80,43 +82,6 @@ const deployERC20WhiteListSelector = async function (light: boolean) {
 
   return {
     erc20exp,
-    deployer,
-    alice,
-    bob,
-    jame,
-  };
-};
-
-const deployDoublyListSelector = async function (light: boolean, autoList: boolean, len: number) {
-  const type = light
-    ? LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT
-    : SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT;
-
-  const [deployer, alice, bob, jame] = await ethers.getSigners();
-
-  const DoublyList = await ethers.getContractFactory(type, deployer);
-  const doublyList = await DoublyList.deploy();
-  await doublyList.deployed();
-
-  // To automatically generate the list.
-  // [1, 2, 3, ... , 8, 9, 10]
-  if (autoList) {
-    if (type === LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT) {
-      for (let i = 0; i < len; i++) {
-        const index = i + 1;
-        await doublyList.insert(index);
-      }
-    } else {
-      for (let i = 0; i < len; i++) {
-        const index = i + 1;
-        const data = padIndexToData(index);
-        await doublyList.insert(index, data);
-      }
-    }
-  }
-
-  return {
-    doublyList,
     deployer,
     alice,
     bob,
@@ -273,14 +238,6 @@ export const deployLightWeightERC20EXP = async function () {
   return deployERC20WhiteListSelector(true);
 };
 
-export const deployLightWeightDoublyList = async function ({autoList = false, len = 10} = {}) {
-  return deployDoublyListSelector(true, autoList, len);
-};
-
-export const deployDoublyList = async function ({autoList = false, len = 10} = {}) {
-  return deployDoublyListSelector(false, autoList, len);
-};
-
 export const deployLightWeightSlidingWindow = async function ({
   startBlockNumber = 100, // start at a current block.number
   blockPeriod = 400, // 400ms per block
@@ -296,4 +253,97 @@ export const deploySlidingWindow = async function ({
   slotSize = 4, // 4 slot per era
 }) {
   return deploySlidingWindowSelector(false, startBlockNumber, blockPeriod, frameSize, slotSize);
+};
+
+// libraries
+const deployDoublyListLibrarySelector = async function (light: boolean, autoList: boolean, len: number) {
+  const type = light
+    ? LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_LIBRARY_CONTRACT
+    : SORTED_CIRCULAR_DOUBLY_LINKED_LIST_LIBRARY_CONTRACT;
+
+  const [deployer, alice, bob, jame] = await ethers.getSigners();
+
+  const DoublyList = await ethers.getContractFactory(type, deployer);
+  const doublyList = await DoublyList.deploy();
+  await doublyList.deployed();
+
+  // To automatically generate the list.
+  // [1, 2, 3, ... , 8, 9, 10]
+  if (autoList) {
+    if (type === LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_LIBRARY_CONTRACT) {
+      for (let i = 0; i < len; i++) {
+        const index = i + 1;
+        await doublyList.insert(index);
+      }
+    } else {
+      for (let i = 0; i < len; i++) {
+        const index = i + 1;
+        const data = padIndexToData(index);
+        await doublyList.insert(index, data);
+      }
+    }
+  }
+
+  return {
+    doublyList,
+    deployer,
+    alice,
+    bob,
+    jame,
+  };
+};
+
+export const deployLightWeightDoublyListLibrary = async function ({autoList = false, len = 10} = {}) {
+  return deployDoublyListLibrarySelector(true, autoList, len);
+};
+
+export const deployDoublyListLibrary = async function ({autoList = false, len = 10} = {}) {
+  return deployDoublyListLibrarySelector(false, autoList, len);
+};
+
+const deploySlidingWindowSelectorLibrary = async function (
+  light: boolean,
+  startBlockNumber: number,
+  blockPeriod: number,
+  frameSize: number,
+  slotSize?: number,
+) {
+  const type = light ? LIGHT_WEIGHT_SLIDING_WINDOW_LIBRARY_CONTRACT : SLIDING_WINDOW_LIBRARY_CONTRACT;
+  const [deployer, alice, bob, jame] = await ethers.getSigners();
+
+  const SlidingWindow = await ethers.getContractFactory(type, deployer);
+
+  let slidingWindow;
+  if (light) {
+    slidingWindow = await SlidingWindow.deploy(startBlockNumber, blockPeriod, frameSize);
+  } else {
+    slidingWindow = await SlidingWindow.deploy(startBlockNumber, blockPeriod, frameSize, slotSize);
+  }
+
+  await slidingWindow.deployed();
+
+  return {
+    slidingWindow,
+    deployer,
+    alice,
+    bob,
+    jame,
+  };
+};
+
+export const deployLightWeightSlidingWindowLibrary = async function ({
+  startBlockNumber = 100, // start at a current block.number
+  blockPeriod = 400, // 400ms per block
+  frameSize = 2, // frame size 2 slot
+}) {
+  return deploySlidingWindowSelectorLibrary(true, startBlockNumber, blockPeriod, frameSize);
+};
+
+export const deploySlidingWindowLibrary = async function ({
+  startBlockNumber = 100, // start at a current block.number
+  blockPeriod = 400, // 400ms per block
+  frameSize = 2, // frame size 2 slot
+  slotSize = 4, // 4 slot per era
+}) {
+  return deploySlidingWindowSelectorLibrary(false, startBlockNumber, blockPeriod, frameSize, slotSize);
 };

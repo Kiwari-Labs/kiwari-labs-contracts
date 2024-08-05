@@ -1,16 +1,21 @@
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
+// abstracts
 export const ERC20_EXP_BASE_CONTRACT = "MockERC20EXPBase";
 export const LIGHT_WEIGHT_ERC20_EXP_BASE_CONTRACT = "MockLightWeightERC20EXPBase";
-
-export const ERC20_EXP_WHITELIST_CONTRACT = "MockERC20EXPWhitelist";
-export const LIGHT_WEIGHT_ERC20_EXP_WHITELIST_CONTRACT = "MockLightWeightERC20EXPWhitelist";
-
 export const SLIDING_WINDOW_CONTRACT = "MockSlidingWindow";
 export const LIGHT_WEIGHT_SLIDING_WINDOW_CONTRACT = "MockLightWeightSlidingWindow";
 
-export const SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT = "MockSortedCircularDoublyLinkedList";
-export const LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_CONTRACT = "MockLightWeightSortedCircularDoublyLinkedList";
+// extensions
+export const ERC20_EXP_WHITELIST_CONTRACT = "MockERC20EXPWhitelist";
+export const LIGHT_WEIGHT_ERC20_EXP_WHITELIST_CONTRACT = "MockLightWeightERC20EXPWhitelist";
+
+// libraries
+export const SLIDING_WINDOW_LIBRARY_CONTRACT = "MockSlidingWindowLibrary";
+export const LIGHT_WEIGHT_SLIDING_WINDOW_LIBRARY_CONTRACT = "MockLightWeightSlidingWindowLibrary";
+export const SORTED_CIRCULAR_DOUBLY_LINKED_LIST_LIBRARY_CONTRACT = "MockSortedCircularDoublyLinkedListLibrary";
+export const LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_LIBRARY_CONTRACT =
+  "MockLightWeightSortedCircularDoublyLinkedListLibrary";
 
 export const ERC20_EXP_EXPIRE_PERIOD = 4;
 
