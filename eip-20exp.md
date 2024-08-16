@@ -134,8 +134,10 @@ Similar idea of index in each page of pagination.
 ** first index of slot is 0
 
 ## Security Considerations
-all address that not registered as whitelist address will be use sliding window algorithm by default.
+- All address that not registered as whitelist address will be use sliding window algorithm by default.
 Sliding window algorithm is not update the 
+
+- Need to be avoiding to create a [dust](https://www.investopedia.com/terms/b/bitcoin-dust.asp) transaction from actions transfer, minting and burning.
 
 ## Copyright
 
