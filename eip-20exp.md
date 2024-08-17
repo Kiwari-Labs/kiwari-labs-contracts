@@ -134,10 +134,10 @@ Similar idea of index in each page of pagination.
 ** first index of slot is 0
 
 ## Security Considerations
-- All address that not registered as whitelist address will be use sliding window algorithm by default.
-Sliding window algorithm is not update the 
-
+- Run out of gas problem due to the operation consume high gas used if transfer multiple group of small token.
+- Exceeds block gas limit if the blockchain have block gas limit lower than the gas used of the transaction. 
 - Need to be avoiding to create a [dust](https://www.investopedia.com/terms/b/bitcoin-dust.asp) transaction from actions transfer, minting and burning.
+- State bloat growth the database size.
 
 ## Copyright
 
