@@ -1,10 +1,10 @@
 import {expect} from "chai";
 import {deployERC20EXPBase} from "../../utils.test";
-import {ERC20_INVALID_APPROVER, ERC20_INVALID_SPENDER, EVENT_APPROVAL, EVENT_TRANSFER, ZERO_ADDRESS} from "../../constant.test";
+import {ERC20_INSUFFICIENT_ALLOWANCE, EVENT_APPROVAL, EVENT_TRANSFER, ZERO_ADDRESS} from "../../constant.test";
 
 export const run = async () => {
-  describe("Approval", async function () {
-    it("[HAPPY] approve correctly", async function () {
+  describe("TransferFrom", async function () {
+    it("[HAPPY] transfer from alice to bob correctly", async function () {
       const {erc20exp, alice, bob} = await deployERC20EXPBase({});
 
       const amount = 100;
@@ -18,13 +18,16 @@ export const run = async () => {
         .withArgs(await alice.getAddress(), await bob.getAddress(), amount);
 
       expect(await erc20exp.allowance(await alice.getAddress(), await bob.getAddress())).to.equal(amount);
+
+      await expect(erc20exp.connect(bob).transferFrom(await alice.getAddress(), await bob.getAddress(), amount))
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .withArgs(await alice.getAddress(), await bob.getAddress(), amount);
     });
 
-    it("[HAPPY] maximum allowance", async function () {
+    it("[HAPPY] alice approve maximum and transfer to bob correctly", async function () {
       const {erc20exp, alice, bob} = await deployERC20EXPBase({});
 
       const amount = 100;
-
       const MAX_INT = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
       await expect(erc20exp.mint(await alice.getAddress(), amount))
@@ -36,9 +39,13 @@ export const run = async () => {
         .withArgs(await alice.getAddress(), await bob.getAddress(), MAX_INT);
 
       expect(await erc20exp.allowance(await alice.getAddress(), await bob.getAddress())).to.equal(MAX_INT);
+
+      await expect(erc20exp.connect(bob).transferFrom(await alice.getAddress(), await bob.getAddress(), amount))
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .withArgs(await alice.getAddress(), await bob.getAddress(), amount);
     });
 
-    it("[UNHAPPY] invalid spender", async function () {
+    it("[UNHAPPY] insufficient allowance", async function () {
       const {erc20exp, alice, bob} = await deployERC20EXPBase({});
 
       const amount = 100;
@@ -47,19 +54,15 @@ export const run = async () => {
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, await alice.getAddress(), amount);
 
-      await expect(erc20exp.connect(alice).approve(ZERO_ADDRESS, amount))
-        .to.be.revertedWithCustomError(erc20exp, ERC20_INVALID_SPENDER)
-        .withArgs(ZERO_ADDRESS);
-    });
+      await expect(erc20exp.connect(alice).approve(await bob.getAddress(), amount))
+        .to.be.emit(erc20exp, EVENT_APPROVAL)
+        .withArgs(await alice.getAddress(), await bob.getAddress(), amount);
 
-    it("[UNHAPPY] invalid approver", async function () {
-      const {erc20exp, alice} = await deployERC20EXPBase({});
+      expect(await erc20exp.allowance(await alice.getAddress(), await bob.getAddress())).to.equal(amount);
 
-      const amount = 100;
-
-      await expect(erc20exp.badApprove(ZERO_ADDRESS, await alice.getAddress(), amount))
-        .to.be.revertedWithCustomError(erc20exp, ERC20_INVALID_APPROVER)
-        .withArgs(ZERO_ADDRESS);
+      await expect(erc20exp.connect(bob).transferFrom(await alice.getAddress(), await bob.getAddress(), amount * 2))
+        .to.be.revertedWithCustomError(erc20exp, ERC20_INSUFFICIENT_ALLOWANCE)
+        .withArgs(await bob.getAddress(), amount, amount * 2);
     });
   });
 };
