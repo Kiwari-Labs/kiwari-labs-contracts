@@ -36,6 +36,7 @@
     "hardhat-deploy": "^0.11.44",
     "hardhat-gas-reporter": "^2.2.0",
     "hardhat-ignore-warnings": "^0.2.11",
+    "hardhat-storage-layout": "^0.1.7",
     "lodash": "^4.17.21",
     "prettier": "^3.1.0",
     "prettier-plugin-solidity": "^1.2.0",

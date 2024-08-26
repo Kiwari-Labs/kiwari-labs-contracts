@@ -81,12 +81,11 @@ This contract creates an abstract implementation that adopts the sliding window 
 
     mapping(address => mapping(uint256 => mapping(uint8 => Slot))) private _balances;
 ```
-With this struct `Slot` it's providing abstract loop in horizontal way more efficient to calculate usable balance of the account because it's provide `slotBalance` which is act as suffix balance so  
-you don't need to get to iterate or traversal over the `list` for each `Slot` to calculate the entire slot balance if the slot can presume not expire. otherwise struct `Slot` also providing vertical in a sorted list.
+With this struct `Slot` it provides an abstract loop in a horizontal way more efficient for calculating the usable balance of the account because it provides `slotBalance` which acts as suffix balance so you don't need to get to iterate or traversal over the `list` for each `Slot` to calculate the entire slot balance if the slot can presume not to expire. otherwise struct `Slot` also provides vertical in a sorted list.
 
 ##### Buffer Slot
 
-In the design sliding window algorithm need to be coarse because it's deterministic and fixed size to ensure that usable balance that nearly expire will be include in usable balance of the account it's need to buffered one slot
+In the design sliding window algorithm needs to be coarse because it's deterministic and fixed in size to ensure that a usable balance that nearly expires will be included in the usable balance of the account it's needs to buffered one slot.
 
 - [ ] This contract provide loyalty reward like, it's expirable so it's not suitable to have `MAX_SUPPLY`.
 - [ ] This contract have `gasUsed` per interaction higher than original ERC20.
@@ -139,6 +138,6 @@ Similar idea of index in each page of pagination.
 - Need to be avoiding to create a [dust](https://www.investopedia.com/terms/b/bitcoin-dust.asp) transaction from actions transfer, minting and burning.
 - State bloat growth the database size.
 
-## Copyright
+## Copyright and License
 
-Copyright and related rights waived via [CC0](../LICENSE.md).
+[BSL-1.1](./LICENSE.md).
