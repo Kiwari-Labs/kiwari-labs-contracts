@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {deploySlidingWindow, calculateSlidingWindowState} from "../utils.test";
+import {deploySlidingWindow, calculateSlidingWindowState, mineBlock, latestBlock} from "../../utils.test";
 import {
   INVALID_BLOCK_TIME,
   INVALID_FRAME_SIZE,
@@ -10,7 +10,7 @@ import {
   MINIMUM_BLOCK_TIME_IN_MILLISECONDS,
   MINIMUM_FRAME_SIZE,
   MINIMUM_SLOT_PER_ERA,
-} from "../constant.test";
+} from "../../constant.test";
 
 export const run = async () => {
   describe("General", async function () {
@@ -169,6 +169,66 @@ export const run = async () => {
         slidingWindow,
         INVALID_SLOT_PER_ERA,
       );
+    });
+
+    it("[HAPPY] query frame", async function () {
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+      const startBlockNumber = 0;
+
+      const {slidingWindow} = await deploySlidingWindow({blockPeriod, slotSize, frameSize, startBlockNumber});
+
+      const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
+
+      await mineBlock(Number(self._blockPerSlot) * 5);
+
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["frame()"]();
+
+      expect(fromEra).to.equal(0);
+      expect(toEra).to.equal(1);
+
+      expect(fromSlot).to.equal(3);
+      expect(toSlot).to.equal(1);
+    });
+
+    it("[HAPPY] query safe frame", async function () {
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+      const startBlockNumber = 0;
+
+      const {slidingWindow} = await deploySlidingWindow({blockPeriod, slotSize, frameSize, startBlockNumber});
+
+      const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
+
+      await mineBlock(Number(self._blockPerSlot) * 5);
+
+      const [fromEra, toEra, fromSlot, toSlot] = await slidingWindow["safeFrame()"]();
+
+      expect(fromEra).to.equal(0);
+      expect(toEra).to.equal(1);
+
+      expect(fromSlot).to.equal(2);
+      expect(toSlot).to.equal(1);
+    });
+
+    it("[HAPPY] query calculate era and slot", async function () {
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+      const startBlockNumber = 0;
+
+      const {slidingWindow} = await deploySlidingWindow({blockPeriod, slotSize, frameSize, startBlockNumber});
+
+      const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
+
+      await mineBlock(Number(self._blockPerSlot) * 5);
+
+      let [era, slot] = await slidingWindow.currentEraAndSlot();
+
+      expect(era).to.equal(1);
+      expect(slot).to.equal(1);
     });
   });
 };

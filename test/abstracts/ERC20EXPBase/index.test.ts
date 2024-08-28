@@ -2,6 +2,8 @@ import * as General from "./General.test";
 import * as Mint from "./Mint.test";
 import * as Burn from "./Burn.test";
 import * as Transfer from "./Transfer.test";
+import * as Approval from "./Approval.test";
+import * as TransferFrom from "./TransferFrom.test";
 
 export const run = async () => {
   describe("ERC20EXPBase", async function () {
@@ -9,5 +11,7 @@ export const run = async () => {
     Mint.run();
     Burn.run();
     Transfer.run();
+    Approval.run();
+    TransferFrom.run();
   });
 };

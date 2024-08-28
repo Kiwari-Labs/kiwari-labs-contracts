@@ -1,6 +1,6 @@
 import {expect} from "chai";
-import {calculateSlidingWindowState, deployERC20EXPBase, mineBlock} from "../utils.test";
-import {ERC20_EXP_NAME, ERC20_EXP_SYMBOL} from "../constant.test";
+import {calculateSlidingWindowState, deployERC20EXPBase, mineBlock} from "../../utils.test";
+import {ERC20_EXP_NAME, ERC20_EXP_SYMBOL} from "../../constant.test";
 
 export const run = async () => {
   describe("General", async function () {
@@ -122,6 +122,12 @@ export const run = async () => {
 
       // Due to token can expiration there is no actual totalSupply.
       expect(await erc20exp.totalSupply()).to.equal(0);
+    });
+
+    it("[HAPPY] query decimals", async function () {
+      const {erc20exp} = await deployERC20EXPBase({});
+
+      expect(await erc20exp.decimals()).to.equal(18);
     });
   });
 };

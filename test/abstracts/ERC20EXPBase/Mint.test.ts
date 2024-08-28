@@ -1,6 +1,6 @@
 import {expect} from "chai";
-import {deployERC20EXPBase, mineBlock, skipToBlock} from "../utils.test";
-import {ERC20_INVALID_RECEIVER, EVENT_TRANSFER, ZERO_ADDRESS} from "../constant.test";
+import {deployERC20EXPBase, mineBlock, skipToBlock} from "../../utils.test";
+import {ERC20_INVALID_RECEIVER, EVENT_TRANSFER, ZERO_ADDRESS} from "../../constant.test";
 
 export const run = async () => {
   describe("Mint", async function () {

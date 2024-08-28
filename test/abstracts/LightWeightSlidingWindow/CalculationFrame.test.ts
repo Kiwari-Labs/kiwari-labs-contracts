@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {deployLightWeightSlidingWindow} from "../utils.test";
+import {deployLightWeightSlidingWindow} from "../../utils.test";
 
 export const run = async () => {
   describe("CalculationFrame", async function () {

@@ -1,11 +1,12 @@
 import {expect} from "chai";
-import {deployLightWeightSlidingWindow} from "../utils.test";
+import {deploySlidingWindow} from "../../utils.test";
 
 export const run = async () => {
   describe("CalculationEraAndSlot", async function () {
     it("[HAPPY] calculate correctly era and slot if the current block is in the first slot period of the first era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
+      const slotSize = 4;
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
@@ -18,7 +19,7 @@ export const run = async () => {
       //    |
       //    * <-- the current block.
 
-      const {slidingWindow} = await deployLightWeightSlidingWindow({startBlockNumber, blockPeriod, frameSize});
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
       const blockNumberList = [
         Math.floor(blockPeriodSlot * 0.25) + startBlockNumber,
@@ -36,6 +37,7 @@ export const run = async () => {
     it("[HAPPY] calculate correctly era and slot if the current block is in the second slot period of the first era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
+      const slotSize = 4;
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
@@ -48,7 +50,7 @@ export const run = async () => {
       //              |
       //              * <-- the current block.
 
-      const {slidingWindow} = await deployLightWeightSlidingWindow({startBlockNumber, blockPeriod, frameSize});
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
       const blockNumberList = [
         Math.floor(blockPeriodSlot * 1.25) + startBlockNumber,
@@ -66,6 +68,7 @@ export const run = async () => {
     it("[HAPPY] calculate correctly era and slot if the current block is in the third slot period of the first era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
+      const slotSize = 4;
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
@@ -78,7 +81,7 @@ export const run = async () => {
       //                        |
       //                        * <-- the current block.
 
-      const {slidingWindow} = await deployLightWeightSlidingWindow({startBlockNumber, blockPeriod, frameSize});
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
       const blockNumberList = [
         Math.floor(blockPeriodSlot * 2.25) + startBlockNumber,
@@ -96,6 +99,7 @@ export const run = async () => {
     it("[HAPPY] calculate correctly era and slot if the current block is in the fourth slot period of the first era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
+      const slotSize = 4;
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
@@ -108,7 +112,7 @@ export const run = async () => {
       //                                  |
       //                                  * <-- the current block.
 
-      const {slidingWindow} = await deployLightWeightSlidingWindow({startBlockNumber, blockPeriod, frameSize});
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
       const blockNumberList = [
         Math.floor(blockPeriodSlot * 3.25) + startBlockNumber,
@@ -126,6 +130,7 @@ export const run = async () => {
     it("[HAPPY] calculate correctly era and slot if the current block is in the first slot period of the second era", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
+      const slotSize = 4;
       const frameSize = 2;
       const blockPeriodSlot = 19723078;
 
@@ -138,7 +143,7 @@ export const run = async () => {
       //                                            |
       //                                            * <-- the current block.
 
-      const {slidingWindow} = await deployLightWeightSlidingWindow({startBlockNumber, blockPeriod, frameSize});
+      const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
       const blockNumberList = [
         Math.floor(blockPeriodSlot * 4.25) + startBlockNumber,
@@ -159,6 +164,7 @@ export const run = async () => {
     // it("[HAPPY] calculate correctly era and slot if the current block is in the last day period of the first era", async function () {
     //   const startBlockNumber = 100;
     //   const blockPeriod = 400;
+    //   const slotSize = 4;
     //   const frameSize = 2;
     //   const blockPeriodEra = 78892315;
 
@@ -171,7 +177,7 @@ export const run = async () => {
     //   //                                        |
     //   //                                        * <-- the current block.
 
-    //   const {slidingWindow} = await deployLightWeightSlidingWindow({startBlockNumber, blockPeriod, frameSize});
+    //   const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
     //   const blockNumberList = [
     //     blockPeriodEra + startBlockNumber - 3,
@@ -195,6 +201,7 @@ export const run = async () => {
     // it("[HAPPY] calculate correctly era and slot if the current block is in the first day period of the second era", async function () {
     //   const startBlockNumber = 100;
     //   const blockPeriod = 400;
+    //   const slotSize = 4;
     //   const frameSize = 2;
     //   const blockPeriodEra = 78892315;
 
@@ -207,7 +214,7 @@ export const run = async () => {
     //   //                                          |
     //   //                                          * <-- the current block.
 
-    //   const {slidingWindow} = await deployLightWeightSlidingWindow({startBlockNumber, blockPeriod, frameSize});
+    //   const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, slotSize, frameSize});
 
     //   const blockNumberList = [
     //     // blockPeriodEra + startBlockNumber - 3,

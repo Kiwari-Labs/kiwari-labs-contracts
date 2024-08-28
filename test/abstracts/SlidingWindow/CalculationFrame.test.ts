@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {deploySlidingWindow} from "../utils.test";
+import {deploySlidingWindow} from "../../utils.test";
 
 export const run = async () => {
   describe("CalculationFrame", async function () {
