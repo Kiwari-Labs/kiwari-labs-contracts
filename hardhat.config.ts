@@ -2,7 +2,7 @@ import "@nomicfoundation/hardhat-toolbox";
 import "hardhat-gas-reporter";
 import "hardhat-deploy";
 import "hardhat-ignore-warnings";
-import 'hardhat-storage-layout';
+// import 'hardhat-storage-layout';
 
 import {HardhatUserConfig} from "hardhat/types";
 import path from "path";
