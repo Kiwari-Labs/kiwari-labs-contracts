@@ -45,8 +45,12 @@ export const INVALID_SLOT_PER_ERA = "InvalidSlotPerEra";
 export const ERC20_INVALID_SENDER = "ERC20InvalidSender";
 export const ERC20_INVALID_RECEIVER = "ERC20InvalidReceiver";
 export const ERC20_INSUFFICIENT_BALANCE = "ERC20InsufficientBalance";
+export const ERC20_INVALID_APPROVER = "ERC20InvalidApprover";
+export const ERC20_INVALID_SPENDER = "ERC20InvalidSpender";
+export const ERC20_INSUFFICIENT_ALLOWANCE = "ERC20InsufficientAllowance";
 
 export const EVENT_TRANSFER = "Transfer";
+export const EVENT_APPROVAL = "Approval";
 
 export interface SlidingWindowState extends LightWeightSlidingWindowState {
   _slotSize: Number;

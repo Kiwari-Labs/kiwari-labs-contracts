@@ -1224,7 +1224,7 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp, alice} = await deployERC20EXPBase({});
 
-      expect(erc20exp.connect(ZERO_ADDRESS).transfer(await alice.getAddress(), 1))
+      expect(erc20exp.badTransfer(ZERO_ADDRESS, await alice.getAddress(), 1))
         .to.be.revertedWithCustomError(erc20exp, ERC20_INVALID_SENDER)
         .withArgs(ZERO_ADDRESS);
     });

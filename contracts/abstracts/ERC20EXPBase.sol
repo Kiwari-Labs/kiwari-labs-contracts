@@ -342,7 +342,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @param owner The address of the token owner.
     /// @param spender The address of the spender.
     /// @param value The amount of tokens to spend from the allowance.
-    function _spendAllowance(address owner, address spender, uint256 value) private {
+    function _spendAllowance(address owner, address spender, uint256 value) internal {
         uint256 currentAllowance = _allowances[owner][spender];
         if (currentAllowance != type(uint256).max) {
             if (currentAllowance < value) {
@@ -359,7 +359,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @param owner The address of the token owner.
     /// @param spender The address allowed to spend the tokens.
     /// @param value The amount of tokens to be approved for spending.
-    function _approve(address owner, address spender, uint256 value) private {
+    function _approve(address owner, address spender, uint256 value) internal {
         _approve(owner, spender, value, true);
     }
 
@@ -371,7 +371,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @param spender The address of the spender.
     /// @param value The amount of tokens to allow.
     /// @param emitEvent Boolean flag indicating whether to emit the `Approval` event.
-    function _approve(address owner, address spender, uint256 value, bool emitEvent) private {
+    function _approve(address owner, address spender, uint256 value, bool emitEvent) internal {
         if (owner == address(0)) {
             revert ERC20InvalidApprover(address(0));
         }
@@ -390,7 +390,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @param from The address from which the tokens are transferred.
     /// @param to The address to which the tokens are transferred.
     /// @param value The amount of tokens to transfer.
-    function _transfer(address from, address to, uint256 value) private {
+    function _transfer(address from, address to, uint256 value) internal {
         if (from == address(0)) {
             revert ERC20InvalidSender(address(0));
         }
@@ -411,7 +411,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     }
 
     /// @inheritdoc IERC20Metadata
-    function decimals() external pure virtual returns (uint8) {
+    function decimals() external view virtual returns (uint8) {
         return 18;
     }
 
@@ -439,7 +439,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @inheritdoc IERC20
     function transfer(address to, uint256 value) external virtual returns (bool) {
         address from = msg.sender;
-        _update(from, to, value);
+        _transfer(from, to, value);
         return true;
     }
 
