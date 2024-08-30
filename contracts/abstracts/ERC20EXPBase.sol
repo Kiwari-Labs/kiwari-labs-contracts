@@ -411,7 +411,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     }
 
     /// @inheritdoc IERC20Metadata
-    function decimals() external pure virtual returns (uint8) {
+    function decimals() external view virtual returns (uint8) {
         return 18;
     }
 

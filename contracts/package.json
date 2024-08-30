@@ -16,5 +16,6 @@
   "keywords": [
     "smart contracts",
     "solidity"
-  ]
+  ],
+  "devDependencies": {}
 }
