@@ -13,4 +13,4 @@ $ npm install --dev @kiwari-labs/contracts
 ## License
 
 All ERC20EXP code Copyright (C) Kiwari Labs. All rights reserved.  
-kiwari-labs-contracts is released under the[BUSL-1.1](./LICENSE)  
+`@kiwari-labs/contracts` is released under the [BUSL-1.1](./LICENSE)  

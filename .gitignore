@@ -13,3 +13,6 @@ artifacts
 
 # Document generate
 docs
+
+# README.md in contracts
+contracts/README.md
