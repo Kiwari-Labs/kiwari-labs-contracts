@@ -1,13 +1,14 @@
 {
-  "name": "@kiwari-labs/contracts",
-  "version": "1.0.2",
-  "license": "Apache-2.0",
+  "name": "@kiwarilabs/contracts",
+  "private": false,
+  "version": "1.0.1",
+  "license": "BSL-1.1",
   "author": "kiwari-labs <kiwarilabs@protonmail.com> (https://github.com/Kiwari-Labs)",
   "files": [
     "**/*.sol"
   ],
   "scripts": {
-    "prepack": "bash ../script/prepare.sh"
+    "prepack": "bash ../scripts/prepare.sh"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.2"
