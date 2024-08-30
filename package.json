@@ -1,24 +1,29 @@
 {
-  "name": "@kiwari-labs/contracts",
-  "license": "BUSL-1.1",
-  "private": false,
+  "private": true,
+  "name": "@kiwari-labs/contracts-dev",
+  "version": "1.0.1",
+  "license": "Apache-2.0",
+  "author": "kiwari-labs <kiwarilabs@protonmail.com> (https://github.com/Kiwari-Labs)",
+  "files": [
+    "contracts/**/*.sol"
+  ],
   "scripts": {
     "clean": "npx hardhat clean && rm -rf cache coverage coverage.json",
     "compile": "npm run clean && npx hardhat compile --force",
     "coverage": "npx hardhat coverage --solcoverjs ./.solcover.js",
     "coverage:clean": "npm run clean && npx hardhat coverage --solcoverjs ./.solcover.js",
+    "docgen": "npx hardhat docgen",
+    "format": "yarn prettier:sol && yarn prettier:ts && yarn lint",
     "prettier:sol": "prettier --write --plugin=prettier-plugin-solidity '**/*.sol'",
     "prettier:ts": "prettier --write '**/*.ts'",
-    "format": "yarn prettier:sol && yarn prettier:ts && yarn lint",
     "run:node": "npx hardhat node",
     "test": "npx hardhat test",
-    "test:parallel": "npx hardhat test --parallel",
     "test:clean": "npm run clean && npx hardhat test",
-    "docgen": "npx hardhat docgen"
+    "test:parallel": "npx hardhat test --parallel"
   },
-  "workspaces": [
-    "contracts"
-  ],
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.2"
+  },
   "devDependencies": {
     "@ethersproject/abi": "^5.4.7",
     "@ethersproject/providers": "^5.4.7",
@@ -27,7 +32,6 @@
     "@nomicfoundation/hardhat-toolbox": "^2.0.0",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "@nomiclabs/hardhat-etherscan": "^3.1.7",
-    "@openzeppelin/contracts": "^5.0.2",
     "@typechain/ethers-v5": "^10.2.1",
     "@typechain/hardhat": "^6.1.6",
     "@types/chai": "^4.3.3",
@@ -42,9 +46,9 @@
     "hardhat-gas-reporter": "^2.2.0",
     "hardhat-ignore-warnings": "^0.2.11",
     "hardhat-storage-layout": "^0.1.7",
-    "lerna": "^8.1.8",
     "lodash": "^4.17.21",
     "prettier": "^3.1.0",
+    "prettier-package-json": "^2.8.0",
     "prettier-plugin-solidity": "^1.2.0",
     "solidity-coverage": "^0.8.5",
     "solidity-docgen": "^0.6.0-beta.36",
@@ -52,6 +56,8 @@
     "typechain": "^8.3.2",
     "typescript": "^5.2.2"
   },
-  "dependencies": {},
-  "version": "1.0.0"
+  "keywords": [
+    "smart contracts",
+    "solidity"
+  ]
 }
