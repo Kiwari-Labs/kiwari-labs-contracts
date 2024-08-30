@@ -1,5 +1,7 @@
 {
+  "name": "@kiwari-labs/contracts",
   "license": "BUSL-1.1",
+  "private": false,
   "scripts": {
     "clean": "npx hardhat clean && rm -rf cache coverage coverage.json",
     "compile": "npm run clean && npx hardhat compile --force",
@@ -14,6 +16,9 @@
     "test:clean": "npm run clean && npx hardhat test",
     "docgen": "npx hardhat docgen"
   },
+  "workspaces": [
+    "contracts"
+  ],
   "devDependencies": {
     "@ethersproject/abi": "^5.4.7",
     "@ethersproject/providers": "^5.4.7",
@@ -37,6 +42,7 @@
     "hardhat-gas-reporter": "^2.2.0",
     "hardhat-ignore-warnings": "^0.2.11",
     "hardhat-storage-layout": "^0.1.7",
+    "lerna": "^8.1.8",
     "lodash": "^4.17.21",
     "prettier": "^3.1.0",
     "prettier-plugin-solidity": "^1.2.0",
@@ -46,5 +52,6 @@
     "typechain": "^8.3.2",
     "typescript": "^5.2.2"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "version": "1.0.0"
 }
