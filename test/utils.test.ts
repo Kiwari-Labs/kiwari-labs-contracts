@@ -244,9 +244,9 @@ export const deployERC20EXPBase = async function ({
 export const deployLightWeightERC20EXPBase = async function ({
   blockPeriod = 400, // 400ms per block
   frameSize = 2, // frame size 2 slot
-  slotSize = 4, // 4 slot per era
 }) {
-  return deployERC20BaseSelector(true, blockPeriod, frameSize, slotSize);
+  // LightWeight has a fixed slot size of 4 by default.
+  return deployERC20BaseSelector(true, blockPeriod, frameSize, 0);
 };
 
 export const deployERC20EXP = async function () {
