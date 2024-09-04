@@ -438,7 +438,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
 
     /// @inheritdoc IERC20
     function transfer(address to, uint256 value) external virtual returns (bool) {
-        address from = msg.sender;
+        address from = _msgSender();
         _transfer(from, to, value);
         return true;
     }
