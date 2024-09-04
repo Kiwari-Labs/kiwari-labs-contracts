@@ -1,6 +1,12 @@
 import {expect} from "chai";
 import {deployERC20EXPBase} from "../../utils.test";
-import {ERC20_INVALID_APPROVER, ERC20_INVALID_SPENDER, EVENT_APPROVAL, EVENT_TRANSFER, ZERO_ADDRESS} from "../../constant.test";
+import {
+  ERC20_INVALID_APPROVER,
+  ERC20_INVALID_SPENDER,
+  EVENT_APPROVAL,
+  EVENT_TRANSFER,
+  ZERO_ADDRESS,
+} from "../../constant.test";
 
 export const run = async () => {
   describe("Approval", async function () {
