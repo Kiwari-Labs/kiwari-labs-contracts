@@ -1,7 +1,7 @@
 {
   "name": "@kiwarilabs/contracts",
   "private": false,
-  "version": "1.0.1",
+  "version": "1.0.1-rc1",
   "license": "BSL-1.1",
   "author": "kiwari-labs <kiwarilabs@protonmail.com> (https://github.com/Kiwari-Labs)",
   "files": [
