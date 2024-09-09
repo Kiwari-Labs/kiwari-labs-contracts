@@ -401,50 +401,50 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     }
 
     /// @inheritdoc IERC20Metadata
-    function name() external view virtual returns (string memory) {
+    function name() public view virtual returns (string memory) {
         return _name;
     }
 
     /// @inheritdoc IERC20Metadata
-    function symbol() external view virtual returns (string memory) {
+    function symbol() public view virtual returns (string memory) {
         return _symbol;
     }
 
     /// @inheritdoc IERC20Metadata
-    function decimals() external view virtual returns (uint8) {
+    function decimals() public view virtual returns (uint8) {
         return 18;
     }
 
     /// @notice Returns 0 as there is no actual total supply due to token expiration.
     /// @dev This function returns the total supply of tokens, which is constant and set to 0.
     /// @inheritdoc IERC20
-    function totalSupply() external pure virtual returns (uint256) {
+    function totalSupply() public pure virtual returns (uint256) {
         return 0;
     }
 
     /// @notice Returns the available balance of tokens for a given account.
     /// @dev Calculates and returns the available balance based on the frame.
     /// @inheritdoc IERC20
-    function balanceOf(address account) external view virtual returns (uint256) {
+    function balanceOf(address account) public view virtual returns (uint256) {
         uint256 blockNumberCache = _blockNumberProvider();
         (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
         return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
     }
 
     /// @inheritdoc IERC20
-    function allowance(address owner, address spender) external view virtual returns (uint256) {
+    function allowance(address owner, address spender) public view virtual returns (uint256) {
         return _allowances[owner][spender];
     }
 
     /// @inheritdoc IERC20
-    function transfer(address to, uint256 value) external virtual returns (bool) {
+    function transfer(address to, uint256 value) public virtual returns (bool) {
         address from = _msgSender();
         _transfer(from, to, value);
         return true;
     }
 
     /// @inheritdoc IERC20
-    function transferFrom(address from, address to, uint256 value) external virtual returns (bool) {
+    function transferFrom(address from, address to, uint256 value) public virtual returns (bool) {
         address spender = _msgSender();
         _spendAllowance(from, spender, value);
         _transfer(from, to, value);
@@ -452,7 +452,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     }
 
     /// @inheritdoc IERC20
-    function approve(address spender, uint256 value) external virtual returns (bool) {
+    function approve(address spender, uint256 value) public virtual returns (bool) {
         address owner = _msgSender();
         _approve(owner, spender, value);
         return true;

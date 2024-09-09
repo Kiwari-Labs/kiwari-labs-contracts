@@ -1,6 +1,6 @@
 import {expect} from "chai";
-import {deployERC20EXP} from "../utils.test";
-import {ZERO_ADDRESS} from "../constant.test";
+import {deployERC20EXP} from "../../utils.test";
+import {ZERO_ADDRESS} from "../../constant.test";
 import {parseEther} from "ethers/lib/utils";
 import {reset, time, mineUpTo} from "@nomicfoundation/hardhat-network-helpers";
 

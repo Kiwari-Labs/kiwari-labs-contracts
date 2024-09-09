@@ -1,6 +1,6 @@
 import {expect} from "chai";
-import {deployLightWeightERC20EXP} from "../utils.test";
-import {ERC20_EXP_NAME, ERC20_EXP_SYMBOL} from "../constant.test";
+import {deployLightWeightERC20EXP} from "../../utils.test";
+import {ERC20_EXP_NAME, ERC20_EXP_SYMBOL} from "../../constant.test";
 
 export const run = async () => {
   describe("General", async function () {

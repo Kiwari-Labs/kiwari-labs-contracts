@@ -1,6 +1,6 @@
 import {expect} from "chai";
-import {deployERC20EXP} from "../utils.test";
-import {ZERO_ADDRESS} from "../constant.test";
+import {deployERC20EXP} from "../../utils.test";
+import {ZERO_ADDRESS} from "../../constant.test";
 
 export const run = async () => {
   describe("Mint", async function () {
