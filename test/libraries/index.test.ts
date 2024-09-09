@@ -7,7 +7,7 @@ export const run = async () => {
   describe("libraries", async function () {
     LightWeightSortedCircularDoublyLinkedList.run();
     SortedCircularDoublyLinkedList.run();
-    LightWeightSlidingWindow.run()
-    SlidingWindow.run()
+    LightWeightSlidingWindow.run();
+    SlidingWindow.run();
   });
 };

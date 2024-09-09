@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {deployERC20EXPBase} from "../../utils.test";
+import {deployLightWeightERC20EXPBase} from "../../utils.test";
 import {
   ERC20_INVALID_APPROVER,
   ERC20_INVALID_SPENDER,
@@ -11,7 +11,7 @@ import {
 export const run = async () => {
   describe("Approval", async function () {
     it("[HAPPY] approve correctly", async function () {
-      const {erc20exp, alice, bob} = await deployERC20EXPBase({});
+      const {erc20exp, alice, bob} = await deployLightWeightERC20EXPBase({});
 
       const amount = 100;
 
@@ -27,7 +27,7 @@ export const run = async () => {
     });
 
     it("[HAPPY] maximum allowance", async function () {
-      const {erc20exp, alice, bob} = await deployERC20EXPBase({});
+      const {erc20exp, alice, bob} = await deployLightWeightERC20EXPBase({});
 
       const amount = 100;
 
@@ -45,7 +45,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] invalid spender", async function () {
-      const {erc20exp, alice, bob} = await deployERC20EXPBase({});
+      const {erc20exp, alice, bob} = await deployLightWeightERC20EXPBase({});
 
       const amount = 100;
 
@@ -59,7 +59,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] invalid approver", async function () {
-      const {erc20exp, alice} = await deployERC20EXPBase({});
+      const {erc20exp, alice} = await deployLightWeightERC20EXPBase({});
 
       const amount = 100;
 
