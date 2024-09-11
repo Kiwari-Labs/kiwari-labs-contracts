@@ -46,7 +46,7 @@ library TimeComparator {
     /// @param x The first block number or block time stamp to compare
     /// @param y The second block number or block time stamp to compare
     /// @return result Returns -1 if `x` is before `y`, 0 if `x` is equal to `y`, 1 if `x` is after `y`
-    function compareTo(uint x, uint y) internal pure returns (bool result) {
+    function compareTo(uint x, uint y) internal pure returns (int result) {
         return x.compareTo(y);
     }
 }

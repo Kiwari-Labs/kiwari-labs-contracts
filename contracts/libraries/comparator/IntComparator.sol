@@ -6,7 +6,6 @@ pragma solidity >=0.5.0 <0.9.0;
 /// @author Kiwari Labs
 
 library IntComparator {
-    
     /// @notice Checks if `x` is less than `y`
     /// @param x The first value to compare
     /// @param y The second value to compare
@@ -66,7 +65,7 @@ library IntComparator {
             result := not(eq(x, y))
         }
     }
-    
+
     /// @notice Compares `x` and `y` and returns an integer indicating their relationship
     /// @param x The first value to compare
     /// @param y The second value to compare
@@ -74,12 +73,11 @@ library IntComparator {
     function compareTo(int x, int y) internal pure returns (int result) {
         assembly {
             if lt(x, y) {
-                result := -1
+                result := sub(0, 1)
             }
             if gt(x, y) {
                 result := 1
             }
         }
     }
-
 }
