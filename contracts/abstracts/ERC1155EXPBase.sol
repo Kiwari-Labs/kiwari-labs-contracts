@@ -10,7 +10,5 @@ pragma solidity >=0.5.0 <0.9.0;
 
 abstract contract ERC1155EXPBase {
     // using AssetStamp for uint256;
-
-    
     // @TODO
-} 
+}

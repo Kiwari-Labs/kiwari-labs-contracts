@@ -24,7 +24,7 @@ contract MockERC20EXPWhitelist is ERC20EXPWhitelist {
         _mintWhitelist(to, value, true);
     }
 
-    function mintUnspendablWehitelist(address to, uint256 value) public {
+    function mintUnspendableWhitelist(address to, uint256 value) public {
         _mintWhitelist(to, value, false);
     }
 

@@ -11,20 +11,16 @@ pragma solidity >=0.5.0 <0.9.0;
 
 abstract contract ERC721EXPBase {
     // using AssetStamp for uint256;
-
     // function mint(address account) internal {
     //      _mint();
     //      tokenId.stampSet(_blockNumberProvider());
     // }
-
     // function burn(uint256 tokenId) internal {
     //      _burn();
     //      tokenId.stampClear();
     //}
-
     // function update(uint256 blockNumber) internal {
     //      tokenId.stampUpdate(blockNumber);
     //}
-
     // @TODO
-} 
+}
