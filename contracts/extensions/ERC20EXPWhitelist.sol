@@ -183,7 +183,7 @@ abstract contract ERC20EXPWhitelist is ERC20EXPBase {
     function _transferHandler(address from, address to, uint256 value) internal {
         // hook before transfer
         _beforeTokenTransfer(from, to, value);
-        uint256 selector = (_whitelist[to] ? 2 : 0) | (_whitelist[from] ? 1 : 0);
+        uint256 selector = (_whitelist[from] ? 2 : 0) | (_whitelist[to] ? 1 : 0);
         if (selector == 0) {
             _transfer(from, to, value);
         } else if (selector == 1) {
