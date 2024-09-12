@@ -1,11 +1,11 @@
-import {expect} from "chai";
-import {deployERC20EXPWhitelist} from "../../utils.test";
-import {ZERO_ADDRESS} from "../../constant.test";
+import { expect } from "chai";
+import { deployERC20EXPWhitelist } from "../../utils.test";
+import { ERC20_INSUFFICIENT_BALANCE, ZERO_ADDRESS } from "../../constant.test";
 
 export const run = async () => {
   describe("Burn", async function () {
     it("[HAPPY] correct burn spendable to whitelist address", async function () {
-      const {erc20exp, deployer, alice} = await deployERC20EXPWhitelist();
+      const { erc20exp, deployer, alice } = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       const deployerAddress = await deployer.getAddress();
       await expect(erc20exp.grantWhitelist(aliceAddress))
@@ -21,7 +21,7 @@ export const run = async () => {
     });
 
     it("[HAPPY] correct burn un-spendable to whitelist address", async function () {
-      const {erc20exp, deployer, alice} = await deployERC20EXPWhitelist();
+      const { erc20exp, deployer, alice } = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       const deployerAddress = await deployer.getAddress();
       await expect(erc20exp.grantWhitelist(aliceAddress))
@@ -36,8 +36,21 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
     });
 
+    it("[UNHAPPY] cannot burn cause insufficient balance of whitelist address", async function () {
+      const { erc20exp, deployer, alice } = await deployERC20EXPWhitelist();
+      const aliceAddress = await alice.getAddress();
+      const deployerAddress = await deployer.getAddress();
+      await expect(erc20exp.grantWhitelist(aliceAddress))
+        .to.emit(erc20exp, "WhitelistGranted")
+        .withArgs(deployerAddress, aliceAddress);
+      await expect(erc20exp.burnUnspendableWhitelist(aliceAddress, 1)).to.be.revertedWithCustomError(
+        erc20exp,
+        ERC20_INSUFFICIENT_BALANCE,
+      );
+    });
+
     it("[UNHAPPY] cannot burn to spendable to non whitelist address", async function () {
-      const {erc20exp, alice} = await deployERC20EXPWhitelist();
+      const { erc20exp, alice } = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       await expect(erc20exp.burnSpendableWhitelist(aliceAddress, 1)).to.be.revertedWithCustomError(
         erc20exp,
@@ -46,7 +59,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] cannot burn to un-spendable to non whitelist address", async function () {
-      const {erc20exp, alice} = await deployERC20EXPWhitelist();
+      const { erc20exp, alice } = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       await expect(erc20exp.burnUnspendableWhitelist(aliceAddress, 1)).to.be.revertedWithCustomError(
         erc20exp,

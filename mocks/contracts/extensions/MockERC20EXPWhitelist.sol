@@ -25,6 +25,10 @@ contract MockERC20EXPWhitelist is ERC20EXPWhitelist {
         _updateUnspendableBalance(sender, to, value);
     }
 
+    function safeBalanceOf(address account) public view returns (uint256) {
+        return _unSafeBalanceOf(account, false);
+    }
+
     function mintSpendableWhitelist(address to, uint256 value) public {
         _mintWhitelist(to, value, true);
     }

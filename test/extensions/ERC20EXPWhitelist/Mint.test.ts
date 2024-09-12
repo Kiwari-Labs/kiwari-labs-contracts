@@ -21,6 +21,7 @@ export const run = async () => {
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, aliceAddress, 1);
       expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp.safeBalanceOf(aliceAddress)).equal(1);
     });
 
     it("[HAPPY] correct mint un-spendable to whitelist address", async function () {
@@ -34,6 +35,7 @@ export const run = async () => {
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, aliceAddress, 1);
       expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp.safeBalanceOf(aliceAddress)).equal(0);
     });
 
     it("[UNHAPPY] cannot mint to spendable to non whitelist address", async function () {
