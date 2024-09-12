@@ -42,6 +42,10 @@ export const INVALID_BLOCK_TIME = "InvalidBlockTime";
 export const INVALID_FRAME_SIZE = "InvalidFrameSize";
 export const INVALID_SLOT_PER_ERA = "InvalidSlotPerEra";
 
+export const INVALID_WHITELIST_ADDRESS = "InvalidWhitelistAddress";
+export const INVALID_WHITELIST_ADDRESS_EXIST = "ExistInWhitelist";
+export const INVALID_WHITELIST_ADDRESS_NOT_EXIST = "NotExistInWhitelist";
+
 export const ERC20_INVALID_SENDER = "ERC20InvalidSender";
 export const ERC20_INVALID_RECEIVER = "ERC20InvalidReceiver";
 export const ERC20_INSUFFICIENT_BALANCE = "ERC20InsufficientBalance";
@@ -51,6 +55,9 @@ export const ERC20_INSUFFICIENT_ALLOWANCE = "ERC20InsufficientAllowance";
 
 export const EVENT_TRANSFER = "Transfer";
 export const EVENT_APPROVAL = "Approval";
+
+export const EVENT_WHITELIST_GRANTED = "WhitelistGranted";
+export const EVENT_WHITELIST_REVOKED = "WhitelistRevoked";
 
 export interface SlidingWindowState extends LightWeightSlidingWindowState {
   _slotSize: Number;

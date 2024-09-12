@@ -4,8 +4,10 @@ import {
   ERC20_INSUFFICIENT_BALANCE,
   ERC20_INVALID_RECEIVER,
   ERC20_INVALID_SENDER,
+  INVALID_WHITELIST_ADDRESS,
   EVENT_TRANSFER,
   ZERO_ADDRESS,
+  EVENT_WHITELIST_GRANTED,
 } from "../../constant.test";
 
 export const run = async () => {
@@ -15,7 +17,7 @@ export const run = async () => {
       const aliceAddress = await alice.getAddress();
       const deployerAddress = await deployer.getAddress();
       await expect(erc20exp.grantWhitelist(aliceAddress))
-        .to.emit(erc20exp, "WhitelistGranted")
+        .to.emit(erc20exp, EVENT_WHITELIST_GRANTED)
         .withArgs(deployerAddress, aliceAddress);
       await expect(erc20exp.mintSpendableWhitelist(aliceAddress, 1))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
@@ -29,7 +31,7 @@ export const run = async () => {
       const aliceAddress = await alice.getAddress();
       const deployerAddress = await deployer.getAddress();
       await expect(erc20exp.grantWhitelist(aliceAddress))
-        .to.emit(erc20exp, "WhitelistGranted")
+        .to.emit(erc20exp, EVENT_WHITELIST_GRANTED)
         .withArgs(deployerAddress, aliceAddress);
       await expect(erc20exp.mintUnspendableWhitelist(aliceAddress, 1))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
@@ -43,7 +45,7 @@ export const run = async () => {
       const aliceAddress = await alice.getAddress();
       await expect(erc20exp.mintSpendableWhitelist(aliceAddress, 1)).to.be.revertedWithCustomError(
         erc20exp,
-        "InvalidWhitelistAddress",
+        INVALID_WHITELIST_ADDRESS,
       );
     });
 
@@ -52,7 +54,7 @@ export const run = async () => {
       const aliceAddress = await alice.getAddress();
       await expect(erc20exp.mintUnspendableWhitelist(aliceAddress, 1)).to.be.revertedWithCustomError(
         erc20exp,
-        "InvalidWhitelistAddress",
+        INVALID_WHITELIST_ADDRESS,
       );
     });
   });
