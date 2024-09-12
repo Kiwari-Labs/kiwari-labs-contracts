@@ -1,97 +1,57 @@
-import {expect} from "chai";
-import {deployERC20EXPWhitelist} from "../../utils.test";
-import {ZERO_ADDRESS} from "../../constant.test";
+import { expect } from "chai";
+import { deployERC20EXPWhitelist } from "../../utils.test";
+import { ZERO_ADDRESS } from "../../constant.test";
 
 export const run = async () => {
   describe("Burn", async function () {
-    it("[HAPPY] correct burn", async function () {
-      // TODO: add test case (suitable logic and event response).
+    it("[HAPPY] correct burn spendable to whitelist address", async function () {
+      const { erc20exp, deployer, alice } = await deployERC20EXPWhitelist();
+      const aliceAddress = await alice.getAddress();
+      const deployerAddress = await deployer.getAddress();
+      await expect(erc20exp.grantWhitelist(aliceAddress))
+        .to.emit(erc20exp, "WhitelistGranted")
+        .withArgs(deployerAddress, aliceAddress);
+      await expect(erc20exp.mintSpendableWhitelist(aliceAddress, 1))
+        .to.be.emit(erc20exp, "Transfer")
+        .withArgs(ZERO_ADDRESS, aliceAddress, 1);
+      await expect(erc20exp.burnSpendableWhitelist(aliceAddress, 1))
+        .to.be.emit(erc20exp, "Transfer")
+        .withArgs(aliceAddress, ZERO_ADDRESS, 1);
+      expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
     });
 
-    it("[UNHAPPY] can burn only own token", async function () {
-      // TODO: add test case (suitable logic and event response).
+    it("[HAPPY] correct burn un-spendable to whitelist address", async function () {
+      const { erc20exp, deployer, alice } = await deployERC20EXPWhitelist();
+      const aliceAddress = await alice.getAddress();
+      const deployerAddress = await deployer.getAddress();
+      await expect(erc20exp.grantWhitelist(aliceAddress))
+        .to.emit(erc20exp, "WhitelistGranted")
+        .withArgs(deployerAddress, aliceAddress);
+      await expect(erc20exp.mintSpendableWhitelist(aliceAddress, 1))
+        .to.be.emit(erc20exp, "Transfer")
+        .withArgs(ZERO_ADDRESS, aliceAddress, 1);
+      await expect(erc20exp.burnSpendableWhitelist(aliceAddress, 1))
+        .to.be.emit(erc20exp, "Transfer")
+        .withArgs(aliceAddress, ZERO_ADDRESS, 1);
+      expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
+    });
+
+    it("[UNHAPPY] cannot burn to spendable to non whitelist address", async function () {
+      const { erc20exp, alice } = await deployERC20EXPWhitelist();
+      const aliceAddress = await alice.getAddress();
+      await expect(erc20exp.burnSpendableWhitelist(aliceAddress, 1)).to.be.revertedWithCustomError(
+        erc20exp,
+        "InvalidWhitelistAddress",
+      );
+    });
+
+    it("[UNHAPPY] cannot burn to un-spendable to non whitelist address", async function () {
+      const { erc20exp, alice } = await deployERC20EXPWhitelist();
+      const aliceAddress = await alice.getAddress();
+      await expect(erc20exp.burnUnspendableWhitelist(aliceAddress, 1)).to.be.revertedWithCustomError(
+        erc20exp,
+        "InvalidWhitelistAddress",
+      );
     });
   });
-
-  // describe("Burn From Wholesaler", async function () {
-  //   it("[HAPPY] correct burn", async function () {
-  //     const {erc20exp, alice} = await deployERC20EXPWhitelist();
-  //     const aliceAddress = await alice.getAddress();
-  //     await expect(erc20exp.grantWholeSale(aliceAddress))
-  //       .to.emit(erc20exp, "GrantWholeSale")
-  //       .withArgs(aliceAddress, true);
-  //     await expect(erc20exp.mintSpentWholeSale(aliceAddress, 1))
-  //       .to.be.emit(erc20exp, "Transfer")
-  //       .withArgs(ZERO_ADDRESS, aliceAddress, 1);
-  //     await expect(erc20exp.mintUnspentWholeSale(aliceAddress, 1))
-  //       .to.be.emit(erc20exp, "Transfer")
-  //       .withArgs(ZERO_ADDRESS, aliceAddress, 1);
-  //     await expect(erc20exp.burnSpentWholeSale(aliceAddress, 1))
-  //       .to.be.emit(erc20exp, "Transfer")
-  //       .withArgs(aliceAddress, ZERO_ADDRESS, 1);
-  //     await expect(erc20exp.burnUnspentWholeSale(aliceAddress, 1))
-  //       .to.be.emit(erc20exp, "Transfer")
-  //       .withArgs(aliceAddress, ZERO_ADDRESS, 1);
-  //     expect(await erc20exp["balanceOf(address)"](aliceAddress)).to.equal(0);
-  //   });
-
-  //   it("[UNHAPPY] burn from non-wholesaler", async function () {
-  //     const {erc20exp, alice} = await deployERC20EXPWhitelist();
-  //     const aliceAddress = await alice.getAddress();
-  //     await expect(erc20exp.burnSpentWholeSale(aliceAddress, 1)).to.be.revertedWith(
-  //       "can't burn non-expirable token to non wholesale account",
-  //     );
-  //     await expect(erc20exp.burnUnspentWholeSale(aliceAddress, 1)).to.be.revertedWith(
-  //       "can't burn non-expirable token to non wholesale account",
-  //     );
-  //   });
-
-  //   it("[UNHAPPY] insufficient balance to burn", async function () {
-  //     const {erc20exp, alice} = await deployERC20EXPWhitelist();
-  //     const aliceAddress = await alice.getAddress();
-  //     await expect(erc20exp.grantWholeSale(aliceAddress))
-  //       .to.emit(erc20exp, "GrantWholeSale")
-  //       .withArgs(aliceAddress, true);
-  //     await expect(erc20exp.burnSpentWholeSale(aliceAddress, 1))
-  //       .to.be.revertedWithCustomError(erc20exp, "ERC20InsufficientBalance")
-  //       .withArgs(aliceAddress, 0, 1);
-  //     await expect(erc20exp.burnUnspentWholeSale(aliceAddress, 1))
-  //       .to.be.revertedWithCustomError(erc20exp, "ERC20InsufficientBalance")
-  //       .withArgs(aliceAddress, 0, 1);
-  //   });
-  // });
-
-  // describe("Burn From Retailer", async function () {
-  //   it("[HAPPY] correct burn", async function () {
-  //     const {erc20exp, alice} = await deployERC20EXPWhitelist();
-  //     const aliceAddress = await alice.getAddress();
-  //     const beforeBalance = await erc20exp["balanceOf(address)"](aliceAddress);
-  //     await erc20exp.mintRetail(aliceAddress, 1);
-  //     expect(beforeBalance).to.equal(0);
-  //     expect(await erc20exp["balanceOf(address)"](aliceAddress)).to.equal(1);
-  //     await expect(erc20exp.burnRetail(aliceAddress, 1))
-  //       .to.emit(erc20exp, "Transfer")
-  //       .withArgs(aliceAddress, ZERO_ADDRESS, 1);
-  //     expect(await erc20exp["balanceOf(address)"](aliceAddress)).to.equal(0);
-  //   });
-
-  //   it("[UNHAPPY] burn from non-retailer", async function () {
-  //     // TODO: add test case (suitable logic and event response).
-  //     const {erc20exp, alice} = await deployERC20EXPWhitelist();
-  //     const aliceAddress = await alice.getAddress();
-  //     await erc20exp.grantWholeSale(aliceAddress);
-  //     await expect(erc20exp.burnRetail(aliceAddress, 1)).to.be.revertedWith(
-  //       "can't burn expirable token to non retail account",
-  //     );
-  //   });
-
-  //   it("[UNHAPPY] insufficient balance to burn", async function () {
-  //     // TODO: add test case (suitable logic and event response).
-  //     const {erc20exp, alice} = await deployERC20EXPWhitelist();
-  //     const aliceAddress = await alice.getAddress();
-  //     await expect(erc20exp.burnRetail(aliceAddress, 1))
-  //       .to.be.revertedWithCustomError(erc20exp, "ERC20InsufficientBalance")
-  //       .withArgs(aliceAddress, 0, 1);
-  //   });
-  // });
 };

@@ -30,7 +30,7 @@ export const run = async () => {
       expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
     });
 
-    it("[UNHAPPY] mint to spendable to non whitelist address", async function () {
+    it("[UNHAPPY] cannot mint to spendable to non whitelist address", async function () {
       const {erc20exp, alice} = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       await expect(erc20exp.mintSpendableWhitelist(aliceAddress, 1)).to.be.revertedWithCustomError(
@@ -39,7 +39,7 @@ export const run = async () => {
       );
     });
 
-    it("[UNHAPPY] mint to un-spendable to non whitelist address", async function () {
+    it("[UNHAPPY] cannot mint to un-spendable to non whitelist address", async function () {
       const {erc20exp, alice} = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       await expect(erc20exp.mintUnspendableWhitelist(aliceAddress, 1)).to.be.revertedWithCustomError(
