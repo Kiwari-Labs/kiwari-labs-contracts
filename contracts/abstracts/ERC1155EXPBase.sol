@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity >=0.5.0 <0.9.0;
+pragma solidity >=0.8.0 <0.9.0;
 
 /// @title ERC1155EXP Base abstract contract
 /// @author Kiwari Labs

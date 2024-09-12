@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity >=0.5.0 <0.9.0;
+pragma solidity >=0.8.0 <0.9.0;
 
 /// @title BooleanOperation
 /// @notice Provides utility functions for common high level of boolean operations.
