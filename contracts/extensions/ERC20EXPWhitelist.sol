@@ -34,7 +34,7 @@ abstract contract ERC20EXPWhitelist is ERC20EXPBase {
     /// @param from The address of the account from which tokens are being transferred or burned. If `from` is the zero address, tokens are minted to the `to` address.
     /// @param to The address of the account to which tokens are being transferred or minted.
     /// @param value The amount of tokens to be transferred, minted, or burned.
-    function _updateSpendableBalance(address from, address to, uint256 value) private {
+    function _updateSpendableBalance(address from, address to, uint256 value) internal {
         unchecked {
             uint256 balanceFrom = _balances[from]._spendableBalances;
             if (from == address(0)) {
@@ -65,7 +65,7 @@ abstract contract ERC20EXPWhitelist is ERC20EXPBase {
     /// @param from The address of the account from which tokens are being transferred or burned. If `from` is the zero address, tokens are minted to the `to` address.
     /// @param to The address of the account to which tokens are being transferred or minted.
     /// @param value The amount of tokens to be transferred, minted, or burned.
-    function _updateUnspendableBalance(address from, address to, uint256 value) private {
+    function _updateUnspendableBalance(address from, address to, uint256 value) internal {
         unchecked {
             uint256 balanceFrom = _balances[from]._unspendableBalances;
             if (from == address(0)) {

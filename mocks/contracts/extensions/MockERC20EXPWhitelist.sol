@@ -20,6 +20,11 @@ contract MockERC20EXPWhitelist is ERC20EXPWhitelist {
         _revokeWhitelist(account);
     }
 
+    function transferUnspendable(address to, uint256 value) public {
+        address sender = _msgSender();
+        _updateUnspendableBalance(sender, to, value);
+    }
+
     function mintSpendableWhitelist(address to, uint256 value) public {
         _mintWhitelist(to, value, true);
     }
