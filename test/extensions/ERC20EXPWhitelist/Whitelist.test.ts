@@ -1,5 +1,5 @@
-import { expect } from "chai";
-import { deployERC20EXPWhitelist } from "../../utils.test";
+import {expect} from "chai";
+import {deployERC20EXPWhitelist} from "../../utils.test";
 import {
   EVENT_WHITELIST_GRANTED,
   EVENT_WHITELIST_REVOKED,
@@ -10,7 +10,7 @@ import {
 export const run = async () => {
   describe("General", async function () {
     it("[HAPPY] granted whitelist address", async function () {
-      const { erc20exp, deployer, alice } = await deployERC20EXPWhitelist();
+      const {erc20exp, deployer, alice} = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       const deployerAddress = await deployer.getAddress();
       await expect(erc20exp.grantWhitelist(aliceAddress))
@@ -20,7 +20,7 @@ export const run = async () => {
     });
 
     it("[HAPPY] revoked whitelist address", async function () {
-      const { erc20exp, deployer, alice } = await deployERC20EXPWhitelist();
+      const {erc20exp, deployer, alice} = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       const deployerAddress = await deployer.getAddress();
       await expect(erc20exp.grantWhitelist(aliceAddress))
@@ -33,7 +33,7 @@ export const run = async () => {
     });
 
     it("[HAPPY] revoked can clean whitelist address balance", async function () {
-      const { erc20exp, deployer, alice } = await deployERC20EXPWhitelist();
+      const {erc20exp, deployer, alice} = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       const deployerAddress = await deployer.getAddress();
       await expect(erc20exp.grantWhitelist(aliceAddress))
@@ -50,7 +50,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] granted exist whitelist address", async function () {
-      const { erc20exp, deployer, alice } = await deployERC20EXPWhitelist();
+      const {erc20exp, deployer, alice} = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       const deployerAddress = await deployer.getAddress();
       await expect(erc20exp.grantWhitelist(aliceAddress))
@@ -63,7 +63,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] revoked non whitelist address", async function () {
-      const { erc20exp, alice } = await deployERC20EXPWhitelist();
+      const {erc20exp, alice} = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       await expect(erc20exp.revokeWhitelist(aliceAddress)).to.be.revertedWithCustomError(
         erc20exp,

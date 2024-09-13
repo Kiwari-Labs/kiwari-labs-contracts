@@ -15,10 +15,30 @@ import {
 export const run = async () => {
   describe(EVENT_TRANSFER, async function () {
     it("[HAPPY] correct non whitelist transfer ", async function () {
-      // TODO: add test case (suitable logic and event response).
-    });
-    it("[HAPPY] correct transferFrom", async function () {
-      // TODO: add test case (suitable logic and event response).
+      const {erc20exp, deployer, alice, bob, jame} = await deployERC20EXPWhitelist();
+      const aliceAddress = await alice.getAddress();
+      const bobAddress = await bob.getAddress();
+      const jameAddress = await jame.getAddress();
+      const deployerAddress = await deployer.getAddress();
+      await expect(erc20exp.grantWhitelist(aliceAddress))
+        .to.emit(erc20exp, EVENT_WHITELIST_GRANTED)
+        .withArgs(deployerAddress, aliceAddress);
+      await expect(erc20exp.mintSpendableWhitelist(aliceAddress, 1))
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .withArgs(ZERO_ADDRESS, aliceAddress, 1);
+      expect(await erc20exp.balanceOf(aliceAddress)).equal(1);
+      await expect(erc20exp.connect(alice).transfer(bobAddress, 1))
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .withArgs(aliceAddress, ZERO_ADDRESS, 1)
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .withArgs(ZERO_ADDRESS, bobAddress, 1);
+      expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
+      expect(await erc20exp.balanceOf(bobAddress)).equal(1);
+      await expect(erc20exp.connect(bob).transfer(jameAddress, 1))
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .withArgs(bobAddress, jameAddress, 1);
+      expect(await erc20exp.balanceOf(bobAddress)).equal(0);
+      expect(await erc20exp.balanceOf(jameAddress)).equal(1);
     });
 
     // In cases of Wholesale and Retail are still in the designing phase to be discussed later.
