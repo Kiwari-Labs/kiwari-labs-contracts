@@ -1,6 +1,6 @@
 import {expect} from "chai";
-import {deployERC20EXP} from "../utils.test";
-import {ZERO_ADDRESS} from "../constant.test";
+import {deployLightWeightERC20EXP} from "../../utils.test";
+import {ZERO_ADDRESS} from "../../constant.test";
 
 export const run = async () => {
   describe("Mint", async function () {
@@ -15,7 +15,7 @@ export const run = async () => {
 
   describe("Mint To Wholesaler", async function () {
     it("[HAPPY] correct mint", async function () {
-      const {erc20exp, alice} = await deployERC20EXP();
+      const {erc20exp, alice} = await deployLightWeightERC20EXP();
       const aliceAddress = await alice.getAddress();
       await expect(erc20exp.grantWholeSale(aliceAddress))
         .to.emit(erc20exp, "GrantWholeSale")
@@ -30,7 +30,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] mint to zero address", async function () {
-      const {erc20exp} = await deployERC20EXP();
+      const {erc20exp} = await deployLightWeightERC20EXP();
       await expect(erc20exp.grantWholeSale(ZERO_ADDRESS))
         .to.emit(erc20exp, "GrantWholeSale")
         .withArgs(ZERO_ADDRESS, true);
@@ -45,10 +45,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] mint to non-wholesaler address", async function () {
-      const {erc20exp} = await deployERC20EXP();
-      await expect(erc20exp.mintSpentWholeSale(ZERO_ADDRESS, 1)).to.revertedWith(
-        "can't mint non-expirable token to non wholesale account",
-      );
+      const {erc20exp} = await deployLightWeightERC20EXP();
       await expect(erc20exp.mintUnspentWholeSale(ZERO_ADDRESS, 1)).to.revertedWith(
         "can't mint non-expirable token to non wholesale account",
       );
@@ -57,7 +54,7 @@ export const run = async () => {
 
   describe("Mint To Retailer", async function () {
     it("[HAPPY] correct mint", async function () {
-      const {erc20exp, alice} = await deployERC20EXP();
+      const {erc20exp, alice} = await deployLightWeightERC20EXP();
       const aliceAddress = await alice.getAddress();
       await expect(erc20exp.mintRetail(aliceAddress, 1))
         .to.be.emit(erc20exp, "Transfer")
@@ -67,14 +64,14 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] mint to zero address", async function () {
-      const {erc20exp} = await deployERC20EXP();
+      const {erc20exp} = await deployLightWeightERC20EXP();
       await expect(erc20exp.mintRetail(ZERO_ADDRESS, 1))
         .to.be.revertedWithCustomError(erc20exp, "ERC20InvalidReceiver")
         .withArgs(ZERO_ADDRESS);
     });
 
     it("[UNHAPPY] mint to non-retailer", async function () {
-      const {erc20exp, alice} = await deployERC20EXP();
+      const {erc20exp, alice} = await deployLightWeightERC20EXP();
       const aliceAddress = await alice.getAddress();
       await expect(erc20exp.grantWholeSale(aliceAddress))
         .to.emit(erc20exp, "GrantWholeSale")

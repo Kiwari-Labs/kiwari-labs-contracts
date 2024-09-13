@@ -210,17 +210,21 @@ const deployERC20BaseSelector = async function (
   };
 };
 
-const deployERC20WhiteListSelector = async function (light: boolean) {
+const deployERC20WhiteListSelector = async function (
+  light: boolean,
+  blockPeriod: number,
+  frameSize: number,
+  slotSize: number,
+) {
   const type = light ? LIGHT_WEIGHT_ERC20_EXP_WHITELIST_CONTRACT : ERC20_EXP_WHITELIST_CONTRACT;
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 
   const ERC20EXP = await ethers.getContractFactory(type, deployer);
   let erc20exp;
   if (light) {
-    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, ERC20_EXP_BLOCK_PERIOD, ERC20_EXP_EXPIRE_PERIOD);
+    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize);
   } else {
-    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, ERC20_EXP_BLOCK_PERIOD, ERC20_EXP_EXPIRE_PERIOD);
-    // @TODO refactor to support customized slot size.
+    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize, slotSize);
   }
   await erc20exp.deployed();
 
@@ -249,12 +253,19 @@ export const deployLightWeightERC20EXPBase = async function ({
   return deployERC20BaseSelector(true, blockPeriod, frameSize, 0);
 };
 
-export const deployERC20EXP = async function () {
-  return deployERC20WhiteListSelector(false);
+export const deployERC20EXPWhitelist = async function (
+  blockPeriod = 400, // 400ms per block
+  frameSize = 2, // frame size 2 slot
+  slotSize = 4, // 4 slot per era
+) {
+  return deployERC20WhiteListSelector(false, blockPeriod, frameSize, slotSize);
 };
 
-export const deployLightWeightERC20EXP = async function () {
-  return deployERC20WhiteListSelector(true);
+export const deployLightWeightERC20EXPWhitelist = async function ({
+  blockPeriod = 400, // 400ms per block
+  frameSize = 2, // frame size 2 slot
+}) {
+  return deployERC20WhiteListSelector(true, blockPeriod, frameSize, 0);
 };
 //////////////////////////////////////////////////////////////////////
 

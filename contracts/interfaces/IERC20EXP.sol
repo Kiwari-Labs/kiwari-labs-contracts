@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity >=0.5.0 <0.9.0;
+pragma solidity >=0.8.0 <0.9.0;
 
 /// @title Extended ERC20 Interface for ERC20EXP tokens with Unexpirable token address exeption.
 /// @author Kiwari Labs

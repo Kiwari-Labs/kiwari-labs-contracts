@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title An implemation sliding window algorithm in Solidity, the sliding frame relying on block-height rather than block-timestmap.
+/// @title An implemation sliding window algorithm in Solidity, the sliding frame relying on block-height rather than block-timestmap with devmode.
 /// @author Kiwari Labs
 /// @notice This library designed to compatible with subsecond blocktime on both Layer 1 Network (L1) and Layer 2 Network (L2).
 // inspiration:
@@ -17,6 +17,7 @@ library SlidingWindow {
     uint40 private constant YEAR_IN_MILLISECONDS = 31_556_926_000;
 
     struct SlidingWindowState {
+        bool _devMode;
         uint40 _blockPerEra;
         uint40 _blockPerSlot;
         uint40 _frameSizeInBlockLength;
@@ -118,14 +119,16 @@ library SlidingWindow {
         uint8 frameSize,
         uint8 slotSize
     ) internal {
-        if (blockTime < MINIMUM_BLOCK_TIME_IN_MILLISECONDS || blockTime > MAXIMUM_BLOCK_TIME_IN_MILLISECONDS) {
-            revert InvalidBlockTime();
-        }
-        if (frameSize < MINIMUM_FRAME_SIZE || frameSize > MAXIMUM_FRAME_SIZE) {
-            revert InvalidFrameSize();
-        }
-        if (slotSize < MINIMUM_SLOT_PER_ERA || slotSize > MAXIMUM_SLOT_PER_ERA) {
-            revert InvalidSlotPerEra();
+        if (!self._devMode) {
+            if (blockTime < MINIMUM_BLOCK_TIME_IN_MILLISECONDS || blockTime > MAXIMUM_BLOCK_TIME_IN_MILLISECONDS) {
+                revert InvalidBlockTime();
+            }
+            if (frameSize < MINIMUM_FRAME_SIZE || frameSize > MAXIMUM_FRAME_SIZE) {
+                revert InvalidFrameSize();
+            }
+            if (slotSize < MINIMUM_SLOT_PER_ERA || slotSize > MAXIMUM_SLOT_PER_ERA) {
+                revert InvalidSlotPerEra();
+            }
         }
         unchecked {
             /// @custom:truncate https://docs.soliditylang.org/en/latest/types.html#division
@@ -258,5 +261,12 @@ library SlidingWindow {
     /// @return The number of slots per era configured in the sliding window state.
     function getSlotPerEra(SlidingWindowState storage self) internal view returns (uint8) {
         return self._slotSize;
+    }
+
+    /// @dev Checks if the sliding window is in developer mode.
+    /// @param self The sliding window state structure.
+    /// @return A boolean value indicating whether the sliding window is in developer mode (`true` if it is, `false` otherwise).
+    function mode(SlidingWindowState storage self) internal view returns (bool) {
+        return self._devMode;
     }
 }

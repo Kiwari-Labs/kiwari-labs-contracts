@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title Sliding Window abstract contract
+/// @title Sliding Window abstract contract with devmode
 /// @author Kiwari Labs
 
-import {ISlidingWindow} from "../interfaces/ISlidingWindow.sol";
-import {SlidingWindow as slide} from "../libraries/SlidingWindow.sol";
+import {ISlidingWindow} from "../../interfaces/ISlidingWindow.sol";
+import {SlidingWindow as slide} from "../../libraries/dev/SlidingWindowDev.sol";
 
 abstract contract SlidingWindow is ISlidingWindow {
     using slide for slide.SlidingWindowState;
@@ -19,9 +19,17 @@ abstract contract SlidingWindow is ISlidingWindow {
     /// @param blockTime_ The block time to be used for the sliding window.
     /// @param frameSize_ The frame size for the sliding window.
     /// @param slotSize_ The slot size for the sliding window.
-    constructor(uint256 blockNumber_, uint16 blockTime_, uint8 frameSize_, uint8 slotSize_) {
+    /// @param mode_ Developer mode enable or not.
+    constructor(uint256 blockNumber_, uint16 blockTime_, uint8 frameSize_, uint8 slotSize_, bool mode_) {
         _slidingWindow._startBlockNumber = blockNumber_ != 0 ? blockNumber_ : _blockNumberProvider();
+        _slidingWindow._devMode = mode_;
         _updateSlidingWindow(blockTime_, frameSize_, slotSize_);
+    }
+
+    /// @dev For return if the sliding window is in developer mode.
+    /// @return A boolean value indicating whether the sliding window is in developer mode (`true` if it is, `false` otherwise).
+    function mode() internal view virtual returns (bool) {
+        return _slidingWindow.mode();
     }
 
     /// @notice Allows for  in subsecond blocktime network.
