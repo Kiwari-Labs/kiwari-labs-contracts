@@ -2,6 +2,7 @@ import {expect} from "chai";
 import {deployERC20EXPWhitelist} from "../../utils.test";
 import {
   ERC20_INSUFFICIENT_BALANCE,
+  EVENT_TRANSFER,
   EVENT_WHITELIST_GRANTED,
   INVALID_WHITELIST_ADDRESS,
   ZERO_ADDRESS,
@@ -17,10 +18,10 @@ export const run = async () => {
         .to.emit(erc20exp, EVENT_WHITELIST_GRANTED)
         .withArgs(deployerAddress, aliceAddress);
       await expect(erc20exp.mintSpendableWhitelist(aliceAddress, 1))
-        .to.be.emit(erc20exp, "Transfer")
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, aliceAddress, 1);
       await expect(erc20exp.burnSpendableWhitelist(aliceAddress, 1))
-        .to.be.emit(erc20exp, "Transfer")
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, ZERO_ADDRESS, 1);
       expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
     });
@@ -33,10 +34,10 @@ export const run = async () => {
         .to.emit(erc20exp, EVENT_WHITELIST_GRANTED)
         .withArgs(deployerAddress, aliceAddress);
       await expect(erc20exp.mintUnspendableWhitelist(aliceAddress, 1))
-        .to.be.emit(erc20exp, "Transfer")
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, aliceAddress, 1);
       await expect(erc20exp.burnUnspendableWhitelist(aliceAddress, 1))
-        .to.be.emit(erc20exp, "Transfer")
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, ZERO_ADDRESS, 1);
       expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
     });

@@ -1,26 +1,57 @@
 import {expect} from "chai";
 import {deployERC20EXPWhitelist} from "../../utils.test";
-import {ERC20_EXP_NAME, ERC20_EXP_SYMBOL} from "../../constant.test";
+import {
+  EVENT_WHITELIST_GRANTED,
+  EVENT_WHITELIST_REVOKED,
+  INVALID_WHITELIST_ADDRESS_EXIST,
+  INVALID_WHITELIST_ADDRESS_NOT_EXIST,
+} from "../../constant.test";
 
 export const run = async () => {
   describe("General", async function () {
-    it("[HAPPY] correct name", async function () {
-      const {erc20exp} = await deployERC20EXPWhitelist();
-
-      expect(await erc20exp.name()).to.equal(ERC20_EXP_NAME);
+    it("[HAPPY] granted whitelist address", async function () {
+      const {erc20exp, deployer, alice} = await deployERC20EXPWhitelist();
+      const aliceAddress = await alice.getAddress();
+      const deployerAddress = await deployer.getAddress();
+      await expect(erc20exp.grantWhitelist(aliceAddress))
+        .to.emit(erc20exp, EVENT_WHITELIST_GRANTED)
+        .withArgs(deployerAddress, aliceAddress);
+      expect(await erc20exp.whitelist(aliceAddress)).equal(true);
     });
 
-    it("[HAPPY] correct symbol", async function () {
-      const {erc20exp} = await deployERC20EXPWhitelist();
-
-      expect(await erc20exp.symbol()).to.equal(ERC20_EXP_SYMBOL);
+    it("[HAPPY] revoked whitelist address", async function () {
+      const {erc20exp, deployer, alice} = await deployERC20EXPWhitelist();
+      const aliceAddress = await alice.getAddress();
+      const deployerAddress = await deployer.getAddress();
+      await expect(erc20exp.grantWhitelist(aliceAddress))
+        .to.emit(erc20exp, EVENT_WHITELIST_GRANTED)
+        .withArgs(deployerAddress, aliceAddress);
+      await expect(erc20exp.revokeWhitelist(aliceAddress))
+        .to.emit(erc20exp, EVENT_WHITELIST_REVOKED)
+        .withArgs(deployerAddress, aliceAddress);
+      expect(await erc20exp.whitelist(aliceAddress)).equal(false);
     });
 
-    it("[HAPPY] correct symbol", async function () {
-      const {erc20exp} = await deployERC20EXPWhitelist();
+    it("[UNHAPPY] granted exist whitelist address", async function () {
+      const {erc20exp, deployer, alice} = await deployERC20EXPWhitelist();
+      const aliceAddress = await alice.getAddress();
+      const deployerAddress = await deployer.getAddress();
+      await expect(erc20exp.grantWhitelist(aliceAddress))
+        .to.emit(erc20exp, EVENT_WHITELIST_GRANTED)
+        .withArgs(deployerAddress, aliceAddress);
+      await expect(erc20exp.grantWhitelist(aliceAddress)).to.be.revertedWithCustomError(
+        erc20exp,
+        INVALID_WHITELIST_ADDRESS_EXIST,
+      );
+    });
 
-      // due to token can expiration there is no actual totalSupply.
-      expect(await erc20exp.totalSupply()).to.equal(0);
+    it("[UNHAPPY] revoked non whitelist address", async function () {
+      const {erc20exp, alice} = await deployERC20EXPWhitelist();
+      const aliceAddress = await alice.getAddress();
+      await expect(erc20exp.grantWhitelist(aliceAddress)).to.be.revertedWithCustomError(
+        erc20exp,
+        INVALID_WHITELIST_ADDRESS_NOT_EXIST,
+      );
     });
   });
 };
