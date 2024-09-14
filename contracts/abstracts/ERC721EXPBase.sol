@@ -16,6 +16,8 @@ abstract contract ERC721EXPBase is ERC721, IERC721EXPBase {
 
     uint256 private _expiredPeriod;
 
+    constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {}
+
     function _setExpiredPeriod(uint256 period) internal {
         _expiredPeriod = period;
     }
