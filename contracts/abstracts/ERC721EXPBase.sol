@@ -35,7 +35,9 @@ abstract contract ERC721EXPBase is ERC721, IERC721EXPBase {
     }
 
     function _updateExpiration(uint256 tokenId, uint256 blockNumber) internal {
-        _asset[tokenId].update(blockNumber);
+        if (_asset[tokenId].checked()){
+            _asset[tokenId].update(blockNumber);
+        }
     }
 
     function expiredPeriod() public view returns (uint256) {
