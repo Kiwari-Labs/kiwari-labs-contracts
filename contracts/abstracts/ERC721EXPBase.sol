@@ -35,7 +35,7 @@ abstract contract ERC721EXPBase is ERC721, IERC721EXPBase {
     }
 
     function _updateExpiration(uint256 tokenId, uint256 blockNumber) internal {
-        if (_asset[tokenId].checked()){
+        if (_asset[tokenId].checked()) {
             _asset[tokenId].update(blockNumber);
         }
     }
@@ -44,7 +44,7 @@ abstract contract ERC721EXPBase is ERC721, IERC721EXPBase {
         return _expiredPeriod;
     }
 
-    function hasExpired(uint256 tokenId) public virtual override view returns (bool) {
+    function hasExpired(uint256 tokenId) public view virtual override returns (bool) {
         uint256 blockNumber = _asset[tokenId].blockNumber;
         if (blockNumber == 0) {
             return false; // Asset not stamped, therefore not expired.
