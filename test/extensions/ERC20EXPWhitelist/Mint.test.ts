@@ -1,9 +1,6 @@
 import {expect} from "chai";
 import {deployERC20EXPWhitelist} from "../../utils.test";
 import {
-  ERC20_INSUFFICIENT_BALANCE,
-  ERC20_INVALID_RECEIVER,
-  ERC20_INVALID_SENDER,
   INVALID_WHITELIST_ADDRESS,
   EVENT_TRANSFER,
   ZERO_ADDRESS,
