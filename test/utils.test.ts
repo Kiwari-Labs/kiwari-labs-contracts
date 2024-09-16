@@ -4,7 +4,6 @@ import {mine, time} from "@nomicfoundation/hardhat-network-helpers";
 
 import {
   ERC20_EXP_WHITELIST_CONTRACT,
-  ERC20_EXP_BLOCK_PERIOD,
   ERC20_EXP_NAME,
   ERC20_EXP_SYMBOL,
   LIGHT_WEIGHT_ERC20_EXP_WHITELIST_CONTRACT,
@@ -23,6 +22,7 @@ import {
   ERC20_EXP_BASE_CONTRACT,
   LIGHT_WEIGHT_SLIDING_WINDOW_LIBRARY_CONTRACT,
   SLIDING_WINDOW_LIBRARY_CONTRACT,
+  ERC20_EXP_MINT_QUOTA_CONTRACT,
 } from "./constant.test";
 
 // tools
@@ -134,6 +134,48 @@ export const getAddress = async function (account: Signer | Contract) {
 };
 
 // abstracts
+const deployERC20BaseSelector = async function (
+  light: boolean,
+  blockPeriod: number,
+  frameSize: number,
+  slotSize: number,
+) {
+  const type = light ? LIGHT_WEIGHT_ERC20_EXP_BASE_CONTRACT : ERC20_EXP_BASE_CONTRACT;
+  const [deployer, alice, bob, jame] = await ethers.getSigners();
+
+  const ERC20EXP = await ethers.getContractFactory(type, deployer);
+  let erc20exp;
+  if (light) {
+    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize);
+  } else {
+    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize, slotSize);
+  }
+  await erc20exp.deployed();
+
+  return {
+    erc20exp,
+    deployer,
+    alice,
+    bob,
+    jame,
+  };
+};
+
+export const deployERC20EXPBase = async function ({
+  blockPeriod = 400, // 400ms per block
+  frameSize = 2, // frame size 2 slot
+  slotSize = 4, // 4 slot per era
+}) {
+  return deployERC20BaseSelector(false, blockPeriod, frameSize, slotSize);
+};
+
+export const deployLightWeightERC20EXPBase = async function ({
+  blockPeriod = 400, // 400ms per block
+  frameSize = 2, // frame size 2 slot
+}) {
+  // LightWeight has a fixed slot size of 4 by default.
+  return deployERC20BaseSelector(true, blockPeriod, frameSize, 0);
+};
 
 const deploySlidingWindowSelector = async function (
   light: boolean,
@@ -183,26 +225,28 @@ export const deploySlidingWindow = async function ({
 };
 
 // TODO: Re-test the cases below. //////////////////////////////////
-const deployERC20BaseSelector = async function (
-  light: boolean,
-  blockPeriod: number,
-  frameSize: number,
-  slotSize: number,
+// extensions
+export const deployERC20EXPMintQuota = async function (
+  blockPeriod = 400, // 400ms per block
+  frameSize = 2, // frame size 2 slot
+  slotSize = 4, // 4 slot per era
 ) {
-  const type = light ? LIGHT_WEIGHT_ERC20_EXP_BASE_CONTRACT : ERC20_EXP_BASE_CONTRACT;
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 
-  const ERC20EXP = await ethers.getContractFactory(type, deployer);
-  let erc20exp;
-  if (light) {
-    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize);
-  } else {
-    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize, slotSize);
-  }
-  await erc20exp.deployed();
+  const ERC20_EXP_MINT_QUOTA = await ethers.getContractFactory(ERC20_EXP_MINT_QUOTA_CONTRACT, deployer);
+
+  const erc20ExpMintQuota = await ERC20_EXP_MINT_QUOTA.deploy(
+    ERC20_EXP_NAME,
+    ERC20_EXP_SYMBOL,
+    blockPeriod,
+    frameSize,
+    slotSize,
+  );
+
+  await erc20ExpMintQuota.deployed();
 
   return {
-    erc20exp,
+    erc20ExpMintQuota,
     deployer,
     alice,
     bob,
@@ -235,22 +279,6 @@ const deployERC20WhiteListSelector = async function (
     bob,
     jame,
   };
-};
-
-export const deployERC20EXPBase = async function ({
-  blockPeriod = 400, // 400ms per block
-  frameSize = 2, // frame size 2 slot
-  slotSize = 4, // 4 slot per era
-}) {
-  return deployERC20BaseSelector(false, blockPeriod, frameSize, slotSize);
-};
-
-export const deployLightWeightERC20EXPBase = async function ({
-  blockPeriod = 400, // 400ms per block
-  frameSize = 2, // frame size 2 slot
-}) {
-  // LightWeight has a fixed slot size of 4 by default.
-  return deployERC20BaseSelector(true, blockPeriod, frameSize, 0);
 };
 
 export const deployERC20EXPWhitelist = async function (

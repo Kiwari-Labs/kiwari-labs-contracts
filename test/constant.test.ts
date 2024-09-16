@@ -7,6 +7,7 @@ export const SLIDING_WINDOW_CONTRACT = "MockSlidingWindow";
 export const LIGHT_WEIGHT_SLIDING_WINDOW_CONTRACT = "MockLightWeightSlidingWindow";
 
 // extensions
+export const ERC20_EXP_MINT_QUOTA_CONTRACT = "MockERC20EXPMintQuota";
 export const ERC20_EXP_WHITELIST_CONTRACT = "MockERC20EXPWhitelist";
 export const LIGHT_WEIGHT_ERC20_EXP_WHITELIST_CONTRACT = "MockLightWeightERC20EXPWhitelist";
 
@@ -46,6 +47,10 @@ export const INVALID_WHITELIST_ADDRESS = "InvalidWhitelistAddress";
 export const INVALID_WHITELIST_ADDRESS_EXIST = "ExistInWhitelist";
 export const INVALID_WHITELIST_ADDRESS_NOT_EXIST = "NotExistInWhitelist";
 
+export const INVALID_UNAUTHORIZED_MINTER = "UnauthorizedMinter";
+export const INVALID_MINT_QUOTA_EXCEEDED = "MintQuotaExceeded";
+export const INVALID_INVALID_MINTER_ADDRESS = "InvalidMinterAddress";
+
 export const ERC20_INVALID_SENDER = "ERC20InvalidSender";
 export const ERC20_INVALID_RECEIVER = "ERC20InvalidReceiver";
 export const ERC20_INSUFFICIENT_BALANCE = "ERC20InsufficientBalance";
@@ -58,6 +63,10 @@ export const EVENT_APPROVAL = "Approval";
 
 export const EVENT_WHITELIST_GRANTED = "WhitelistGranted";
 export const EVENT_WHITELIST_REVOKED = "WhitelistRevoked";
+
+export const EVENT_QUOTA_SET = "QuotaSet";
+export const EVENT_QUOTA_RESET = "QuotaReset";
+export const EVENT_QUOTA_MINTED = "QuotaMinted";
 
 export interface SlidingWindowState extends LightWeightSlidingWindowState {
   _slotSize: Number;
