@@ -24,6 +24,7 @@ abstract contract BilateralAgreementTemplate is Context {
     /// @notice Event
     event InitializedAgreement();
     event AgreementApproved(address party);
+    event AgreementContractUpdate(address oldContract, address newContract);
     event SignedAgreement(address party);
 
     /// @notice Error
@@ -50,6 +51,12 @@ abstract contract BilateralAgreementTemplate is Context {
         _init = true;
 
         emit InitializedAgreement();
+    }
+
+    function _updateAgreement(IAgreement agreementContract) private {
+        address oldAgreementContract = address(_agreementContract);
+        _agreementContract = agreementContract;
+        emit AgreementContractUpdate(oldAgreementContract, agreementContract);
     }
 
     function _excecute() private {
