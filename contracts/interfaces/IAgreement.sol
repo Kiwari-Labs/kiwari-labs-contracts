@@ -1,0 +1,14 @@
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.8.0 <0.9.0;
+
+/// @title Interface Agreement Contract
+/// @author Kiwari-labs
+
+interface IAgreement {
+    /// @notice Evaluates the bilateral agreement between party A and party B
+    /// @dev This function checks if the agreement between the parameters `x` (from party A) and `y` (from party B) is valid.
+    /// @param x The input parameters provided by party A
+    /// @param y The input parameters provided by party B
+    /// @return True if the agreement is valid, otherwise false
+    function agreement(bytes memory x, bytes memory y) external returns (bool);
+}
