@@ -11,4 +11,13 @@ interface IAgreement {
     /// @param y The input parameters provided by party B
     /// @return True if the agreement is valid, otherwise false
     function agreement(bytes memory x, bytes memory y) external returns (bool);
+
+    /// @notice Returns the name of the agreement contract.
+    /// @dev This function retrieves the name of the agreement to distinguish between different contracts.
+    /// @return string The name of the agreement contract.
+    function name() external returns (string memory);
+    
+    /// @notice Returns the current version of the agreement
+    /// @return The version number of the agreement
+    function version() external returns (uint256);  
 }
