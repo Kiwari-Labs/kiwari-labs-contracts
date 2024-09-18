@@ -51,7 +51,7 @@ abstract contract Agreement is IAgreement {
 
     /// @notice Returns the current version of the agreement
     /// @return The version number of the agreement
-    function version() public view returns (uint32) {
+    function version() public view returns (uint256) {
         return _version;
     }
 

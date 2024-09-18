@@ -11,21 +11,24 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 
 abstract contract BilateralAgreementTemplate is Context {
-
-    enum STATE { NULL, APPROVED, REJECTED }
+    enum STATE {
+        NULL,
+        APPROVED,
+        REJECTED
+    }
 
     struct Party {
         address account;
-        bool approved;
+        STATE approve;
         bytes data;
     }
-    
+
     address private _partyA;
     address private _partyB;
-    
+
     bool private _init;
     IAgreement private _agreementContract;
-    Party [2] _party;
+    Party[2] _party;
 
     /// @notice Event
     event InitializedAgreement();
@@ -37,14 +40,15 @@ abstract contract BilateralAgreementTemplate is Context {
     error AlreadyInitialized();
     error InvalidPartyAddress();
     error InvalidPartyZeroAddress();
+    error InvalidAgreementAddress();
     error InvalidAgreementZeroAddress();
 
-    constructor(address[2] calldata _parties, IAgreement _agreementContract) {
+    constructor(address[2] memory _parties, IAgreement _agreementContract) {
         _initAgreement(_parties);
         _updateAgreement(_agreementContract);
     }
 
-    function _initAgreement(address[2] calldata _parties) private {
+    function _initAgreement(address[2] memory _parties) private {
         if (_init) {
             revert AlreadyInitialized();
         }
@@ -62,12 +66,16 @@ abstract contract BilateralAgreementTemplate is Context {
     }
 
     function _updateAgreement(IAgreement agreementContract) private {
-        if (agreementContract == address(0)) {
+        address oldAgreementContract = address(_agreementContract);
+        address newAgreementContract = address(agreementContract);
+        if (address(agreementContract) == address(0)) {
             revert InvalidAgreementZeroAddress();
         }
-        address oldAgreementContract = address(_agreementContract);
+        if (oldAgreementContract == newAgreementContract) {
+            revert InvalidAgreementAddress();
+        }
         _agreementContract = agreementContract;
-        emit AgreementContractUpdate(oldAgreementContract, agreementContract);
+        emit AgreementContractUpdate(oldAgreementContract, newAgreementContract);
     }
 
     function _excecute() private {
@@ -79,7 +87,7 @@ abstract contract BilateralAgreementTemplate is Context {
     }
 
     function _reject(address sender) public view {
-        Party [2] memory party = _party;
+        Party[2] memory party = _party;
         if (sender == party[0].account) {
             party[0].approve = STATE.REJECTED;
         } else if (sender == party[1].account) {
@@ -109,20 +117,18 @@ abstract contract BilateralAgreementTemplate is Context {
         // refund token back to sender of each party
         // ERC20(tokenA).transfer(amountTokenA, _partyA);
         // ERC20(tokenA).transfer(amountTokenB, _partyB);
-        Party [2] memory party = _party;
+        Party[2] memory party = _party;
         // do not change or remove the line below.
         bytes memory parameterA = party[0].data;
         bytes memory parameterB = party[1].data;
-        uint amountTokenA = abi.decode(parameterA[0], uint);
-        uint amountTokenB = abi.decode(parameterB[0], uint);
-        address tokenA = abi.decode(parameterA[0], address);
-        address tokenB = abi.decode(parameterB[1], address);
+        (uint amountTokenA, address tokenA) = abi.decode(parameterA, (uint, address));
+        (uint amountTokenB, address tokenB) = abi.decode(parameterB, (uint, address));
         // --> ptr argeement
         bool success = _agreementContract.agreement(parameterA, parameterB);
         require(success);
         // peform exchange.
-        IERC20(tokenA).transfer(amountTokenA, party[1].account);
-        IERC20(tokenB).transfer(amountTokenB, party[0].account);
+        IERC20(tokenA).transfer(party[1].account, amountTokenA);
+        IERC20(tokenB).transfer(party[0].account, amountTokenB);
         // _clear();
         // emit AgreementApproved();
     }
@@ -130,7 +136,7 @@ abstract contract BilateralAgreementTemplate is Context {
     /// submit their parameter
     function submit(bytes calldata parameter) public {
         address sender = _msgSender();
-        Party [2] memory party = _party;
+        Party[2] memory party = _party;
         if (sender == party[0].account) {
             party[0].data = parameter;
         } else if (sender == party[1].account) {

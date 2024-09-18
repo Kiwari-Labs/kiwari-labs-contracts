@@ -15,9 +15,9 @@ interface IAgreement {
     /// @notice Returns the name of the agreement contract.
     /// @dev This function retrieves the name of the agreement to distinguish between different contracts.
     /// @return string The name of the agreement contract.
-    function name() external returns (string memory);
-    
+    function name() external view returns (string memory);
+
     /// @notice Returns the current version of the agreement
     /// @return The version number of the agreement
-    function version() external returns (uint256);  
+    function version() external view returns (uint256);
 }

@@ -46,7 +46,7 @@ abstract contract ERC721EXPBase is ERC721, IERC721EXPBase {
         return _expiredPeriod;
     }
 
-    function hasExpired(uint256 tokenId) public view override virtual returns (bool) {
+    function hasExpired(uint256 tokenId) public view virtual override returns (bool) {
         uint256 blockNumber = _asset[tokenId].blockNumber;
         if (blockNumber == 0) {
             return false; // Asset not stamped, therefore not expired.
