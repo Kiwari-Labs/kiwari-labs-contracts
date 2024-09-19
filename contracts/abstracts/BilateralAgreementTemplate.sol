@@ -23,9 +23,6 @@ abstract contract BilateralAgreementTemplate is Context {
         bytes data;
     }
 
-    address private _partyA;
-    address private _partyB;
-
     bool private _init;
     IAgreement private _agreementContract;
     Party[2] _party;
@@ -34,18 +31,42 @@ abstract contract BilateralAgreementTemplate is Context {
     event InitializedAgreement();
     event AgreementApproved(address party);
     event AgreementContractUpdate(address oldContract, address newContract);
-    event SignedAgreement(address party);
+    event SubmitAgreementParameter(address party);
 
     /// @notice Error
+    error AlreadyApproved();
     error AlreadyInitialized();
     error InvalidPartyAddress();
     error InvalidPartyZeroAddress();
     error InvalidAgreementAddress();
     error InvalidAgreementZeroAddress();
+    error ParameterEmpty();
 
-    constructor(address[2] memory _parties, IAgreement _agreementContract) {
+    constructor(address[2] memory _parties, IAgreement _agreementImplementation) {
         _initAgreement(_parties);
-        _updateAgreement(_agreementContract);
+        _updateAgreement(_agreementImplementation);
+    }
+
+    function _action(address sender, STATE types) private {
+        Party[2] memory party = _party;
+        if (sender == party[0].account || sender == party[1].account) {
+            if (sender == party[0].account) {
+                if (party[0].approve == STATE.NULL) {
+                    party[0].approve = types;
+                } else {
+                    revert AlreadyApproved();
+                }
+            } else {
+                if (party[0].approve == STATE.NULL) {
+                    party[0].approve = types;
+                } else {
+                    revert AlreadyApproved();
+                }
+            }
+            emit AgreementApproved(sender);
+        } else {
+            revert InvalidPartyAddress();
+        }
     }
 
     function _initAgreement(address[2] memory _parties) private {
@@ -58,8 +79,8 @@ abstract contract BilateralAgreementTemplate is Context {
         if (_parties[0] != address(0) && _parties[1] != address(0)) {
             revert InvalidPartyZeroAddress();
         }
-        _partyA = _parties[0];
-        _partyB = _parties[1];
+        _party[0].account = _parties[0];
+        _party[1].account = _parties[1];
         _init = true;
 
         emit InitializedAgreement();
@@ -78,23 +99,53 @@ abstract contract BilateralAgreementTemplate is Context {
         emit AgreementContractUpdate(oldAgreementContract, newAgreementContract);
     }
 
+    /// @notice do not change or make modified the _execute function below.
     function _excecute() private {
-        //
+        Party[2] memory party = _party;
+        bytes memory parameterA = party[0].data;
+        bytes memory parameterB = party[1].data;
+        (address tokenA, uint256 amountTokenA) = abi.decode(parameterA, (address, uint256));
+        (address tokenB, uint256 amountTokenB) = abi.decode(parameterB, (address, uint256));
+        bool success = _agreementContract.agreement(parameterA, parameterB);
+        if (success) {
+            IERC20(tokenA).transfer(party[1].account, amountTokenA);
+            IERC20(tokenB).transfer(party[0].account, amountTokenB);
+            // _clear();
+        } else {
+            revert();
+        }
     }
 
     function _clear() private {
-        delete _party;
+        // clear state and parameter.
     }
 
-    function _reject(address sender) public view {
+    function approve() public {
+        // @TODO check is both parameter agreement from partyA and partyB aleardy paste before approve.
+        address sender = _msgSender();
+        _action(sender, STATE.APPROVED);
+        // if partyA or partyB approved second party execute if approved
+    }
+
+    function reject() public {
+        // @TODO check is both parameter agreement from partyA and partyB aleardy paste before reject.
+        address sender = _msgSender();
+        _action(sender, STATE.REJECTED);
+        // if partyA or partyB reject second party clear if approved or reject
+    }
+
+    // @TODO if one party not meet the agreement balance of the contract not enough. the transfer maybe stuck
+    // potentially create DoS of smart contract agreement can't be clear
+    function _refundTokens() private {
         Party[2] memory party = _party;
-        if (sender == party[0].account) {
-            party[0].approve = STATE.REJECTED;
-        } else if (sender == party[1].account) {
-            party[1].approve = STATE.REJECTED;
-        } else {
-            revert InvalidPartyAddress();
-        }
+        bytes memory parameterA = party[0].data;
+        bytes memory parameterB = party[1].data;
+
+        (address tokenA, uint256 amountTokenA) = abi.decode(parameterA, (address, uint256));
+        (address tokenB, uint256 amountTokenB) = abi.decode(parameterB, (address, uint256));
+
+        IERC20(tokenA).transfer(party[0].account, amountTokenA);
+        IERC20(tokenB).transfer(party[1].account, amountTokenB);
     }
 
     function agreement() public view returns (address) {
@@ -109,31 +160,6 @@ abstract contract BilateralAgreementTemplate is Context {
         return _agreementContract.version();
     }
 
-    // approving agreement
-    function approve() public {
-        // if first party just approve
-        // else if second party approve and then execute
-        // else if second party reject and then reject
-        // refund token back to sender of each party
-        // ERC20(tokenA).transfer(amountTokenA, _partyA);
-        // ERC20(tokenA).transfer(amountTokenB, _partyB);
-        Party[2] memory party = _party;
-        // do not change or remove the line below.
-        bytes memory parameterA = party[0].data;
-        bytes memory parameterB = party[1].data;
-        (uint amountTokenA, address tokenA) = abi.decode(parameterA, (uint, address));
-        (uint amountTokenB, address tokenB) = abi.decode(parameterB, (uint, address));
-        // --> ptr argeement
-        bool success = _agreementContract.agreement(parameterA, parameterB);
-        require(success);
-        // peform exchange.
-        IERC20(tokenA).transfer(party[1].account, amountTokenA);
-        IERC20(tokenB).transfer(party[0].account, amountTokenB);
-        // _clear();
-        // emit AgreementApproved();
-    }
-
-    /// submit their parameter
     function submit(bytes calldata parameter) public {
         address sender = _msgSender();
         Party[2] memory party = _party;
@@ -146,6 +172,6 @@ abstract contract BilateralAgreementTemplate is Context {
         }
         // place parameter for a if caller is partyA.
         // place parameter for b if caller is partyB.
-        emit SignedAgreement(sender);
+        emit SubmitAgreementParameter(sender);
     }
 }
