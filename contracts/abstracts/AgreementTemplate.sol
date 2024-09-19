@@ -23,18 +23,16 @@ abstract contract Agreement is IAgreement {
         _name = name_;
     }
 
-    /** @notice Increment the major version of the agreement
-     *  @dev Use this when major changes are made, such as changing the proxy address, external address or ownership structure.
-     */
+    /// @notice Increment the major version of the agreement
+    /// @dev Use this when major changes are made, such as changing the proxy address, external address or ownership structure.
     function _bumpMajorVersion() internal {
         uint256 oldVersion = _version;
         _version += 100;
         emit BumpMajorVersion(oldVersion, _version);
     }
 
-    /** @notice Increment the minor version of the agreement
-     * @dev Use this for medium-impact changes like updating or parameter configurations.
-     */
+    /// @notice Increment the minor version of the agreement
+    /// @dev Use this for medium-impact changes like updating or parameter configurations.
     function _bumpMinorVersion() internal {
         uint256 oldVersion = _version;
         _version += 10;
