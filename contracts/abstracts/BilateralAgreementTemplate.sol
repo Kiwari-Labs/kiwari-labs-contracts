@@ -41,6 +41,7 @@ abstract contract BilateralAgreementTemplate is Context {
     error InvalidAgreementAddress();
     error InvalidAgreementZeroAddress();
     error ParameterEmpty();
+    error ExecutionFailed();
 
     constructor(address[2] memory _parties, IAgreement _agreementImplementation) {
         _initAgreement(_parties);
@@ -112,7 +113,7 @@ abstract contract BilateralAgreementTemplate is Context {
             IERC20(tokenB).transfer(party[0].account, amountTokenB);
             // _clear();
         } else {
-            revert();
+            revert ExecutionFailed();
         }
     }
 
@@ -146,6 +147,8 @@ abstract contract BilateralAgreementTemplate is Context {
 
         IERC20(tokenA).transfer(party[0].account, amountTokenA);
         IERC20(tokenB).transfer(party[1].account, amountTokenB);
+
+        // emit Refunded(partyAddress, amount);
     }
 
     function agreement() public view returns (address) {
