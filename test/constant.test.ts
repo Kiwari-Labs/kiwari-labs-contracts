@@ -17,6 +17,7 @@ export const LIGHT_WEIGHT_SLIDING_WINDOW_LIBRARY_CONTRACT = "MockLightWeightSlid
 export const SORTED_CIRCULAR_DOUBLY_LINKED_LIST_LIBRARY_CONTRACT = "MockSortedCircularDoublyLinkedListLibrary";
 export const LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_LIBRARY_CONTRACT =
   "MockLightWeightSortedCircularDoublyLinkedListLibrary";
+export const COMPARATOR_LIBRARY_CONTRACT = "MockComparator";
 
 export const ERC20_EXP_EXPIRE_PERIOD = 4;
 

@@ -6,6 +6,6 @@ export const run = async () => {
   describe("extensions", async function () {
     ERC20EXPWhitelist.run();
     // LightWeightERC20.run();
-    ERC20EXPMintQuota.run()
+    ERC20EXPMintQuota.run();
   });
 };

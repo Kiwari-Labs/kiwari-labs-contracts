@@ -23,6 +23,7 @@ import {
   LIGHT_WEIGHT_SLIDING_WINDOW_LIBRARY_CONTRACT,
   SLIDING_WINDOW_LIBRARY_CONTRACT,
   ERC20_EXP_MINT_QUOTA_CONTRACT,
+  COMPARATOR_LIBRARY_CONTRACT,
 } from "./constant.test";
 
 // tools
@@ -388,4 +389,19 @@ export const deploySlidingWindowLibrary = async function ({
   slotSize = 4, // 4 slot per era
 }) {
   return deploySlidingWindowSelectorLibrary(false, startBlockNumber, blockPeriod, frameSize, slotSize);
+};
+
+export const deployComparatorLibrary = async function ({}) {
+  const [deployer, alice, bob, jame] = await ethers.getSigners();
+
+  const Comparator = await ethers.getContractFactory(COMPARATOR_LIBRARY_CONTRACT, deployer);
+  const comparator = await Comparator.deploy();
+
+  return {
+    comparator,
+    deployer,
+    alice,
+    bob,
+    jame,
+  };
 };
