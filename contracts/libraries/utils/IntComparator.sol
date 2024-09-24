@@ -62,7 +62,7 @@ library IntComparator {
     /// @return result True if `x` is not equal to `y`, otherwise false
     function notEqual(int x, int y) internal pure returns (bool result) {
         assembly {
-            result := not(eq(x, y))
+            result := iszero(eq(x, y))
         }
     }
 

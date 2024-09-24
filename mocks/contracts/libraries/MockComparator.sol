@@ -61,7 +61,7 @@ contract MockComparator {
         return x.equal(y);
     }
 
-    function intNotEqula(int x, int y) public pure returns (bool) {
+    function intNotEqual(int x, int y) public pure returns (bool) {
         return x.notEqual(y);
     }
 
@@ -107,7 +107,7 @@ contract MockComparator {
         return x.equal(y);
     }
 
-    function uintNotEqula(uint x, uint y) public pure returns (bool) {
+    function uintNotEqual(uint x, uint y) public pure returns (bool) {
         return x.notEqual(y);
     }
 
