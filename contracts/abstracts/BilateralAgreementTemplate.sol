@@ -178,6 +178,13 @@ abstract contract BilateralAgreementTemplate is Context {
         // if partyA or partyB reject second party clear if approved or reject
     }
 
+    function status() public view returns (bool) {
+        Party[2] memory party = _party;
+        if (party[0].approve == STATE.APPROVED || party[1].approve == STATE.APPROVED) {
+            return true;
+        }
+    }
+
     function claim() public {
         address sender = _msgSender();
         // @TODO check if the state of agreement is reject
