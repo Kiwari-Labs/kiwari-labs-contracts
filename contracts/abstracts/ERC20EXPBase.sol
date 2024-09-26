@@ -27,6 +27,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
 
     mapping(address => mapping(uint256 => mapping(uint8 => Slot))) private _balances;
     mapping(address => mapping(address => uint256)) private _allowances;
+    mapping(uint256 => uint256) private _worldBlockBalance;
 
     /// @notice Constructor function to initialize the token contract with specified parameters.
     /// @dev Initializes the token contract by setting the name, symbol, and initializing the sliding window parameters.
@@ -187,7 +188,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         uint8 slotSizeCache = _getSlotPerEra();
 
         if (from == address(0)) {
-            // Mint expirable token.
+            // Mint token.
             (uint256 currentEra, uint8 currentSlot) = _calculateEraAndSlot(blockNumberCache);
             Slot storage _recipient = _balances[to][currentEra][currentSlot];
             unchecked {
@@ -195,7 +196,9 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                 _recipient.blockBalances[blockNumberCache] += value;
             }
             _recipient.list.insert(blockNumberCache, (""));
+            _worldBlockBalance[blockNumberCache] += value;
         } else {
+            // Burn token.
             (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
             uint256 balance = _lookBackBalance(from, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
             if (balance < value) {
@@ -206,7 +209,6 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
             uint256 balanceCache = 0;
 
             if (to == address(0)) {
-                // Burn expirable token.
                 while ((fromEra < toEra || (fromEra == toEra && fromSlot <= toSlot)) && pendingValue > 0) {
                     Slot storage _spender = _balances[from][fromEra][fromSlot];
 
@@ -223,11 +225,13 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                             }
                             key = _spender.list.next(key);
                             _spender.list.remove(_spender.list.previous(key));
+                            _worldBlockBalance[key] -= balanceCache;
                         } else {
                             unchecked {
                                 _spender.slotBalance -= pendingValue;
                                 _spender.blockBalances[key] -= pendingValue;
                             }
+                            _worldBlockBalance[key] -= pendingValue;
                             pendingValue = 0;
                         }
                     }
@@ -243,7 +247,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                     }
                 }
             } else {
-                // Transfer expirable token.
+                // Transfer token.
                 while ((fromEra < toEra || (fromEra == toEra && fromSlot <= toSlot)) && pendingValue > 0) {
                     Slot storage _spender = _balances[from][fromEra][fromSlot];
                     Slot storage _recipient = _balances[to][fromEra][fromSlot];
@@ -398,6 +402,32 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
             revert ERC20InvalidReceiver(address(0));
         }
         _update(from, to, value);
+    }
+
+    /// @notice Retrieves the total balance stored at a specific block.
+    /// @dev This function returns the balance of the given block from the internal `_worldBlockBalance` mapping.
+    /// @param blockNumber The block number for which the balance is being queried.
+    /// @return balance The total balance stored at the given block number.
+    function getBlockBalance(uint256 blockNumber) public view returns (uint256) {
+        return _worldBlockBalance[blockNumber];
+    }
+
+    /// @notice Retrieves the nearest unexpired block balance for a given account.
+    /// @dev This function checks the block history for an account and finds the first unexpired block balance.
+    /// It uses the `_blockNumberProvider` to get the current block number and looks up the account's block balances.
+    /// @param account The address of the account whose unexpired block balance is being queried.
+    /// @return balance The balance at the nearest unexpired block for the specified account.
+    /// @return blockNumber The block number at which the nearest unexpired balance was found.
+    function nearestExpire(address account) public view returns (uint256, uint256) {
+        uint256 blockNumberCache = _blockNumberProvider();
+        (uint256 fromEra, , uint8 fromSlot, ) = _safeFrame(blockNumberCache);
+        Slot storage _account = _balances[account][fromEra][fromSlot];
+        blockNumberCache = _getFirstUnexpiredBlockBalance(
+            _account.list,
+            blockNumberCache,
+            _getFrameSizeInBlockLength()
+        );
+        return (_account.blockBalances[blockNumberCache], blockNumberCache);
     }
 
     /// @inheritdoc IERC20Metadata
