@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import "../interfaces/IAgreement.sol";
 
 /// @title Bilateral Agreement Template
-/// @author Kiwari labs
+/// @author Kiwari Labs
 /// @notice Before approving the agreement make sure each party deposit token meet the requirement.
 
 // Diagram Highlevel of Smart Contract
