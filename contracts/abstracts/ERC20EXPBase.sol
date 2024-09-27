@@ -427,6 +427,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
             blockNumberCache,
             _getFrameSizeInBlockLength()
         );
+        // @TODO calculate the expired blocknumber then save to blockNumberCache
         return (_account.blockBalances[blockNumberCache], blockNumberCache);
     }
 
