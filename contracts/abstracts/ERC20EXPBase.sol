@@ -222,16 +222,16 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                                 pendingValue -= balanceCache;
                                 _spender.slotBalance -= balanceCache;
                                 _spender.blockBalances[key] -= balanceCache;
+                                _worldBlockBalance[key] -= balanceCache;
                             }
                             key = _spender.list.next(key);
                             _spender.list.remove(_spender.list.previous(key));
-                            _worldBlockBalance[key] -= balanceCache;
                         } else {
                             unchecked {
                                 _spender.slotBalance -= pendingValue;
                                 _spender.blockBalances[key] -= pendingValue;
+                                _worldBlockBalance[key] -= pendingValue;
                             }
-                            _worldBlockBalance[key] -= pendingValue;
                             pendingValue = 0;
                         }
                     }
