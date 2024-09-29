@@ -150,11 +150,20 @@ export const run = async () => {
       await expect(erc20exp.mint(aliceAddress, amount))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, aliceAddress, amount);
-      const mintedBlockNumber = await network.provider.send("eth_blockNumber");
-      const [value, blockNumber] = await erc20exp.nearestExpire(aliceAddress);
-
+      const mintedBlockNumber = parseInt(await network.provider.send("eth_blockNumber"));
+      const blockLength = await erc20exp.getFrameSizeInBlockLength();
+      const [value, blockNumber] = await erc20exp.nearestExpireBalanceOf(aliceAddress);
+  
       expect(value).to.equal(amount);
-      expect(blockNumber).to.equal(mintedBlockNumber);
+      expect(blockNumber).to.equal(mintedBlockNumber + blockLength);
+    });
+
+    it("[HAPPY] query no nearest expire balance", async function () {
+      const {erc20exp, alice} = await deployERC20EXPBase({});
+      const aliceAddress = await alice.getAddress();
+      const amount = 0;
+      const [value, blockNumber] = await erc20exp.nearestExpireBalanceOf(aliceAddress);
+      expect(blockNumber).to.equal(amount);
     });
   });
 };

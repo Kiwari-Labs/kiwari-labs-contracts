@@ -418,17 +418,21 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @param account The address of the account whose unexpired block balance is being queried.
     /// @return balance The balance at the nearest unexpired block for the specified account.
     /// @return blockNumber The block number at which the nearest unexpired balance was found.
-    function nearestExpire(address account) public view returns (uint256, uint256) {
+    function nearestExpireBalanceOf(address account) public view returns (uint256, uint256) {
         uint256 blockNumberCache = _blockNumberProvider();
+        uint256 blockLengthCache = _getFrameSizeInBlockLength();
         (uint256 fromEra, , uint8 fromSlot, ) = _safeFrame(blockNumberCache);
         Slot storage _account = _balances[account][fromEra][fromSlot];
         blockNumberCache = _getFirstUnexpiredBlockBalance(
             _account.list,
             blockNumberCache,
-            _getFrameSizeInBlockLength()
+            blockLengthCache
         );
-        // @TODO calculate the expired blocknumber then save to blockNumberCache
-        return (_account.blockBalances[blockNumberCache], blockNumberCache);
+        if (blockNumberCache == 0) {
+            return (0,0);
+        } else {
+            return (_account.blockBalances[blockNumberCache], blockNumberCache + blockLengthCache);
+        }
     }
 
     /// @inheritdoc IERC20Metadata
