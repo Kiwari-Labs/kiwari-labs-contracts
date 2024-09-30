@@ -1,6 +1,8 @@
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 // abstracts
+export const AGREEMENT_BASE_CONTRACT = "MockAgreementBase";
+export const BILATERAL_AGREEMENT_BASE_CONTRACT = "MockBilateralAgreementBase";
 export const ERC20_EXP_BASE_CONTRACT = "MockERC20EXPBase";
 export const LIGHT_WEIGHT_ERC20_EXP_BASE_CONTRACT = "MockLightWeightERC20EXPBase";
 export const SLIDING_WINDOW_CONTRACT = "MockSlidingWindow";

@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title Template of using the Bilateral Agreement Template
-/// @author Kiwari-labs
+/// @title Agreement Template
+/// @author Kiwari Labs
 /// @notice this contract is abstract contract do not modify this contract.
 
 import "../interfaces/IAgreement.sol";
 
-abstract contract Agreement is IAgreement {
+abstract contract AgreementBase is IAgreement {
     uint32 private _version = 100;
     string private _name;
 
-    /// @notice Event
+    /// @notice Events
     event BumpMajorVersion(uint256 formVersion, uint256 toVersion);
     event BumpMinorVersion(uint256 formVersion, uint256 toVersion);
     event BumpPatchVersion(uint256 formVersion, uint256 toVersion);
 
-    /// @notice Error
+    /// @notice Custom error definitions
     error AgreementFailed(bytes x, bytes y);
 
     constructor(string memory name_) {

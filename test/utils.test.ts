@@ -24,6 +24,8 @@ import {
   SLIDING_WINDOW_LIBRARY_CONTRACT,
   ERC20_EXP_MINT_QUOTA_CONTRACT,
   COMPARATOR_LIBRARY_CONTRACT,
+  AGREEMENT_BASE_CONTRACT,
+  BILATERAL_AGREEMENT_BASE_CONTRACT,
 } from "./constant.test";
 
 // tools
@@ -135,6 +137,20 @@ export const getAddress = async function (account: Signer | Contract) {
 };
 
 // abstracts
+const deployAgreementBase = async function () {
+  const [deployer, alice, bob, jame] = await ethers.getSigners();
+  const AGREEMENT = await ethers.getContractFactory(AGREEMENT_BASE_CONTRACT, deployer);
+  const agreement = await AGREEMENT.deploy();
+  return {agreement, alice, bob, jame};
+};
+
+const deployBilateralAgreementBase = async function () {
+  const [deployer, alice, bob, jame] = await ethers.getSigners();
+  const BILATERAL_AGREEMENT = await ethers.getContractFactory(BILATERAL_AGREEMENT_BASE_CONTRACT, deployer);
+  const bilateralAgreement = await BILATERAL_AGREEMENT.deploy();
+  return {bilateralAgreement, alice, bob, jame};
+};
+
 const deployERC20BaseSelector = async function (
   light: boolean,
   blockPeriod: number,

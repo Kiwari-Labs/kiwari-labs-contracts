@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 /// @title Interface Agreement Contract
-/// @author Kiwari-labs
+/// @author Kiwari Labs
 
 interface IAgreement {
     /// @notice Evaluates the bilateral agreement between party A and party B

@@ -22,7 +22,7 @@ import "../interfaces/IAgreement.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 
-abstract contract BilateralAgreementTemplate is Context {
+abstract contract BilateralAgreementBase is Context {
     enum TRANSACTION_TYPE {
         DEFAULT,
         LOGIC_CHANGE
@@ -39,9 +39,10 @@ abstract contract BilateralAgreementTemplate is Context {
     IAgreement private _implemetation;
     Transaction[] private _transactions;
     address[2] _parties;
+    /// @notice Maps transaction indices to confirmation status of each address.
     mapping(uint256 => mapping(address => bool)) private _transactionConfirmed;
 
-    /// @notice EventsDefinitions
+    /// @notice Events
     event Initialized();
     event ImplementationUpdated(address indexed oldImplementation, address indexed newImplementation);
     event TransactionFinalized(uint256 indexed index);
@@ -54,7 +55,7 @@ abstract contract BilateralAgreementTemplate is Context {
     event TransactionRejected(uint256 indexed index, address indexed sender);
     event TransactionRevoked(uint256 indexed index, address indexed sender);
 
-    /// @notice Error Definitions
+    /// @notice Custom error definitions
     error ContractAlreadyInitialized();
     error InvalidPartyAddress();
     error InvalidAgreementAddress();
