@@ -16,7 +16,6 @@ export const run = async () => {
 
     it("[HAPPY] bump major version", async function () {
       const {agreementBase} = await deployAgreementBase(AGREEMENT_NAME);
-      const version = await agreementBase.version();
       await expect(agreementBase.bumpMajorVersion())
         .to.emit(agreementBase, EVENT_AGREEMENT_BUMP_MAJOR_VERSION)
         .withArgs(100, 200);
