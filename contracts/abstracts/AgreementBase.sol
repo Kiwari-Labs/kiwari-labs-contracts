@@ -44,7 +44,7 @@ abstract contract AgreementBase is IAgreement {
     function _bumpPatchVersion() internal {
         uint256 oldVersion = _version;
         _version += 1;
-        emit BumpMinorVersion(oldVersion, _version);
+        emit BumpPatchVersion(oldVersion, _version);
     }
 
     /// @notice Returns the current version of the agreement
@@ -64,6 +64,7 @@ abstract contract AgreementBase is IAgreement {
         if (!_verifyAgreement(x, y)) {
             revert AgreementFailed(x, y);
         }
+        // emit AgreementSucessful();
         return true;
     }
 

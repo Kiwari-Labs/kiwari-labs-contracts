@@ -137,18 +137,18 @@ export const getAddress = async function (account: Signer | Contract) {
 };
 
 // abstracts
-const deployAgreementBase = async function () {
+export const deployAgreementBase = async function (name: string) {
   const [deployer, alice, bob, jame] = await ethers.getSigners();
   const AGREEMENT = await ethers.getContractFactory(AGREEMENT_BASE_CONTRACT, deployer);
-  const agreement = await AGREEMENT.deploy();
-  return {agreement, alice, bob, jame};
+  const agreementBase = await AGREEMENT.deploy(name);
+  return {agreementBase, alice, bob, jame};
 };
 
-const deployBilateralAgreementBase = async function () {
+export const deployBilateralAgreementBase = async function () {
   const [deployer, alice, bob, jame] = await ethers.getSigners();
   const BILATERAL_AGREEMENT = await ethers.getContractFactory(BILATERAL_AGREEMENT_BASE_CONTRACT, deployer);
-  const bilateralAgreement = await BILATERAL_AGREEMENT.deploy();
-  return {bilateralAgreement, alice, bob, jame};
+  const bilateralAgreementBase = await BILATERAL_AGREEMENT.deploy();
+  return {bilateralAgreementBase, alice, bob, jame};
 };
 
 const deployERC20BaseSelector = async function (
