@@ -1,11 +1,11 @@
-import { expect } from "chai";
-import { deployERC20EXPWhitelist } from "../../utils.test";
-import { EVENT_APPROVAL, EVENT_TRANSFER, EVENT_WHITELIST_GRANTED, ZERO_ADDRESS } from "../../constant.test";
+import {expect} from "chai";
+import {deployERC20EXPWhitelist} from "../../utils.test";
+import {EVENT_APPROVAL, EVENT_TRANSFER, EVENT_WHITELIST_GRANTED, ZERO_ADDRESS} from "../../constant.test";
 
 export const run = async () => {
   describe("TransferFrom", async function () {
     it("[HAPPY] transfer from alice to bob correctly", async function () {
-      const { erc20expWhitelist, deployer, alice, bob } = await deployERC20EXPWhitelist();
+      const {erc20expWhitelist, deployer, alice, bob} = await deployERC20EXPWhitelist();
       const deployerAddress = await deployer.getAddress();
       const aliceAddress = await alice.getAddress();
       const bobAddress = await bob.getAddress();

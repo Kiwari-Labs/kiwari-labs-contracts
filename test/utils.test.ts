@@ -262,7 +262,10 @@ export const deployERC20EXPNearestExpiryQuery = async function (
 ) {
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 
-  const ERC20_EXP_NEAREST_EXPIRY_QUERY = await ethers.getContractFactory(ERC20_EXP_NEAREST_EXPIRY_QUERY_CONTRACT, deployer);
+  const ERC20_EXP_NEAREST_EXPIRY_QUERY = await ethers.getContractFactory(
+    ERC20_EXP_NEAREST_EXPIRY_QUERY_CONTRACT,
+    deployer,
+  );
 
   const erc20ExpNearestExpiryQuery = await ERC20_EXP_NEAREST_EXPIRY_QUERY.deploy(
     ERC20_EXP_NAME,
@@ -297,7 +300,13 @@ const deployERC20WhiteListSelector = async function (
   if (light) {
     erc20expWhitelist = await ERC20EXP_WHITELIST.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize);
   } else {
-    erc20expWhitelist = await ERC20EXP_WHITELIST.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize, slotSize);
+    erc20expWhitelist = await ERC20EXP_WHITELIST.deploy(
+      ERC20_EXP_NAME,
+      ERC20_EXP_SYMBOL,
+      blockPeriod,
+      frameSize,
+      slotSize,
+    );
   }
   await erc20expWhitelist.deployed();
 

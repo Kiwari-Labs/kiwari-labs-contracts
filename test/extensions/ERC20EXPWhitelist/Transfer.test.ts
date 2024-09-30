@@ -1,8 +1,8 @@
-import { expect } from "chai";
-import { deployERC20EXPWhitelist } from "../../utils.test";
-import { parseEther } from "ethers/lib/utils";
-import { reset, time, mineUpTo } from "@nomicfoundation/hardhat-network-helpers";
-import { erc20 } from "../../../typechain-types/@openzeppelin/contracts/token";
+import {expect} from "chai";
+import {deployERC20EXPWhitelist} from "../../utils.test";
+import {parseEther} from "ethers/lib/utils";
+import {reset, time, mineUpTo} from "@nomicfoundation/hardhat-network-helpers";
+import {erc20} from "../../../typechain-types/@openzeppelin/contracts/token";
 import {
   ERC20_INSUFFICIENT_BALANCE,
   ERC20_INVALID_RECEIVER,
@@ -15,7 +15,7 @@ import {
 export const run = async () => {
   describe(EVENT_TRANSFER, async function () {
     it("[HAPPY] correct non whitelist transfer ", async function () {
-      const { erc20expWhitelist, deployer, alice, bob, jame } = await deployERC20EXPWhitelist();
+      const {erc20expWhitelist, deployer, alice, bob, jame} = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       const bobAddress = await bob.getAddress();
       const jameAddress = await jame.getAddress();
@@ -43,7 +43,7 @@ export const run = async () => {
 
     // In cases of Wholesale and Retail are still in the designing phase to be discussed later.
     it("[HAPPY] whitelist address transfer spendable balance to non whitelist address", async function () {
-      const { erc20expWhitelist, deployer, alice, bob } = await deployERC20EXPWhitelist();
+      const {erc20expWhitelist, deployer, alice, bob} = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       const bobAddress = await bob.getAddress();
       const deployerAddress = await deployer.getAddress();
@@ -64,7 +64,7 @@ export const run = async () => {
     });
 
     it("[HAPPY] non whitelist address transfer un-spendable balance to whitelist address", async function () {
-      const { erc20expWhitelist, deployer, alice, bob } = await deployERC20EXPWhitelist();
+      const {erc20expWhitelist, deployer, alice, bob} = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       const bobAddress = await bob.getAddress();
       const deployerAddress = await deployer.getAddress();
@@ -90,7 +90,7 @@ export const run = async () => {
     });
 
     it("[HAPPY] whitelist address transfer spendable balance to whitelist address", async function () {
-      const { erc20expWhitelist, deployer, alice, bob } = await deployERC20EXPWhitelist();
+      const {erc20expWhitelist, deployer, alice, bob} = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       const bobAddress = await bob.getAddress();
       const deployerAddress = await deployer.getAddress();
@@ -112,7 +112,7 @@ export const run = async () => {
     });
 
     it("[HAPPY] whitelist address transfer un-spendable balance to whitelist address", async function () {
-      const { erc20expWhitelist, deployer, alice, bob } = await deployERC20EXPWhitelist();
+      const {erc20expWhitelist, deployer, alice, bob} = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       const bobAddress = await bob.getAddress();
       const deployerAddress = await deployer.getAddress();
@@ -134,7 +134,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] whitelist address insufficient transfer un-spendable balance to whitelist address", async function () {
-      const { erc20expWhitelist, deployer, alice, bob } = await deployERC20EXPWhitelist();
+      const {erc20expWhitelist, deployer, alice, bob} = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       const bobAddress = await bob.getAddress();
       const deployerAddress = await deployer.getAddress();
@@ -151,7 +151,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] whitelist address transfer un-spendable balance to whitelist address", async function () {
-      const { erc20expWhitelist, deployer, alice, bob } = await deployERC20EXPWhitelist();
+      const {erc20expWhitelist, deployer, alice, bob} = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       const bobAddress = await bob.getAddress();
       const deployerAddress = await deployer.getAddress();
@@ -170,7 +170,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] whitelist address transfer un-spendable balance to non whitelist address", async function () {
-      const { erc20expWhitelist, deployer, alice, bob } = await deployERC20EXPWhitelist();
+      const {erc20expWhitelist, deployer, alice, bob} = await deployERC20EXPWhitelist();
       const aliceAddress = await alice.getAddress();
       const bobAddress = await bob.getAddress();
       const deployerAddress = await deployer.getAddress();
