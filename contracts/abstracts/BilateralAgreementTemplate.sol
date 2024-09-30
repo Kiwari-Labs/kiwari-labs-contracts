@@ -74,7 +74,7 @@ abstract contract BilateralAgreementTemplate is Context {
     }
 
     modifier transactionReader(address sender) {
-        // @TODO do we need observer ?
+        // @TODO do we need observer role for read ?
         // if ((sender != _parties[0] && sender != _parties[1]) && sender != IObserver.observer(sender)) {
         //     revert Unauthorized();
         // }
@@ -187,9 +187,10 @@ abstract contract BilateralAgreementTemplate is Context {
         address sender,
         uint256 index
     ) private transactionExist(index) transactionWriter(sender) {
-        // @TODO to reject transaction require at least 1 confirmation
         if (!_transactionConfirmed[index][sender] && (_transactions[index].confirmations == 1)) {
             _transactions[index].executed = true;
+            // @TODO refund token back to first sender
+            // IERC20(token).transfer(party, value);
             emit TransactionRejected(index, sender);
         } else {
             // revert
