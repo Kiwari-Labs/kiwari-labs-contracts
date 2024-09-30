@@ -90,37 +90,12 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         uint256 blockNumber
     ) private view returns (uint256 balance) {
         Slot storage _spender = _balances[account][era][slot];
-        uint256 key = _getFirstUnexpiredBlockBalance(_spender.list, blockNumber, _getFrameSizeInBlockLength());
+        uint256 key = _locateUnexpiredBlockBalance(_spender.list, blockNumber, _getFrameSizeInBlockLength());
         while (key > 0) {
             unchecked {
                 balance += _spender.blockBalances[key];
             }
             key = _spender.list.next(key);
-        }
-    }
-
-    /// @notice Finds the index of the first valid block balance in a sorted list of block numbers.
-    /// A block balance index is considered valid if the difference between the current blockNumber
-    /// and the block number at the index (key) is less than the expirationPeriodInBlockLength.
-    /// @dev This function is used to determine the first valid block balance index within a sorted circular doubly linked list.
-    /// It iterates through the list starting from the head and stops when it finds a valid index or reaches the end of the list.
-    /// @param list The sorted circular doubly linked list of block numbers.
-    /// @param blockNumber The current block number.
-    /// @param expirationPeriodInBlockLength The maximum allowed difference between blockNumber and the key.
-    /// @return key The index of the first valid block balance.
-    function _getFirstUnexpiredBlockBalance(
-        SCDLL.List storage list,
-        uint256 blockNumber,
-        uint256 expirationPeriodInBlockLength
-    ) private view returns (uint256 key) {
-        key = list.head();
-        unchecked {
-            while (blockNumber - key >= expirationPeriodInBlockLength) {
-                if (key == 0) {
-                    break;
-                }
-                key = list.next(key);
-            }
         }
     }
 
@@ -169,11 +144,6 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         }
     }
 
-    /// @inheritdoc IERC20EXPBase
-    function tokenList(address account, uint256 era, uint8 slot) external view virtual returns (uint256[] memory list) {
-        list = _balances[account][era][slot].list.ascending();
-    }
-
     /// @notice Internal function to update token balances during token transfers or operations.
     /// @dev Handles various scenarios including minting, burning, and transferring tokens with expiration logic.
     /// @param from The address from which tokens are being transferred (or minted/burned).
@@ -212,7 +182,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                 while ((fromEra < toEra || (fromEra == toEra && fromSlot <= toSlot)) && pendingValue > 0) {
                     Slot storage _spender = _balances[from][fromEra][fromSlot];
 
-                    uint256 key = _getFirstUnexpiredBlockBalance(_spender.list, blockNumberCache, blockLengthCache);
+                    uint256 key = _locateUnexpiredBlockBalance(_spender.list, blockNumberCache, blockLengthCache);
 
                     while (key > 0 && pendingValue > 0) {
                         balanceCache = _spender.blockBalances[key];
@@ -252,7 +222,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                     Slot storage _spender = _balances[from][fromEra][fromSlot];
                     Slot storage _recipient = _balances[to][fromEra][fromSlot];
 
-                    uint256 key = _getFirstUnexpiredBlockBalance(_spender.list, blockNumberCache, blockLengthCache);
+                    uint256 key = _locateUnexpiredBlockBalance(_spender.list, blockNumberCache, blockLengthCache);
 
                     while (key > 0 && pendingValue > 0) {
                         balanceCache = _spender.blockBalances[key];
@@ -299,6 +269,41 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
 
         // Hook after transfer
         _afterTokenTransfer(from, to, value);
+    }
+
+    /// @notice Retrieves the Slot storage for a given account, era, and slot.
+    /// @dev This function accesses the `_balances` mapping to return the Slot associated with the specified account, era, and slot.
+    /// @param account The address of the account whose slot is being queried.
+    /// @param fromEra The era during which the slot was created or updated.
+    /// @param fromSlot The slot identifier within the era for the account.
+    /// @return slot The storage reference to the Slot structure for the given account, era, and slot.
+    function _slotOf(address account, uint256 fromEra, uint8 fromSlot) internal view returns (Slot storage) {
+        return _balances[account][fromEra][fromSlot];
+    }
+
+    /// @notice Finds the index of the first valid block balance in a sorted list of block numbers.
+    /// A block balance index is considered valid if the difference between the current blockNumber
+    /// and the block number at the index (key) is less than the expirationPeriodInBlockLength.
+    /// @dev This function is used to determine the first valid block balance index within a sorted circular doubly linked list.
+    /// It iterates through the list starting from the head and stops when it finds a valid index or reaches the end of the list.
+    /// @param list The sorted circular doubly linked list of block numbers.
+    /// @param blockNumber The current block number.
+    /// @param expirationPeriodInBlockLength The maximum allowed difference between blockNumber and the key.
+    /// @return key The index of the first valid block balance.
+    function _locateUnexpiredBlockBalance(
+        SCDLL.List storage list,
+        uint256 blockNumber,
+        uint256 expirationPeriodInBlockLength
+    ) internal view returns (uint256 key) {
+        key = list.head();
+        unchecked {
+            while (blockNumber - key >= expirationPeriodInBlockLength) {
+                if (key == 0) {
+                    break;
+                }
+                key = list.next(key);
+            }
+        }
     }
 
     /// @notice Mints new tokens to a specified account.
@@ -412,29 +417,6 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         return _worldBlockBalance[blockNumber];
     }
 
-    /// @notice Retrieves the nearest unexpired block balance for a given account.
-    /// @dev This function checks the block history for an account and finds the first unexpired block balance.
-    /// It uses the `_blockNumberProvider` to get the current block number and looks up the account's block balances.
-    /// @param account The address of the account whose unexpired block balance is being queried.
-    /// @return balance The balance at the nearest unexpired block for the specified account.
-    /// @return blockNumber The block number at which the nearest unexpired balance was found.
-    function nearestExpireBalanceOf(address account) public view returns (uint256, uint256) {
-        uint256 blockNumberCache = _blockNumberProvider();
-        uint256 blockLengthCache = _getFrameSizeInBlockLength();
-        (uint256 fromEra, , uint8 fromSlot, ) = _safeFrame(blockNumberCache);
-        Slot storage _account = _balances[account][fromEra][fromSlot];
-        blockNumberCache = _getFirstUnexpiredBlockBalance(
-            _account.list,
-            blockNumberCache,
-            blockLengthCache
-        );
-        if (blockNumberCache == 0) {
-            return (0,0);
-        } else {
-            return (_account.blockBalances[blockNumberCache], blockNumberCache + blockLengthCache);
-        }
-    }
-
     /// @inheritdoc IERC20Metadata
     function name() public view virtual returns (string memory) {
         return _name;
@@ -491,5 +473,10 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         address owner = _msgSender();
         _approve(owner, spender, value);
         return true;
+    }
+
+    /// @inheritdoc IERC20EXPBase
+    function tokenList(address account, uint256 era, uint8 slot) external view virtual returns (uint256[] memory list) {
+        list = _balances[account][era][slot].list.ascending();
     }
 }

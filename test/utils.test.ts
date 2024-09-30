@@ -23,6 +23,7 @@ import {
   LIGHT_WEIGHT_SLIDING_WINDOW_LIBRARY_CONTRACT,
   SLIDING_WINDOW_LIBRARY_CONTRACT,
   ERC20_EXP_MINT_QUOTA_CONTRACT,
+  ERC20_EXP_NEAREST_EXPIRY_QUERY_CONTRACT,
 } from "./constant.test";
 
 // tools
@@ -254,6 +255,34 @@ export const deployERC20EXPMintQuota = async function (
   };
 };
 
+export const deployERC20EXPNearestExpiryQuery = async function (
+  blockPeriod = 400, // 400ms per block
+  frameSize = 2, // frame size 2 slot
+  slotSize = 4, // 4 slot per era
+) {
+  const [deployer, alice, bob, jame] = await ethers.getSigners();
+
+  const ERC20_EXP_NEAREST_EXPIRY_QUERY = await ethers.getContractFactory(ERC20_EXP_NEAREST_EXPIRY_QUERY_CONTRACT, deployer);
+
+  const erc20ExpNearestExpiryQuery = await ERC20_EXP_NEAREST_EXPIRY_QUERY.deploy(
+    ERC20_EXP_NAME,
+    ERC20_EXP_SYMBOL,
+    blockPeriod,
+    frameSize,
+    slotSize,
+  );
+
+  await erc20ExpNearestExpiryQuery.deployed();
+
+  return {
+    erc20ExpNearestExpiryQuery,
+    deployer,
+    alice,
+    bob,
+    jame,
+  };
+};
+
 const deployERC20WhiteListSelector = async function (
   light: boolean,
   blockPeriod: number,
@@ -263,17 +292,17 @@ const deployERC20WhiteListSelector = async function (
   const type = light ? LIGHT_WEIGHT_ERC20_EXP_WHITELIST_CONTRACT : ERC20_EXP_WHITELIST_CONTRACT;
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 
-  const ERC20EXP = await ethers.getContractFactory(type, deployer);
-  let erc20exp;
+  const ERC20EXP_WHITELIST = await ethers.getContractFactory(type, deployer);
+  let erc20expWhitelist;
   if (light) {
-    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize);
+    erc20expWhitelist = await ERC20EXP_WHITELIST.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize);
   } else {
-    erc20exp = await ERC20EXP.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize, slotSize);
+    erc20expWhitelist = await ERC20EXP_WHITELIST.deploy(ERC20_EXP_NAME, ERC20_EXP_SYMBOL, blockPeriod, frameSize, slotSize);
   }
-  await erc20exp.deployed();
+  await erc20expWhitelist.deployed();
 
   return {
-    erc20exp,
+    erc20expWhitelist,
     deployer,
     alice,
     bob,

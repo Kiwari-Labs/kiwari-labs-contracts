@@ -9,6 +9,7 @@ export const LIGHT_WEIGHT_SLIDING_WINDOW_CONTRACT = "MockLightWeightSlidingWindo
 // extensions
 export const ERC20_EXP_MINT_QUOTA_CONTRACT = "MockERC20EXPMintQuota";
 export const ERC20_EXP_WHITELIST_CONTRACT = "MockERC20EXPWhitelist";
+export const ERC20_EXP_NEAREST_EXPIRY_QUERY_CONTRACT = "MockERC20EXPNearestExpiryQuery"
 export const LIGHT_WEIGHT_ERC20_EXP_WHITELIST_CONTRACT = "MockLightWeightERC20EXPWhitelist";
 
 // libraries
