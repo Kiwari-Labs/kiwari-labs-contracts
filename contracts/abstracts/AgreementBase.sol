@@ -12,6 +12,7 @@ abstract contract AgreementBase is IAgreement {
     string private _name;
 
     /// @notice Events
+    event AgreementComplete();
     event BumpMajorVersion(uint256 formVersion, uint256 toVersion);
     event BumpMinorVersion(uint256 formVersion, uint256 toVersion);
     event BumpPatchVersion(uint256 formVersion, uint256 toVersion);
@@ -64,7 +65,7 @@ abstract contract AgreementBase is IAgreement {
         if (!_verifyAgreement(x, y)) {
             revert AgreementFailed(x, y);
         }
-        // emit AgreementSucessful();
+        emit AgreementComplete();
         return true;
     }
 

@@ -67,6 +67,7 @@ export const ERC20_INVALID_SPENDER = "ERC20InvalidSpender";
 export const ERC20_INSUFFICIENT_ALLOWANCE = "ERC20InsufficientAllowance";
 
 // events
+export const EVENT_AGREEMENT_COMPLETE = "AgreementComplete";
 export const EVENT_AGREEMENT_BUMP_MAJOR_VERSION = "BumpMajorVersion";
 export const EVENT_AGREEMENT_BUMP_MINOR_VERSION = "BumpMinorVersion";
 export const EVENT_AGREEMENT_BUMP_PATCH_VERSION = "BumpPatchVersion";

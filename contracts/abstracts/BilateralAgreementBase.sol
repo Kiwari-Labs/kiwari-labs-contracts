@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 /// @title Bilateral Agreement Template
 /// @author Kiwari Labs
-/// @dev Bilateral Agreement Template applied multi-signature approach
+/// @dev Bilateral Agreement Template for exchange ERC20 between party applied multi-signature approach
 /// @notice Before approving the agreement make sure each party deposit token meet the requirement.
 
 // Highlevel diagram of the smart contract

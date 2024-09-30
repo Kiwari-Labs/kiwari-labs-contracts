@@ -23,6 +23,6 @@ contract MockAgreementBase is AgreementBase {
     }
 
     function verifyAgreement(bytes memory x, bytes memory y) public returns (bool) {
-        return _verifyAgreement(x,y);
+        return _verifyAgreement(x, y);
     }
 }
