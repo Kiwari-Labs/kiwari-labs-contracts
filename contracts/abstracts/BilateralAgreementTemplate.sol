@@ -41,8 +41,9 @@ abstract contract BilateralAgreementTemplate is Context {
     address[2] _parties;
     mapping(uint256 => mapping(address => bool)) private _transactionConfirmed;
 
+    /// @notice EventsDefinitions
     event Initialized();
-    event ImplementationUpdated(address oldImplementation, address newImplementation);
+    event ImplementationUpdated(address indexed oldImplementation, address indexed newImplementation);
     event TransactionFinalized(uint256 indexed index);
     event TransactionRecorded(
         uint256 indexed index,
@@ -53,19 +54,20 @@ abstract contract BilateralAgreementTemplate is Context {
     event TransactionRejected(uint256 indexed index, address indexed sender);
     event TransactionRevoked(uint256 indexed index, address indexed sender);
 
-    /// @notice Error
-    error ContractInitialized();
+    /// @notice Error Definitions
+    error ContractAlreadyInitialized();
     error InvalidPartyAddress();
     error InvalidAgreementAddress();
-    error AddressZero();
-
+    error AddressCannotBeZero();
     error Unauthorized();
-    error TransactionExecuted();
+    error TransactionAlreadyConfirmed();
+    error TransactionAlreadyExecuted();
     error TransactionExecutionFailed();
-    error TransactionNotExist();
-    error TransactionNotSubmited();
-    error TransactionSubmited();
+    error TransactionDoesNotExist();
+    error TransactionNotSubmitted();
+    error TransactionAlreadySubmitted();
 
+    /// @notice Modifiers
     modifier transactionWriter(address sender) {
         if (sender != _parties[0] && sender != _parties[1]) {
             revert Unauthorized();
@@ -73,24 +75,16 @@ abstract contract BilateralAgreementTemplate is Context {
         _;
     }
 
-    modifier transactionReader(address sender) {
-        // @TODO do we need observer role for read ?
-        // if ((sender != _parties[0] && sender != _parties[1]) && sender != IObserver.observer(sender)) {
-        //     revert Unauthorized();
-        // }
-        _;
-    }
-
-    modifier transactionExist(uint256 index) {
-        if (index < _transactions.length) {
-            revert TransactionNotExist();
+    modifier transactionExists(uint256 index) {
+        if (index >= _transactions.length) {
+            revert TransactionDoesNotExist();
         }
         _;
     }
 
     modifier transactionExecuted(uint256 index) {
-        if (_transactions[index].executed) {
-            revert TransactionExecuted();
+        if (!_transactions[index].executed) {
+            revert TransactionAlreadyExecuted();
         }
         _;
     }
@@ -100,9 +94,15 @@ abstract contract BilateralAgreementTemplate is Context {
         _updateImplementation(address(_agreementImplementation));
     }
 
+    /// @notice Initializes the contract with two parties involved in the bilateral agreement.
+    /// @dev This function is used to set up the initial parties for the agreement.
+    /// It can only be called once, as it checks if the contract has already been initialized.
+    /// The two parties involved must have distinct addresses, and neither can be the zero address.
+    /// @param parties The array of two addresses representing the parties involved in the agreement.
+    /// parties[0] represents the first party, and parties[1] represents the second party.
     function _initialize(address[2] memory parties) private {
         if (_initialized) {
-            revert ContractInitialized();
+            revert ContractAlreadyInitialized();
         }
         address partyA = parties[0];
         address partyB = parties[1];
@@ -110,7 +110,7 @@ abstract contract BilateralAgreementTemplate is Context {
             revert InvalidPartyAddress();
         }
         if (partyA != address(0) && partyB != address(0)) {
-            revert AddressZero();
+            revert AddressCannotBeZero();
         }
         _parties[0] = partyA;
         _parties[1] = partyB;
@@ -119,18 +119,14 @@ abstract contract BilateralAgreementTemplate is Context {
         emit Initialized();
     }
 
-    function _updateImplementation(address implement) internal {
-        address implementationCache = address(implement);
-        if (implement == address(0)) {
-            revert AddressZero();
-        }
-        if (implementationCache == implement) {
-            revert InvalidAgreementAddress();
-        }
-        _implemetation = IAgreement(implement);
-        emit ImplementationUpdated(implementationCache, implement);
-    }
-
+    /// @notice Submits a new transaction for approval by the parties.
+    /// @dev This function allows one of the parties to submit a transaction of a specific type.
+    /// If this is the first transaction or the previous one has been executed, a new transaction is created.
+    /// If there’s already a transaction that has not yet been executed, the function updates it.
+    /// The function transfers tokens from the sender to the contract as part of the transaction data.
+    /// @param sender The address of the party submitting the transaction.
+    /// @param transactionType The type of transaction being submitted (e.g., LOGIC_CHANGE).
+    /// @param data The encoded transaction data, which includes the token address and value for transfer.
     function _submitTransaction(
         address sender,
         TRANSACTION_TYPE transactionType,
@@ -138,7 +134,7 @@ abstract contract BilateralAgreementTemplate is Context {
     ) private transactionWriter(sender) {
         uint256 transactionLengthCache = _transactions.length;
         bool transactionCreation = _transactions[transactionLengthCache].executed;
-        uint8 party = sender == _parties[0] ? 0 : 1;
+        uint8 party = (sender == _parties[0]) ? 0 : 1;
         if (transactionLengthCache == 0) {
             transactionCreation = true;
         }
@@ -164,11 +160,18 @@ abstract contract BilateralAgreementTemplate is Context {
     }
 
     /// @notice there is no retention period, second party can only submit transaction but not possible to revoke.
+    /// @notice Allows the sender to revoke a previously submitted transaction.
+    /// @dev The second party cannot revoke the transaction as there is no retention period.
+    /// Only the first party can revoke a transaction before execution if it has been confirmed.
+    /// The function checks if the sender has confirmed the transaction and, if so, decrements the confirmation count.
+    /// If the transaction type is `DEFAULT`, the token and value associated with the transaction will be refunded to the sender.
+    /// @param sender The address of the party attempting to revoke the transaction.
+    /// @param index The index of the transaction to be revoked.
     function _revokeTransaction(
         address sender,
         uint256 index
-    ) private transactionExist(index) transactionExecuted(index) transactionWriter(sender) {
-        uint8 party = sender == _parties[0] ? 0 : 1;
+    ) private transactionExists(index) transactionExecuted(index) transactionWriter(sender) {
+        uint8 party = (sender == _parties[0]) ? 0 : 1;
         if (_transactionConfirmed[index][sender]) {
             _transactions[index].confirmations -= 1;
             if (_transactions[index].transactionType == TRANSACTION_TYPE.DEFAULT) {
@@ -179,26 +182,39 @@ abstract contract BilateralAgreementTemplate is Context {
             _transactionConfirmed[index][sender] = false;
             emit TransactionRevoked(index, sender);
         } else {
-            revert TransactionNotSubmited();
+            revert TransactionNotSubmitted();
         }
     }
 
+    /// @notice Allows the sender to reject a transaction if it has only one confirmation.
+    /// @dev This function enables a party to reject the transaction initiated by the counterparty if certain conditions are met.
+    /// It ensures that the transaction has not been confirmed by the sender and that the number of confirmations is exactly one.
+    /// If valid, the transaction is marked as executed, and the token and value are transferred to the counterparty.
+    /// @param sender The address of the party rejecting the transaction.
+    /// @param index The index of the transaction to be rejected.
     function _rejectTransaction(
         address sender,
         uint256 index
-    ) private transactionExist(index) transactionWriter(sender) {
-        if (!_transactionConfirmed[index][sender] && (_transactions[index].confirmations == 1)) {
+    ) private transactionExists(index) transactionWriter(sender) {
+        uint8 counterparty = (sender == _parties[0]) ? 1 : 0;
+        Transaction memory transactionCache = _transactions[index];
+        if (!_transactionConfirmed[index][sender] && (transactionCache.confirmations == 1)) {
             _transactions[index].executed = true;
-            // @TODO refund token back to first sender
-            // IERC20(token).transfer(party, value);
+            (address token, uint256 value) = abi.decode(transactionCache.data[counterparty], (address, uint256));
+            IERC20(token).transfer(_parties[counterparty], value);
             emit TransactionRejected(index, sender);
         } else {
-            // revert
+            revert TransactionAlreadyConfirmed();
         }
     }
 
-    /// @notice do not change or make modified the _excecuteTransaction function below.
-    function _excecuteTransaction(uint256 index) private transactionExist(index) transactionExecuted(index) {
+    /// @notice Executes the transaction at the specified index, based on the transaction type.
+    /// @dev This function is responsible for executing transactions.
+    /// For `DEFAULT` transaction types, it decodes token information and facilitates token transfers between the two parties if the agreement is successful.
+    /// For other transaction types, it decodes and updates the contract's implementation if both parties agree on the same implementation.
+    /// The transaction is marked as executed and the confirmations count is updated to 2.
+    /// @param index The index of the transaction to be executed.
+    function _excecuteTransaction(uint256 index) private transactionExists(index) transactionExecuted(index) {
         Transaction memory transactionCache = _transactions[index];
         if (transactionCache.transactionType == TRANSACTION_TYPE.DEFAULT) {
             bytes memory parameterACache = transactionCache.data[0];
@@ -228,51 +244,80 @@ abstract contract BilateralAgreementTemplate is Context {
         emit TransactionFinalized(index);
     }
 
-    // onlyReader can retrieve data
+    /// @notice Retrieves the current transaction index.
+    /// @dev If the transaction list is not empty, it returns the index of the latest transaction. Otherwise, it returns 0.
+    /// @return The current transaction index.
+    function _getCurrentIndex() internal view returns (uint256) {
+        uint256 index = _transactions.length;
+        if (index > 0) {
+            index -= 1;
+        }
+        return index;
+    }
+
+    /// @notice Returns the transaction at the specified index.
+    /// @dev Retrieves a transaction from the internal transaction list based on the provided index.
+    /// @param index The index of the transaction to retrieve.
+    /// @return The `Transaction` object corresponding to the given index.
+    function _getTranasaction(uint256 index) internal view virtual returns (Transaction memory) {
+        return _transactions[index];
+    }
+
+    /// @notice Updates the contract's implementation to the specified address.
+    /// @dev This function changes the current implementation to a new one if the address is valid.
+    /// @param implement The address of the new implementation.
+    function _updateImplementation(address implement) internal {
+        address implementationCache = address(implement);
+        if (implement == address(0)) {
+            revert AddressCannotBeZero();
+        }
+        if (implementationCache == implement) {
+            revert InvalidAgreementAddress();
+        }
+        _implemetation = IAgreement(implement);
+        emit ImplementationUpdated(implementationCache, implement);
+    }
+
+    /// @notice Retrieves the transaction at the specified index.
+    /// @dev This function calls the internal `_getTranasaction` function to fetch the `Transaction` object.
+    /// @param index The index of the transaction to retrieve.
+    /// @return The `Transaction` object corresponding to the given index.
     function transaction(uint256 index) public view returns (Transaction memory) {
-        // @TODO
-        // _getTranasaction(sender, index); // TransactionReader(sender)
+        return _getTranasaction(index);
     }
 
+    /// @notice Checks the execution status of the latest transaction.
+    /// @dev This function determines if the most recent transaction has been executed by checking the `executed` status.
+    /// @return `true` if the current transaction has been executed; otherwise, `false`.
     function status() public view returns (bool) {
-        // @TODO
+        return _transactions[_getCurrentIndex()].executed;
     }
 
-    /// @notice Submits a parameter on behalf of a party in the agreement.
-    /// @dev The function verifies the caller is one of the two parties in the agreement.
-    ///      If the caller is party A, their `parameter` is stored in `party[0].data`.
-    ///      If the caller is party B, their `parameter` is stored in `party[1].data`.
-    ///      If the caller is neither party, the transaction is reverted with an `InvalidPartyAddress` error.
-    /// @param data The parameter to be submitted by the party.
-    /// @custom:requirements The caller must be either `party[0].account` or `party[1].account`.
-    /// @custom:events Emits a `SubmitAgreementParameter` event with the sender's address.
-    /// @custom:throws InvalidPartyAddress if the caller is not one of the agreement parties.
+    /// @notice Submits a transaction to approve an agreement.
+    /// @dev This function calls the `_submitTransaction` function with the sender's address and the provided data.
+    /// @param data The encoded data required for the transaction approval.
     function approveAgreement(bytes calldata data) public {
         address sender = _msgSender();
         _submitTransaction(sender, TRANSACTION_TYPE.DEFAULT, data);
     }
 
+    /// @notice Submits a transaction to approve a logic change.
+    /// @dev This function calls the `_submitTransaction` function with the sender's address and the provided data.
+    /// @param data The encoded data required for the transaction approval.
     function approveChange(bytes calldata data) public {
-        address sender = _msgSender();
-        _submitTransaction(sender, TRANSACTION_TYPE.LOGIC_CHANGE, data);
+        _submitTransaction(_msgSender(), TRANSACTION_TYPE.LOGIC_CHANGE, data);
     }
 
+    /// @notice Revokes the most recent transaction submitted by the sender.
+    /// @dev This function calls the `_revokeTransaction` function with the sender's address and the current transaction index.
     function revokeTransaction() public {
-        address sender = _msgSender();
-        uint256 transactionLengthCache = _transactions.length;
-        if (transactionLengthCache > 0) {
-            transactionLengthCache -= 1;
-        }
-        _revokeTransaction(sender, transactionLengthCache);
+        _revokeTransaction(_msgSender(), _getCurrentIndex());
     }
 
+    /// @notice Rejects the most recent transaction submitted by the sender.
+    /// @dev This function calls the `_rejectTransaction` function with the sender's address and the current transaction index.
     function rejectTransaction() public {
-        address sender = _msgSender();
-        uint256 transactionLengthCache = _transactions.length;
-        if (transactionLengthCache > 0) {
-            transactionLengthCache -= 1;
-        }
-        _rejectTransaction(sender, transactionLengthCache);
+        _rejectTransaction(_msgSender(), _getCurrentIndex());
     }
 
     /// @notice Returns the address of the agreement contract.
