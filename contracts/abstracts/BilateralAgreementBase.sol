@@ -110,7 +110,7 @@ abstract contract BilateralAgreementBase is Context {
         if (partyA == partyB) {
             revert InvalidPartyAddress();
         }
-        if (partyA != address(0) && partyB != address(0)) {
+        if (partyA == address(0) || partyB == address(0)) {
             revert AddressCannotBeZero();
         }
         _parties[0] = partyA;
@@ -134,7 +134,7 @@ abstract contract BilateralAgreementBase is Context {
         bytes calldata data
     ) private transactionWriter(sender) {
         uint256 transactionLengthCache = _transactions.length;
-        bool transactionCreation = _transactions[transactionLengthCache].executed;
+        bool transactionCreation;
         uint8 party = (sender == _parties[0]) ? 0 : 1;
         if (transactionLengthCache == 0) {
             transactionCreation = true;
@@ -268,7 +268,7 @@ abstract contract BilateralAgreementBase is Context {
     /// @dev This function changes the current implementation to a new one if the address is valid.
     /// @param implement The address of the new implementation.
     function _updateImplementation(address implement) internal {
-        address implementationCache = address(implement);
+        address implementationCache = address(_implemetation);
         if (implement == address(0)) {
             revert AddressCannotBeZero();
         }
@@ -284,6 +284,10 @@ abstract contract BilateralAgreementBase is Context {
     /// @param index The index of the transaction to retrieve.
     /// @return The `Transaction` object corresponding to the given index.
     function transaction(uint256 index) public view returns (Transaction memory) {
+        if (_transactions.length == 0) {
+            Transaction memory empty;
+            return empty;
+        }
         return _getTranasaction(index);
     }
 
@@ -298,6 +302,9 @@ abstract contract BilateralAgreementBase is Context {
     /// @dev This function determines if the most recent transaction has been executed by checking the `executed` status.
     /// @return `true` if the current transaction has been executed; otherwise, `false`.
     function status() public view returns (bool) {
+        if (_transactions.length == 0) {
+            return false;
+        }
         return _transactions[_getCurrentIndex()].executed;
     }
 
