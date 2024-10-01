@@ -1,6 +1,6 @@
-import { Contract, Signer } from "ethers";
-import { ethers } from "hardhat";
-import { mine, time } from "@nomicfoundation/hardhat-network-helpers";
+import {Contract, Signer} from "ethers";
+import {ethers} from "hardhat";
+import {mine, time} from "@nomicfoundation/hardhat-network-helpers";
 
 import {
   ERC20_EXP_WHITELIST_CONTRACT,
@@ -27,14 +27,14 @@ import {
   AGREEMENT_BASE_CONTRACT,
   BILATERAL_AGREEMENT_BASE_CONTRACT,
 } from "./constant.test";
-import { PromiseOrValue } from "../typechain-types/common";
+import {PromiseOrValue} from "../typechain-types/common";
 
 // tools
 export const latestBlock = async function () {
   return await time.latestBlock();
 };
 
-export const mineBlock = async function (blocks: number = 1, options: { interval?: number } = {}) {
+export const mineBlock = async function (blocks: number = 1, options: {interval?: number} = {}) {
   await mine(blocks, options);
 };
 
@@ -142,14 +142,17 @@ export const deployAgreementBase = async function (name: string) {
   const [deployer, alice, bob, jame] = await ethers.getSigners();
   const AGREEMENT = await ethers.getContractFactory(AGREEMENT_BASE_CONTRACT, deployer);
   const agreementBase = await AGREEMENT.deploy(name);
-  return { agreementBase, alice, bob, jame };
+  return {agreementBase, alice, bob, jame};
 };
 
-export const deployBilateralAgreementBase = async function (party: [PromiseOrValue<string>, PromiseOrValue<string>], implementation: string) {
+export const deployBilateralAgreementBase = async function (
+  party: [PromiseOrValue<string>, PromiseOrValue<string>],
+  implementation: string,
+) {
   const [deployer, alice, bob, jame] = await ethers.getSigners();
   const BILATERAL_AGREEMENT = await ethers.getContractFactory(BILATERAL_AGREEMENT_BASE_CONTRACT, deployer);
   const bilateralAgreementBase = await BILATERAL_AGREEMENT.deploy(party, implementation);
-  return { bilateralAgreementBase, alice, bob, jame };
+  return {bilateralAgreementBase, alice, bob, jame};
 };
 
 const deployERC20BaseSelector = async function (
@@ -353,11 +356,11 @@ const deployDoublyListLibrarySelector = async function (light: boolean, autoList
   };
 };
 
-export const deployLightWeightDoublyListLibrary = async function ({ autoList = false, len = 10 } = {}) {
+export const deployLightWeightDoublyListLibrary = async function ({autoList = false, len = 10} = {}) {
   return deployDoublyListLibrarySelector(true, autoList, len);
 };
 
-export const deployDoublyListLibrary = async function ({ autoList = false, len = 10 } = {}) {
+export const deployDoublyListLibrary = async function ({autoList = false, len = 10} = {}) {
   return deployDoublyListLibrarySelector(false, autoList, len);
 };
 
@@ -408,7 +411,7 @@ export const deploySlidingWindowLibrary = async function ({
   return deploySlidingWindowSelectorLibrary(false, startBlockNumber, blockPeriod, frameSize, slotSize);
 };
 
-export const deployComparatorLibrary = async function ({ }) {
+export const deployComparatorLibrary = async function ({}) {
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 
   const Comparator = await ethers.getContractFactory(COMPARATOR_LIBRARY_CONTRACT, deployer);
