@@ -287,7 +287,9 @@ abstract contract BilateralAgreementBase is Context {
         return _getTranasaction(index);
     }
 
-    // @TODO natspec
+    /// @notice Returns the number of transactions stored in the contract.
+    /// @dev This function retrieves the length of the `_transactions` array, which holds all transactions.
+    /// @return The total number of transactions in the contract.
     function transactiontLength() public view returns (uint256) {
         return _transactions.length;
     }
