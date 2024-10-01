@@ -287,6 +287,11 @@ abstract contract BilateralAgreementBase is Context {
         return _getTranasaction(index);
     }
 
+    // @TODO natspec
+    function transactiontLength() public view returns (uint256) {
+        return _transactions.length;
+    }
+
     /// @notice Checks the execution status of the latest transaction.
     /// @dev This function determines if the most recent transaction has been executed by checking the `executed` status.
     /// @return `true` if the current transaction has been executed; otherwise, `false`.
