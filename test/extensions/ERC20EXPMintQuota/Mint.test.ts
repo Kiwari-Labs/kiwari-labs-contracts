@@ -54,10 +54,9 @@ export const run = async () => {
       expect(await erc20ExpMintQuota.remainingQuota(aliceAddress)).equal(quota);
       expect(await erc20ExpMintQuota.minted(aliceAddress)).equal(0);
 
-      await expect(erc20ExpMintQuota.connect(alice).mintQuota(aliceAddress, quota + quota)).to.be.revertedWithCustomError(
-        erc20ExpMintQuota,
-        INVALID_MINT_QUOTA_EXCEEDED,
-      );
+      await expect(
+        erc20ExpMintQuota.connect(alice).mintQuota(aliceAddress, quota + quota),
+      ).to.be.revertedWithCustomError(erc20ExpMintQuota, INVALID_MINT_QUOTA_EXCEEDED);
     });
   });
 };
