@@ -49,9 +49,23 @@ abstract contract campaignBase is ICampaignBase {
     }
 
     /// @dev burn or transferFrom from given account
-    function _redeem(address account, uint256 value) internal virtual returns (bool) {}
+    function _redeem(address account, uint256 value) internal virtual returns (bool) {
+    // function _redeem(address account, uint256 value, bytes memory encodeData) internal virtual returns (bool) {
+        // address campaignValidationLogic = campaign[campaignId].implementation;
+        // (bool redemtion) = IValidate(campaignValidationLogic).validation(encodedeta);
+        // if (redemtion) {
+        //  ... some logic
+        // }
+    }
 
     /// @dev mint or transfer token to given account
-    function _reward(address account, uint256 value) internal virtual returns (bool) {}
+    function _reward(address account, uint256 value) internal virtual returns (bool) {
+    // function _reward(address account, uint256 value, bytes memory encodeData) internal virtual returns (bool) {
+        // address campaignValidationLogic = campaign[campaignId].implementation;
+        // (bool rewarding) = IValidate(campaingValidationLogic).validation(encodedeta);
+        // if (rewarding) {
+        //  ... some logic
+        // }
+    }
 
 }
