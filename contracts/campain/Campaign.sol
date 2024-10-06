@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: BUSL-1.1
-pragma solidity >=0.8.0 <0.9.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
 // Interface for the ERC20 token contract with minting functionality
 interface IERC20Mintable {
@@ -21,11 +21,6 @@ contract Campaign {
         _;
     }
 
-    modifier withinCampaignPeriod() {
-        require(block.timestamp >= startTime && block.timestamp <= endTime, "Campaign is not within the active period");
-        _;
-    }
-
     constructor(uint256 _startTime, uint256 _endTime, address _rewardTokenAddress, uint256 _rewardAmount) {
         require(_startTime > block.timestamp, "Start time must be in the future");
         require(_endTime > _startTime, "End time must be after start time");
@@ -38,34 +33,36 @@ contract Campaign {
         isCampaignActive = false;
     }
 
-    // Owner can start the campaign if within the period
-    function startCampaign() public onlyOwner {
-        require(block.timestamp >= startTime, "It's not time to start the campaign yet");
-        require(!isCampaignActive, "Campaign is already active");
-
-        isCampaignActive = true;
+    // Function to check if the campaign is ongoing
+    function isCampaignOngoing() public view returns (bool) {
+        return (block.timestamp >= startTime && block.timestamp <= endTime && isCampaignActive);
     }
 
-    // Owner can manually stop the campaign even if it's within the active period
+    // Owner can manually stop the campaign if desired
     function stopCampaign() public onlyOwner {
         require(isCampaignActive, "Campaign is already inactive");
-
         isCampaignActive = false;
     }
 
-    // Function to check if the campaign is both within the active period and manually activated
-    function isCampaignOngoing() public view returns (bool) {
-        return block.timestamp >= startTime && block.timestamp <= endTime && isCampaignActive;
+    // Automatically deactivate the campaign when endTime is reached
+    function checkAndDeactivateCampaign() internal {
+        if (block.timestamp > endTime) {
+            isCampaignActive = false;
+        }
     }
 
-    // Owner can extend the campaign time
-    function extendCampaign(uint256 newEndTime) public onlyOwner {
-        require(newEndTime > endTime, "New end time must be after current end time");
-        endTime = newEndTime;
-    }
+    // User can claim reward, automatically activating the campaign if necessary
+    // The campaign will also automatically deactivate when the end time is reached
+    function claimReward() public {
+        // Deactivate the campaign if the current time is past the end time
+        checkAndDeactivateCampaign();
+        require(block.timestamp <= endTime, "Campaign has already ended");
 
-    // User can claim reward if the campaign is active and they haven't claimed before
-    function claimReward() public withinCampaignPeriod {
+        // Activate the campaign if it hasn't been activated yet and within the time period
+        if (!isCampaignActive && block.timestamp >= startTime && block.timestamp <= endTime) {
+            isCampaignActive = true;
+        }
+
         require(isCampaignActive, "Campaign is not active");
         require(!hasClaimed[msg.sender], "Reward already claimed");
 
@@ -74,6 +71,15 @@ contract Campaign {
 
         // Mark that the user has claimed their reward
         hasClaimed[msg.sender] = true;
+
+        // Check again after minting to deactivate if the campaign has ended
+        checkAndDeactivateCampaign();
+    }
+
+    // Owner can extend the campaign time
+    function extendCampaign(uint256 newEndTime) public onlyOwner {
+        require(newEndTime > endTime, "New end time must be after current end time");
+        endTime = newEndTime;
     }
 
     // Function to return campaign times
