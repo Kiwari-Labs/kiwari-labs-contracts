@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 // Interface for the ERC20 token contract with minting functionality
-interface IERC20Mintable {
+interface Point {
     function mint(address to, uint256 amount) external;
 }
 
@@ -11,7 +11,7 @@ contract Campaign {
     uint256 public startTime;
     uint256 public endTime;
     bool public isCampaignActive;
-    IERC20Mintable public rewardToken; // ERC20 token for minting rewards
+    Point public rewardToken; // ERC20 token for minting rewards
     uint256 public rewardAmount; // Amount of tokens to mint as reward
 
     mapping(address => bool) public hasClaimed; // Track if user has claimed reward
@@ -28,7 +28,7 @@ contract Campaign {
         owner = msg.sender;
         startTime = _startTime;
         endTime = _endTime;
-        rewardToken = IERC20Mintable(_rewardTokenAddress);
+        rewardToken = Point(_rewardTokenAddress);
         rewardAmount = _rewardAmount;
         isCampaignActive = false;
     }
