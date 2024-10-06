@@ -54,7 +54,7 @@ contract Campaign is Ownable {
 
     // User can claim reward, automatically activating the campaign if necessary
     // The campaign will also automatically deactivate when the end time is reached
-    function claimReward() public {
+    function claimReward(address to_) public {
         // Deactivate the campaign if the current time is past the end time
         checkAndDeactivateCampaign();
         require(block.timestamp <= endTime, "Campaign has already ended");
@@ -65,16 +65,20 @@ contract Campaign is Ownable {
         }
 
         require(isCampaignActive, "Campaign is not active");
-        require(!hasClaimed[msg.sender], "Reward already claimed");
+        require(!hasClaimed[to_], "Reward already claimed");
 
         // Mint reward tokens to the user
-        rewardToken.mint(msg.sender, rewardAmount);
+        rewardToken.mint(to_, rewardAmount);
 
         // Mark that the user has claimed their reward
-        hasClaimed[msg.sender] = true;
+        hasClaimed[to_] = true;
 
         // Check again after minting to deactivate if the campaign has ended
         checkAndDeactivateCampaign();
+    }
+
+    function claimReward() public {
+        claimReward(msg.sender);
     }
 
     // Owner can extend the campaign time
