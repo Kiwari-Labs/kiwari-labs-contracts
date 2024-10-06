@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity >=0.8.0 <0.9.0;
 
 // Interface for the ERC20 token contract with minting functionality
 interface IERC20Mintable {
