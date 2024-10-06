@@ -2,8 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "../../contracts/abstracts/ERC20EXPBase.sol";
-
-// import "./interfaces/IPoint.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 // import "@kiwarilabs/contracts/abstracts/ERC20EXPBase.sol";
