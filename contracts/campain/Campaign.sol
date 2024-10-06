@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 // Interface for the ERC20 token contract with minting functionality
-interface Point {
+interface IPoint {
     function mint(address to, uint256 amount) external;
 }
 
@@ -12,10 +12,12 @@ contract Campaign is Ownable {
     uint256 public startTime;
     uint256 public endTime;
     bool public isCampaignActive;
-    Point public rewardToken; // ERC20 token for minting rewards
+    IPoint public rewardToken; // ERC20 token for minting rewards
     uint256 public rewardAmount; // Amount of tokens to mint as reward
 
     mapping(address => bool) public hasClaimed; // Track if user has claimed reward
+
+    event RewardClaimed(address indexed user, uint256 rewardAmount);
 
     constructor(
         address _owner,
@@ -29,7 +31,7 @@ contract Campaign is Ownable {
 
         startTime = _startTime;
         endTime = _endTime;
-        rewardToken = Point(_rewardTokenAddress);
+        rewardToken = IPoint(_rewardTokenAddress);
         rewardAmount = _rewardAmount;
         isCampaignActive = false;
     }
@@ -72,6 +74,9 @@ contract Campaign is Ownable {
 
         // Mark that the user has claimed their reward
         hasClaimed[to_] = true;
+
+        // Emit the event for reward claim
+        emit RewardClaimed(msg.sender, rewardAmount);
 
         // Check again after minting to deactivate if the campaign has ended
         checkAndDeactivateCampaign();
