@@ -4,8 +4,6 @@ pragma solidity ^0.8.0;
 import "../../contracts/abstracts/ERC20EXPBase.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-// import "@kiwarilabs/contracts/abstracts/ERC20EXPBase.sol";
-
 contract Point is ERC20EXPBase, Ownable {
     uint8 private _decimals;
 

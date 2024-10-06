@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.8.0 <0.9.0;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
+
 // Interface for the ERC20 token contract with minting functionality
 interface Point {
     function mint(address to, uint256 amount) external;
 }
 
-contract Campaign {
-    address public owner;
+contract Campaign is Ownable {
     uint256 public startTime;
     uint256 public endTime;
     bool public isCampaignActive;
@@ -16,16 +17,16 @@ contract Campaign {
 
     mapping(address => bool) public hasClaimed; // Track if user has claimed reward
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only the owner can call this function");
-        _;
-    }
-
-    constructor(uint256 _startTime, uint256 _endTime, address _rewardTokenAddress, uint256 _rewardAmount) {
+    constructor(
+        address _owner,
+        uint256 _startTime,
+        uint256 _endTime,
+        address _rewardTokenAddress,
+        uint256 _rewardAmount
+    ) Ownable(_owner) {
         require(_startTime > block.timestamp, "Start time must be in the future");
         require(_endTime > _startTime, "End time must be after start time");
 
-        owner = msg.sender;
         startTime = _startTime;
         endTime = _endTime;
         rewardToken = Point(_rewardTokenAddress);
