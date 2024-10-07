@@ -20,19 +20,19 @@ contract Campaign is Ownable {
     event RewardClaimed(address indexed user, uint256 rewardAmount);
 
     constructor(
-        address _owner,
-        uint256 _startTime,
-        uint256 _endTime,
-        address _rewardTokenAddress,
-        uint256 _rewardAmount
-    ) Ownable(_owner) {
-        require(_startTime > block.timestamp, "Start time must be in the future");
-        require(_endTime > _startTime, "End time must be after start time");
+        address owner_,
+        uint256 startTime_,
+        uint256 endTime_,
+        address rewardTokenAddress_,
+        uint256 rewardAmount_
+    ) Ownable(owner_) {
+        require(startTime_ > block.timestamp, "Start time must be in the future");
+        require(endTime_ > startTime_, "End time must be after start time");
 
-        startTime = _startTime;
-        endTime = _endTime;
-        rewardToken = IPoint(_rewardTokenAddress);
-        rewardAmount = _rewardAmount;
+        startTime = startTime_;
+        endTime = endTime_;
+        rewardToken = IPoint(rewardTokenAddress_);
+        rewardAmount = rewardAmount_;
         isCampaignActive = false;
     }
 
@@ -87,9 +87,9 @@ contract Campaign is Ownable {
     }
 
     // Owner can extend the campaign time
-    function extendCampaign(uint256 newEndTime) public onlyOwner {
-        require(newEndTime > endTime, "New end time must be after current end time");
-        endTime = newEndTime;
+    function extendCampaign(uint256 endTime_) public onlyOwner {
+        require(endTime_ > endTime, "New end time must be after current end time");
+        endTime = endTime_;
     }
 
     // Function to return campaign times
