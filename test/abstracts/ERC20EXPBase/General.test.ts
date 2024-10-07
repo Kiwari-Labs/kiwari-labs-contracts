@@ -1,6 +1,7 @@
 import {expect} from "chai";
 import {calculateSlidingWindowState, deployERC20EXPBase, mineBlock} from "../../utils.test";
-import {ERC20_EXP_NAME, ERC20_EXP_SYMBOL} from "../../constant.test";
+import {ERC20_EXP_NAME, ERC20_EXP_SYMBOL, EVENT_TRANSFER, ZERO_ADDRESS} from "../../constant.test";
+import {network} from "hardhat";
 
 export const run = async () => {
   describe("General", async function () {
@@ -128,6 +129,18 @@ export const run = async () => {
       const {erc20exp} = await deployERC20EXPBase({});
 
       expect(await erc20exp.decimals()).to.equal(18);
+    });
+
+    it("[HAPPY] query block balance ", async function () {
+      const {erc20exp, alice} = await deployERC20EXPBase({});
+      const aliceAddress = await alice.getAddress();
+      const amount = 1;
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .withArgs(ZERO_ADDRESS, aliceAddress, amount);
+      const blockNumber = await network.provider.send("eth_blockNumber");
+      expect(await erc20exp.getBlockBalance(blockNumber)).to.equal(1);
+      expect(await erc20exp.getBlockBalance(blockNumber + 1n)).to.equal(0);
     });
   });
 };
