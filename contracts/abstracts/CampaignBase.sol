@@ -4,48 +4,27 @@ pragma solidity >=0.8.0 <0.9.0;
 import "../interfaces/ICampaignBase.sol";
 // import "../intefaces/IValidation.sol"; 
 
-abstract contract campaignBase is ICampaignBase {
-    enum CAMPAIGN_STATUS {
-        INACTIVE,
-        ACTIVE
-    }
-
+abstract contract CampaignBase is ICampaignBase {
     enum CAMPAIGN_TYPE {
-        BURN,
-        EARN
+        EARN,
+        BURN
     }
 
     bool private _init;
-    string private _name;
 
     struct CampaingInfo {
         CAMPAIGN_TYPE types;
-        CAMPAIGN_STATUS status;
+        bool status;
         uint32 estimateParticipate;
         uint32 actualParticipate;
-        uint256 totalSupply;
-        uint256 startBlock;
-        uint256 validFor; 
-        // if the network sub-second can be more tight presume wrost case block time is 100ms
-        // campaign should not be stay active forever. 
-        // min 1 min
-        // max 1 year
-        // 138 bytes without metadata uri
+        uint256 totalSupply; // total budget for the campaign zero for no limit?
+        uint256 startBlock; 
+        uint56 validFor;    // wrost case blocktime is 100ms and campaign validfor 10 years
+        uint256 rewardAmount; 
+        address rewardToken;
         string uri; // campaign metadata
         // IValidation implementation; // the reward logic or something.
-    }
-
-    constructor(string memory name_) {
-        _initialize(name_);
-    }
-
-    function _initialize(string memory name) internal {
-        if (_init == true) {
-            revert();
-        }
-        _name = name;
-        _init = true;
-        // events
+        // e.g. (mapping => bool) participate
     }
 
     /// @dev burn or transferFrom from given account
@@ -56,6 +35,7 @@ abstract contract campaignBase is ICampaignBase {
         // if (redemtion) {
         //  ... some logic
         // }
+        // actualParticipate++;
     }
 
     /// @dev mint or transfer token to given account
@@ -66,6 +46,7 @@ abstract contract campaignBase is ICampaignBase {
         // if (rewarding) {
         //  ... some logic
         // }
+        // actualParticipate++;
     }
 
 }
