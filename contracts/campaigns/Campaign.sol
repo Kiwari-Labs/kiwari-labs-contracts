@@ -9,10 +9,10 @@ interface IPoint {
 }
 
 contract Campaign is Ownable {
-    uint256 public startTime;
-    uint256 public endTime;
-    bool public isCampaignActive;
-    IPoint public rewardToken; // ERC20 token for minting rewards
+    uint256 public startBlock;
+    uint56 public validFor; // Change to period of block instead of time
+    bool public isCampaignActive; // 1 bytes
+    IPoint public rewardToken; // ERC20 token for minting rewards 20 bytes
     uint256 public rewardAmount; // Amount of tokens to mint as reward
 
     mapping(address => bool) public hasClaimed; // Track if user has claimed reward
@@ -22,15 +22,15 @@ contract Campaign is Ownable {
     constructor(
         address owner_,
         uint256 startTime_,
-        uint256 endTime_,
+        uint256 validFor_,
         address rewardTokenAddress_,
         uint256 rewardAmount_
     ) Ownable(owner_) {
         require(startTime_ > block.timestamp, "Start time must be in the future");
-        require(endTime_ > startTime_, "End time must be after start time");
+        require(validFor_ > 0, "End time must be after start time");
 
-        startTime = startTime_;
-        endTime = endTime_;
+        startBlock = startTime_;
+        validFor = validFor_;
         rewardToken = IPoint(rewardTokenAddress_);
         rewardAmount = rewardAmount_;
         isCampaignActive = false;
@@ -38,7 +38,7 @@ contract Campaign is Ownable {
 
     // Function to check if the campaign is ongoing
     function isCampaignOngoing() public view returns (bool) {
-        return (block.timestamp >= startTime && block.timestamp <= endTime && isCampaignActive);
+        return (block.number >= startBlock && block.number <= startBlock + validFor && isCampaignActive);
     }
 
     // Owner can manually stop the campaign if desired
@@ -47,9 +47,9 @@ contract Campaign is Ownable {
         isCampaignActive = false;
     }
 
-    // Automatically deactivate the campaign when endTime is reached
+    // Automatically deactivate the campaign when validFor is reached
     function checkAndDeactivateCampaign() internal {
-        if (block.timestamp > endTime) {
+        if (block.number > startBlock + validFor) {
             isCampaignActive = false;
         }
     }
@@ -59,10 +59,10 @@ contract Campaign is Ownable {
     function claimReward(address to_) public {
         // Deactivate the campaign if the current time is past the end time
         checkAndDeactivateCampaign();
-        require(block.timestamp <= endTime, "Campaign has already ended");
+        require(block.number <= validFor, "Campaign has already ended");
 
         // Activate the campaign if it hasn't been activated yet and within the time period
-        if (!isCampaignActive && block.timestamp >= startTime && block.timestamp <= endTime) {
+        if (!isCampaignActive && block.number >= startBlock && block.number <= startBlock + validFor) {
             isCampaignActive = true;
         }
 
@@ -87,13 +87,13 @@ contract Campaign is Ownable {
     }
 
     // Owner can extend the campaign time
-    function extendCampaign(uint256 endTime_) public onlyOwner {
-        require(endTime_ > endTime, "New end time must be after current end time");
-        endTime = endTime_;
+    function extendCampaign(uint256 validFor_) public onlyOwner {
+        require(validFor_ > validFor, "New end time must be after current end time");
+        validFor = validFor_;
     }
 
     // Function to return campaign times
     function getCampaignTimes() public view returns (uint256, uint256) {
-        return (startTime, endTime);
+        return (startBlock, validFor);
     }
 }
