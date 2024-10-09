@@ -2,7 +2,7 @@ import {expect} from "chai";
 import {deployBilateralAgreementBase} from "../../utils.test";
 
 export const run = async () => {
-  describe("RevokeTransaction", async function () {
+  describe("Transaction", async function () {
     // TODO
     // transaction()
     // transactionSize()

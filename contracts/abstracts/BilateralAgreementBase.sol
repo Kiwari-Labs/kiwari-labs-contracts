@@ -84,7 +84,7 @@ abstract contract BilateralAgreementBase is Context {
     }
 
     modifier transactionExecuted(uint256 index) {
-        if (!_transactions[index].executed) {
+        if (_transactions[index].executed) {
             revert TransactionAlreadyExecuted();
         }
         _;
@@ -116,6 +116,10 @@ abstract contract BilateralAgreementBase is Context {
         _parties[0] = partyA;
         _parties[1] = partyB;
         _initialized = true;
+        // init empty transaction first for easier handling
+        Transaction memory newTransaction;
+        newTransaction.executed = true;
+        _transactions.push(newTransaction);
 
         emit Initialized();
     }
@@ -133,10 +137,10 @@ abstract contract BilateralAgreementBase is Context {
         TRANSACTION_TYPE transactionType,
         bytes calldata data
     ) private transactionWriter(sender) {
-        uint256 transactionLengthCache = _transactions.length;
+        uint256 transactionIndexCache = _getCurrentIndex();
         bool transactionCreation;
         uint8 party = (sender == _parties[0]) ? 0 : 1;
-        if (transactionLengthCache == 0) {
+        if (_transactions[transactionIndexCache].executed) {
             transactionCreation = true;
         }
         if (transactionCreation) {
@@ -145,19 +149,19 @@ abstract contract BilateralAgreementBase is Context {
             newTransaction.confirmations = 1;
             newTransaction.data[party] = data;
             _transactions.push(newTransaction);
-            transactionLengthCache = _transactions.length;
-            _transactionConfirmed[transactionLengthCache][sender] = true;
+            transactionIndexCache = _getCurrentIndex();
+            _transactionConfirmed[transactionIndexCache][sender] = true;
             (address token, uint256 value) = abi.decode(data, (address, uint256));
             IERC20(token).transferFrom(sender, address(this), value);
         } else {
-            transactionLengthCache -= 1;
-            _transactions[transactionLengthCache].data[party] = data;
-            _transactionConfirmed[transactionLengthCache][sender] = true;
+            _transactions[transactionIndexCache].data[party] = data;
+            _transactionConfirmed[transactionIndexCache][sender] = true;
             (address token, uint256 value) = abi.decode(data, (address, uint256));
             IERC20(token).transferFrom(sender, address(this), value);
-            _excecuteTransaction(transactionLengthCache);
+            _excecuteTransaction(transactionIndexCache);
+            emit TransactionRecorded(transactionIndexCache, sender, transactionType, data);
         }
-        emit TransactionRecorded(transactionLengthCache, sender, transactionType, data);
+        emit TransactionRecorded(transactionIndexCache, sender, transactionType, data);
     }
 
     /// @notice there is no retention period, second party can only submit transaction but not possible to revoke.
@@ -294,17 +298,14 @@ abstract contract BilateralAgreementBase is Context {
     /// @notice Returns the number of transactions stored in the contract.
     /// @dev This function retrieves the length of the `_transactions` array, which holds all transactions.
     /// @return The total number of transactions in the contract.
-    function transactiontLength() public view returns (uint256) {
-        return _transactions.length;
+    function transactionLength() public view returns (uint256) {
+        return _transactions.length - 1;
     }
 
     /// @notice Checks the execution status of the latest transaction.
     /// @dev This function determines if the most recent transaction has been executed by checking the `executed` status.
     /// @return `true` if the current transaction has been executed; otherwise, `false`.
     function status() public view returns (bool) {
-        if (_transactions.length == 0) {
-            return false;
-        }
         return _transactions[_getCurrentIndex()].executed;
     }
 
