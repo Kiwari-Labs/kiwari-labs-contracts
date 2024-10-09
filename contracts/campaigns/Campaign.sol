@@ -10,7 +10,7 @@ interface IPoint {
 
 contract Campaign is Ownable {
     uint256 public startBlock;
-    uint56 public validFor; // Change to period of block instead of time
+    uint256 public validFor; // Change to period of block instead of time
     bool public isCampaignActive; // 1 bytes
     IPoint public rewardToken; // ERC20 token for minting rewards 20 bytes
     uint256 public rewardAmount; // Amount of tokens to mint as reward
@@ -87,7 +87,7 @@ contract Campaign is Ownable {
     }
 
     // Owner can extend the campaign time
-    function extendCampaign(uint256 validFor_) public onlyOwner {
+    function extendCampaign(uint56 validFor_) public onlyOwner {
         require(validFor_ > validFor, "New end time must be after current end time");
         validFor = validFor_;
     }
