@@ -26,12 +26,10 @@ abstract contract ERC20EXPMintQuota is ERC20EXPBase {
     event QuotaReset(address indexed minter);
     event QuotaMinted(address indexed minter, address indexed to, uint256 amount);
 
-    /**
-     * @dev Mints tokens to a specified address if the minter has quota left.
-     * Only allowed _minters can mint within their quota.
-     * @param to Address to receive the minted tokens.
-     * @param amount Number of tokens to mint.
-     */
+    /// @dev Mints tokens to a specified address if the minter has quota left.
+    /// Only allowed _minters can mint within their quota.
+    /// @param to Address to receive the minted tokens.
+    /// @param amount Number of tokens to mint.
     function _mintQuota(address to, uint256 amount) internal virtual {
         Minter storage minter = _minters[_msgSender()];
 
@@ -49,11 +47,9 @@ abstract contract ERC20EXPMintQuota is ERC20EXPBase {
         emit QuotaMinted(_msgSender(), to, amount);
     }
 
-    /**
-     * @dev Set the mint quota for a specific minter.
-     * @param minter The address of the minter.
-     * @param quota The amount the minter is allowed to mint.
-     */
+    /// @dev Set the mint quota for a specific minter.
+    /// @param minter The address of the minter.
+    /// @param quota The amount the minter is allowed to mint.
     function _setQuota(address minter, uint256 quota) internal virtual {
         if (minter == address(0)) {
             revert InvalidMinterAddress();
@@ -64,11 +60,9 @@ abstract contract ERC20EXPMintQuota is ERC20EXPBase {
         emit QuotaSet(_msgSender(), minter, quota);
     }
 
-    /**
-     * @dev Reset the mint amount for a specific minter.
-     * This could be useful to reset or reduce a minter's used quota.
-     * @param minter The address of the minter.
-     */
+    /// @dev Reset the mint amount for a specific minter.
+    /// This could be useful to reset or reduce a minter's used quota.
+    /// @param minter The address of the minter.
     function _resetQuota(address minter) internal virtual {
         if (minter == address(0)) {
             revert InvalidMinterAddress();
@@ -79,11 +73,9 @@ abstract contract ERC20EXPMintQuota is ERC20EXPBase {
         emit QuotaReset(minter);
     }
 
-    /**
-     * @dev Get the remaining mint quota for a specific minter.
-     * @param minter The address of the minter.
-     * @return Remaining quota.
-     */
+    /// @dev Get the remaining mint quota for a specific minter.
+    /// @param minter The address of the minter.
+    /// @return Remaining quota.
     function remainingQuota(address minter) external view virtual returns (uint256) {
         if (_minters[minter].minted < _minters[minter].quota) {
             unchecked {
@@ -93,11 +85,9 @@ abstract contract ERC20EXPMintQuota is ERC20EXPBase {
         return 0;
     }
 
-    /**
-     * @dev Returns the amount of tokens that a specific minter has already minted.
-     * @param minter The address of the minter.
-     * @return The minted amount by the given minter.
-     */
+    /// @dev Returns the amount of tokens that a specific minter has already minted.
+    /// @param minter The address of the minter.
+    /// @return The minted amount by the given minter.
     function minted(address minter) external view virtual returns (uint256) {
         return _minters[minter].minted;
     }

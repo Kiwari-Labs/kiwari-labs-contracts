@@ -23,8 +23,12 @@ import {
   LIGHT_WEIGHT_SLIDING_WINDOW_LIBRARY_CONTRACT,
   SLIDING_WINDOW_LIBRARY_CONTRACT,
   ERC20_EXP_MINT_QUOTA_CONTRACT,
+  COMPARATOR_LIBRARY_CONTRACT,
+  AGREEMENT_BASE_CONTRACT,
+  BILATERAL_AGREEMENT_BASE_CONTRACT,
   ERC20_EXP_NEAREST_EXPIRY_QUERY_CONTRACT,
 } from "./constant.test";
+import {PromiseOrValue} from "../typechain-types/common";
 
 // tools
 export const latestBlock = async function () {
@@ -135,6 +139,23 @@ export const getAddress = async function (account: Signer | Contract) {
 };
 
 // abstracts
+export const deployAgreementBase = async function (name: string) {
+  const [deployer, alice, bob, jame] = await ethers.getSigners();
+  const AGREEMENT = await ethers.getContractFactory(AGREEMENT_BASE_CONTRACT, deployer);
+  const agreementBase = await AGREEMENT.deploy(name);
+  return {agreementBase, alice, bob, jame};
+};
+
+export const deployBilateralAgreementBase = async function (
+  party: [PromiseOrValue<string>, PromiseOrValue<string>],
+  implementation: string,
+) {
+  const [deployer, alice, bob, jame] = await ethers.getSigners();
+  const BILATERAL_AGREEMENT = await ethers.getContractFactory(BILATERAL_AGREEMENT_BASE_CONTRACT, deployer);
+  const bilateralAgreementBase = await BILATERAL_AGREEMENT.deploy(party, implementation);
+  return {bilateralAgreementBase, alice, bob, jame};
+};
+
 const deployERC20BaseSelector = async function (
   light: boolean,
   blockPeriod: number,
@@ -426,4 +447,19 @@ export const deploySlidingWindowLibrary = async function ({
   slotSize = 4, // 4 slot per era
 }) {
   return deploySlidingWindowSelectorLibrary(false, startBlockNumber, blockPeriod, frameSize, slotSize);
+};
+
+export const deployComparatorLibrary = async function ({}) {
+  const [deployer, alice, bob, jame] = await ethers.getSigners();
+
+  const Comparator = await ethers.getContractFactory(COMPARATOR_LIBRARY_CONTRACT, deployer);
+  const comparator = await Comparator.deploy();
+
+  return {
+    comparator,
+    deployer,
+    alice,
+    bob,
+    jame,
+  };
 };

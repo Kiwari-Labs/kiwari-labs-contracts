@@ -25,6 +25,15 @@ contract MyLoyaltyPoint is ERC20EXPBase {
 }
 ```
 
+### Components
+- ERC20EXPBase
+- ERC721EXPBase
+- ERC1155EXPBase
+- extension for ERC20, ERC721, and ERC1155
+- bilateral agreement
+- campaign and reward
+- utilities e.g. comparator, linked list, and sliding window
+
 ### Support and Issue
 
 For support or any inquiries, feel free to reach out to us at [github-issue]() or kiwarilabs@protonmail.com
