@@ -413,7 +413,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @dev This function returns the balance of the given block from the internal `_worldBlockBalance` mapping.
     /// @param blockNumber The block number for which the balance is being queried.
     /// @return balance The total balance stored at the given block number.
-    function getBlockBalance(uint256 blockNumber) public view returns (uint256) {
+    function getBlockBalance(uint256 blockNumber) external view virtual returns (uint256) {
         return _worldBlockBalance[blockNumber];
     }
 
