@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 abstract contract ERC721EXPBase is ERC721, IERC721EXPBase {
     using AssetStamp for AssetStamp.Asset;
 
-    mapping(uint256 => AssetStamp.Asset) private _asset;
+    AssetStamp.Asset private _asset;
 
     uint256 private _expiredPeriod;
 
@@ -28,17 +28,17 @@ abstract contract ERC721EXPBase is ERC721, IERC721EXPBase {
 
     function _mintWithExpiration(address to, uint256 tokenId, uint256 blockNumber) internal {
         _mint(to, tokenId);
-        _asset[tokenId].set(blockNumber);
+        _asset.set(tokenId, blockNumber);
     }
 
     function _burnWithExpiration(uint256 tokenId) internal {
         _burn(tokenId);
-        _asset[tokenId].clear();
+        _asset.clear(tokenId);
     }
 
     function _updateExpiration(uint256 tokenId, uint256 blockNumber) internal {
-        if (_asset[tokenId].checked()) {
-            _asset[tokenId].update(blockNumber);
+        if (_asset.checked(tokenId)) {
+            _asset.update(tokenId,blockNumber);
         }
     }
 
@@ -47,10 +47,13 @@ abstract contract ERC721EXPBase is ERC721, IERC721EXPBase {
     }
 
     function hasExpired(uint256 tokenId) public view virtual override returns (bool) {
-        uint256 blockNumber = _asset[tokenId].blockNumber;
+        uint256 blockNumber = _asset.get(tokenId);
         if (blockNumber == 0) {
             return false; // Asset not stamped, therefore not expired.
         }
         return _blockNumberProvider() > (blockNumber + _expiredPeriod);
     }
+
+    // @TODO balanceOf(address account) 
+    // return only non-expiration balance
 }
