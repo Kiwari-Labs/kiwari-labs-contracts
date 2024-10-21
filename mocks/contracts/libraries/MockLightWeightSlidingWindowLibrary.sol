@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.5.0 <0.9.0;
 
-import "../../../contracts/libraries/LightWeightSlidingWindow.sol";
+import "../../../contracts/utils/LightWeightSlidingWindow.sol";
 
 contract MockLightWeightSlidingWindowLibrary {
     using SlidingWindow for SlidingWindow.SlidingWindowState;

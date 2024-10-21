@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.5.0 <0.9.0;
 
-import "../../../contracts/libraries/LightWeightSortedCircularDoublyLinkedList.sol";
+import "../../../contracts/utils/LightWeightSortedCircularDoublyLinkedList.sol";
 
 contract MockLightWeightSortedCircularDoublyLinkedListLibrary {
     using SortedCircularDoublyLinkedList for SortedCircularDoublyLinkedList.List;

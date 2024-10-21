@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title LightWeight ERC20EXP Base abstract contract
+/// @title ERC20EXP Base abstract contract with devmode
 /// @author Kiwari Labs
 
-import {SlidingWindow} from "./LightWeightSlidingWindow.sol";
-import {SortedCircularDoublyLinkedList as SCDLL} from "../utils/LightWeightSortedCircularDoublyLinkedList.sol";
+import {SlidingWindow} from "./SlidingWindowDev.sol";
+import {SortedCircularDoublyLinkedList as SCDLL} from "../utils/SortedCircularDoublyLinkedList.sol";
 import {IERC20EXPBase} from "../interfaces/IERC20EXPBase.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
@@ -29,17 +29,21 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     mapping(address => mapping(address => uint256)) private _allowances;
 
     /// @notice Constructor function to initialize the token contract with specified parameters.
+    /// @dev Initializes the token contract by setting the name, symbol, and initializing the sliding window parameters.
     /// @param name_ The name of the token.
     /// @param symbol_ The symbol of the token.
     /// @param blockNumber_ The starting block number for the sliding window.
-    /// @param blockTime_ The duration of each block in milliseconds..
+    /// @param blockTime_ The duration of each block in milliseconds.
+    /// @param mode_ Developer mode enable or not.
     constructor(
         string memory name_,
         string memory symbol_,
         uint256 blockNumber_,
         uint16 blockTime_,
-        uint8 frameSize_
-    ) SlidingWindow(blockNumber_, blockTime_, frameSize_) {
+        uint8 frameSize_,
+        uint8 slotSize_,
+        bool mode_
+    ) SlidingWindow(blockNumber_, blockTime_, frameSize_, slotSize_, mode_) {
         _name = name_;
         _symbol = symbol_;
     }
@@ -176,7 +180,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @param from The address from which tokens are being transferred (or minted/burned).
     /// @param to The address to which tokens are being transferred (or burned to if `to` is `zero address`).
     /// @param value The amount of tokens being transferred, minted, or burned.
-    function _update(address from, address to, uint256 value) internal virtual {
+    function _update(address from, address to, uint256 value) private {
         // Hook before transfer
         _beforeTokenTransfer(from, to, value);
 
@@ -192,7 +196,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                 _recipient.slotBalance += value;
                 _recipient.blockBalances[blockNumberCache] += value;
             }
-            _recipient.list.insert(blockNumberCache);
+            _recipient.list.insert(blockNumberCache, (""));
         } else {
             (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
             uint256 balance = _lookBackBalance(from, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
@@ -259,7 +263,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
 
                                 _recipient.slotBalance += balanceCache;
                                 _recipient.blockBalances[key] += balanceCache;
-                                _recipient.list.insert(key);
+                                _recipient.list.insert(key, (""));
                             }
                             key = _spender.list.next(key);
                             _spender.list.remove(_spender.list.previous(key));
@@ -271,7 +275,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                                 _recipient.slotBalance += pendingValue;
                                 _recipient.blockBalances[key] += pendingValue;
                             }
-                            _recipient.list.insert(key);
+                            _recipient.list.insert(key, (""));
                             pendingValue = 0;
                         }
                     }
@@ -436,7 +440,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
 
     /// @inheritdoc IERC20
     function transfer(address to, uint256 value) external virtual returns (bool) {
-        address from = _msgSender();
+        address from = msg.sender;
         _transfer(from, to, value);
         return true;
     }
