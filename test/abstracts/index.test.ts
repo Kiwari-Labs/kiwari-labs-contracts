@@ -7,11 +7,11 @@ import * as SlidingWindow from "./SlidingWindow/index.test";
 
 export const run = async () => {
   describe("abstracts", async function () {
-    // AgreementBase.run();
+    AgreementBase.run();
     BilateralAgreementBase.run();
-    // ERC20EXPBase.run();
-    // LightWeightERC20EXPBase.run();
-    // LightWeightSlidingWindow.run();
-    // SlidingWindow.run();
+    ERC20EXPBase.run();
+    LightWeightERC20EXPBase.run();
+    LightWeightSlidingWindow.run();
+    SlidingWindow.run();
   });
 };

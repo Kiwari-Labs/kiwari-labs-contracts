@@ -4,6 +4,6 @@ import * as libraries from "./libraries/index.test";
 
 describe("Scenario", async function () {
   abstracts.run();
-  // extensions.run();
-  // libraries.run();
+  extensions.run();
+  libraries.run();
 });
