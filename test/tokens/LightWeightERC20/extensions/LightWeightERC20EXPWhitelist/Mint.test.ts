@@ -45,7 +45,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] mint to non-wholesaler address", async function () {
-      const {erc20expWhitelist} = await deployLightWeightERC20Base({});
+      const {erc20expWhitelist} = await deployLightWeightERC20EXPWhitelist({});
       await expect(erc20expWhitelist.mintUnspentWholeSale(ZERO_ADDRESS, 1)).to.revertedWith(
         "can't mint non-expirable token to non wholesale account",
       );
@@ -54,7 +54,7 @@ export const run = async () => {
 
   describe("Mint To Retailer", async function () {
     it("[HAPPY] correct mint", async function () {
-      const {erc20expWhitelist, alice} = await deployLightWeightERC20Base({});
+      const {erc20expWhitelist, alice} = await deployLightWeightERC20EXPWhitelist({});
       const aliceAddress = await alice.getAddress();
       await expect(erc20expWhitelist.mintRetail(aliceAddress, 1))
         .to.be.emit(erc20expWhitelist, "Transfer")
@@ -64,14 +64,14 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] mint to zero address", async function () {
-      const {erc20expWhitelist} = await deployLightWeightERC20Base({});
+      const {erc20expWhitelist} = await deployLightWeightERC20EXPWhitelist({});
       await expect(erc20expWhitelist.mintRetail(ZERO_ADDRESS, 1))
         .to.be.revertedWithCustomError(erc20expWhitelist, "ERC20InvalidReceiver")
         .withArgs(ZERO_ADDRESS);
     });
 
     it("[UNHAPPY] mint to non-retailer", async function () {
-      const {erc20expWhitelist, alice} = await deployLightWeightERC20Base({});
+      const {erc20expWhitelist, alice} = await deployLightWeightERC20EXPWhitelist({});
       const aliceAddress = await alice.getAddress();
       await expect(erc20expWhitelist.grantWholeSale(aliceAddress))
         .to.emit(erc20expWhitelist, "GrantWholeSale")
@@ -82,7 +82,3 @@ export const run = async () => {
     });
   });
 };
-function deployLightWeightERC20Base(): { erc20expWhitelist: any; alice: any; } | PromiseLike<{ erc20expWhitelist: any; alice: any; }> {
-  throw new Error("Function not implemented.");
-}
-

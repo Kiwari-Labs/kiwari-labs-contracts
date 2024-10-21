@@ -5,7 +5,7 @@ import * as SlidingWindow from "./SlidingWindow/index.test";
 import * as Comparators from "./Comparators/index.test";
 
 export const run = async () => {
-  describe("libraries", async function () {
+  describe("utils", async function () {
     LightWeightSortedCircularDoublyLinkedList.run();
     SortedCircularDoublyLinkedList.run();
     LightWeightSlidingWindow.run();

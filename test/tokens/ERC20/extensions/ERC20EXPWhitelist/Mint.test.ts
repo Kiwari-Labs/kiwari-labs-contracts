@@ -1,6 +1,11 @@
 import {expect} from "chai";
 import {deployERC20EXPWhitelist} from "../../../../utils.test";
-import {INVALID_WHITELIST_ADDRESS, EVENT_TRANSFER, ZERO_ADDRESS, EVENT_WHITELIST_GRANTED} from "../../../../constant.test";
+import {
+  INVALID_WHITELIST_ADDRESS,
+  EVENT_TRANSFER,
+  ZERO_ADDRESS,
+  EVENT_WHITELIST_GRANTED,
+} from "../../../../constant.test";
 
 export const run = async () => {
   describe("Mint", async function () {
