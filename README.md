@@ -1,10 +1,6 @@
 # @kiwarilabs/contracts
 
-This is a `solidity` smart contract library for provide multiple types of assets, agreement, campaigns, and utilities for Loyalty Program
-
-## Overview
-
-> TODO
+This is a `solidity` smart contract library for provide multiple types of assets, agreement, campaigns, and utilities for Loyalty Program.
 
 ### Installation
 

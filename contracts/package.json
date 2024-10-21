@@ -12,7 +12,7 @@
     "**/*.sol"
   ],
   "scripts": {
-    "prepack": "bash ../scripts/prepare.sh"
+    "prepare": "bash ../scripts/prepare.sh"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.2"
