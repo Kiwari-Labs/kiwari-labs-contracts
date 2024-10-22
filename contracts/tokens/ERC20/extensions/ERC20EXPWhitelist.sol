@@ -14,9 +14,9 @@ abstract contract ERC20EXPWhitelist is ERC20EXPBase {
     }
 
     /// @notice Mapping whitelist address
-    mapping(address => bool) private _whitelist;
+    mapping(address account => bool auth) private _whitelist;
     /// @notice Mapping from whitelist address to their whitelist balance details
-    mapping(address => Whitelist) private _balances;
+    mapping(address account => Whitelist whitelist) private _balances;
 
     /// @notice Custom error definitions
     error InvalidWhitelistAddress();

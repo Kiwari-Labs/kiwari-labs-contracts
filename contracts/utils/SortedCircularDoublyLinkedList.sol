@@ -10,8 +10,8 @@ pragma solidity >=0.8.0 <0.9.0;
 library SortedCircularDoublyLinkedList {
     struct List {
         uint256 _size;
-        mapping(uint256 => mapping(bool => uint256)) _nodes;
-        mapping(uint256 => bytes) _data;
+        mapping(uint256 node => mapping(bool direction => uint256 value)) _nodes;
+        mapping(uint256 node => bytes data) _data;
     }
 
     uint8 private constant ONE_BIT = 1;

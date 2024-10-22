@@ -14,7 +14,7 @@ abstract contract ERC20EXPMintQuota is ERC20EXPBase {
     }
 
     /// @notice Mapping from minter address to their quota details
-    mapping(address => Minter) private _minters;
+    mapping(address account => Minter minter) private _minters;
 
     /// @notice Custom error definitions
     error UnauthorizedMinter(address caller);

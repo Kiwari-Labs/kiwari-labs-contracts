@@ -25,9 +25,9 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         SCDLL.List list;
     }
 
-    mapping(address => mapping(uint256 => mapping(uint8 => Slot))) private _balances;
-    mapping(address => mapping(address => uint256)) private _allowances;
-    mapping(uint256 => uint256) private _worldBlockBalance;
+    mapping(address account => mapping(uint256 era => mapping(uint8 slot => Slot))) private _balances;
+    mapping(address account => mapping(address spneder => uint256 balance)) private _allowances;
+    mapping(uint256 blockNumber => uint256 balance) private _worldBlockBalance;
 
     /// @notice Constructor function to initialize the token contract with specified parameters.
     /// @dev Initializes the token contract by setting the name, symbol, and initializing the sliding window parameters.
