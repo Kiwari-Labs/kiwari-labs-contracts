@@ -4,9 +4,9 @@ import {parseEther} from "ethers/lib/utils";
 import {reset, time, mineUpTo} from "@nomicfoundation/hardhat-network-helpers";
 import {erc20} from "../../../typechain-types/@openzeppelin/contracts/token";
 import {
-  ERC20_INSUFFICIENT_BALANCE,
-  ERC20_INVALID_RECEIVER,
-  ERC20_INVALID_SENDER,
+  ERROR_ERC20_INSUFFICIENT_BALANCE,
+  ERROR_ERC20_INVALID_RECEIVER,
+  ERROR_ERC20_INVALID_SENDER,
   EVENT_TRANSFER,
   EVENT_WHITELIST_GRANTED,
   ZERO_ADDRESS,
@@ -146,7 +146,7 @@ export const run = async () => {
         .withArgs(deployerAddress, bobAddress);
       await expect(erc20expWhitelist.connect(alice).transferUnspendable(bobAddress, 1)).to.be.revertedWithCustomError(
         erc20expWhitelist,
-        ERC20_INSUFFICIENT_BALANCE,
+        ERROR_ERC20_INSUFFICIENT_BALANCE,
       );
     });
 
@@ -165,7 +165,7 @@ export const run = async () => {
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, aliceAddress, 1);
       await expect(erc20expWhitelist.connect(alice).transfer(bobAddress, 1))
-        .to.be.revertedWithCustomError(erc20expWhitelist, ERC20_INSUFFICIENT_BALANCE)
+        .to.be.revertedWithCustomError(erc20expWhitelist, ERROR_ERC20_INSUFFICIENT_BALANCE)
         .withArgs(aliceAddress, 0, 1);
     });
 
@@ -181,7 +181,7 @@ export const run = async () => {
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, aliceAddress, 1);
       await expect(erc20expWhitelist.connect(alice).transfer(bobAddress, 1))
-        .to.be.revertedWithCustomError(erc20expWhitelist, ERC20_INSUFFICIENT_BALANCE)
+        .to.be.revertedWithCustomError(erc20expWhitelist, ERROR_ERC20_INSUFFICIENT_BALANCE)
         .withArgs(aliceAddress, 0, 1);
     });
   });

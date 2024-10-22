@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {deployERC20EXPBase, mineBlock, skipToBlock} from "../../utils.test";
-import {ERC20_INVALID_RECEIVER, EVENT_TRANSFER, ZERO_ADDRESS} from "../../constant.test";
+import {ERROR_ERC20_INVALID_RECEIVER, EVENT_TRANSFER, ZERO_ADDRESS} from "../../constant.test";
 
 export const run = async () => {
   describe("Mint", async function () {
@@ -711,7 +711,7 @@ export const run = async () => {
       const {erc20exp} = await deployERC20EXPBase({});
 
       expect(erc20exp.mint(ZERO_ADDRESS, 1))
-        .to.be.revertedWithCustomError(erc20exp, ERC20_INVALID_RECEIVER)
+        .to.be.revertedWithCustomError(erc20exp, ERROR_ERC20_INVALID_RECEIVER)
         .withArgs(ZERO_ADDRESS);
     });
   });

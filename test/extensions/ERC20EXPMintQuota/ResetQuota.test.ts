@@ -3,7 +3,7 @@ import {deployERC20EXPMintQuota} from "../../utils.test";
 import {
   ZERO_ADDRESS,
   EVENT_QUOTA_SET,
-  INVALID_INVALID_MINTER_ADDRESS,
+  ERROR_INVALID_MINTER_ADDRESS,
   EVENT_QUOTA_RESET,
   EVENT_QUOTA_MINTED,
 } from "../../constant.test";
@@ -39,7 +39,7 @@ export const run = async () => {
       const {erc20ExpMintQuota} = await deployERC20EXPMintQuota();
       await expect(erc20ExpMintQuota.resetQuota(ZERO_ADDRESS)).to.be.revertedWithCustomError(
         erc20ExpMintQuota,
-        INVALID_INVALID_MINTER_ADDRESS,
+        ERROR_INVALID_MINTER_ADDRESS,
       );
     });
   });

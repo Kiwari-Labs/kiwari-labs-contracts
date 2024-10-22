@@ -6,8 +6,8 @@ import {
   mineBlock,
 } from "../../utils.test";
 import {
-  INVALID_BLOCK_TIME,
-  INVALID_FRAME_SIZE,
+  ERROR_INVALID_BLOCK_TIME,
+  ERROR_INVALID_FRAME_SIZE,
   MAXIMUM_BLOCK_TIME_IN_MILLISECONDS,
   MAXIMUM_FRAME_SIZE,
   MINIMUM_BLOCK_TIME_IN_MILLISECONDS,
@@ -86,7 +86,7 @@ export const run = async () => {
 
       await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize)).to.be.revertedWithCustomError(
         slidingWindow,
-        INVALID_BLOCK_TIME,
+        ERROR_INVALID_BLOCK_TIME,
       );
     });
 
@@ -105,7 +105,7 @@ export const run = async () => {
 
       await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize)).to.be.revertedWithCustomError(
         slidingWindow,
-        INVALID_BLOCK_TIME,
+        ERROR_INVALID_BLOCK_TIME,
       );
     });
 
@@ -124,7 +124,7 @@ export const run = async () => {
 
       await expect(slidingWindow.updateWindow(blockPeriod, invalidFrameSize)).to.be.revertedWithCustomError(
         slidingWindow,
-        INVALID_FRAME_SIZE,
+        ERROR_INVALID_FRAME_SIZE,
       );
     });
 
@@ -143,7 +143,7 @@ export const run = async () => {
 
       await expect(slidingWindow.updateWindow(blockPeriod, invalidFrameSize)).to.be.revertedWithCustomError(
         slidingWindow,
-        INVALID_FRAME_SIZE,
+        ERROR_INVALID_FRAME_SIZE,
       );
     });
 

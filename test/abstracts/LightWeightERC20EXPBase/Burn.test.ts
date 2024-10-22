@@ -1,6 +1,11 @@
 import {expect} from "chai";
 import {deployLightWeightERC20EXPBase, mineBlock, skipToBlock} from "../../utils.test";
-import {ERC20_INSUFFICIENT_BALANCE, ERC20_INVALID_SENDER, EVENT_TRANSFER, ZERO_ADDRESS} from "../../constant.test";
+import {
+  ERROR_ERC20_INSUFFICIENT_BALANCE,
+  ERROR_ERC20_INVALID_SENDER,
+  EVENT_TRANSFER,
+  ZERO_ADDRESS,
+} from "../../constant.test";
 
 export const run = async () => {
   describe("Burn", async function () {
@@ -891,7 +896,7 @@ export const run = async () => {
       const {erc20exp} = await deployLightWeightERC20EXPBase({});
 
       expect(erc20exp.burn(ZERO_ADDRESS, 1))
-        .to.be.revertedWithCustomError(erc20exp, ERC20_INVALID_SENDER)
+        .to.be.revertedWithCustomError(erc20exp, ERROR_ERC20_INVALID_SENDER)
         .withArgs(ZERO_ADDRESS);
     });
 
@@ -903,7 +908,7 @@ export const run = async () => {
       const {erc20exp, alice} = await deployLightWeightERC20EXPBase({});
 
       expect(erc20exp.burn(await alice.getAddress(), 1))
-        .to.be.revertedWithCustomError(erc20exp, ERC20_INSUFFICIENT_BALANCE)
+        .to.be.revertedWithCustomError(erc20exp, ERROR_ERC20_INSUFFICIENT_BALANCE)
         .withArgs(await alice.getAddress(), 0, 1);
     });
   });

@@ -9,6 +9,7 @@ export const SLIDING_WINDOW_CONTRACT = "MockSlidingWindow";
 export const LIGHT_WEIGHT_SLIDING_WINDOW_CONTRACT = "MockLightWeightSlidingWindow";
 
 // extensions
+export const ERC20_EXP_BACKLIST_CONTRACT = "MockERC20EXPBacklist";
 export const ERC20_EXP_MINT_QUOTA_CONTRACT = "MockERC20EXPMintQuota";
 export const ERC20_EXP_WHITELIST_CONTRACT = "MockERC20EXPWhitelist";
 export const ERC20_EXP_NEAREST_EXPIRY_QUERY_CONTRACT = "MockERC20EXPNearestExpiryQuery";
@@ -46,26 +47,29 @@ export const YEAR_IN_MILLISECONDS = 31_556_926_000;
 export const DAY_IN_MILLISECONDS = 86_400_000;
 
 // custom error
-export const INVALID_AGREEMENT_FAILED = "AgreementFailed";
+export const ERROR_AGREEMENT_FAILED = "AgreementFailed";
 
-export const INVALID_BLOCK_TIME = "InvalidBlockTime";
-export const INVALID_FRAME_SIZE = "InvalidFrameSize";
-export const INVALID_SLOT_PER_ERA = "InvalidSlotPerEra";
+export const ERROR_INVALID_BLOCK_TIME = "InvalidBlockTime";
+export const ERROR_INVALID_FRAME_SIZE = "InvalidFrameSize";
+export const ERROR_INVALID_SLOT_PER_ERA = "InvalidSlotPerEra";
 
-export const INVALID_WHITELIST_ADDRESS = "InvalidWhitelistAddress";
-export const INVALID_WHITELIST_ADDRESS_EXIST = "ExistInWhitelist";
-export const INVALID_WHITELIST_ADDRESS_NOT_EXIST = "NotExistInWhitelist";
+export const ERROR_INVALID_WHITELIST_ADDRESS = "InvalidWhitelistAddress";
+export const ERROR_EXIST_IN_WHITELIST = "ExistInWhitelist";
+export const ERROR_NOT_EXIST_IN_WHITELIST = "NotExistInWhitelist";
 
-export const INVALID_UNAUTHORIZED_MINTER = "UnauthorizedMinter";
-export const INVALID_MINT_QUOTA_EXCEEDED = "MintQuotaExceeded";
-export const INVALID_INVALID_MINTER_ADDRESS = "InvalidMinterAddress";
+export const ERROR_UNAUTHORIZED_MINTER = "UnauthorizedMinter";
+export const ERROR_MINT_QUOTA_EXCEEDED = "MintQuotaExceeded";
+export const ERROR_INVALID_MINTER_ADDRESS = "InvalidMinterAddress";
 
-export const ERC20_INVALID_SENDER = "ERC20InvalidSender";
-export const ERC20_INVALID_RECEIVER = "ERC20InvalidReceiver";
-export const ERC20_INSUFFICIENT_BALANCE = "ERC20InsufficientBalance";
-export const ERC20_INVALID_APPROVER = "ERC20InvalidApprover";
-export const ERC20_INVALID_SPENDER = "ERC20InvalidSpender";
-export const ERC20_INSUFFICIENT_ALLOWANCE = "ERC20InsufficientAllowance";
+export const ERROR_ERC20_INVALID_SENDER = "ERC20InvalidSender";
+export const ERROR_ERC20_INVALID_RECEIVER = "ERC20InvalidReceiver";
+export const ERROR_ERC20_INSUFFICIENT_BALANCE = "ERC20InsufficientBalance";
+export const ERROR_ERC20_INVALID_APPROVER = "ERC20InvalidApprover";
+export const ERROR_ERC20_INVALID_SPENDER = "ERC20InvalidSpender";
+export const ERROR_ERC20_INSUFFICIENT_ALLOWANCE = "ERC20InsufficientAllowance";
+
+export const ERROR_BLACKLISTED_ADDRESS = "BlacklistedAddress";
+export const ERROR_INVALID_ADDRESS = "InvalidAddress";
 
 // events
 export const EVENT_AGREEMENT_COMPLETE = "AgreementComplete";
@@ -82,6 +86,10 @@ export const EVENT_WHITELIST_REVOKED = "WhitelistRevoked";
 export const EVENT_QUOTA_SET = "QuotaSet";
 export const EVENT_QUOTA_RESET = "QuotaReset";
 export const EVENT_QUOTA_MINTED = "QuotaMinted";
+
+export const EVENT_BLACKLISTED = "Blacklisted";
+export const EVENT_UNBLACKLISTED = "Unblacklisted";
+
 export interface SlidingWindowState extends LightWeightSlidingWindowState {
   _slotSize: Number;
 }
