@@ -27,6 +27,7 @@ import {
   AGREEMENT_BASE_CONTRACT,
   BILATERAL_AGREEMENT_BASE_CONTRACT,
   ERC20_EXP_NEAREST_EXPIRY_QUERY_CONTRACT,
+  ERC20_EXP_BACKLIST_CONTRACT,
 } from "./constant.test";
 import {PromiseOrValue} from "../typechain-types/common";
 
@@ -246,8 +247,35 @@ export const deploySlidingWindow = async function ({
   return deploySlidingWindowSelector(false, startBlockNumber, blockPeriod, frameSize, slotSize);
 };
 
-// TODO: Re-test the cases below. //////////////////////////////////
 // extensions
+export const deployERC20EXBacklist = async function (
+  blockPeriod = 400, // 400ms per block
+  frameSize = 2, // frame size 2 slot
+  slotSize = 4, // 4 slot per era
+) {
+  const [deployer, alice, bob, jame] = await ethers.getSigners();
+
+  const ERC20_EXP_BACKLIST = await ethers.getContractFactory(ERC20_EXP_BACKLIST_CONTRACT, deployer);
+
+  const erc20ExpBacklist = await ERC20_EXP_BACKLIST.deploy(
+    ERC20_EXP_NAME,
+    ERC20_EXP_SYMBOL,
+    blockPeriod,
+    frameSize,
+    slotSize,
+  );
+
+  await erc20ExpBacklist.deployed();
+
+  return {
+    erc20ExpBacklist,
+    deployer,
+    alice,
+    bob,
+    jame,
+  };
+};
+
 export const deployERC20EXPMintQuota = async function (
   blockPeriod = 400, // 400ms per block
   frameSize = 2, // frame size 2 slot
