@@ -22,7 +22,7 @@ contract MockAgreementBase is AgreementBase {
         return (abi.decode(x, (bool)) && abi.decode(y, (bool)));
     }
 
-    function verifyAgreement(bytes memory x, bytes memory y) public returns (bool) {
+    function verifyAgreement(bytes memory x, bytes memory y) public pure returns (bool) {
         return _verifyAgreement(x, y);
     }
 }
