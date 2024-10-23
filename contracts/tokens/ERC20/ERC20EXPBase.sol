@@ -81,7 +81,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @param slot The specific slot within the era to retrieve balances.
     /// @param blockNumber The current block number for determining balance validity.
     /// @return balance The total buffered balance within the specified era and slot.
-    /// @custom:inefficientgasusedappetite This function can consume significant gas due to potentially
+    /// @custom:gas-inefficiency This function can consume significant gas due to potentially
     /// iterating through a large array of block indices.
     function _bufferSlotBalance(
         address account,

@@ -8,12 +8,12 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {SlidingWindow} from "../../abstracts/SlidingWindow.sol";
 import {SortedCircularDoublyLinkedList as SCDLL} from "../../utils/SortedCircularDoublyLinkedList.sol";
+// import {CircularDoublyLinkedList as CDLL} from "../../utils/CircularDoublyLinkedList.sol";
 import {IERC721EXPBase} from "../../interfaces/IERC721EXPBase.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IERC165, ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-import {IERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 
 /// @notice First-In-First-Out (FIFO) not suitable for ERC721 cause each token is unique it's need to be selective to spend.
@@ -22,11 +22,11 @@ import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.s
 abstract contract ERC721EXPBase is
     Context,
     IERC721Errors,
-    IERC721Enumerable,
     IERC721EXPBase,
     IERC721Metadata,
     SlidingWindow
 {
+    // using CDLL for CDLL.List;
     using SCDLL for SCDLL.List;
     using Strings for uint256;
 
@@ -36,12 +36,13 @@ abstract contract ERC721EXPBase is
     /// @notice Struct representing a slot containing balances mapped by blocks.
     struct Slot {
         uint256 slotBalance;
-        SCDLL.List list;
+        SCDLL.List list; // use for store the blockNumber for handling even if the tokenId minted in non-sequential way
+        mapping(uint256 blockNumber => SCDLL.List list) blockBalances; // didn't require to be in sorted list for saving gas
     }
 
     mapping(address account => mapping(uint256 era => mapping(uint8 slot => Slot))) private _balances;
     mapping(uint256 tokenId => uint256 blockNumber) private _mintedBlockOfToken;
-    mapping(uint256 blockNumber => uint256 balance) private _worldBlockBalance; // keep tracking amout of token in each block.
+    mapping(uint256 blockNumber => uint256 balance) private _worldBlockBalance;
 
     mapping(uint256 tokenId => address) private _owners;
     mapping(uint256 tokenId => address) private _tokenApprovals;
@@ -108,23 +109,10 @@ abstract contract ERC721EXPBase is
         }
     }
 
-    function _locateUnexpiredBlockBalance(
-        SCDLL.List storage list,
-        uint256 blockNumber,
-        uint256 expirationPeriodInBlockLength
-    ) internal view returns (uint256 tokenId) {
-        tokenId = list.head();
-        unchecked {
-            uint256 mitedBlock = _mintedBlockOfToken[tokenId];
-            while (blockNumber - mitedBlock >= expirationPeriodInBlockLength) {
-                if (tokenId == 0) {
-                    break;
-                }
-                tokenId = list.next(tokenId);
-            }
-        }
-    }
-
+    /// @custom:gas-inefficiency 
+    /// This method may incur gas inefficiencies due to the unique nature of ERC721 tokens. 
+    /// Each minted block can potentially hold multiple tokens, complicating balance tracking 
+    /// and leading to higher computational costs during operations.
     function _bufferSlotBalance(
         address account,
         uint256 era,
@@ -132,12 +120,16 @@ abstract contract ERC721EXPBase is
         uint256 blockNumber
     ) private view returns (uint256 balance) {
         Slot storage _spender = _balances[account][era][slot];
-        uint256 tokenId = _locateUnexpiredBlockBalance(_spender.list, blockNumber, _getFrameSizeInBlockLength());
-        while (tokenId > 0) {
-            unchecked {
-                balance += _mintedBlockOfToken[tokenId];
+        uint256 expirationPeriodInBlockLengthCache = _getFrameSizeInBlockLength();
+        uint256 blockNumberCache = _spender.list.head();
+        unchecked {
+            while (blockNumber - blockNumberCache >= expirationPeriodInBlockLengthCache) {
+                if (blockNumberCache == 0) {
+                    break;
+                }
+                blockNumberCache = _spender.list.next(blockNumberCache);
+                balance += _spender.blockBalances[blockNumberCache].size();
             }
-            tokenId = _spender.list.next(tokenId);
         }
     }
 
@@ -145,13 +137,10 @@ abstract contract ERC721EXPBase is
         return _balances[account][fromEra][fromSlot];
     }
 
-    // @TODO refactor
     function _isExpired(uint256 tokenId) internal view returns (bool) {
-        (uint256 era, uint8 slot) = _calculateEraAndSlot(_mintedBlockOfToken[tokenId]);
-        if (false) {
-            return false;
+        if (_blockNumberProvider() - _mintedBlockOfToken[tokenId] >= _getFrameSizeInBlockLength()) {
+            return true;
         }
-        return true;
     }
 
     function _baseURI() internal view virtual returns (string memory) {
@@ -228,7 +217,8 @@ abstract contract ERC721EXPBase is
             revert ERC721NonexistentToken(tokenId);
         }
         address from = _ownerOf(tokenId);
-        (uint256 era, uint8 slot) = _calculateEraAndSlot(_mintedBlockOfToken[tokenId]);
+        uint256 mintedBlockCache = _mintedBlockOfToken[tokenId];
+        (uint256 era, uint8 slot) = _calculateEraAndSlot(mintedBlockCache);
 
         Slot storage _spender = _balances[from][era][slot];
         Slot storage _recepient = _balances[from][era][slot];
@@ -245,13 +235,18 @@ abstract contract ERC721EXPBase is
 
             unchecked {
                 _spender.slotBalance -= 1;
-                _spender.list.remove(tokenId);
+                _spender.blockBalances[mintedBlockCache].remove(tokenId);
+                if (_spender.blockBalances[mintedBlockCache].size() == 0) {
+                    _spender.list.remove(tokenId);
+                }
             }
         }
 
         if (to != address(0)) {
             unchecked {
                 _recepient.slotBalance += 1;
+                _recepient.blockBalances[mintedBlockCache].insert(tokenId, "");
+                // do nothing, if tokenId exist
                 _recepient.list.insert(tokenId, "");
             }
         }

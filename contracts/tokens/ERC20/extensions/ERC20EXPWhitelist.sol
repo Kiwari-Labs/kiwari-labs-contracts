@@ -176,7 +176,7 @@ abstract contract ERC20EXPWhitelist is ERC20EXPBase {
     }
 
     /// @notice Performs a custom token transfer operation using safe balanceOf for calculating available balances.
-    /// @custom:inefficientgasusedappetite Emits 2 transfer events which may result in inefficient gas usage.
+    /// @custom:gas-inefficiency Emits 2 transfer events which may result in inefficient gas usage.
     /// @param from The address from which tokens are being transferred.
     /// @param to The address to which tokens are being transferred.
     /// @param value The amount of tokens being transferred.
