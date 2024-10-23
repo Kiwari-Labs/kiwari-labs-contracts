@@ -25,6 +25,7 @@ import {
   ERC20_EXP_MINT_QUOTA_CONTRACT,
   COMPARATOR_LIBRARY_CONTRACT,
   AGREEMENT_BASE_CONTRACT,
+  AGREEMENT_BASE_FOR_BILATERAL_CONTRACT,
   BILATERAL_AGREEMENT_BASE_CONTRACT,
   ERC20_EXP_NEAREST_EXPIRY_QUERY_CONTRACT,
   ERC20_EXP_BACKLIST_CONTRACT,
@@ -143,6 +144,13 @@ export const getAddress = async function (account: Signer | Contract) {
 export const deployAgreementBase = async function (name: string) {
   const [deployer, alice, bob, jame] = await ethers.getSigners();
   const AGREEMENT = await ethers.getContractFactory(AGREEMENT_BASE_CONTRACT, deployer);
+  const agreementBase = await AGREEMENT.deploy(name);
+  return {agreementBase, alice, bob, jame};
+};
+
+export const deployAgreementBaseForBilateral = async function (name: string) {
+  const [deployer, alice, bob, jame] = await ethers.getSigners();
+  const AGREEMENT = await ethers.getContractFactory(AGREEMENT_BASE_FOR_BILATERAL_CONTRACT, deployer);
   const agreementBase = await AGREEMENT.deploy(name);
   return {agreementBase, alice, bob, jame};
 };

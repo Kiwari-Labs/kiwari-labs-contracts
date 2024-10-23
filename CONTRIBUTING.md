@@ -1,35 +1,33 @@
-## Getting Started
+## Prerequisites
 
-#### Prerequisites
-
-To compile and test the smart contract, you need the following:
+Before you begin developing or contributing to kiwari-labs-contracts, ensure that the following software is installed.
 
 - node [Download](https://nodejs.org/en/)
 - nvm [Download](https://github.com/nvm-sh/nvm#installing-and-updating)
 - yarn [Download](https://yarnpkg.com/getting-started/install)
 - git [Download](https://git-scm.com/)
 
-#### Installing
+## Development
 
 ```
-git clone https://github.com/Kiwari-Labs/asset-contracts.git
+git clone https://github.com/Kiwari-Labs/kiwari-labs-contracts.git
 ```
 
-Change work directory to asset-contracts
+Change work directory to `kiwari-labs-contracts`
 
 ```
-cd ./asset-contracts
+cd ./kiwari-labs-contracts
 ```
 
-Install the dependencies:
+Install the dependencies via `yarn`
 
 ```
 yarn install
 ```
 
-#### Compiling
+## Compiling and Test
 
-Compile the smart contract:
+Compile the `solidity` smart contract:
 
 ```
 yarn compile
@@ -47,14 +45,5 @@ Run the tests coverage:
 yarn coverage
 ```
 
-`**NOTE: require at least 4GB of RAM to run tests coverage.`
-
-### TODO List
-
-| Task                                                                                                                               | High | Low |
-| ---------------------------------------------------------------------------------------------------------------------------------- | ---- | --- |
-| test:Unit test all function                                                                                                        | ✓    |     |
-| test:Gas Benchmark test                                                                                                            | ✓    |     |
-| test:Acceptance/E2E test                                                                                                           | ✓    |     |
-| feat:[Change expirePeriod from length of slot into length of blocks](https://github.com/MASDXI/ERC20EXP/issues/4#issue-2234558942) |      | ✓   |
-| feat:[issue9](https://github.com/MASDXI/ERC20EXP/issues/9),[pullrequest](https://github.com/MASDXI/ERC20EXP/pull/23)               | ✓    |     |
+> [!IMPORTANT]
+> require at least 4GB of RAM, to run all the test coverage.

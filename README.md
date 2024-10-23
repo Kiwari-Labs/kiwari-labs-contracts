@@ -1,44 +1,53 @@
 # @kiwarilabs/contracts
 
-This is a Solidity smart contract library for create asset that could be use for Loyalty program.
+This is a `solidity` smart contract library for provide multiple types of assets, agreement, campaigns, and utilities for Loyalty Program
 
 ## Overview
 
-#### Installing
+> TODO
 
+### Installation
+
+Install via `npm`
+``` shell
+npm install --dev @kiwarilabs/contracts@stable
 ```
-$ npm install --dev @kiwarilabs/contracts
+Install via `yarn`
+``` shell
+yarn add --dev @kiwarilabs/contracts@stable
 ```
 
+### Usage
 ```solidity
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import "@kiwarilabs/contracts/abstracts/ERC20EXPBase.sol";
+import "@kiwarilabs/contracts/tokens/ERC20/ERC20EXPBase.sol";
 
+/* @dev creates a loyalty point with token expiration functionality. 
+* `blockTime_` The average block time of the network, measured in milliseconds.
+* `frameSize_` represents the total number of slots that form one full expiration cycle. 
+* `slotSize_`  defines the total number of slots in a year. 
+*              For example, 4 slots/year could imply each slot lasts 3 months.
+*/
 contract MyLoyaltyPoint is ERC20EXPBase {
   constructor(
-    uint16 blockTime_,
-    uint8 frameSize_,
-    uint8 slotSize_
+    uint16 blockTime_,  // block time of the network (in milliseconds)
+    uint8 frameSize_,   // Number of slots in one expiration cycle (e.g., 4 slots for annual expiration)
+    uint8 slotSize_     // Total slots per year (e.g., 4 slots/year)
   ) ERC20EXPBase("MyLoyaltyPoint", "MLP", block.number, blockTime_, frameSize_, slotSize_) {}
 }
 ```
 
-### Components
-- ERC20EXPBase
-- ERC721EXPBase
-- ERC1155EXPBase
-- extension for ERC20, ERC721, and ERC1155
-- bilateral agreement
-- campaign and reward
-- utilities e.g. comparator, linked list, and sliding window
+### Contribute
 
-### Support and Issue
+Check out the contribution [guide](CONTRIBUTING.md)
 
-For support or any inquiries, feel free to reach out to us at [github-issue]() or kiwarilabs@protonmail.com
+## Support and Issue
+
+For support or any inquiries, feel free to reach out to us at [github-issue](https://github.com/Kiwari-Labs/kiwari-labs-contracts/issues) or kiwarilabs@protonmail.com
 
 ### License
 
-All ERC20EXP code Copyright (C) Kiwari Labs. All rights reserved.  
-`@kiwarilabs/contracts` is released under the [BUSL-1.1](LICENSE)
+All code within the `contracts` directory is released under the [Business Source License 1.1](LICENSE).  
+Copyright (C) Kiwari Labs. 

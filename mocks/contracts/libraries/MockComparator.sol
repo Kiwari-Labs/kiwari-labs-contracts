@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.5.0 <0.9.0;
 
-import "../../../contracts/libraries/utils/AddressComparator.sol";
-import "../../../contracts/libraries/utils/BooleanOperation.sol";
-import "../../../contracts/libraries/utils/IntComparator.sol";
-import "../../../contracts/libraries/utils/TimeComparator.sol";
-import "../../../contracts/libraries/utils/UintComparator.sol";
+import "../../../contracts/utils/comparators/AddressComparator.sol";
+import "../../../contracts/utils/comparators/BooleanOperation.sol";
+import "../../../contracts/utils/comparators/IntComparator.sol";
+import "../../../contracts/utils/comparators/TimeComparator.sol";
+import "../../../contracts/utils/comparators/UintComparator.sol";
 
 contract MockComparator {
     using AddressComparator for address;

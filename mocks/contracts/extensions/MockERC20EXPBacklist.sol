@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.5.0 <0.9.0;
 
-import "../../../contracts/abstracts/ERC20EXPBase.sol";
-import "../../../contracts/extensions/ERC20EXPBlacklist.sol";
+import "../../../contracts/tokens/ERC20/ERC20EXPBase.sol";
+import "../../../contracts/tokens/ERC20/extensions/ERC20EXPBlacklist.sol";
 
 contract MockERC20EXPBacklist is ERC20EXPBase, ERC20EXPBlacklist {
     constructor(

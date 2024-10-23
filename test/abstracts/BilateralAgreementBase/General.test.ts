@@ -37,7 +37,8 @@ export const run = async () => {
         [await alice.getAddress(), await bob.getAddress()],
         agreementBase.address,
       );
-      expect(await bilateralAgreementBase.status()).to.equal(false);
+      // init transaction always return true
+      expect(await bilateralAgreementBase.status()).to.equal(true);
     });
   });
 };

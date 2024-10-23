@@ -5,7 +5,7 @@ pragma solidity >=0.8.0 <0.9.0;
 /// @author Kiwari Labs
 
 import {SlidingWindow} from "./LightWeightSlidingWindow.sol";
-import {SortedCircularDoublyLinkedList as SCDLL} from "../libraries/LightWeightSortedCircularDoublyLinkedList.sol";
+import {SortedCircularDoublyLinkedList as SCDLL} from "../utils/LightWeightSortedCircularDoublyLinkedList.sol";
 import {IERC20EXPBase} from "../interfaces/IERC20EXPBase.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
