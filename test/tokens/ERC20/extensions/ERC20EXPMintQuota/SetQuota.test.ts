@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {deployERC20EXPMintQuota} from "../../../../utils.test";
-import {ZERO_ADDRESS, EVENT_QUOTA_SET, INVALID_INVALID_MINTER_ADDRESS} from "../../../../constant.test";
+import {ZERO_ADDRESS, EVENT_QUOTA_SET, ERROR_INVALID_MINTER_ADDRESS} from "../../../../constant.test";
 
 export const run = async () => {
   describe("SetQuota", async function () {
@@ -22,7 +22,7 @@ export const run = async () => {
       const quota = 100;
       await expect(erc20ExpMintQuota.setQuota(ZERO_ADDRESS, quota)).to.be.revertedWithCustomError(
         erc20ExpMintQuota,
-        INVALID_INVALID_MINTER_ADDRESS,
+        ERROR_INVALID_MINTER_ADDRESS,
       );
     });
   });

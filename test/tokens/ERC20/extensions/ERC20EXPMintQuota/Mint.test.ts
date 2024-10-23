@@ -2,8 +2,8 @@ import {expect} from "chai";
 import {deployERC20EXPMintQuota} from "../../../../utils.test";
 import {
   EVENT_QUOTA_SET,
-  INVALID_MINT_QUOTA_EXCEEDED,
-  INVALID_UNAUTHORIZED_MINTER,
+  ERROR_MINT_QUOTA_EXCEEDED,
+  ERROR_UNAUTHORIZED_MINTER,
   EVENT_QUOTA_MINTED,
 } from "../../../../constant.test";
 
@@ -37,7 +37,7 @@ export const run = async () => {
       const quota = 100;
       await expect(erc20ExpMintQuota.mintQuota(aliceAddress, quota)).to.be.revertedWithCustomError(
         erc20ExpMintQuota,
-        INVALID_UNAUTHORIZED_MINTER,
+        ERROR_UNAUTHORIZED_MINTER,
       );
     });
 
@@ -56,7 +56,7 @@ export const run = async () => {
 
       await expect(
         erc20ExpMintQuota.connect(alice).mintQuota(aliceAddress, quota + quota),
-      ).to.be.revertedWithCustomError(erc20ExpMintQuota, INVALID_MINT_QUOTA_EXCEEDED);
+      ).to.be.revertedWithCustomError(erc20ExpMintQuota, ERROR_MINT_QUOTA_EXCEEDED);
     });
   });
 };

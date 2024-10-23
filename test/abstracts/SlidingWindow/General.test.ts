@@ -1,9 +1,9 @@
 import {expect} from "chai";
 import {deploySlidingWindow, calculateSlidingWindowState, mineBlock, latestBlock} from "../../utils.test";
 import {
-  INVALID_BLOCK_TIME,
-  INVALID_FRAME_SIZE,
-  INVALID_SLOT_PER_ERA,
+  ERROR_INVALID_BLOCK_TIME,
+  ERROR_INVALID_FRAME_SIZE,
+  ERROR_INVALID_SLOT_PER_ERA,
   MAXIMUM_BLOCK_TIME_IN_MILLISECONDS,
   MAXIMUM_FRAME_SIZE,
   MAXIMUM_SLOT_PER_ERA,
@@ -87,7 +87,7 @@ export const run = async () => {
 
       await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize, slotSize)).to.be.revertedWithCustomError(
         slidingWindow,
-        INVALID_BLOCK_TIME,
+        ERROR_INVALID_BLOCK_TIME,
       );
     });
 
@@ -103,7 +103,7 @@ export const run = async () => {
 
       await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize, slotSize)).to.be.revertedWithCustomError(
         slidingWindow,
-        INVALID_BLOCK_TIME,
+        ERROR_INVALID_BLOCK_TIME,
       );
     });
 
@@ -119,7 +119,7 @@ export const run = async () => {
 
       await expect(slidingWindow.updateWindow(blockPeriod, invalidFrameSize, slotSize)).to.be.revertedWithCustomError(
         slidingWindow,
-        INVALID_FRAME_SIZE,
+        ERROR_INVALID_FRAME_SIZE,
       );
     });
 
@@ -135,7 +135,7 @@ export const run = async () => {
 
       await expect(slidingWindow.updateWindow(blockPeriod, invalidFrameSize, slotSize)).to.be.revertedWithCustomError(
         slidingWindow,
-        INVALID_FRAME_SIZE,
+        ERROR_INVALID_FRAME_SIZE,
       );
     });
 
@@ -151,7 +151,7 @@ export const run = async () => {
 
       await expect(slidingWindow.updateWindow(blockPeriod, frameSize, invalidSlotPerEra)).to.be.revertedWithCustomError(
         slidingWindow,
-        INVALID_SLOT_PER_ERA,
+        ERROR_INVALID_SLOT_PER_ERA,
       );
     });
 
@@ -167,7 +167,7 @@ export const run = async () => {
 
       await expect(slidingWindow.updateWindow(blockPeriod, frameSize, invalidSlotPerEra)).to.be.revertedWithCustomError(
         slidingWindow,
-        INVALID_SLOT_PER_ERA,
+        ERROR_INVALID_SLOT_PER_ERA,
       );
     });
 

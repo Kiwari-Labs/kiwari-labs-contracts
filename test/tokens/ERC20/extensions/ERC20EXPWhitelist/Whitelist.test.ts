@@ -3,8 +3,8 @@ import {deployERC20EXPWhitelist} from "../../../../utils.test";
 import {
   EVENT_WHITELIST_GRANTED,
   EVENT_WHITELIST_REVOKED,
-  INVALID_WHITELIST_ADDRESS_EXIST,
-  INVALID_WHITELIST_ADDRESS_NOT_EXIST,
+  ERROR_EXIST_IN_WHITELIST, 
+  ERROR_NOT_EXIST_IN_WHITELIST,
 } from "../../../../constant.test";
 
 export const run = async () => {
@@ -58,7 +58,7 @@ export const run = async () => {
         .withArgs(deployerAddress, aliceAddress);
       await expect(erc20expWhitelist.grantWhitelist(aliceAddress)).to.be.revertedWithCustomError(
         erc20expWhitelist,
-        INVALID_WHITELIST_ADDRESS_EXIST,
+        ERROR_EXIST_IN_WHITELIST,
       );
     });
 
@@ -67,7 +67,7 @@ export const run = async () => {
       const aliceAddress = await alice.getAddress();
       await expect(erc20expWhitelist.revokeWhitelist(aliceAddress)).to.be.revertedWithCustomError(
         erc20expWhitelist,
-        INVALID_WHITELIST_ADDRESS_NOT_EXIST,
+        ERROR_NOT_EXIST_IN_WHITELIST,
       );
     });
   });

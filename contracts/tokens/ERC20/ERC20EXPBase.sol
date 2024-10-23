@@ -311,7 +311,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// Reverts if the `account` address is zero.
     /// @param account The address of the account to receive the minted tokens.
     /// @param value The amount of tokens to be minted.
-    function _mint(address account, uint256 value) internal {
+    function _mint(address account, uint256 value) internal virtual {
         if (account == address(0)) {
             revert ERC20InvalidReceiver(address(0));
         }
@@ -323,7 +323,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// Reverts if the `account` address is zero.
     /// @param account The address of the account from which tokens will be burned.
     /// @param value The amount of tokens to be burned.
-    function _burn(address account, uint256 value) internal {
+    function _burn(address account, uint256 value) internal virtual {
         if (account == address(0)) {
             revert ERC20InvalidSender(address(0));
         }
@@ -399,7 +399,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @param from The address from which the tokens are transferred.
     /// @param to The address to which the tokens are transferred.
     /// @param value The amount of tokens to transfer.
-    function _transfer(address from, address to, uint256 value) internal {
+    function _transfer(address from, address to, uint256 value) internal virtual {
         if (from == address(0)) {
             revert ERC20InvalidSender(address(0));
         }
@@ -413,7 +413,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @dev This function returns the balance of the given block from the internal `_worldBlockBalance` mapping.
     /// @param blockNumber The block number for which the balance is being queried.
     /// @return balance The total balance stored at the given block number.
-    function getBlockBalance(uint256 blockNumber) public view returns (uint256) {
+    function getBlockBalance(uint256 blockNumber) external view virtual returns (uint256) {
         return _worldBlockBalance[blockNumber];
     }
 
