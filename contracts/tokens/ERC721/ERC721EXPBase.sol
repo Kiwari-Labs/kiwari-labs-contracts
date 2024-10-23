@@ -7,7 +7,7 @@ pragma solidity >=0.8.0 <0.9.0;
 /// @notice it's adding expiration capabalitiy to ERC721 of '@openzeppelin/contracts'
 
 import {SlidingWindow} from "../../abstracts/SlidingWindow.sol";
-import {SortedCircularDoublyLinkedList as SCDLL} from "../../utils/SortedCircularDoublyLinkedList.sol";
+import {SortedCircularDoublyLinkedList as SCDLL} from "../../utils/LightWeightSortedCircularDoublyLinkedList.sol";
 // import {CircularDoublyLinkedList as CDLL} from "../../utils/CircularDoublyLinkedList.sol";
 import {IERC721EXPBase} from "../../interfaces/IERC721EXPBase.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
@@ -215,6 +215,7 @@ abstract contract ERC721EXPBase is
         // Perform token expired check
         if (_isExpired(tokenId)) {
             revert ERC721NonexistentToken(tokenId);
+            // revert ERC721ExpiredToken(tokenId);
         }
         address from = _ownerOf(tokenId);
         uint256 mintedBlockCache = _mintedBlockOfToken[tokenId];
@@ -245,9 +246,9 @@ abstract contract ERC721EXPBase is
         if (to != address(0)) {
             unchecked {
                 _recepient.slotBalance += 1;
-                _recepient.blockBalances[mintedBlockCache].insert(tokenId, "");
+                _recepient.blockBalances[mintedBlockCache].insert(tokenId);
                 // do nothing, if tokenId exist
-                _recepient.list.insert(tokenId, "");
+                _recepient.list.insert(tokenId);
             }
         }
 
