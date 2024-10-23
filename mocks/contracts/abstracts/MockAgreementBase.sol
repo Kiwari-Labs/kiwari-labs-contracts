@@ -18,11 +18,11 @@ contract MockAgreementBase is AgreementBase {
         _bumpPatchVersion();
     }
 
-    function _verifyAgreement(bytes memory x, bytes memory y) internal override returns (bool) {
+    function _verifyAgreement(bytes memory x, bytes memory y) internal pure override returns (bool) {
         return (abi.decode(x, (bool)) && abi.decode(y, (bool)));
     }
 
-    function verifyAgreement(bytes memory x, bytes memory y) public returns (bool) {
+    function verifyAgreement(bytes memory x, bytes memory y) public pure returns (bool) {
         return _verifyAgreement(x, y);
     }
 }

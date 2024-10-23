@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {deployAgreementBase} from "../../utils.test";
-import {AGREEMENT_NAME, EVENT_AGREEMENT_COMPLETE, INVALID_AGREEMENT_FAILED} from "../../constant.test";
+import {AGREEMENT_NAME, EVENT_AGREEMENT_COMPLETE, ERROR_AGREEMENT_FAILED} from "../../constant.test";
 import {AbiCoder} from "@ethersproject/abi";
 
 export const run = async () => {
@@ -33,7 +33,7 @@ export const run = async () => {
       const {agreementBase} = await deployAgreementBase(AGREEMENT_NAME);
       const payload = abiCoder.encode(["bool"], [false]);
       await expect(agreementBase.agreement(payload, payload))
-        .to.be.revertedWithCustomError(agreementBase, INVALID_AGREEMENT_FAILED)
+        .to.be.revertedWithCustomError(agreementBase, ERROR_AGREEMENT_FAILED)
         .withArgs(payload, payload);
     });
   });

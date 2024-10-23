@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {deployLightWeightERC20EXPBase} from "../../utils.test";
-import {ERC20_INSUFFICIENT_ALLOWANCE, EVENT_APPROVAL, EVENT_TRANSFER, ZERO_ADDRESS} from "../../constant.test";
+import {ERROR_ERC20_INSUFFICIENT_ALLOWANCE, EVENT_APPROVAL, EVENT_TRANSFER, ZERO_ADDRESS} from "../../constant.test";
 
 export const run = async () => {
   describe("TransferFrom", async function () {
@@ -61,7 +61,7 @@ export const run = async () => {
       expect(await erc20exp.allowance(await alice.getAddress(), await bob.getAddress())).to.equal(amount);
 
       await expect(erc20exp.connect(bob).transferFrom(await alice.getAddress(), await bob.getAddress(), amount * 2))
-        .to.be.revertedWithCustomError(erc20exp, ERC20_INSUFFICIENT_ALLOWANCE)
+        .to.be.revertedWithCustomError(erc20exp, ERROR_ERC20_INSUFFICIENT_ALLOWANCE)
         .withArgs(await bob.getAddress(), amount, amount * 2);
     });
   });

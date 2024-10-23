@@ -1,8 +1,8 @@
 import {expect} from "chai";
 import {deployLightWeightERC20EXPBase} from "../../utils.test";
 import {
-  ERC20_INVALID_APPROVER,
-  ERC20_INVALID_SPENDER,
+  ERROR_ERC20_INVALID_APPROVER,
+  ERROR_ERC20_INVALID_SPENDER,
   EVENT_APPROVAL,
   EVENT_TRANSFER,
   ZERO_ADDRESS,
@@ -54,7 +54,7 @@ export const run = async () => {
         .withArgs(ZERO_ADDRESS, await alice.getAddress(), amount);
 
       await expect(erc20exp.connect(alice).approve(ZERO_ADDRESS, amount))
-        .to.be.revertedWithCustomError(erc20exp, ERC20_INVALID_SPENDER)
+        .to.be.revertedWithCustomError(erc20exp, ERROR_ERC20_INVALID_SPENDER)
         .withArgs(ZERO_ADDRESS);
     });
 
@@ -64,7 +64,7 @@ export const run = async () => {
       const amount = 100;
 
       await expect(erc20exp.badApprove(ZERO_ADDRESS, await alice.getAddress(), amount))
-        .to.be.revertedWithCustomError(erc20exp, ERC20_INVALID_APPROVER)
+        .to.be.revertedWithCustomError(erc20exp, ERROR_ERC20_INVALID_APPROVER)
         .withArgs(ZERO_ADDRESS);
     });
   });

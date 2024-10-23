@@ -1,10 +1,10 @@
 import {expect} from "chai";
 import {deployERC20EXPWhitelist} from "../../../../utils.test";
 import {
-  ERC20_INSUFFICIENT_BALANCE,
+  ERROR_ERC20_INSUFFICIENT_BALANCE,
   EVENT_TRANSFER,
   EVENT_WHITELIST_GRANTED,
-  INVALID_WHITELIST_ADDRESS,
+  ERROR_INVALID_WHITELIST_ADDRESS,
   ZERO_ADDRESS,
 } from "../../../../constant.test";
 
@@ -51,7 +51,7 @@ export const run = async () => {
         .withArgs(deployerAddress, aliceAddress);
       await expect(erc20expWhitelist.burnUnspendableWhitelist(aliceAddress, 1)).to.be.revertedWithCustomError(
         erc20expWhitelist,
-        ERC20_INSUFFICIENT_BALANCE,
+        ERROR_ERC20_INSUFFICIENT_BALANCE,
       );
     });
 
@@ -60,7 +60,7 @@ export const run = async () => {
       const aliceAddress = await alice.getAddress();
       await expect(erc20expWhitelist.burnSpendableWhitelist(aliceAddress, 1)).to.be.revertedWithCustomError(
         erc20expWhitelist,
-        INVALID_WHITELIST_ADDRESS,
+        ERROR_INVALID_WHITELIST_ADDRESS,
       );
     });
 
@@ -69,7 +69,7 @@ export const run = async () => {
       const aliceAddress = await alice.getAddress();
       await expect(erc20expWhitelist.burnUnspendableWhitelist(aliceAddress, 1)).to.be.revertedWithCustomError(
         erc20expWhitelist,
-        INVALID_WHITELIST_ADDRESS,
+        ERROR_INVALID_WHITELIST_ADDRESS,
       );
     });
   });

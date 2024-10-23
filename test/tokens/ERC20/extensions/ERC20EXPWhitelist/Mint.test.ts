@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import {deployERC20EXPWhitelist} from "../../../../utils.test";
 import {
-  INVALID_WHITELIST_ADDRESS,
+  ERROR_INVALID_WHITELIST_ADDRESS,
   EVENT_TRANSFER,
   ZERO_ADDRESS,
   EVENT_WHITELIST_GRANTED,
@@ -42,7 +42,7 @@ export const run = async () => {
       const aliceAddress = await alice.getAddress();
       await expect(erc20expWhitelist.mintSpendableWhitelist(aliceAddress, 1)).to.be.revertedWithCustomError(
         erc20expWhitelist,
-        INVALID_WHITELIST_ADDRESS,
+        ERROR_INVALID_WHITELIST_ADDRESS,
       );
       expect(await erc20expWhitelist.whitelist(aliceAddress)).equal(false);
     });
@@ -52,7 +52,7 @@ export const run = async () => {
       const aliceAddress = await alice.getAddress();
       await expect(erc20expWhitelist.mintUnspendableWhitelist(aliceAddress, 1)).to.be.revertedWithCustomError(
         erc20expWhitelist,
-        INVALID_WHITELIST_ADDRESS,
+        ERROR_INVALID_WHITELIST_ADDRESS,
       );
       expect(await erc20expWhitelist.whitelist(aliceAddress)).equal(false);
     });
