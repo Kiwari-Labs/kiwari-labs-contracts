@@ -186,6 +186,8 @@ abstract contract ERC721EXPBase is
         return _symbol;
     }
 
+    /// @notice Returns 0 as there is no actual total supply due to token expiration.
+    /// @dev This function returns the total supply of tokens, which is constant and set to 0.
     function totalSupply() public pure returns (uint256) {
         return 0;
     }
@@ -346,4 +348,5 @@ abstract contract ERC721EXPBase is
     // safeMint
     // safeTransferFrom
     // transferFrom
+    // supportInterface
 }

@@ -21,7 +21,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @notice Struct representing a slot containing balances mapped by blocks.
     struct Slot {
         uint256 slotBalance;
-        mapping(uint256 => uint256) blockBalances;
+        mapping(uint256 blockNumber => uint256 balance) blockBalances;
         SCDLL.List list;
     }
 
