@@ -9,9 +9,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import {SlidingWindow} from "../../abstracts/SlidingWindow.sol";
 import {SortedCircularDoublyLinkedList as SCDLL} from "../../utils/LightWeightSortedCircularDoublyLinkedList.sol";
 import {IERC721EXPBase} from "../../interfaces/IERC721EXPBase.sol";
-// import {CircularDoublyLinkedList as CDLL} from "../../utils/CircularDoublyLinkedList.sol";
 import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+import {EnumerableSet as EnumSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IERC165, ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -19,10 +19,10 @@ import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/I
 import {ERC721Utils} from "@openzeppelin/contracts/token/ERC721/utils/ERC721Utils.sol";
 
 /// @notice First-In-First-Out (FIFO) not suitable for ERC721 cause each token is unique it's need to be selective to spend.
-///         However we still maintain list of token is sorted list for able to query nearest expire token
+///         However we still maintain list of blockNumber that store token is sorted list.
 
-abstract contract ERC721EXPBase is Context, IERC721, IERC721Errors, IERC721EXPBase, IERC721Metadata, SlidingWindow {
-    // using CDLL for CDLL.List;
+abstract contract ERC721EXPBase is Context, ERC165, IERC721, IERC721Errors, IERC721EXPBase, IERC721Metadata, SlidingWindow {
+    using EnumSet for EnumSet.UintSet;
     using SCDLL for SCDLL.List;
     using Strings for uint256;
 
@@ -33,7 +33,7 @@ abstract contract ERC721EXPBase is Context, IERC721, IERC721Errors, IERC721EXPBa
     struct Slot {
         uint256 slotBalance;
         SCDLL.List list; // use for store the blockNumber for handling even if the tokenId minted in non-sequential way
-        mapping(uint256 blockNumber => SCDLL.List list) blockBalances; // didn't require to be in sorted list for saving gas
+        mapping(uint256 blockNumber => EnumSet.UintSet set) blockBalances; // didn't require to be in sorted list for saving gas
     }
 
     mapping(address account => mapping(uint256 era => mapping(uint8 slot => Slot))) private _balances;
@@ -124,7 +124,7 @@ abstract contract ERC721EXPBase is Context, IERC721, IERC721Errors, IERC721EXPBa
                     break;
                 }
                 blockNumberCache = _spender.list.next(blockNumberCache);
-                balance += _spender.blockBalances[blockNumberCache].size();
+                balance += _spender.blockBalances[blockNumberCache].length();
             }
         }
     }
@@ -235,7 +235,7 @@ abstract contract ERC721EXPBase is Context, IERC721, IERC721Errors, IERC721EXPBa
             unchecked {
                 _spender.slotBalance -= 1;
                 _spender.blockBalances[mintedBlockCache].remove(tokenId);
-                if (_spender.blockBalances[mintedBlockCache].size() == 0) {
+                if (_spender.blockBalances[mintedBlockCache].length() == 0) {
                     _spender.list.remove(tokenId);
                 }
             }
@@ -244,7 +244,7 @@ abstract contract ERC721EXPBase is Context, IERC721, IERC721Errors, IERC721EXPBa
         if (to != address(0)) {
             unchecked {
                 _recepient.slotBalance += 1;
-                _recepient.blockBalances[mintedBlockCache].insert(tokenId);
+                _recepient.blockBalances[mintedBlockCache].add(tokenId);
                 // do nothing, if tokenId exist
                 _recepient.list.insert(tokenId);
             }
@@ -362,6 +362,7 @@ abstract contract ERC721EXPBase is Context, IERC721, IERC721Errors, IERC721EXPBa
         return
             interfaceId == type(IERC721).interfaceId ||
             interfaceId == type(IERC721Metadata).interfaceId ||
+            interfaceId == type(IERC721EXPBase).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 }
