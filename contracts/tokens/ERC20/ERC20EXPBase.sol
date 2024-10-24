@@ -27,7 +27,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
 
     mapping(address account => mapping(uint256 era => mapping(uint8 slot => Slot))) private _balances;
     mapping(address account => mapping(address spneder => uint256 balance)) private _allowances;
-    mapping(uint256 blockNumber => uint256 balance) private _worldBlockBalance;
+    mapping(uint256 blockNumber => uint256 balance) private _worldBlockBalances;
 
     /// @notice Constructor function to initialize the token contract with specified parameters.
     /// @dev Initializes the token contract by setting the name, symbol, and initializing the sliding window parameters.
@@ -166,7 +166,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                 _recipient.blockBalances[blockNumberCache] += value;
             }
             _recipient.list.insert(blockNumberCache, (""));
-            _worldBlockBalance[blockNumberCache] += value;
+            _worldBlockBalances[blockNumberCache] += value;
         } else {
             // Burn token.
             (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
@@ -192,7 +192,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                                 pendingValue -= balanceCache;
                                 _spender.slotBalance -= balanceCache;
                                 _spender.blockBalances[key] -= balanceCache;
-                                _worldBlockBalance[key] -= balanceCache;
+                                _worldBlockBalances[key] -= balanceCache;
                             }
                             key = _spender.list.next(key);
                             _spender.list.remove(_spender.list.previous(key));
@@ -200,7 +200,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                             unchecked {
                                 _spender.slotBalance -= pendingValue;
                                 _spender.blockBalances[key] -= pendingValue;
-                                _worldBlockBalance[key] -= pendingValue;
+                                _worldBlockBalances[key] -= pendingValue;
                             }
                             pendingValue = 0;
                         }
@@ -410,11 +410,11 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     }
 
     /// @notice Retrieves the total balance stored at a specific block.
-    /// @dev This function returns the balance of the given block from the internal `_worldBlockBalance` mapping.
+    /// @dev This function returns the balance of the given block from the internal `_worldBlockBalances` mapping.
     /// @param blockNumber The block number for which the balance is being queried.
     /// @return balance The total balance stored at the given block number.
     function getBlockBalance(uint256 blockNumber) external view virtual returns (uint256) {
-        return _worldBlockBalance[blockNumber];
+        return _worldBlockBalances[blockNumber];
     }
 
     /// @inheritdoc IERC20Metadata

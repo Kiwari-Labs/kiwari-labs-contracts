@@ -5,12 +5,12 @@ pragma solidity >=0.8.0 <0.9.0;
 /// @author Kiwari Labs
 
 import {ISlidingWindow} from "../interfaces/ISlidingWindow.sol";
-import {SlidingWindow as slide} from "./LibSlidingWindowDev.sol";
+import {SlidingWindow as Slide} from "./LibSlidingWindowDev.sol";
 
 abstract contract SlidingWindow is ISlidingWindow {
-    using slide for slide.SlidingWindowState;
+    using Slide for Slide.SlidingWindowState;
 
-    slide.SlidingWindowState private _slidingWindow;
+    Slide.SlidingWindowState private _slidingWindow;
 
     /// @notice Constructs the Sliding Window Contract with the initial parameters.
     /// @dev Initializes the sliding window with the provided parameters.

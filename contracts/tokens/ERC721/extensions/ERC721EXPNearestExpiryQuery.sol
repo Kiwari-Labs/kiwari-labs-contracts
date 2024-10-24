@@ -15,13 +15,13 @@ abstract contract ERC721EXPNearestExpiryQuery is ERC721EXPBase {
     /// @param account The address of the account whose unexpired block balance is being queried.
     /// @return tokenIds The array of tokenId at the nearest unexpired block for the specified account.
     /// @return blockNumber The block number at which the nearest unexpired balance was found.
-    function _getNearestExpireBalanceOf(address account) internal view returns (uint256 [] memory, uint256) {
+    function _getNearestExpireBalanceOf(address account) internal view returns (uint256[] memory, uint256) {
         uint256 blockNumberCache = _blockNumberProvider();
         uint256 blockLengthCache = _getFrameSizeInBlockLength();
         (uint256 fromEra, , uint8 fromSlot, ) = _safeFrame(blockNumberCache);
         Slot storage _account = _slotOf(account, fromEra, fromSlot);
         uint256 blockNumberIndexCache = _account.list.head();
-        uint256 [] memory tokenIds;
+        uint256[] memory tokenIds;
         unchecked {
             while (blockNumberCache - blockNumberIndexCache >= blockLengthCache) {
                 if (blockNumberCache == 0) {

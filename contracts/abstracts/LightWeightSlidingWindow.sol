@@ -5,12 +5,12 @@ pragma solidity >=0.8.0 <0.9.0;
 /// @author Kiwari Labs
 
 import {ISlidingWindow} from "../interfaces/ISlidingWindow.sol";
-import {SlidingWindow as slide} from "../utils/LightWeightSlidingWindow.sol";
+import {SlidingWindow as Slide} from "../utils/LightWeightSlidingWindow.sol";
 
 abstract contract SlidingWindow is ISlidingWindow {
-    using slide for slide.SlidingWindowState;
+    using Slide for Slide.SlidingWindowState;
 
-    slide.SlidingWindowState private _slidingWindow;
+    Slide.SlidingWindowState private _slidingWindow;
 
     constructor(uint256 blockNumber_, uint16 blockTime_, uint8 frameSize_) {
         _slidingWindow._startBlockNumber = blockNumber_ != 0 ? blockNumber_ : _blockNumberProvider();
@@ -128,7 +128,7 @@ abstract contract SlidingWindow is ISlidingWindow {
     /// @dev This function returns the `_slotSize` attribute from the provided sliding window state `self`,
     /// which represents the number of slots per era in the sliding window configuration.
     function _getSlotPerEra() internal pure returns (uint8) {
-        return slide.getSlotPerEra();
+        return Slide.getSlotPerEra();
     }
 
     /// @inheritdoc ISlidingWindow

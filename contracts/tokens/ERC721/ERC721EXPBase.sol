@@ -21,7 +21,15 @@ import {ERC721Utils} from "@openzeppelin/contracts/token/ERC721/utils/ERC721Util
 /// @notice First-In-First-Out (FIFO) not suitable for ERC721 cause each token is unique it's need to be selective to spend.
 ///         However we still maintain list of blockNumber that store token is sorted list.
 
-abstract contract ERC721EXPBase is Context, ERC165, IERC721, IERC721Errors, IERC721EXPBase, IERC721Metadata, SlidingWindow {
+abstract contract ERC721EXPBase is
+    Context,
+    ERC165,
+    IERC721,
+    IERC721Errors,
+    IERC721EXPBase,
+    IERC721Metadata,
+    SlidingWindow
+{
     using EnumSet for EnumSet.UintSet;
     using SCDLL for SCDLL.List;
     using Strings for uint256;
@@ -37,8 +45,8 @@ abstract contract ERC721EXPBase is Context, ERC165, IERC721, IERC721Errors, IERC
     }
 
     mapping(address account => mapping(uint256 era => mapping(uint8 slot => Slot))) private _balances;
-    mapping(uint256 tokenId => uint256 blockNumber) private _mintedBlockOfToken;
-    mapping(uint256 blockNumber => uint256 balance) private _worldBlockBalance;
+    mapping(uint256 tokenId => uint256 blockNumber) private _mintedBlockOfTokens;
+    mapping(uint256 blockNumber => uint256 balance) private _worldBlockBalances;
 
     mapping(uint256 tokenId => address) private _owners;
     mapping(uint256 tokenId => address) private _tokenApprovals;
@@ -134,7 +142,7 @@ abstract contract ERC721EXPBase is Context, ERC165, IERC721, IERC721Errors, IERC
     }
 
     function _isExpired(uint256 tokenId) internal view returns (bool) {
-        if (_blockNumberProvider() - _mintedBlockOfToken[tokenId] >= _getFrameSizeInBlockLength()) {
+        if (_blockNumberProvider() - _worldBlockBalances[tokenId] >= _getFrameSizeInBlockLength()) {
             return true;
         }
     }
@@ -216,7 +224,7 @@ abstract contract ERC721EXPBase is Context, ERC165, IERC721, IERC721Errors, IERC
             // revert ERC721ExpiredToken(tokenId);
         }
         address from = _ownerOf(tokenId);
-        uint256 mintedBlockCache = _mintedBlockOfToken[tokenId];
+        uint256 mintedBlockCache = _mintedBlockOfTokens[tokenId];
         (uint256 era, uint8 slot) = _calculateEraAndSlot(mintedBlockCache);
 
         Slot storage _spender = _balances[from][era][slot];
@@ -269,6 +277,7 @@ abstract contract ERC721EXPBase is Context, ERC165, IERC721, IERC721Errors, IERC
         if (previousOwner != address(0)) {
             revert ERC721InvalidSender(address(0));
         }
+        _worldBlockBalances[_blockNumberProvider()] += 1;
     }
 
     function _burn(uint256 tokenId) internal {
@@ -276,6 +285,7 @@ abstract contract ERC721EXPBase is Context, ERC165, IERC721, IERC721Errors, IERC
         if (previousOwner == address(0)) {
             revert ERC721NonexistentToken(tokenId);
         }
+        _worldBlockBalances[_blockNumberProvider()] -= 1;
     }
 
     function _transfer(address from, address to, uint256 tokenId) internal {
@@ -340,6 +350,15 @@ abstract contract ERC721EXPBase is Context, ERC165, IERC721, IERC721Errors, IERC
         }
     }
 
+    function balanceOf(address owner) public view virtual returns (uint256) {
+        if (owner == address(0)) {
+            revert ERC721InvalidOwner(address(0));
+        }
+        uint256 blockNumberCache = _blockNumberProvider();
+        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
+        return _lookBackBalance(owner, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
+    }
+
     function _safeTransfer(address from, address to, uint256 tokenId) internal {
         _safeTransfer(from, to, tokenId, "");
     }
@@ -356,6 +375,14 @@ abstract contract ERC721EXPBase is Context, ERC165, IERC721, IERC721Errors, IERC
     function _safeMint(address to, uint256 tokenId, bytes memory data) internal virtual {
         _mint(to, tokenId);
         ERC721Utils.checkOnERC721Received(_msgSender(), address(0), to, tokenId, data);
+    }
+
+    /// @notice Retrieves the total balance stored at a specific block.
+    /// @dev This function returns the balance of the given block from the internal `_worldBlockBalances` mapping.
+    /// @param blockNumber The block number for which the balance is being queried.
+    /// @return balance The total balance stored at the given block number.
+    function getBlockBalance(uint256 blockNumber) external view virtual returns (uint256) {
+        return _worldBlockBalances[blockNumber];
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {

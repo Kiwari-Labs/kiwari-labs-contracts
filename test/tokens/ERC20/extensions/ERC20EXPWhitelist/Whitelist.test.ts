@@ -3,7 +3,7 @@ import {deployERC20EXPWhitelist} from "../../../../utils.test";
 import {
   EVENT_WHITELIST_GRANTED,
   EVENT_WHITELIST_REVOKED,
-  ERROR_EXIST_IN_WHITELIST, 
+  ERROR_EXIST_IN_WHITELIST,
   ERROR_NOT_EXIST_IN_WHITELIST,
 } from "../../../../constant.test";
 
