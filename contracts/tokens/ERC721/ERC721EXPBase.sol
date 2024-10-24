@@ -8,24 +8,20 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {SlidingWindow} from "../../abstracts/SlidingWindow.sol";
 import {SortedCircularDoublyLinkedList as SCDLL} from "../../utils/LightWeightSortedCircularDoublyLinkedList.sol";
-// import {CircularDoublyLinkedList as CDLL} from "../../utils/CircularDoublyLinkedList.sol";
 import {IERC721EXPBase} from "../../interfaces/IERC721EXPBase.sol";
+// import {CircularDoublyLinkedList as CDLL} from "../../utils/CircularDoublyLinkedList.sol";
+import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IERC165, ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
+import {ERC721Utils} from "@openzeppelin/contracts/token/ERC721/utils/ERC721Utils.sol";
 
 /// @notice First-In-First-Out (FIFO) not suitable for ERC721 cause each token is unique it's need to be selective to spend.
 ///         However we still maintain list of token is sorted list for able to query nearest expire token
 
-abstract contract ERC721EXPBase is
-    Context,
-    IERC721Errors,
-    IERC721EXPBase,
-    IERC721Metadata,
-    SlidingWindow
-{
+abstract contract ERC721EXPBase is Context, IERC721, IERC721Errors, IERC721EXPBase, IERC721Metadata, SlidingWindow {
     // using CDLL for CDLL.List;
     using SCDLL for SCDLL.List;
     using Strings for uint256;
@@ -109,9 +105,9 @@ abstract contract ERC721EXPBase is
         }
     }
 
-    /// @custom:gas-inefficiency 
-    /// This method may incur gas inefficiencies due to the unique nature of ERC721 tokens. 
-    /// Each minted block can potentially hold multiple tokens, complicating balance tracking 
+    /// @custom:gas-inefficiency
+    /// This method may incur gas inefficiencies due to the unique nature of ERC721 tokens.
+    /// Each minted block can potentially hold multiple tokens, complicating balance tracking
     /// and leading to higher computational costs during operations.
     function _bufferSlotBalance(
         address account,
@@ -344,9 +340,28 @@ abstract contract ERC721EXPBase is
         }
     }
 
-    // @TODO
-    // safeMint
-    // safeTransferFrom
-    // transferFrom
-    // supportInterface
+    function _safeTransfer(address from, address to, uint256 tokenId) internal {
+        _safeTransfer(from, to, tokenId, "");
+    }
+
+    function _safeTransfer(address from, address to, uint256 tokenId, bytes memory data) internal virtual {
+        _transfer(from, to, tokenId);
+        ERC721Utils.checkOnERC721Received(_msgSender(), from, to, tokenId, data);
+    }
+
+    function _safeMint(address to, uint256 tokenId) internal {
+        _safeMint(to, tokenId, "");
+    }
+
+    function _safeMint(address to, uint256 tokenId, bytes memory data) internal virtual {
+        _mint(to, tokenId);
+        ERC721Utils.checkOnERC721Received(_msgSender(), address(0), to, tokenId, data);
+    }
+
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
+        return
+            interfaceId == type(IERC721).interfaceId ||
+            interfaceId == type(IERC721Metadata).interfaceId ||
+            super.supportsInterface(interfaceId);
+    }
 }
