@@ -64,24 +64,11 @@ abstract contract ERC20EXPBlacklist is ERC20EXPBase {
         emit Unblacklisted(_msgSender(), account);
     }
 
-    /// @notice Mints tokens to the specified account
-    /// @dev This function overrides the `_mint` function to include blacklist checks
-    /// @param account The address to mint tokens to
-    /// @param value The amount of tokens to mint
-    function _mint(address account, uint256 value) internal virtual override notBlacklisted(account) {
-        super._mint(account, value);
-    }
-
-    /// @notice Transfers tokens from one account to another
-    /// @dev This function overrides the `_transfer` function to include blacklist checks
-    /// @param from The address sending the tokens
-    /// @param to The address receiving the tokens
-    /// @param value The amount of tokens to transfer
-    function _transfer(
+    function _update(
         address from,
         address to,
         uint256 value
     ) internal virtual override notBlacklisted(from) notBlacklisted(to) {
-        super._transfer(from, to, value);
+        super._update(from, to, value);
     }
 }

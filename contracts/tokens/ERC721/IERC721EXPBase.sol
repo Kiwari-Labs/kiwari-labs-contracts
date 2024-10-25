@@ -7,4 +7,8 @@ interface IERC721EXPBase {
     /// @param tokenId The ID of the token to check for expiration.
     /// @return bool Returns `true` if the token has expired, otherwise `false`.
     function hasExpired(uint256 tokenId) external view returns (bool);
+
+    function tokenList(address account) external view returns (bool);
+
+    // function balanceOf(address account, bool safe) external view returns (uint256);
 }

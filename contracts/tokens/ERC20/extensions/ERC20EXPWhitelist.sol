@@ -181,8 +181,6 @@ abstract contract ERC20EXPWhitelist is ERC20EXPBase {
     /// @param to The address to which tokens are being transferred.
     /// @param value The amount of tokens being transferred.
     function _transferHandler(address from, address to, uint256 value) internal {
-        // hook before transfer
-        _beforeTokenTransfer(from, to, value);
         uint256 selector = (_whitelist[from] ? 2 : 0) | (_whitelist[to] ? 1 : 0);
         if (selector == 0) {
             _transfer(from, to, value);
@@ -198,9 +196,6 @@ abstract contract ERC20EXPWhitelist is ERC20EXPBase {
             // wholesale to wholesale transfer only use spendable balance.
             _updateSpendableBalance(from, to, value);
         }
-
-        // hook after transfer
-        _afterTokenTransfer(from, to, value);
     }
 
     /// @inheritdoc IERC20

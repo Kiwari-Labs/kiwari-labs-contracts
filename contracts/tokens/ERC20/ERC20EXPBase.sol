@@ -6,7 +6,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {SlidingWindow} from "../../abstracts/SlidingWindow.sol";
 import {SortedCircularDoublyLinkedList as SCDLL} from "../../utils/SortedCircularDoublyLinkedList.sol";
-import {IERC20EXPBase} from "../../interfaces/IERC20EXPBase.sol";
+import {IERC20EXPBase} from "./IERC20EXPBase.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -149,10 +149,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @param from The address from which tokens are being transferred (or minted/burned).
     /// @param to The address to which tokens are being transferred (or burned to if `to` is `zero address`).
     /// @param value The amount of tokens being transferred, minted, or burned.
-    function _update(address from, address to, uint256 value) private {
-        // Hook before transfer
-        _beforeTokenTransfer(from, to, value);
-
+    function _update(address from, address to, uint256 value) internal virtual {
         uint256 blockNumberCache = _blockNumberProvider();
         uint256 blockLengthCache = _getFrameSizeInBlockLength();
         uint8 slotSizeCache = _getSlotPerEra();
@@ -266,9 +263,6 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         }
 
         emit Transfer(from, to, value);
-
-        // Hook after transfer
-        _afterTokenTransfer(from, to, value);
     }
 
     /// @notice Retrieves the Slot storage for a given account, era, and slot.
@@ -311,7 +305,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// Reverts if the `account` address is zero.
     /// @param account The address of the account to receive the minted tokens.
     /// @param value The amount of tokens to be minted.
-    function _mint(address account, uint256 value) internal virtual {
+    function _mint(address account, uint256 value) internal {
         if (account == address(0)) {
             revert ERC20InvalidReceiver(address(0));
         }
@@ -323,26 +317,12 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// Reverts if the `account` address is zero.
     /// @param account The address of the account from which tokens will be burned.
     /// @param value The amount of tokens to be burned.
-    function _burn(address account, uint256 value) internal virtual {
+    function _burn(address account, uint256 value) internal {
         if (account == address(0)) {
             revert ERC20InvalidSender(address(0));
         }
         _update(account, address(0), value);
     }
-
-    /// @notice Abstract hook called before every token transfer operation.
-    /// @dev This function is called before every token transfer operation for additional checks or actions.
-    /// @param from The address sending tokens.
-    /// @param to The address receiving tokens.
-    /// @param amount The amount of tokens being transferred.
-    function _beforeTokenTransfer(address from, address to, uint amount) internal virtual {}
-
-    /// @notice Abstract hook called after every token transfer operation.
-    /// @dev This function is called after every token transfer operation for additional processing or logging.
-    /// @param from The address sending tokens.
-    /// @param to The address receiving tokens.
-    /// @param amount The amount of tokens being transferred.
-    function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual {}
 
     /// @notice Spends the specified allowance by reducing the allowance of the spender.
     /// @dev This function deducts the `value` amount from the current allowance of the `spender` by the `owner`.
@@ -399,7 +379,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @param from The address from which the tokens are transferred.
     /// @param to The address to which the tokens are transferred.
     /// @param value The amount of tokens to transfer.
-    function _transfer(address from, address to, uint256 value) internal virtual {
+    function _transfer(address from, address to, uint256 value) internal {
         if (from == address(0)) {
             revert ERC20InvalidSender(address(0));
         }

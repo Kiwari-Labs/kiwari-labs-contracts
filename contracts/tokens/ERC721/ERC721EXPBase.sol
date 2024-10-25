@@ -8,7 +8,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {SlidingWindow} from "../../abstracts/SlidingWindow.sol";
 import {SortedCircularDoublyLinkedList as SCDLL} from "../../utils/LightWeightSortedCircularDoublyLinkedList.sol";
-import {IERC721EXPBase} from "../../interfaces/IERC721EXPBase.sol";
+import {IERC721EXPBase} from "./IERC721EXPBase.sol";
 import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {EnumerableSet as EnumSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";

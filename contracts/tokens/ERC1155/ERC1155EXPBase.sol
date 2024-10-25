@@ -6,7 +6,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {SlidingWindow as Slide} from "../../utils/SlidingWindow.sol";
 import {SortedCircularDoublyLinkedList as SCDLL} from "../../utils/LightWeightSortedCircularDoublyLinkedList.sol";
-import {IERC1155EXPBase} from "../../interfaces/IERC1155EXPBase.sol";
+import {IERC1155EXPBase} from "./IERC1155EXPBase.sol";
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import {IERC1155MetadataURI} from "@openzeppelin/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol";
 
@@ -45,4 +45,8 @@ abstract contract ERC1155EXPBase is IERC1155, IERC1155EXPBase, IERC1155MetadataU
     }
 
     // @TODO finish other method
+    /// @custom:gas-inefficiency balanceOf(accounts, ids)
+    /// @custom:gas-inefficiency _safeBatchTransferFrom(from, to, ids, values, data)
+    /// @custom:gas-inefficiency _mintBatch(to, ids, values, data)
+    /// @custom:gas-inefficiency _burnBatch(from, ids, values)
 }

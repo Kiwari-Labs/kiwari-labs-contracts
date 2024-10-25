@@ -6,7 +6,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {SlidingWindow} from "./SlidingWindowDev.sol";
 import {SortedCircularDoublyLinkedList as SCDLL} from "../utils/SortedCircularDoublyLinkedList.sol";
-import {IERC20EXPBase} from "../interfaces/IERC20EXPBase.sol";
+import {IERC20EXPBase} from "../tokens/ERC20/IERC20EXPBase.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";

@@ -13,10 +13,6 @@ contract MockERC20EXPBacklist is ERC20EXPBase, ERC20EXPBlacklist {
         uint8 slotSize_
     ) ERC20EXPBase(_name, _symbol, block.number, blockTime_, frameSize_, slotSize_) {}
 
-    function mint(address to, uint256 value) public {
-        _mint(to, value);
-    }
-
     function addToBlacklist(address account) public {
         _addToBlacklist(account);
     }
@@ -25,15 +21,15 @@ contract MockERC20EXPBacklist is ERC20EXPBase, ERC20EXPBlacklist {
         _removeFromBlacklist(account);
     }
 
-    function _mint(address account, uint256 value) internal virtual override(ERC20EXPBase, ERC20EXPBlacklist) {
-        return super._mint(account, value);
+    function mint(address to, uint256 value) public {
+        _mint(to, value);
     }
 
-    function _transfer(
+    function _update(
         address from,
         address to,
         uint256 value
     ) internal virtual override(ERC20EXPBase, ERC20EXPBlacklist) {
-        return super._transfer(from, to, value);
+        super._update(from, to, value);
     }
 }
