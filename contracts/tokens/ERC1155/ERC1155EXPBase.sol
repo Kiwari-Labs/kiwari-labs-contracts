@@ -31,6 +31,8 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
         SCDLL.List list;
     }
 
+    uint8 private DEFAULT_FRAME_SIZE;
+    uint8 private DEFAULT_SLOT_SIZE;
     uint24 private BLOCK_TIME; // shared blocktime configuration for all tokenIds
     string private _uri;
 
@@ -39,6 +41,7 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
     constructor(string memory uri_, uint24 blocktime_) {
         _setURI(uri_);
         _setBlockTime(blocktime_);
+        // _setBaseExpirationPeriod(blockTime_, frameSize_, slotSize_);
     }
 
     mapping(uint256 id => mapping(address account => mapping(uint256 era => mapping(uint8 slot => Slot))))
@@ -46,7 +49,7 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
     mapping(uint256 id => Slide.SlidingWindowState) private _slidingWindowTokens;
     mapping(uint256 blockNumber => mapping(uint256 id => uint256 balance)) private _worldBlockBalances;
     // initialized default expired period if use _mint(to , id, value, data)
-    // passing config when mint with _mint(to, id, value, data)
+    // passing config when mint with _mint(to, id, value, data, config)
 
     mapping(address account => mapping(address operator => bool)) private _operatorApprovals;
 
@@ -56,6 +59,34 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
 
     function _setBlockTime(uint24 newblocktime) internal virtual {
         BLOCK_TIME = newblocktime;
+    }
+
+    function _setBaseExpirationPeriod(uint24 blockTime, uint8 frameSize, uint8 slotSize) internal {
+        // Perform check min/max blocktime
+        // Perform check min/max frameSize
+        // Perform check min/max slotSize
+        BLOCK_TIME = blockTime;
+        DEFAULT_FRAME_SIZE = frameSize;
+        DEFAULT_SLOT_SIZE = slotSize;
+        // emit BaseExpirationPeriod(frameSize, slotSize);
+    }
+
+    function _setExpirationPeriodOfToken(uint256 id, uint8 frameSize, uint8 slotSize) internal {
+        // Perform check min/max frameSize
+        // Perform check min/max slotSize
+
+        // _slidingWindowTokens[id] = frameSize;
+        // _slidingWindowTokens[id] = slotSize;
+
+        // emit ExpirationPeriod(id, frameSize, slotSize);
+    }
+
+    function _setStartBlockOfToken(uint256 id, uint256 blockNumber) internal {
+        // Peform check 
+
+        // _slidingWindowTokens[id].updateSlidingWindow(BLOCK_TIME, frameSize, slotSize);
+
+        // emit StartSlidingToken(id);
     }
 
     function _blockNumberProvider() internal view virtual returns (uint256) {

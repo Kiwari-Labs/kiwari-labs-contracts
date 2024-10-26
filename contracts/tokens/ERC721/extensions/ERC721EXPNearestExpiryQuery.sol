@@ -8,6 +8,7 @@ import "../ERC721EXPBase.sol";
 
 abstract contract ERC721EXPNearestExpiryQuery is ERC721EXPBase {
     using SCDLL for SCDLL.List;
+    using EnumSet for EnumSet.UintSet;
 
     /// @notice Retrieves the nearest unexpired tokenIds for a given account.
     /// @dev This function checks the block history for an account and finds the first unexpired block balance.
@@ -24,13 +25,16 @@ abstract contract ERC721EXPNearestExpiryQuery is ERC721EXPBase {
         uint256[] memory tokenIds;
         unchecked {
             while (blockNumberCache - blockNumberIndexCache >= blockLengthCache) {
-                if (blockNumberCache == 0) {
+                if (blockNumberIndexCache == 0) {
                     break;
                 }
-                blockNumberCache = _account.list.next(blockNumberCache);
-                // @TODO tokenIds
+                blockNumberIndexCache = _account.list.next(blockNumberIndexCache);
             }
         }
+        // return array of tokenId under the same blocknumber.
+        tokenIds = _account.blockBalances[blockNumberIndexCache].values();
         return (tokenIds, blockNumberIndexCache + blockLengthCache);
     }
+    
+    // @TODO override support interface
 }
