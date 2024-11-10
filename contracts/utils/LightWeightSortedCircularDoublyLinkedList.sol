@@ -140,15 +140,17 @@ library SortedCircularDoublyLinkedList {
                 self._nodes[index][NEXT] = SENTINEL;
             } else {
                 uint256 tmpCurr;
-                if (index - tmpHead <= tmpTail - index) {
-                    tmpCurr = tmpHead;
-                    while (index > tmpCurr) {
-                        tmpCurr = self._nodes[tmpCurr][NEXT];
-                    }
-                } else {
-                    tmpCurr = tmpTail;
-                    while (index < tmpCurr) {
-                        tmpCurr = self._nodes[tmpCurr][PREV];
+                unchecked {
+                    if (index - tmpHead <= tmpTail - index) {
+                        tmpCurr = tmpHead;
+                        while (index > tmpCurr) {
+                            tmpCurr = self._nodes[tmpCurr][NEXT];
+                        }
+                    } else {
+                        tmpCurr = tmpTail;
+                        while (index < tmpCurr) {
+                            tmpCurr = self._nodes[tmpCurr][PREV];
+                        }
                     }
                 }
                 uint256 tmpPrev = self._nodes[tmpCurr][PREV];

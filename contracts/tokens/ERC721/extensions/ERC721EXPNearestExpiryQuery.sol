@@ -35,6 +35,6 @@ abstract contract ERC721EXPNearestExpiryQuery is ERC721EXPBase {
         tokenIds = _account.blockBalances[blockNumberIndexCache].values();
         return (tokenIds, blockNumberIndexCache + blockLengthCache);
     }
-    
+
     // @TODO override support interface
 }

@@ -42,17 +42,24 @@ library libstdsclist {
 
     // element access
     function find(address precompile, uint256 listId, uint256 element) internal view returns (bool) {
-        return abi.decode(staticcall(precompile, abi.encodeCall(stdscdlist(precompile).find, (listId, element))), (bool));
+        return
+            abi.decode(staticcall(precompile, abi.encodeCall(stdscdlist(precompile).find, (listId, element))), (bool));
     }
 
     function prev(address precompile, uint256 listId, uint256 element) internal view returns (uint256) {
         return
-            abi.decode(staticcall(precompile, abi.encodeCall(stdscdlist(precompile).prev, (listId, element))), (uint256));
+            abi.decode(
+                staticcall(precompile, abi.encodeCall(stdscdlist(precompile).prev, (listId, element))),
+                (uint256)
+            );
     }
 
     function next(address precompile, uint256 listId, uint256 element) internal view returns (uint256) {
         return
-            abi.decode(staticcall(precompile, abi.encodeCall(stdscdlist(precompile).next, (listId, element))), (uint256));
+            abi.decode(
+                staticcall(precompile, abi.encodeCall(stdscdlist(precompile).next, (listId, element))),
+                (uint256)
+            );
     }
 
     function front(address precompile, uint256 listId) internal view returns (uint256) {
@@ -121,6 +128,6 @@ contract Example {
     }
 
     function findFromCompositeKey(uint key1, uint key2, uint256 element) public view returns (bool) {
-        return linklist.find(_compositeKey(key1,key2), element);
+        return linklist.find(_compositeKey(key1, key2), element);
     }
 }

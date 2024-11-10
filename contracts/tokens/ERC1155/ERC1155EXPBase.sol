@@ -74,18 +74,14 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
     function _setExpirationPeriodOfToken(uint256 id, uint8 frameSize, uint8 slotSize) internal {
         // Perform check min/max frameSize
         // Perform check min/max slotSize
-
         // _slidingWindowTokens[id] = frameSize;
         // _slidingWindowTokens[id] = slotSize;
-
         // emit ExpirationPeriod(id, frameSize, slotSize);
     }
 
     function _setStartBlockOfToken(uint256 id, uint256 blockNumber) internal {
-        // Peform check 
-
+        // Peform check
         // _slidingWindowTokens[id].updateSlidingWindow(BLOCK_TIME, frameSize, slotSize);
-
         // emit StartSlidingToken(id);
     }
 
