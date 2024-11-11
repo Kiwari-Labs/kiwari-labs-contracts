@@ -11,7 +11,7 @@ library PU128SCDLL {
     }
 
     uint8 private constant SENTINEL = 0x00;
-    uint8 constant BASE_SLOT = 0xFF;
+    uint128 constant BASE_SLOT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
     uint128 constant MASK_128 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
 
     function node(List storage list, uint256 element) internal view returns (uint128 previous, uint128 next) {
@@ -132,8 +132,9 @@ library PU128SCDLL {
     }
 
     /// @custom:gas-inefficiency O(n)
-    function insert(List storage list, uint128 element) internal {
-        if (!exist(list, element)) {
+    function insert(List storage list, uint256 element) internal {
+        uint128 e = uint128(element);
+        if (!exist(list, e)) {
             uint128 size = list.size;
             uint128 back;
             uint128 front;
@@ -144,50 +145,50 @@ library PU128SCDLL {
             }
             if (size == 0) {
                 assembly {
-                    mstore(0x20, or(list.slot, BASE_SLOT))
-                    sstore(xor(mload(0x20), SENTINEL), or(shl(0x80, element), element))
-                    sstore(xor(mload(0x20), element), or(shl(0x80, SENTINEL), SENTINEL))
+                    mstore(0x20, xor(list.slot, BASE_SLOT))
+                    sstore(xor(mload(0x20), SENTINEL), or(shl(0x80, e), e))
+                    sstore(xor(mload(0x20), e), or(shl(0x80, SENTINEL), SENTINEL))
                 }
-            } else if (element < front) {
+            } else if (e < front) {
                 // push_front
                 assembly {
-                    let base := or(list.slot, BASE_SLOT)
-                    sstore(xor(base, element), or(shl(0x80, SENTINEL), front))
-                    sstore(xor(base, SENTINEL), or(shl(0x80, back), element))
+                    let base := xor(list.slot, BASE_SLOT)
+                    sstore(xor(base, e), or(shl(0x80, SENTINEL), front))
+                    sstore(xor(base, SENTINEL), or(shl(0x80, back), e))
                     back := sload(xor(base, front))
-                    sstore(xor(base, front), or(shl(0x80, element), and(back, MASK_128)))
+                    sstore(xor(base, front), or(shl(0x80, e), and(back, MASK_128)))
                 }
-            } else if (element > back) {
+            } else if (e > back) {
                 // push_back
                 assembly {
-                    let base := or(list.slot, BASE_SLOT)
-                    sstore(xor(base, element), or(shl(0x80, back), SENTINEL))
-                    sstore(xor(base, SENTINEL), or(shl(0x80, element), front))
-                    sstore(xor(base, back), or(shl(0x80, shr(0x80, sload(xor(base, back)))), element))
+                    let base := xor(list.slot, BASE_SLOT)
+                    sstore(xor(base, e), or(shl(0x80, back), SENTINEL))
+                    sstore(xor(base, SENTINEL), or(shl(0x80, e), front))
+                    sstore(xor(base, back), or(shl(0x80, shr(0x80, sload(xor(base, back)))), e))
                 }
             } else {
                 // push
                 uint128 cursor = front;
                 unchecked {
-                    if (element - front <= back - element) {
-                        while (element > cursor) {
+                    if (e - front <= back - e) {
+                        while (e > cursor) {
                             (, cursor) = node(list, cursor);
                         }
                     } else {
                         cursor = back;
-                        while (element < cursor) {
+                        while (e < cursor) {
                             (cursor, ) = node(list, cursor);
                         }
                     }
                 }
                 assembly {
-                    let base := or(list.slot, BASE_SLOT)
+                    let base := xor(list.slot, BASE_SLOT)
                     let value := sload(xor(base, cursor))
                     front := and(value, MASK_128)
                     back := shr(0x80, value)
-                    sstore(xor(base, element), or(shl(0x80, back), cursor))
-                    sstore(xor(base, cursor), or(shl(0x80, element), front))
-                    sstore(xor(base, back), or(shl(0x80, shr(0x80, sload(xor(base, back)))), element))
+                    sstore(xor(base, e), or(shl(0x80, back), cursor))
+                    sstore(xor(base, cursor), or(shl(0x80, e), front))
+                    sstore(xor(base, back), or(shl(0x80, shr(0x80, sload(xor(base, back)))), e))
                 }
             }
             unchecked {
