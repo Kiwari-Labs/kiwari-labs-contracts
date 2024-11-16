@@ -455,7 +455,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         return true;
     }
 
-    /// @inheritdoc IERC20EXPBase
+    /// @inheritdoc IERC7818
     function tokenList(address account, uint256 era, uint8 slot) external view virtual returns (uint256[] memory list) {
         list = _balances[account][era][slot].list.ascending();
     }

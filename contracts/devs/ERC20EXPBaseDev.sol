@@ -6,13 +6,13 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {SlidingWindow} from "./SlidingWindowDev.sol";
 import {SortedCircularDoublyLinkedList as SCDLL} from "../utils/SortedCircularDoublyLinkedList.sol";
-import {IERC20EXPBase} from "../tokens/ERC20/IERC20EXPBase.sol";
+import {IERC7818} from "../tokens/ERC20/IERC7818.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors, IERC20EXPBase, SlidingWindow {
+abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors, IERC7818, SlidingWindow {
     using SCDLL for SCDLL.List;
 
     string private _name;
@@ -170,7 +170,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         }
     }
 
-    /// @inheritdoc IERC20EXPBase
+    /// @inheritdoc IERC7818
     function tokenList(address account, uint256 era, uint8 slot) external view virtual returns (uint256[] memory list) {
         list = _balances[account][era][slot].list.ascending();
     }
