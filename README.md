@@ -15,7 +15,7 @@ yarn add --dev @kiwarilabs/contracts@stable
 
 ### Usage
 ```solidity
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
 import "@kiwarilabs/contracts/tokens/ERC20/ERC20EXPBase.sol";
@@ -45,5 +45,5 @@ For support or any inquiries, feel free to reach out to us at [github-issue](htt
 
 ### License
 
-All code within the `contracts` directory is released under the [Business Source License 1.1](LICENSE).  
+All code within the `contracts` directory is released under the [Apache-2.0](LICENSE).  
 Copyright (C) Kiwari Labs. 
