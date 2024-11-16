@@ -1,11 +1,11 @@
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
 /// @title Extended ERC20 Interface for ERC20EXPBase tokens
 /// @author Kiwari Labs
 /// @notice This interface defines additional functionalities for ERC20EXPBase tokens.
 
-interface IERC20EXPBase {
+interface IERC7818 {
     /// @notice Retrieves an array of token balances stored for a specific account, era, and slot.
     /// @dev Retrieves the list of token balances stored for the specified account, era, and slot, sorted in ascending order.
     /// @param account The address of the account for which the token balances are being retrieved.

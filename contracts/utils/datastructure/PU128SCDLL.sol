@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
 /// @title Packed Uint128 Sorted Circular Doubly Linked List (PU128SCDLL)
