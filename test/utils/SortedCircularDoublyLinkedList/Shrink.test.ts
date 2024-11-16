@@ -3,6 +3,38 @@ import {deployDoublyListLibrary} from "../../utils.test";
 
 export const run = async () => {
   describe("Shrink", async function () {
+    it("[HAPPY] shrink correctly of one element", async function () {
+      const {doublyList} = await deployDoublyListLibrary({
+        autoList: true,
+        len: 1,
+      });
+      // Removing all nodes before the specified index.
+      // [1] => []
+      await doublyList.shrink(0);
+      expect(await doublyList.size()).to.equal(0);
+      const node = await doublyList.node(1);
+      expect(node.prev).to.equal(0);
+      expect(node.next).to.equal(0);
+      expect(node.data).to.equal("0x");
+    });
+
+    it("[HAPPY] shrink correctly of two element", async function () {
+      const {doublyList} = await deployDoublyListLibrary({
+        autoList: true,
+        len: 2,
+      });
+      // Removing all nodes before the specified index.
+      // [1,2] => [2]
+      await doublyList.shrink(2);
+      expect(await doublyList.size()).to.equal(1);
+      const list = await doublyList.ascending();
+      expect(list[0]).to.equal(2);
+      const node = await doublyList.node(1);
+      expect(node.prev).to.equal(0);
+      expect(node.next).to.equal(0);
+      expect(node.data).to.equal("0x");
+    });
+
     it("[HAPPY] shrink correctly of even linked list", async function () {
       const {doublyList} = await deployDoublyListLibrary({
         autoList: true,
