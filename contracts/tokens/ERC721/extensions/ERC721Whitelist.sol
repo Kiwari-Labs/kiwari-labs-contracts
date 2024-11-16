@@ -12,4 +12,6 @@ abstract contract ERC721EXPWhitelist is ERC721EXPBase {
         uint256 _spendableBalances;
         uint256 _unspendableBalances;
     }
+
+    // @TODO override support interface
 }

@@ -21,6 +21,7 @@ import {
   LIGHT_WEIGHT_ERC20_EXP_BASE_CONTRACT,
   ERC20_EXP_BASE_CONTRACT,
   LIGHT_WEIGHT_SLIDING_WINDOW_LIBRARY_CONTRACT,
+  PU128SCDLL_CONTRACT,
   SLIDING_WINDOW_LIBRARY_CONTRACT,
   ERC20_EXP_MINT_QUOTA_CONTRACT,
   COMPARATOR_LIBRARY_CONTRACT,
@@ -432,6 +433,30 @@ const deployDoublyListLibrarySelector = async function (light: boolean, autoList
 
 export const deployLightWeightDoublyListLibrary = async function ({autoList = false, len = 10} = {}) {
   return deployDoublyListLibrarySelector(true, autoList, len);
+};
+
+export const deployLightWeightDoublyListLibraryV2 = async function ({autoList = false, len = 10} = {}) {
+  const [deployer, alice, bob, jame] = await ethers.getSigners();
+  const DoublyList = await ethers.getContractFactory(PU128SCDLL_CONTRACT, deployer);
+  const doublyList = await DoublyList.deploy();
+  await doublyList.deployed();
+
+  // To automatically generate the list.
+  // [1, 2, 3, ... , 8, 9, 10]
+  if (autoList) {
+    for (let i = 0; i < len; i++) {
+      const index = i + 1;
+      await doublyList.insert(index);
+    }
+  }
+
+  return {
+    doublyList,
+    deployer,
+    alice,
+    bob,
+    jame,
+  };
 };
 
 export const deployDoublyListLibrary = async function ({autoList = false, len = 10} = {}) {

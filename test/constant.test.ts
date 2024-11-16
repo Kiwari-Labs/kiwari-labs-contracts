@@ -23,6 +23,7 @@ export const SORTED_CIRCULAR_DOUBLY_LINKED_LIST_LIBRARY_CONTRACT = "MockSortedCi
 export const LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_LIBRARY_CONTRACT =
   "MockLightWeightSortedCircularDoublyLinkedListLibrary";
 export const COMPARATOR_LIBRARY_CONTRACT = "MockComparator";
+export const PU128SCDLL_CONTRACT = "MockLightWeightSortedCircularDoublyLinkedListLibraryV2";
 
 export const AGREEMENT_NAME = "MockAgreement";
 

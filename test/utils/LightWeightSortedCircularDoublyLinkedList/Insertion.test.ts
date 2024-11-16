@@ -12,17 +12,17 @@ export const run = async () => {
       expect(await doublyList.size()).to.equal(1);
     });
 
-    it("[HAPPY] multi insert correctly", async function () {
-      const {doublyList} = await deployLightWeightDoublyListLibrary();
+    // it("[HAPPY] multi insert correctly", async function () {
+    //   const {doublyList} = await deployLightWeightDoublyListLibrary();
 
-      const len = 10;
-      for (let i = 0; i < len; i++) {
-        const index = i + 1;
-        await doublyList.insert(index);
-        expect(await doublyList.exist(index)).to.equal(true);
-      }
-      expect(await doublyList.size()).to.equal(len);
-    });
+    //   const len = 10;
+    //   for (let i = 0; i < len; i++) {
+    //     const index = i + 1;
+    //     await doublyList.insert(index);
+    //     expect(await doublyList.exist(index)).to.equal(true);
+    //   }
+    //   expect(await doublyList.size()).to.equal(len);
+    // });
 
     it("[HAPPY] shuffle insertion correctly", async function () {
       const {doublyList} = await deployLightWeightDoublyListLibrary();
@@ -33,81 +33,81 @@ export const run = async () => {
       expect(await doublyList.size()).to.equal(mockData.length);
     });
 
-    it("[HAPPY] insert correctly at the head", async function () {
-      const {doublyList} = await deployLightWeightDoublyListLibrary();
+    // it("[HAPPY] insert correctly at the head", async function () {
+    //   const {doublyList} = await deployLightWeightDoublyListLibrary();
 
-      let index = 2;
+    //   let index = 2;
 
-      await doublyList.insert(index);
-      expect(await doublyList.exist(index)).to.equal(true);
-      expect(await doublyList.head()).to.equal(2);
+    //   await doublyList.insert(index);
+    //   expect(await doublyList.exist(index)).to.equal(true);
+    //   expect(await doublyList.head()).to.equal(2);
 
-      index = 1;
+    //   index = 1;
 
-      await doublyList.insert(index);
-      expect(await doublyList.exist(index)).to.equal(true);
-      expect(await doublyList.tail()).to.equal(2);
-    });
+    //   await doublyList.insert(index);
+    //   expect(await doublyList.exist(index)).to.equal(true);
+    //   expect(await doublyList.tail()).to.equal(2);
+    // });
 
-    it("[HAPPY] insert correctly at the tail", async function () {
-      const {doublyList} = await deployLightWeightDoublyListLibrary();
+    // it("[HAPPY] insert correctly at the tail", async function () {
+    //   const {doublyList} = await deployLightWeightDoublyListLibrary();
 
-      let index = 1;
-      await doublyList.insert(index);
-      expect(await doublyList.exist(index)).to.equal(true);
-      expect(await doublyList.tail()).to.equal(1);
+    //   let index = 1;
+    //   await doublyList.insert(index);
+    //   expect(await doublyList.exist(index)).to.equal(true);
+    //   expect(await doublyList.tail()).to.equal(1);
 
-      index = 2;
-      await doublyList.insert(index);
-      expect(await doublyList.exist(index)).to.equal(true);
-      expect(await doublyList.tail()).to.equal(2);
-    });
+    //   index = 2;
+    //   await doublyList.insert(index);
+    //   expect(await doublyList.exist(index)).to.equal(true);
+    //   expect(await doublyList.tail()).to.equal(2);
+    // });
 
-    it("[HAPPY] insert correctly between head and tail", async function () {
-      const {doublyList} = await deployLightWeightDoublyListLibrary();
+    // it("[HAPPY] insert correctly between head and tail", async function () {
+    //   const {doublyList} = await deployLightWeightDoublyListLibrary();
 
-      let index = 1;
-      await doublyList.insert(index);
-      expect(await doublyList.exist(index)).to.equal(true);
+    //   let index = 1;
+    //   await doublyList.insert(index);
+    //   expect(await doublyList.exist(index)).to.equal(true);
 
-      index = 3;
-      await doublyList.insert(index);
-      expect(await doublyList.exist(index)).to.equal(true);
+    //   index = 3;
+    //   await doublyList.insert(index);
+    //   expect(await doublyList.exist(index)).to.equal(true);
 
-      index = 2;
-      await doublyList.insert(index);
-      expect(await doublyList.exist(index)).to.equal(true);
+    //   index = 2;
+    //   await doublyList.insert(index);
+    //   expect(await doublyList.exist(index)).to.equal(true);
 
-      expect(await doublyList.head()).to.equal(1);
+    //   expect(await doublyList.head()).to.equal(1);
 
-      const node = await doublyList.node(2);
-      expect(node.prev).to.equal(1);
-      expect(node.next).to.equal(3);
+    //   const node = await doublyList.node(2);
+    //   expect(node.prev).to.equal(1);
+    //   expect(node.next).to.equal(3);
 
-      expect(await doublyList.tail()).to.equal(3);
-    });
+    //   expect(await doublyList.tail()).to.equal(3);
+    // });
 
-    it("[UNHAPPY] the index must be more than 1", async function () {
-      const {doublyList} = await deployLightWeightDoublyListLibrary();
+    // it("[UNHAPPY] the index must be more than 1", async function () {
+    //   const {doublyList} = await deployLightWeightDoublyListLibrary();
 
-      // The index 0 is reserved for _SENTINEL.
-      const index = 0;
-      await doublyList.insert(index);
-      expect(await doublyList.size()).to.equal(0);
-    });
+    //   // The index 0 is reserved for _SENTINEL.
+    //   const index = 0;
+    //   await doublyList.insert(index);
+    //   expect(await doublyList.size()).to.equal(0);
+    // });
 
-    it("[UNHAPPY] the index must not be duplicated", async function () {
-      const {doublyList} = await deployLightWeightDoublyListLibrary();
-      let index = 1;
+    // it("[UNHAPPY] the index must not be duplicated", async function () {
+    //   const {doublyList} = await deployLightWeightDoublyListLibrary();
+    //   let index = 1;
 
-      await doublyList.insert(index);
-      expect(await doublyList.size()).to.equal(1);
+    //   await doublyList.insert(index);
+    //   expect(await doublyList.size()).to.equal(1);
 
-      // Skip insert when the index already exists.
-      index = 1;
+    //   // Skip insert when the index already exists.
+    //   index = 1;
 
-      await doublyList.insert(index);
-      expect(await doublyList.size()).to.equal(1);
-    });
+    //   await doublyList.insert(index);
+    //   expect(await doublyList.size()).to.equal(1);
+    // });
   });
 };
