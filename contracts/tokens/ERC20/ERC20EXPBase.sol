@@ -165,7 +165,6 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
             _recipient.list.insert(blockNumberCache, (""));
             _worldBlockBalances[blockNumberCache] += value;
         } else {
-            // Burn token.
             (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
             uint256 balance = _lookBackBalance(from, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
             if (balance < value) {
@@ -176,6 +175,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
             uint256 balanceCache = 0;
 
             if (to == address(0)) {
+                // Burn token.
                 while ((fromEra < toEra || (fromEra == toEra && fromSlot <= toSlot)) && pendingValue > 0) {
                     Slot storage _spender = _balances[from][fromEra][fromSlot];
 
@@ -192,7 +192,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                                 _worldBlockBalances[key] -= balanceCache;
                             }
                             key = _spender.list.next(key);
-                            _spender.list.remove(_spender.list.previous(key));
+                            _spender.list.shrink(key);
                         } else {
                             unchecked {
                                 _spender.slotBalance -= pendingValue;
@@ -235,7 +235,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                                 _recipient.list.insert(key, (""));
                             }
                             key = _spender.list.next(key);
-                            _spender.list.remove(_spender.list.previous(key));
+                            _spender.list.shrink(key);
                         } else {
                             unchecked {
                                 _spender.slotBalance -= pendingValue;
