@@ -9,10 +9,9 @@ import {SortedCircularDoublyLinkedList as SCDLL} from "../../utils/SortedCircula
 import {IERC7818} from "./IERC7818.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors, IERC7818, SlidingWindow {
+abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow {
     using SCDLL for SCDLL.List;
 
     string private _name;
@@ -397,50 +396,50 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         return _worldBlockBalances[blockNumber];
     }
 
-    /// @inheritdoc IERC20Metadata
+    /// @dev See {IERC20Metadata-name}.
     function name() public view virtual returns (string memory) {
         return _name;
     }
 
-    /// @inheritdoc IERC20Metadata
+    /// @dev See {IERC20Metadata-symbol}.
     function symbol() public view virtual returns (string memory) {
         return _symbol;
     }
 
-    /// @inheritdoc IERC20Metadata
+    /// @dev See {IERC20Metadata-decimals}.
     function decimals() public view virtual returns (uint8) {
         return 18;
     }
 
     /// @notice Returns 0 as there is no actual total supply due to token expiration.
     /// @dev This function returns the total supply of tokens, which is constant and set to 0.
-    /// @inheritdoc IERC20
+    /// @dev See {IERC20-totalSupply}.
     function totalSupply() public pure virtual returns (uint256) {
         return 0;
     }
 
     /// @notice Returns the available balance of tokens for a given account.
     /// @dev Calculates and returns the available balance based on the frame.
-    /// @inheritdoc IERC20
+    /// @dev See {IERC20-balanceOf}.
     function balanceOf(address account) public view virtual returns (uint256) {
         uint256 blockNumberCache = _blockNumberProvider();
         (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
         return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
     }
 
-    /// @inheritdoc IERC20
+    /// @dev See {IERC20-allowance}.
     function allowance(address owner, address spender) public view virtual returns (uint256) {
         return _allowances[owner][spender];
     }
 
-    /// @inheritdoc IERC20
+    /// @dev See {IERC20-transfer}.
     function transfer(address to, uint256 value) public virtual returns (bool) {
         address from = _msgSender();
         _transfer(from, to, value);
         return true;
     }
 
-    /// @inheritdoc IERC20
+    /// @dev See {IERC20-transferFrom}.
     function transferFrom(address from, address to, uint256 value) public virtual returns (bool) {
         address spender = _msgSender();
         _spendAllowance(from, spender, value);
@@ -448,7 +447,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         return true;
     }
 
-    /// @inheritdoc IERC20
+    /// @dev See {IERC20-approve}.
     function approve(address spender, uint256 value) public virtual returns (bool) {
         address owner = _msgSender();
         _approve(owner, spender, value);
@@ -458,5 +457,15 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @inheritdoc IERC7818
     function tokenList(address account, uint256 era, uint8 slot) external view virtual returns (uint256[] memory list) {
         list = _balances[account][era][slot].list.ascending();
+    }
+
+    /// @inheritdoc IERC7818
+    function balanceOfBlock(uint256 blockNumber) public view virtual returns (uint256) {
+        return _worldBlockBalances[blockNumber];
+    }
+
+    /// @inheritdoc IERC7818
+    function expiryDuration() public view virtual returns (uint256) {
+        return _getFrameSizeInBlockLength();
     }
 }

@@ -198,7 +198,7 @@ abstract contract ERC20EXPWhitelist is ERC20EXPBase {
         }
     }
 
-    /// @inheritdoc IERC20
+    /// @dev See {IERC20-balanceOf}
     function balanceOf(address account) public view override returns (uint256) {
         if (_whitelist[account]) {
             return _unSafeBalanceOf(account, true);
@@ -207,14 +207,14 @@ abstract contract ERC20EXPWhitelist is ERC20EXPBase {
         }
     }
 
-    /// @inheritdoc IERC20
+    /// @dev See {IERC20-transfer}
     function transfer(address to, uint256 value) public virtual override returns (bool) {
         address from = _msgSender();
         _transferHandler(from, to, value);
         return true;
     }
 
-    /// @inheritdoc IERC20
+    /// @dev See {IERC20-transferFrom}
     function transferFrom(address from, address to, uint256 value) public override returns (bool) {
         address spender = _msgSender();
         _spendAllowance(from, spender, value);
