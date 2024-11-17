@@ -28,6 +28,10 @@ contract MockLightWeightSortedCircularDoublyLinkedListLibrary {
         list.shrink(index);
     }
 
+    function lazyShrink(uint256 index) public {
+        list.lazyShrink(index);
+    }
+
     function remove(uint256 index) public {
         list.remove(index);
     }
