@@ -1,0 +1,80 @@
+name: Release
+on:
+  create:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    name: Release Kiwali Labs Contract
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine Release Type
+        id: determine-release
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME}"
+          if [[ "${TAG_NAME}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-rc\..* ]]; then
+            echo "RELEASE_TYPE=rc" >> $GITHUB_ENV 
+          elif [[ "${TAG_NAME}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-beta\..* ]]; then
+            echo "RELEASE_TYPE=beta" >> $GITHUB_ENV
+          elif [[ "${TAG_NAME}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-alpha\..* ]]; then
+            echo "RELEASE_TYPE=alpha" >> $GITHUB_ENV
+          else
+            echo "RELEASE_TYPE=final" >> $GITHUB_ENV
+          fi
+
+      - name: Create release
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ "${RELEASE_TYPE}" == "rc" || "${RELEASE_TYPE}" == "beta" || "${RELEASE_TYPE}" == "alpha" ]]; then
+            gh release create "$TAG_NAME" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="${TAG_NAME}" \
+              --prerelease \
+              --generate-notes
+          else
+            gh release create "$TAG_NAME" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="${TAG_NAME}" \
+              --generate-notes
+          fi
+
+  publish-npm:
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    name: "Publish the new version to npmjs"
+    runs-on: ubuntu-22.04
+    needs: release
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: "yarn"
+          node-version: 18.x
+          architecture: x64
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build the Project
+        run: yarn build
+
+      - name: Publish
+        run: |
+          if [[ "${RELEASE_TYPE}" == "rc" || "${RELEASE_TYPE}" == "beta" || "${RELEASE_TYPE}" == "alpha" ]]; then
+            cd dist
+            yarn publish --tag next --access public
+          else
+            cd dist
+            yarn publish --access public
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
