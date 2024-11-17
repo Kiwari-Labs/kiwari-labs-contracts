@@ -5,6 +5,7 @@ import * as Updatable from "./Updatable.test";
 import * as Removal from "./Removal.test";
 import * as Integration from "./Integration.test";
 import * as Shrink from "./Shrink.test";
+import * as LazyShrink from "./LazyShrink.test";
 
 export const run = async () => {
   describe("SortedCircularDoublyLinkedList", async function () {
@@ -15,5 +16,6 @@ export const run = async () => {
     Removal.run();
     Integration.run();
     Shrink.run();
+    LazyShrink.run();
   });
 };
