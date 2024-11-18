@@ -6,7 +6,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {SlidingWindow} from "./SlidingWindowDev.sol";
 import {SortedCircularDoublyLinkedList as SCDLL} from "../utils/SortedCircularDoublyLinkedList.sol";
-import {IERC7818} from "../tokens/ERC20/IERC7818.sol";
+import {IERC7818} from "../tokens/ERC20/extensions/IERC7818.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -168,11 +168,6 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                 balance += _slotBalance(account, toEra, 0, toSlot);
             }
         }
-    }
-
-    /// @inheritdoc IERC7818
-    function tokenList(address account, uint256 era, uint8 slot) external view virtual returns (uint256[] memory list) {
-        list = _balances[account][era][slot].list.ascending();
     }
 
     /// @notice Internal function to update token balances during token transfers or operations.
@@ -458,5 +453,49 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         address owner = _msgSender();
         _approve(owner, spender, value);
         return true;
+    }
+
+        /// @inheritdoc IERC7818
+    function balanceOf(address account, uint256 id) external view returns (uint256) {
+        // if (_expired(id)) {
+        //     return 0;
+        // }
+        (uint256 era, uint8 slot) =  _calculateEraAndSlot(id);
+        return _balances[account][era][slot].blockBalances[id];
+    }
+
+    /// @inheritdoc IERC7818
+    function duration() public view virtual returns (uint256) {
+        return _getFrameSizeInBlockLength();
+    }
+
+    /// @inheritdoc IERC7818
+    function transfer(address to, uint256 id, uint256 value) public view virtual returns (bool) {
+        // if (_expired(id)) {
+        //     return false;
+        // }
+        (uint256 era, uint8 slot) =  _calculateEraAndSlot(id);
+        
+        return true;
+    }
+
+    /// @inheritdoc IERC7818
+    function transferFrom(address from, address to, uint256 id, uint256 value) public view virtual returns (bool) {
+        // if (_expired(id)) {
+        //     return false;
+        // }
+        (uint256 era, uint8 slot) =  _calculateEraAndSlot(id);
+
+        return true;
+    }
+
+    /// @inheritdoc IERC7818
+    /// @custom:gas-inefficiency if not limit the size of array
+    function tokenList(address account, uint256 offset, uint256 limit) external view virtual returns (uint256[] memory list) {
+        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safeFrame(_blockNumberProvider());
+        // @TODO for loop fronEra toEra and sum of size
+        // then check is given limit exceed the size if true then use actual size if less than limit use a actual size
+        // list = _balances[account][era][slot].list.ascending();
+        return list;
     }
 }
