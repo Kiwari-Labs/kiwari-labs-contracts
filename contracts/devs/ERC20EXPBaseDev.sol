@@ -489,13 +489,8 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         return true;
     }
 
-    /// @inheritdoc IERC7818
     /// @custom:gas-inefficiency if not limit the size of array
-    function tokenList(address account, uint256 offset, uint256 limit) external view virtual returns (uint256[] memory list) {
-        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _safeFrame(_blockNumberProvider());
-        // @TODO for loop fronEra toEra and sum of size
-        // then check is given limit exceed the size if true then use actual size if less than limit use a actual size
-        // list = _balances[account][era][slot].list.ascending();
-        return list;
+    function tokenList(address account, uint256 era, uint8 slot) external view virtual returns (uint256[] memory list) {
+        list = _balances[account][era][slot].list.ascending();
     }
 }
