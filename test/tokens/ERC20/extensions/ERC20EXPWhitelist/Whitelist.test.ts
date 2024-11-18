@@ -41,7 +41,7 @@ export const run = async () => {
         .withArgs(deployerAddress, aliceAddress);
       await erc20expWhitelist.mintSpendableWhitelist(aliceAddress, 1);
       await erc20expWhitelist.mintUnspendableWhitelist(aliceAddress, 1);
-      expect(await erc20expWhitelist.balanceOf(aliceAddress)).equal(2);
+      expect(await erc20expWhitelist["balanceOf(address)"](aliceAddress)).equal(2);
       expect(await erc20expWhitelist.safeBalanceOf(aliceAddress)).equal(1);
       await expect(erc20expWhitelist.revokeWhitelist(aliceAddress))
         .to.emit(erc20expWhitelist, EVENT_WHITELIST_REVOKED)

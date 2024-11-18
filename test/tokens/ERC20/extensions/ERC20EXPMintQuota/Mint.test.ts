@@ -28,7 +28,7 @@ export const run = async () => {
 
       expect(await erc20ExpMintQuota.remainingQuota(aliceAddress)).equal(0);
       expect(await erc20ExpMintQuota.minted(aliceAddress)).equal(quota);
-      expect(await erc20ExpMintQuota.balanceOf(aliceAddress)).equal(quota);
+      expect(await erc20ExpMintQuota["balanceOf(address)"](aliceAddress)).equal(quota);
     });
 
     it("[UNHAPPY] unauthorized minter", async function () {

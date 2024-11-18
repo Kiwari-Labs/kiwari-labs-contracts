@@ -23,7 +23,7 @@ export const run = async () => {
       await expect(erc20expWhitelist.burnSpendableWhitelist(aliceAddress, 1))
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(aliceAddress, ZERO_ADDRESS, 1);
-      expect(await erc20expWhitelist.balanceOf(aliceAddress)).equal(0);
+      expect(await erc20expWhitelist["balanceOf(address)"](aliceAddress)).equal(0);
     });
 
     it("[HAPPY] correct burn un-spendable to whitelist address", async function () {
@@ -39,7 +39,7 @@ export const run = async () => {
       await expect(erc20expWhitelist.burnUnspendableWhitelist(aliceAddress, 1))
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(aliceAddress, ZERO_ADDRESS, 1);
-      expect(await erc20expWhitelist.balanceOf(aliceAddress)).equal(0);
+      expect(await erc20expWhitelist["balanceOf(address)"](aliceAddress)).equal(0);
     });
 
     it("[UNHAPPY] cannot burn cause insufficient balance of whitelist address", async function () {

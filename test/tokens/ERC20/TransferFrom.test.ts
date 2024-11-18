@@ -19,7 +19,11 @@ export const run = async () => {
 
       expect(await erc20exp.allowance(await alice.getAddress(), await bob.getAddress())).to.equal(amount);
 
-      await expect(erc20exp.connect(bob).transferFrom(await alice.getAddress(), await bob.getAddress(), amount))
+      await expect(
+        erc20exp
+          .connect(bob)
+          ["transferFrom(address,address,uint256)"](await alice.getAddress(), await bob.getAddress(), amount),
+      )
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(await alice.getAddress(), await bob.getAddress(), amount);
     });
@@ -40,7 +44,11 @@ export const run = async () => {
 
       expect(await erc20exp.allowance(await alice.getAddress(), await bob.getAddress())).to.equal(MAX_INT);
 
-      await expect(erc20exp.connect(bob).transferFrom(await alice.getAddress(), await bob.getAddress(), amount))
+      await expect(
+        erc20exp
+          .connect(bob)
+          ["transferFrom(address,address,uint256)"](await alice.getAddress(), await bob.getAddress(), amount),
+      )
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(await alice.getAddress(), await bob.getAddress(), amount);
     });
@@ -60,7 +68,11 @@ export const run = async () => {
 
       expect(await erc20exp.allowance(await alice.getAddress(), await bob.getAddress())).to.equal(amount);
 
-      await expect(erc20exp.connect(bob).transferFrom(await alice.getAddress(), await bob.getAddress(), amount * 2))
+      await expect(
+        erc20exp
+          .connect(bob)
+          ["transferFrom(address,address,uint256)"](await alice.getAddress(), await bob.getAddress(), amount * 2),
+      )
         .to.be.revertedWithCustomError(erc20exp, ERROR_ERC20_INSUFFICIENT_ALLOWANCE)
         .withArgs(await bob.getAddress(), amount, amount * 2);
     });

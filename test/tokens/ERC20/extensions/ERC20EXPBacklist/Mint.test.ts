@@ -11,7 +11,7 @@ export const run = async () => {
 
       await erc20ExpBacklist.mint(alice.address, 100);
 
-      expect(await erc20ExpBacklist.balanceOf(alice.address)).equal(100);
+      expect(await erc20ExpBacklist["balanceOf(address)"](alice.address)).equal(100);
     });
 
     it("[HAPPY] unable mint to blacklist", async function () {

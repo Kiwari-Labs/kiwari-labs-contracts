@@ -15,6 +15,8 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors, IERC7818, SlidingWindow {
     using SCDLL for SCDLL.List;
 
+    error ERC7818TransferExpired();
+
     string private _name;
     string private _symbol;
 
@@ -27,6 +29,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
 
     mapping(address => mapping(uint256 => mapping(uint8 => Slot))) private _balances;
     mapping(address => mapping(address => uint256)) private _allowances;
+    mapping(uint256 blockNumber => uint256 balance) private _worldBlockBalances;
 
     /// @notice Constructor function to initialize the token contract with specified parameters.
     /// @param name_ The name of the token.
@@ -166,6 +169,14 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         }
     }
 
+    function _expired(uint256 id) internal view returns (bool) {
+        unchecked {
+            if (_blockNumberProvider() - id >= _getFrameSizeInBlockLength()) {
+                return true;
+            }
+        }
+    }
+
     /// @notice Internal function to update token balances during token transfers or operations.
     /// @dev Handles various scenarios including minting, burning, and transferring tokens with expiration logic.
     /// @param from The address from which tokens are being transferred (or minted/burned).
@@ -186,6 +197,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
             unchecked {
                 _recipient.slotBalance += value;
                 _recipient.blockBalances[blockNumberCache] += value;
+                _worldBlockBalances[blockNumberCache] += value;
             }
             _recipient.list.insert(blockNumberCache);
         } else {
@@ -213,6 +225,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                                 pendingValue -= balanceCache;
                                 _spender.slotBalance -= balanceCache;
                                 _spender.blockBalances[key] -= balanceCache;
+                                _worldBlockBalances[key] -= balanceCache;
                             }
                             key = _spender.list.next(key);
                             _spender.list.remove(_spender.list.previous(key));
@@ -288,6 +301,37 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
 
         // Hook after transfer
         _afterTokenTransfer(from, to, value);
+    }
+
+    function _updateSpecific(address from, address to, uint256 id, uint256 value) internal virtual {
+        (uint256 era, uint8 slot) = _calculateEraAndSlot(id);
+        if (from == address(0)) {
+            Slot storage _recipient = _balances[to][era][slot];
+            unchecked {
+                _recipient.slotBalance += value;
+                _recipient.blockBalances[id] += value;
+            }
+            _worldBlockBalances[id] += value;
+        } else {
+            Slot storage _spender = _balances[from][era][slot];
+            uint256 balanceCache = _spender.blockBalances[id];
+            if (balanceCache < value) {
+                revert ERC20InsufficientBalance(from, balanceCache, value);
+            }
+            if (to == address(0)) {
+                _spender.slotBalance -= value;
+                _spender.blockBalances[id] -= value;
+                _worldBlockBalances[id] -= value;
+            } else {
+                Slot storage _recipient = _balances[from][era][slot];
+                _spender.slotBalance -= value;
+                _spender.blockBalances[id] -= value;
+                _recipient.slotBalance += value;
+                _recipient.blockBalances[id] += value;
+            }
+        }
+
+        emit Transfer(from, to, value);
     }
 
     /// @notice Mints new tokens to a specified account.
@@ -393,6 +437,24 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         _update(from, to, value);
     }
 
+    function _transferSpecific(address from, address to, uint256 id, uint256 value) internal {
+        if (from == address(0)) {
+            revert ERC20InvalidSender(address(0));
+        }
+        if (to == address(0)) {
+            revert ERC20InvalidReceiver(address(0));
+        }
+        _updateSpecific(from, to, id, value);
+    }
+
+    /// @notice Retrieves the total balance stored at a specific block.
+    /// @dev This function returns the balance of the given block from the internal `_worldBlockBalances` mapping.
+    /// @param blockNumber The block number for which the balance is being queried.
+    /// @return balance The total balance stored at the given block number.
+    function getBlockBalance(uint256 blockNumber) external view virtual returns (uint256) {
+        return _worldBlockBalances[blockNumber];
+    }
+
     /// @inheritdoc IERC20Metadata
     function name() external view virtual returns (string memory) {
         return _name;
@@ -451,12 +513,12 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         return true;
     }
 
-        /// @inheritdoc IERC7818
+    /// @inheritdoc IERC7818
     function balanceOf(address account, uint256 id) external view returns (uint256) {
-        // if (_expired(id)) {
-        //     return 0;
-        // }
-        (uint256 era, uint8 slot) =  _calculateEraAndSlot(id);
+        if (_expired(id)) {
+            return 0;
+        }
+        (uint256 era, uint8 slot) = _calculateEraAndSlot(id);
         return _balances[account][era][slot].blockBalances[id];
     }
 
@@ -466,22 +528,34 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     }
 
     /// @inheritdoc IERC7818
-    function transfer(address to, uint256 id, uint256 value) public view virtual returns (bool) {
-        // if (_expired(id)) {
-        //     return false;
-        // }
-        (uint256 era, uint8 slot) =  _calculateEraAndSlot(id);
-        
+    function epoch() public view virtual returns (uint256) {
+        (uint256 era, ) = _calculateEraAndSlot(_blockNumberProvider());
+        return era;
+    }
+
+    /// @inheritdoc IERC7818
+    function expired(uint256 id) public view virtual returns (bool) {
+        return _expired(id);
+    }
+
+    /// @inheritdoc IERC7818
+    function transfer(address to, uint256 id, uint256 value) public virtual returns (bool) {
+        if (_expired(id)) {
+            revert ERC7818TransferExpired();
+        }
+        address owner = _msgSender();
+        _transferSpecific(owner, to, id, value);
         return true;
     }
 
     /// @inheritdoc IERC7818
-    function transferFrom(address from, address to, uint256 id, uint256 value) public view virtual returns (bool) {
-        // if (_expired(id)) {
-        //     return false;
-        // }
-        (uint256 era, uint8 slot) =  _calculateEraAndSlot(id);
-
+    function transferFrom(address from, address to, uint256 id, uint256 value) public virtual returns (bool) {
+        if (_expired(id)) {
+            revert ERC7818TransferExpired();
+        }
+        address spender = _msgSender();
+        _spendAllowance(from, spender, value);
+        _transferSpecific(from, to, id, value);
         return true;
     }
 

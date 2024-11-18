@@ -9,11 +9,12 @@ import {SortedCircularDoublyLinkedList as SCDLL} from "../utils/SortedCircularDo
 import {IERC7818} from "../tokens/ERC20/extensions/IERC7818.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors, IERC7818, SlidingWindow {
+abstract contract ERC20EXPBase is Context, IERC20Metadata, IERC20Errors, IERC7818, SlidingWindow {
     using SCDLL for SCDLL.List;
+
+    error ERC7818TransferExpired();
 
     string private _name;
     string private _symbol;
@@ -21,20 +22,20 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @notice Struct representing a slot containing balances mapped by blocks.
     struct Slot {
         uint256 slotBalance;
-        mapping(uint256 => uint256) blockBalances;
+        mapping(uint256 blockNumber => uint256 balance) blockBalances;
         SCDLL.List list;
     }
 
-    mapping(address => mapping(uint256 => mapping(uint8 => Slot))) private _balances;
-    mapping(address => mapping(address => uint256)) private _allowances;
+    mapping(address account => mapping(uint256 era => mapping(uint8 slot => Slot))) private _balances;
+    mapping(address account => mapping(address spneder => uint256 balance)) private _allowances;
+    mapping(uint256 blockNumber => uint256 balance) private _worldBlockBalances;
 
     /// @notice Constructor function to initialize the token contract with specified parameters.
     /// @dev Initializes the token contract by setting the name, symbol, and initializing the sliding window parameters.
     /// @param name_ The name of the token.
     /// @param symbol_ The symbol of the token.
     /// @param blockNumber_ The starting block number for the sliding window.
-    /// @param blockTime_ The duration of each block in milliseconds.
-    /// @param mode_ Developer mode enable or not.
+    /// @param blockTime_ The duration of each block in milliseconds..
     constructor(
         string memory name_,
         string memory symbol_,
@@ -91,37 +92,12 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         uint256 blockNumber
     ) private view returns (uint256 balance) {
         Slot storage _spender = _balances[account][era][slot];
-        uint256 key = _getFirstUnexpiredBlockBalance(_spender.list, blockNumber, _getFrameSizeInBlockLength());
+        uint256 key = _locateUnexpiredBlockBalance(_spender.list, blockNumber, _getFrameSizeInBlockLength());
         while (key > 0) {
             unchecked {
                 balance += _spender.blockBalances[key];
             }
             key = _spender.list.next(key);
-        }
-    }
-
-    /// @notice Finds the index of the first valid block balance in a sorted list of block numbers.
-    /// A block balance index is considered valid if the difference between the current blockNumber
-    /// and the block number at the index (key) is less than the expirationPeriodInBlockLength.
-    /// @dev This function is used to determine the first valid block balance index within a sorted circular doubly linked list.
-    /// It iterates through the list starting from the head and stops when it finds a valid index or reaches the end of the list.
-    /// @param list The sorted circular doubly linked list of block numbers.
-    /// @param blockNumber The current block number.
-    /// @param expirationPeriodInBlockLength The maximum allowed difference between blockNumber and the key.
-    /// @return key The index of the first valid block balance.
-    function _getFirstUnexpiredBlockBalance(
-        SCDLL.List storage list,
-        uint256 blockNumber,
-        uint256 expirationPeriodInBlockLength
-    ) private view returns (uint256 key) {
-        key = list.head();
-        unchecked {
-            while (blockNumber - key >= expirationPeriodInBlockLength) {
-                if (key == 0) {
-                    break;
-                }
-                key = list.next(key);
-            }
         }
     }
 
@@ -170,21 +146,26 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         }
     }
 
+    function _expired(uint256 id) internal view returns (bool) {
+        unchecked {
+            if (_blockNumberProvider() - id >= _getFrameSizeInBlockLength()) {
+                return true;
+            }
+        }
+    }
+
     /// @notice Internal function to update token balances during token transfers or operations.
     /// @dev Handles various scenarios including minting, burning, and transferring tokens with expiration logic.
     /// @param from The address from which tokens are being transferred (or minted/burned).
     /// @param to The address to which tokens are being transferred (or burned to if `to` is `zero address`).
     /// @param value The amount of tokens being transferred, minted, or burned.
-    function _update(address from, address to, uint256 value) private {
-        // Hook before transfer
-        _beforeTokenTransfer(from, to, value);
-
+    function _update(address from, address to, uint256 value) internal virtual {
         uint256 blockNumberCache = _blockNumberProvider();
         uint256 blockLengthCache = _getFrameSizeInBlockLength();
         uint8 slotSizeCache = _getSlotPerEra();
 
         if (from == address(0)) {
-            // Mint expirable token.
+            // Mint token.
             (uint256 currentEra, uint8 currentSlot) = _calculateEraAndSlot(blockNumberCache);
             Slot storage _recipient = _balances[to][currentEra][currentSlot];
             unchecked {
@@ -192,7 +173,9 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                 _recipient.blockBalances[blockNumberCache] += value;
             }
             _recipient.list.insert(blockNumberCache, (""));
+            _worldBlockBalances[blockNumberCache] += value;
         } else {
+            // Burn token.
             (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
             uint256 balance = _lookBackBalance(from, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
             if (balance < value) {
@@ -203,11 +186,10 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
             uint256 balanceCache = 0;
 
             if (to == address(0)) {
-                // Burn expirable token.
                 while ((fromEra < toEra || (fromEra == toEra && fromSlot <= toSlot)) && pendingValue > 0) {
                     Slot storage _spender = _balances[from][fromEra][fromSlot];
 
-                    uint256 key = _getFirstUnexpiredBlockBalance(_spender.list, blockNumberCache, blockLengthCache);
+                    uint256 key = _locateUnexpiredBlockBalance(_spender.list, blockNumberCache, blockLengthCache);
 
                     while (key > 0 && pendingValue > 0) {
                         balanceCache = _spender.blockBalances[key];
@@ -217,6 +199,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                                 pendingValue -= balanceCache;
                                 _spender.slotBalance -= balanceCache;
                                 _spender.blockBalances[key] -= balanceCache;
+                                _worldBlockBalances[key] -= balanceCache;
                             }
                             key = _spender.list.next(key);
                             _spender.list.remove(_spender.list.previous(key));
@@ -224,6 +207,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                             unchecked {
                                 _spender.slotBalance -= pendingValue;
                                 _spender.blockBalances[key] -= pendingValue;
+                                _worldBlockBalances[key] -= pendingValue;
                             }
                             pendingValue = 0;
                         }
@@ -240,12 +224,12 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
                     }
                 }
             } else {
-                // Transfer expirable token.
+                // Transfer token.
                 while ((fromEra < toEra || (fromEra == toEra && fromSlot <= toSlot)) && pendingValue > 0) {
                     Slot storage _spender = _balances[from][fromEra][fromSlot];
                     Slot storage _recipient = _balances[to][fromEra][fromSlot];
 
-                    uint256 key = _getFirstUnexpiredBlockBalance(_spender.list, blockNumberCache, blockLengthCache);
+                    uint256 key = _locateUnexpiredBlockBalance(_spender.list, blockNumberCache, blockLengthCache);
 
                     while (key > 0 && pendingValue > 0) {
                         balanceCache = _spender.blockBalances[key];
@@ -289,9 +273,72 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         }
 
         emit Transfer(from, to, value);
+    }
 
-        // Hook after transfer
-        _afterTokenTransfer(from, to, value);
+    function _updateSpecific(address from, address to, uint256 id, uint256 value) internal virtual {
+        (uint256 era, uint8 slot) = _calculateEraAndSlot(id);
+        if (from == address(0)) {
+            Slot storage _recipient = _balances[to][era][slot];
+            unchecked {
+                _recipient.slotBalance += value;
+                _recipient.blockBalances[id] += value;
+            }
+            _worldBlockBalances[id] += value;
+        } else {
+            Slot storage _spender = _balances[from][era][slot];
+            uint256 balanceCache = _spender.blockBalances[id];
+            if (balanceCache < value) {
+                revert ERC20InsufficientBalance(from, balanceCache, value);
+            }
+            if (to == address(0)) {
+                _spender.slotBalance -= value;
+                _spender.blockBalances[id] -= value;
+                _worldBlockBalances[id] -= value;
+            } else {
+                Slot storage _recipient = _balances[from][era][slot];
+                _spender.slotBalance -= value;
+                _spender.blockBalances[id] -= value;
+                _recipient.slotBalance += value;
+                _recipient.blockBalances[id] += value;
+            }
+        }
+
+        emit Transfer(from, to, value);
+    }
+
+    /// @notice Retrieves the Slot storage for a given account, era, and slot.
+    /// @dev This function accesses the `_balances` mapping to return the Slot associated with the specified account, era, and slot.
+    /// @param account The address of the account whose slot is being queried.
+    /// @param fromEra The era during which the slot was created or updated.
+    /// @param fromSlot The slot identifier within the era for the account.
+    /// @return slot The storage reference to the Slot structure for the given account, era, and slot.
+    function _slotOf(address account, uint256 fromEra, uint8 fromSlot) internal view returns (Slot storage) {
+        return _balances[account][fromEra][fromSlot];
+    }
+
+    /// @notice Finds the index of the first valid block balance in a sorted list of block numbers.
+    /// A block balance index is considered valid if the difference between the current blockNumber
+    /// and the block number at the index (key) is less than the expirationPeriodInBlockLength.
+    /// @dev This function is used to determine the first valid block balance index within a sorted circular doubly linked list.
+    /// It iterates through the list starting from the head and stops when it finds a valid index or reaches the end of the list.
+    /// @param list The sorted circular doubly linked list of block numbers.
+    /// @param blockNumber The current block number.
+    /// @param expirationPeriodInBlockLength The maximum allowed difference between blockNumber and the key.
+    /// @return key The index of the first valid block balance.
+    function _locateUnexpiredBlockBalance(
+        SCDLL.List storage list,
+        uint256 blockNumber,
+        uint256 expirationPeriodInBlockLength
+    ) internal view returns (uint256 key) {
+        key = list.head();
+        unchecked {
+            while (blockNumber - key >= expirationPeriodInBlockLength) {
+                if (key == 0) {
+                    break;
+                }
+                key = list.next(key);
+            }
+        }
     }
 
     /// @notice Mints new tokens to a specified account.
@@ -317,20 +364,6 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         }
         _update(account, address(0), value);
     }
-
-    /// @notice Abstract hook called before every token transfer operation.
-    /// @dev This function is called before every token transfer operation for additional checks or actions.
-    /// @param from The address sending tokens.
-    /// @param to The address receiving tokens.
-    /// @param amount The amount of tokens being transferred.
-    function _beforeTokenTransfer(address from, address to, uint amount) internal virtual {}
-
-    /// @notice Abstract hook called after every token transfer operation.
-    /// @dev This function is called after every token transfer operation for additional processing or logging.
-    /// @param from The address sending tokens.
-    /// @param to The address receiving tokens.
-    /// @param amount The amount of tokens being transferred.
-    function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual {}
 
     /// @notice Spends the specified allowance by reducing the allowance of the spender.
     /// @dev This function deducts the `value` amount from the current allowance of the `spender` by the `owner`.
@@ -397,70 +430,88 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         _update(from, to, value);
     }
 
-    /// @inheritdoc IERC20Metadata
-    function name() external view virtual returns (string memory) {
+    function _transferSpecific(address from, address to, uint256 id, uint256 value) internal {
+        if (from == address(0)) {
+            revert ERC20InvalidSender(address(0));
+        }
+        if (to == address(0)) {
+            revert ERC20InvalidReceiver(address(0));
+        }
+        _updateSpecific(from, to, id, value);
+    }
+
+    /// @notice Retrieves the total balance stored at a specific block.
+    /// @dev This function returns the balance of the given block from the internal `_worldBlockBalances` mapping.
+    /// @param blockNumber The block number for which the balance is being queried.
+    /// @return balance The total balance stored at the given block number.
+    function getBlockBalance(uint256 blockNumber) external view virtual returns (uint256) {
+        return _worldBlockBalances[blockNumber];
+    }
+
+    /// @dev See {IERC20Metadata-name}.
+    function name() public view virtual returns (string memory) {
         return _name;
     }
 
-    /// @inheritdoc IERC20Metadata
-    function symbol() external view virtual returns (string memory) {
+    /// @dev See {IERC20Metadata-symbol}.
+    function symbol() public view virtual returns (string memory) {
         return _symbol;
     }
 
-    /// @inheritdoc IERC20Metadata
-    function decimals() external view virtual returns (uint8) {
+    /// @dev See {IERC20Metadata-decimals}.
+    function decimals() public view virtual returns (uint8) {
         return 18;
     }
 
     /// @notice Returns 0 as there is no actual total supply due to token expiration.
     /// @dev This function returns the total supply of tokens, which is constant and set to 0.
-    /// @inheritdoc IERC20
-    function totalSupply() external pure virtual returns (uint256) {
+    /// @dev See {IERC20-totalSupply}.
+    function totalSupply() public pure virtual returns (uint256) {
         return 0;
     }
 
     /// @notice Returns the available balance of tokens for a given account.
     /// @dev Calculates and returns the available balance based on the frame.
-    /// @inheritdoc IERC20
-    function balanceOf(address account) external view virtual returns (uint256) {
+    /// @dev See {IERC20-balanceOf}.
+    function balanceOf(address account) public view virtual returns (uint256) {
         uint256 blockNumberCache = _blockNumberProvider();
         (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
         return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
     }
 
-    /// @inheritdoc IERC20
-    function allowance(address owner, address spender) external view virtual returns (uint256) {
+    /// @dev See {IERC20-allowance}.
+    function allowance(address owner, address spender) public view virtual returns (uint256) {
         return _allowances[owner][spender];
     }
 
-    /// @inheritdoc IERC20
-    function transfer(address to, uint256 value) external virtual returns (bool) {
-        address from = msg.sender;
+    /// @dev See {IERC20-transfer}.
+    function transfer(address to, uint256 value) public virtual returns (bool) {
+        address from = _msgSender();
         _transfer(from, to, value);
         return true;
     }
 
-    /// @inheritdoc IERC20
-    function transferFrom(address from, address to, uint256 value) external virtual returns (bool) {
+    /// @dev See {IERC20-transferFrom}.
+    function transferFrom(address from, address to, uint256 value) public virtual returns (bool) {
         address spender = _msgSender();
         _spendAllowance(from, spender, value);
         _transfer(from, to, value);
         return true;
     }
 
-    /// @inheritdoc IERC20
-    function approve(address spender, uint256 value) external virtual returns (bool) {
+    /// @dev See {IERC20-approve}.
+    function approve(address spender, uint256 value) public virtual returns (bool) {
         address owner = _msgSender();
         _approve(owner, spender, value);
         return true;
     }
 
-        /// @inheritdoc IERC7818
+    /// @inheritdoc IERC7818
     function balanceOf(address account, uint256 id) external view returns (uint256) {
-        // if (_expired(id)) {
-        //     return 0;
-        // }
-        (uint256 era, uint8 slot) =  _calculateEraAndSlot(id);
+        if (_expired(id)) {
+            return 0;
+        }
+        (uint256 era, uint8 slot) = _calculateEraAndSlot(id);
         return _balances[account][era][slot].blockBalances[id];
     }
 
@@ -470,22 +521,34 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     }
 
     /// @inheritdoc IERC7818
-    function transfer(address to, uint256 id, uint256 value) public view virtual returns (bool) {
-        // if (_expired(id)) {
-        //     return false;
-        // }
-        (uint256 era, uint8 slot) =  _calculateEraAndSlot(id);
-        
+    function epoch() public view virtual returns (uint256) {
+        (uint256 era, ) = _calculateEraAndSlot(_blockNumberProvider());
+        return era;
+    }
+
+    /// @inheritdoc IERC7818
+    function expired(uint256 id) public view virtual returns (bool) {
+        return _expired(id);
+    }
+
+    /// @inheritdoc IERC7818
+    function transfer(address to, uint256 id, uint256 value) public override returns (bool) {
+        if (_expired(id)) {
+            revert ERC7818TransferExpired();
+        }
+        address owner = _msgSender();
+        _transferSpecific(owner, to, id, value);
         return true;
     }
 
     /// @inheritdoc IERC7818
-    function transferFrom(address from, address to, uint256 id, uint256 value) public view virtual returns (bool) {
-        // if (_expired(id)) {
-        //     return false;
-        // }
-        (uint256 era, uint8 slot) =  _calculateEraAndSlot(id);
-
+    function transferFrom(address from, address to, uint256 id, uint256 value) public virtual returns (bool) {
+        if (_expired(id)) {
+            revert ERC7818TransferExpired();
+        }
+        address spender = _msgSender();
+        _spendAllowance(from, spender, value);
+        _transferSpecific(from, to, id, value);
         return true;
     }
 

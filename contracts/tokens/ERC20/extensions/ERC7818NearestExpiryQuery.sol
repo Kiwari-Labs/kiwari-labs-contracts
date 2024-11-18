@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title ERC20EXP Nearest Expiry Query extension contract
+/// @title ERC7818 Nearest Expiry Query extension contract
 /// @author Kiwari Labs
 
 import "../ERC20EXPBase.sol";
 
-abstract contract ERC20EXPNearestExpiryQuery is ERC20EXPBase {
+abstract contract ERC7818NearestExpiryQuery is ERC20EXPBase {
     /// @notice Retrieves the nearest unexpired block balance for a given account.
     /// @dev This function checks the block history for an account and finds the first unexpired block balance.
     /// It uses the `_blockNumberProvider` to get the current block number and looks up the account's block balances.

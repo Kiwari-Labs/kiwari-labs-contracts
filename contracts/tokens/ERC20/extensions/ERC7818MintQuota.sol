@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title ERC20EXP Mint Quota extension contract
+/// @title ERC7818 Mint Quota extension contract
 /// @author Kiwari Labs
 
 import "../ERC20EXPBase.sol";
 
-abstract contract ERC20EXPMintQuota is ERC20EXPBase {
+abstract contract ERC7818MintQuota is ERC20EXPBase {
     /// @notice Struct to define mint quota for each minter
     struct Minter {
         uint256 quota; // Maximum amount the minter is allowed to mint

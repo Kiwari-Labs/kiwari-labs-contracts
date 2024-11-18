@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../../../../../contracts/tokens/ERC7818/extensions/ERC7818Whitelist.sol";
+import "../../../../../contracts/tokens/ERC20/extensions/ERC7818Whitelist.sol";
 
 contract MockERC7818Whitelist is ERC7818Whitelist {
     constructor(
@@ -10,7 +10,7 @@ contract MockERC7818Whitelist is ERC7818Whitelist {
         uint16 blockTime_,
         uint8 frameSize_,
         uint8 slotSize_
-    ) ERC7818(_name, _symbol, block.number, blockTime_, frameSize_, slotSize_) {}
+    ) ERC20EXPBase(_name, _symbol, block.number, blockTime_, frameSize_, slotSize_) {}
 
     function grantWhitelist(address account) public {
         _grantWhitelist(account);

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../../../../../contracts/tokens/ERC7818/extensions/ERC7818Blacklist.sol";
+import "../../../../../contracts/tokens/ERC20/extensions/ERC7818Blacklist.sol";
 
 contract MockERC7818Backlist is ERC7818Blacklist {
     constructor(
@@ -10,7 +10,7 @@ contract MockERC7818Backlist is ERC7818Blacklist {
         uint16 blockTime_,
         uint8 frameSize_,
         uint8 slotSize_
-    ) ERC7818(_name, _symbol, block.number, blockTime_, frameSize_, slotSize_) {}
+    ) ERC20EXPBase(_name, _symbol, block.number, blockTime_, frameSize_, slotSize_) {}
 
     function addToBlacklist(address account) public {
         _addToBlacklist(account);
@@ -24,7 +24,7 @@ contract MockERC7818Backlist is ERC7818Blacklist {
         _mint(to, value);
     }
 
-    function _update(address from, address to, uint256 value) internal virtual override(ERC7818Base, ERC7818Blacklist) {
+    function _update(address from, address to, uint256 value) internal virtual override(ERC7818Blacklist) {
         super._update(from, to, value);
     }
 }

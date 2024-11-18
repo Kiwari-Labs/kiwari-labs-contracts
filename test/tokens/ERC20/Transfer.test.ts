@@ -89,8 +89,8 @@ export const run = async () => {
       //  10, 10    10, 10
 
       // Right now, the balance of Alice and Bob must be 20.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(amount * 2);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(amount * 2);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount * 2);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(amount * 2);
 
       // Transfer 5 token from Alice to Bob.
       // |-------------- 78892315 --------------|   <-- era 1.
@@ -99,11 +99,11 @@ export const run = async () => {
       //  Alice --> Bob
       //  5, 10     5, 10, 10
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(15);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(25);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(15);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(25);
 
       // Skip to the expiry period of Alice.
       await skipToBlock(aliceExpectExp[0]);
@@ -112,8 +112,8 @@ export const run = async () => {
       // Alice must be 10.
       // Bob must be 20.
       // Because Alice's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(10);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(20);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(10);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(20);
 
       // Transfer 5 tokens from Alice to Bob, repeating this process twice.
       // |-------------- 78892315 --------------|   <-- era 1.
@@ -123,38 +123,38 @@ export const run = async () => {
       //  0, 5      0, 5, 10, 10
       //  0, 0      0, 10, 10, 10
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(5);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(25);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(5);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(25);
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(30);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(30);
 
       // Skip to the expiry period of Alice.
       await skipToBlock(aliceExpectExp[1]);
 
       // Right now, the balance of Bob must be 20.
       // Because Alice's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(20);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(20);
 
       // Skip to the expiry period of Bob.
       await skipToBlock(bobExpectExp[0]);
 
       // Right now, the balance of Bob must be 10.
       // Because Bob's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(10);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(10);
 
       // Skip to the expiry period of Bob.
       await skipToBlock(bobExpectExp[1]);
 
       // Right now, the balance of Bob must be 0.
       // Because Bob's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(0);
     });
 
     it("[HAPPY] transfer correctly if frame size is 4 and slot per era is 4", async function () {
@@ -236,8 +236,8 @@ export const run = async () => {
       //  10, 10    10, 10
 
       // Right now, the balance of Alice and Bob must be 20.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(amount * 2);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(amount * 2);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount * 2);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(amount * 2);
 
       // Transfer 5 token from Alice to Bob.
       // |-------------- 78892315 --------------|   <-- era 1.
@@ -246,11 +246,11 @@ export const run = async () => {
       //  Alice --> Bob
       //  5, 10     5, 10, 10
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(15);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(25);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(15);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(25);
 
       // Skip to the expiry period of Alice.
       await skipToBlock(aliceExpectExp[0]);
@@ -259,8 +259,8 @@ export const run = async () => {
       // Alice must be 10.
       // Bob must be 20.
       // Because Alice's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(10);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(20);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(10);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(20);
 
       // Transfer 5 tokens from Alice to Bob, repeating this process twice.
       // |-------------- 78892315 --------------|   <-- era 1.
@@ -270,38 +270,38 @@ export const run = async () => {
       //  0, 5      0, 5, 10, 10
       //  0, 0      0, 10, 10, 10
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(5);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(25);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(5);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(25);
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(30);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(30);
 
       // Skip to the expiry period of Alice.
       await skipToBlock(aliceExpectExp[1]);
 
       // Right now, the balance of Bob must be 20.
       // Because Alice's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(20);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(20);
 
       // Skip to the expiry period of Bob.
       await skipToBlock(bobExpectExp[0]);
 
       // Right now, the balance of Bob must be 10.
       // Because Bob's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(10);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(10);
 
       // Skip to the expiry period of Bob.
       await skipToBlock(bobExpectExp[1]);
 
       // Right now, the balance of Bob must be 0.
       // Because Bob's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(0);
     });
 
     it("[HAPPY] transfer correctly if frame size is 6 and slot per era is 4", async function () {
@@ -383,8 +383,8 @@ export const run = async () => {
       //  10, 10    10, 10
 
       // Right now, the balance of Alice and Bob must be 20.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(amount * 2);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(amount * 2);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount * 2);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(amount * 2);
 
       // Transfer 5 token from Alice to Bob.
       // |-------------- 78892315 --------------|   <-- era 1.
@@ -393,11 +393,11 @@ export const run = async () => {
       //  Alice --> Bob
       //  5, 10     5, 10, 10
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(15);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(25);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(15);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(25);
 
       // Skip to the expiry period of Alice.
       await skipToBlock(aliceExpectExp[0]);
@@ -406,8 +406,8 @@ export const run = async () => {
       // Alice must be 10.
       // Bob must be 20.
       // Because Alice's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(10);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(20);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(10);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(20);
 
       // Transfer 5 tokens from Alice to Bob, repeating this process twice.
       // |-------------- 78892315 --------------|   <-- era 1.
@@ -417,38 +417,38 @@ export const run = async () => {
       //  0, 5      0, 5, 10, 10
       //  0, 0      0, 10, 10, 10
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(5);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(25);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(5);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(25);
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(30);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(30);
 
       // Skip to the expiry period of Alice.
       await skipToBlock(aliceExpectExp[1]);
 
       // Right now, the balance of Bob must be 20.
       // Because Alice's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(20);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(20);
 
       // Skip to the expiry period of Bob.
       await skipToBlock(bobExpectExp[0]);
 
       // Right now, the balance of Bob must be 10.
       // Because Bob's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(10);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(10);
 
       // Skip to the expiry period of Bob.
       await skipToBlock(bobExpectExp[1]);
 
       // Right now, the balance of Bob must be 0.
       // Because Bob's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(0);
     });
 
     it("[HAPPY] transfer correctly if frame size is 8 and slot per era is 4", async function () {
@@ -530,8 +530,8 @@ export const run = async () => {
       //  10, 10    10, 10
 
       // Right now, the balance of Alice and Bob must be 20.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(amount * 2);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(amount * 2);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount * 2);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(amount * 2);
 
       // Transfer 5 token from Alice to Bob.
       // |-------------- 78892315 --------------|   <-- era 1.
@@ -540,11 +540,11 @@ export const run = async () => {
       //  Alice --> Bob
       //  5, 10     5, 10, 10
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(15);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(25);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(15);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(25);
 
       // Skip to the expiry period of Alice.
       await skipToBlock(aliceExpectExp[0]);
@@ -553,8 +553,8 @@ export const run = async () => {
       // Alice must be 10.
       // Bob must be 20.
       // Because Alice's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(10);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(20);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(10);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(20);
 
       // Transfer 5 tokens from Alice to Bob, repeating this process twice.
       // |-------------- 78892315 --------------|   <-- era 1.
@@ -564,38 +564,38 @@ export const run = async () => {
       //  0, 5      0, 5, 10, 10
       //  0, 0      0, 10, 10, 10
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(5);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(25);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(5);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(25);
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(30);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(30);
 
       // Skip to the expiry period of Alice.
       await skipToBlock(aliceExpectExp[1]);
 
       // Right now, the balance of Bob must be 20.
       // Because Alice's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(20);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(20);
 
       // Skip to the expiry period of Bob.
       await skipToBlock(bobExpectExp[0]);
 
       // Right now, the balance of Bob must be 10.
       // Because Bob's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(10);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(10);
 
       // Skip to the expiry period of Bob.
       await skipToBlock(bobExpectExp[1]);
 
       // Right now, the balance of Bob must be 0.
       // Because Bob's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(0);
     });
 
     it("[HAPPY] transfer correctly if frame size is 2 and slot per era is 4 and mint at end era period", async function () {
@@ -684,8 +684,8 @@ export const run = async () => {
       //                               10, 10    10, 10
 
       // Right now, the balance of Alice and Bob must be 20.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(amount * 2);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(amount * 2);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount * 2);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(amount * 2);
 
       // Transfer 5 token from Alice to Bob.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|  <-- era 2.
@@ -694,11 +694,11 @@ export const run = async () => {
       //                               Alice     Bob
       //                               5, 10 --> 5, 10, 10
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(15);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(25);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(15);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(25);
 
       // Skip to the expiry period of Alice.
       await skipToBlock(aliceExpectExp[0]);
@@ -707,8 +707,8 @@ export const run = async () => {
       // Alice must be 10.
       // Bob must be 20.
       // Because Alice's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(10);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(20);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(10);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(20);
 
       // // Transfer 5 tokens from Alice to Bob, repeating this process twice.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|  <-- era 2.
@@ -718,38 +718,38 @@ export const run = async () => {
       //                               0, 5  --> 0, 5, 10, 10
       //                               0, 0  --> 0, 10, 10, 10
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(5);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(25);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(5);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(25);
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(30);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(30);
 
       // Skip to the expiry period of Alice.
       await skipToBlock(aliceExpectExp[1]);
 
       // Right now, the balance of Bob must be 20.
       // Because Alice's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(20);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(20);
 
       // Skip to the expiry period of Bob.
       await skipToBlock(bobExpectExp[0]);
 
       // Right now, the balance of Bob must be 10.
       // Because Bob's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(10);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(10);
 
       // Skip to the expiry period of Bob.
       await skipToBlock(bobExpectExp[1]);
 
       // Right now, the balance of Bob must be 0.
       // Because Bob's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(0);
     });
 
     it("[HAPPY] transfer correctly if frame size is 4 and slot per era is 4 and mint at end era period", async function () {
@@ -838,8 +838,8 @@ export const run = async () => {
       //                               10, 10    10, 10
 
       // Right now, the balance of Alice and Bob must be 20.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(amount * 2);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(amount * 2);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount * 2);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(amount * 2);
 
       // Transfer 5 token from Alice to Bob.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|  <-- era 2.
@@ -848,11 +848,11 @@ export const run = async () => {
       //                               Alice     Bob
       //                               5, 10 --> 5, 10, 10
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(15);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(25);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(15);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(25);
 
       // Skip to the expiry period of Alice.
       await skipToBlock(aliceExpectExp[0]);
@@ -861,8 +861,8 @@ export const run = async () => {
       // Alice must be 10.
       // Bob must be 20.
       // Because Alice's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(10);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(20);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(10);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(20);
 
       // // Transfer 5 tokens from Alice to Bob, repeating this process twice.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|  <-- era 2.
@@ -872,38 +872,38 @@ export const run = async () => {
       //                               0, 5  --> 0, 5, 10, 10
       //                               0, 0  --> 0, 10, 10, 10
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(5);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(25);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(5);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(25);
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(30);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(30);
 
       // Skip to the expiry period of Alice.
       await skipToBlock(aliceExpectExp[1]);
 
       // Right now, the balance of Bob must be 20.
       // Because Alice's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(20);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(20);
 
       // Skip to the expiry period of Bob.
       await skipToBlock(bobExpectExp[0]);
 
       // Right now, the balance of Bob must be 10.
       // Because Bob's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(10);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(10);
 
       // Skip to the expiry period of Bob.
       await skipToBlock(bobExpectExp[1]);
 
       // Right now, the balance of Bob must be 0.
       // Because Bob's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(0);
     });
 
     it("[HAPPY] transfer correctly if frame size is 6 and slot per era is 4 and mint at end era period", async function () {
@@ -992,8 +992,8 @@ export const run = async () => {
       //                               10, 10    10, 10
 
       // Right now, the balance of Alice and Bob must be 20.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(amount * 2);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(amount * 2);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount * 2);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(amount * 2);
 
       // Transfer 5 token from Alice to Bob.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|  <-- era 2.
@@ -1002,11 +1002,11 @@ export const run = async () => {
       //                               Alice     Bob
       //                               5, 10 --> 5, 10, 10
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(15);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(25);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(15);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(25);
 
       // Skip to the expiry period of Alice.
       await skipToBlock(aliceExpectExp[0]);
@@ -1015,8 +1015,8 @@ export const run = async () => {
       // Alice must be 10.
       // Bob must be 20.
       // Because Alice's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(10);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(20);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(10);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(20);
 
       // // Transfer 5 tokens from Alice to Bob, repeating this process twice.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|  <-- era 2.
@@ -1026,38 +1026,38 @@ export const run = async () => {
       //                               0, 5  --> 0, 5, 10, 10
       //                               0, 0  --> 0, 10, 10, 10
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(5);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(25);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(5);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(25);
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(30);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(30);
 
       // Skip to the expiry period of Alice.
       await skipToBlock(aliceExpectExp[1]);
 
       // Right now, the balance of Bob must be 20.
       // Because Alice's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(20);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(20);
 
       // Skip to the expiry period of Bob.
       await skipToBlock(bobExpectExp[0]);
 
       // Right now, the balance of Bob must be 10.
       // Because Bob's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(10);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(10);
 
       // Skip to the expiry period of Bob.
       await skipToBlock(bobExpectExp[1]);
 
       // Right now, the balance of Bob must be 0.
       // Because Bob's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(0);
     });
 
     it("[HAPPY] transfer correctly if frame size is 8 and slot per era is 4 and mint at end era period", async function () {
@@ -1152,8 +1152,8 @@ export const run = async () => {
       //                               |         |         | 10, 10
 
       // Right now, the balance of Alice and Bob must be 20.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(amount * 2);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(amount * 2);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount * 2);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(amount * 2);
 
       // Transfer 5 token from Alice to Bob.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|  <-- era 2.
@@ -1164,11 +1164,11 @@ export const run = async () => {
       //                               |Bob      |         |
       //                               |10       |5        | 10, 10
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 15))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 15))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 15);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(5);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(35);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(5);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(35);
 
       // Skip to the expiry period of Alice.
       await skipToBlock(aliceExpectExp[0]);
@@ -1177,8 +1177,8 @@ export const run = async () => {
       // Alice must be 5.
       // Bob must be 25.
       // Because Alice's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(5);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(25);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(5);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(25);
 
       // // Transfer 5 tokens from Alice to Bob, repeating this process twice.
       // |-------------- 78892315 --------------||-------------- 78892315 --------------|  <-- era 2.
@@ -1189,32 +1189,32 @@ export const run = async () => {
       //                               |Bob      |         |
       //                               |0        |10       | 10, 10
 
-      expect(await erc20exp.connect(alice).transfer(bobAddress, 5))
+      expect(await erc20exp.connect(alice)["transfer(address,uint256)"](bobAddress, 5))
         .to.be.emit(erc20exp, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 5);
-      expect(await erc20exp.balanceOf(aliceAddress)).equal(0);
-      expect(await erc20exp.balanceOf(bobAddress)).equal(30);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(30);
 
       // Skip to the expiry period of Alice.
       await skipToBlock(aliceExpectExp[1]);
 
       // Right now, the balance of Bob must be 20.
       // Because Alice's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(20);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(20);
 
       // Skip to the expiry period of Bob.
       await skipToBlock(bobExpectExp[0]);
 
       // Right now, the balance of Bob must be 10.
       // Because Bob's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(10);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(10);
 
       // Skip to the expiry period of Bob.
       await skipToBlock(bobExpectExp[1]);
 
       // Right now, the balance of Bob must be 0.
       // Because Bob's 10 tokens have expired.
-      expect(await erc20exp.balanceOf(bobAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](bobAddress)).equal(0);
     });
 
     it("[UNHAPPY] transfer from zero address", async function () {
@@ -1236,7 +1236,7 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp, alice} = await deployERC20EXPBase({});
 
-      expect(erc20exp.connect(alice).transfer(ZERO_ADDRESS, 1))
+      expect(erc20exp.connect(alice)["transfer(address,uint256)"](ZERO_ADDRESS, 1))
         .to.be.revertedWithCustomError(erc20exp, ERROR_ERC20_INVALID_RECEIVER)
         .withArgs(ZERO_ADDRESS);
     });
@@ -1248,7 +1248,7 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp, alice, bob} = await deployERC20EXPBase({});
 
-      expect(erc20exp.connect(alice).transfer(await bob.getAddress(), 1))
+      expect(erc20exp.connect(alice)["transfer(address,uint256)"](await bob.getAddress(), 1))
         .to.be.revertedWithCustomError(erc20exp, ERROR_ERC20_INSUFFICIENT_BALANCE)
         .withArgs(await alice.getAddress(), 0, 1);
     });

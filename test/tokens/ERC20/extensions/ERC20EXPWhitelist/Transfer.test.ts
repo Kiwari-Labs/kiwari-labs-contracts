@@ -21,19 +21,19 @@ export const run = async () => {
       await expect(erc20expWhitelist.mintSpendableWhitelist(aliceAddress, 1))
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, aliceAddress, 1);
-      expect(await erc20expWhitelist.balanceOf(aliceAddress)).equal(1);
-      await expect(erc20expWhitelist.connect(alice).transfer(bobAddress, 1))
+      expect(await erc20expWhitelist["balanceOf(address)"](aliceAddress)).equal(1);
+      await expect(erc20expWhitelist.connect(alice)["transfer(address,uint256)"](bobAddress, 1))
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(aliceAddress, ZERO_ADDRESS, 1)
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, bobAddress, 1);
-      expect(await erc20expWhitelist.balanceOf(aliceAddress)).equal(0);
-      expect(await erc20expWhitelist.balanceOf(bobAddress)).equal(1);
-      await expect(erc20expWhitelist.connect(bob).transfer(jameAddress, 1))
+      expect(await erc20expWhitelist["balanceOf(address)"](aliceAddress)).equal(0);
+      expect(await erc20expWhitelist["balanceOf(address)"](bobAddress)).equal(1);
+      await expect(erc20expWhitelist.connect(bob)["transfer(address,uint256)"](jameAddress, 1))
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(bobAddress, jameAddress, 1);
-      expect(await erc20expWhitelist.balanceOf(bobAddress)).equal(0);
-      expect(await erc20expWhitelist.balanceOf(jameAddress)).equal(1);
+      expect(await erc20expWhitelist["balanceOf(address)"](bobAddress)).equal(0);
+      expect(await erc20expWhitelist["balanceOf(address)"](jameAddress)).equal(1);
     });
 
     // In cases of Wholesale and Retail are still in the designing phase to be discussed later.
@@ -48,13 +48,13 @@ export const run = async () => {
       await expect(erc20expWhitelist.mintSpendableWhitelist(aliceAddress, 1))
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, aliceAddress, 1);
-      await expect(erc20expWhitelist.connect(alice).transfer(bobAddress, 1))
+      await expect(erc20expWhitelist.connect(alice)["transfer(address,uint256)"](bobAddress, 1))
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(aliceAddress, ZERO_ADDRESS, 1)
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, bobAddress, 1);
-      expect(await erc20expWhitelist.balanceOf(aliceAddress)).equal(0);
-      expect(await erc20expWhitelist.balanceOf(bobAddress)).equal(1);
+      expect(await erc20expWhitelist["balanceOf(address)"](aliceAddress)).equal(0);
+      expect(await erc20expWhitelist["balanceOf(address)"](bobAddress)).equal(1);
       expect(await erc20expWhitelist.safeBalanceOf(bobAddress)).equal(0);
     });
 
@@ -69,18 +69,18 @@ export const run = async () => {
       await expect(erc20expWhitelist.mintSpendableWhitelist(aliceAddress, 1))
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, aliceAddress, 1);
-      await expect(erc20expWhitelist.connect(alice).transfer(bobAddress, 1))
+      await expect(erc20expWhitelist.connect(alice)["transfer(address,uint256)"](bobAddress, 1))
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(aliceAddress, ZERO_ADDRESS, 1)
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, bobAddress, 1);
-      await expect(erc20expWhitelist.connect(bob).transfer(aliceAddress, 1))
+      await expect(erc20expWhitelist.connect(bob)["transfer(address,uint256)"](aliceAddress, 1))
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(bobAddress, ZERO_ADDRESS, 1)
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, aliceAddress, 1);
-      expect(await erc20expWhitelist.balanceOf(aliceAddress)).equal(1);
-      expect(await erc20expWhitelist.balanceOf(bobAddress)).equal(0);
+      expect(await erc20expWhitelist["balanceOf(address)"](aliceAddress)).equal(1);
+      expect(await erc20expWhitelist["balanceOf(address)"](bobAddress)).equal(0);
       expect(await erc20expWhitelist.safeBalanceOf(bobAddress)).equal(0);
     });
 
@@ -98,11 +98,11 @@ export const run = async () => {
       await expect(erc20expWhitelist.mintSpendableWhitelist(aliceAddress, 1))
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, aliceAddress, 1);
-      await expect(erc20expWhitelist.connect(alice).transfer(bobAddress, 1))
+      await expect(erc20expWhitelist.connect(alice)["transfer(address,uint256)"](bobAddress, 1))
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 1);
-      expect(await erc20expWhitelist.balanceOf(aliceAddress)).equal(0);
-      expect(await erc20expWhitelist.balanceOf(bobAddress)).equal(1);
+      expect(await erc20expWhitelist["balanceOf(address)"](aliceAddress)).equal(0);
+      expect(await erc20expWhitelist["balanceOf(address)"](bobAddress)).equal(1);
       expect(await erc20expWhitelist.safeBalanceOf(bobAddress)).equal(1);
     });
 
@@ -123,8 +123,8 @@ export const run = async () => {
       await expect(erc20expWhitelist.connect(alice).transferUnspendable(bobAddress, 1))
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(aliceAddress, bobAddress, 1);
-      expect(await erc20expWhitelist.balanceOf(aliceAddress)).equal(0);
-      expect(await erc20expWhitelist.balanceOf(bobAddress)).equal(1);
+      expect(await erc20expWhitelist["balanceOf(address)"](aliceAddress)).equal(0);
+      expect(await erc20expWhitelist["balanceOf(address)"](bobAddress)).equal(1);
       expect(await erc20expWhitelist.safeBalanceOf(bobAddress)).equal(0);
     });
 
@@ -159,7 +159,7 @@ export const run = async () => {
       await expect(erc20expWhitelist.mintUnspendableWhitelist(aliceAddress, 1))
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, aliceAddress, 1);
-      await expect(erc20expWhitelist.connect(alice).transfer(bobAddress, 1))
+      await expect(erc20expWhitelist.connect(alice)["transfer(address,uint256)"](bobAddress, 1))
         .to.be.revertedWithCustomError(erc20expWhitelist, ERROR_ERC20_INSUFFICIENT_BALANCE)
         .withArgs(aliceAddress, 0, 1);
     });
@@ -175,7 +175,7 @@ export const run = async () => {
       await expect(erc20expWhitelist.mintUnspendableWhitelist(aliceAddress, 1))
         .to.be.emit(erc20expWhitelist, EVENT_TRANSFER)
         .withArgs(ZERO_ADDRESS, aliceAddress, 1);
-      await expect(erc20expWhitelist.connect(alice).transfer(bobAddress, 1))
+      await expect(erc20expWhitelist.connect(alice)["transfer(address,uint256)"](bobAddress, 1))
         .to.be.revertedWithCustomError(erc20expWhitelist, ERROR_ERC20_INSUFFICIENT_BALANCE)
         .withArgs(aliceAddress, 0, 1);
     });
