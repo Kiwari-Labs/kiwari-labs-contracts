@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {deploySlidingWindowLibrary} from "../../utils.test";
+import {deploySlidingWindowLibrary} from "./utils.test";
 
 export const run = async () => {
   describe("CalculationSafeFrame", async function () {
