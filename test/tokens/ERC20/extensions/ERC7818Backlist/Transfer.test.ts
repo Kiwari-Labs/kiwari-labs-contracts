@@ -12,9 +12,9 @@ export const run = async () => {
       expect(await erc7818Backlist.isBlacklisted(alice.address)).equal(false);
       expect(await erc7818Backlist.isBlacklisted(bob.address)).equal(false);
 
-      await erc7818Backlist.connect(alice).transfer(bob.address, 100);
+      await erc7818Backlist.connect(alice)["transfer(address,uint256)"](bob.address, 100);
 
-      expect(await erc7818Backlist.balanceOf(bob.address)).equal(100);
+      expect(await erc7818Backlist["balanceOf(address)"](bob.address)).equal(100);
     });
 
     it("[HAPPY] able transfer from non blacklist", async function () {
@@ -26,9 +26,9 @@ export const run = async () => {
       expect(await erc7818Backlist.isBlacklisted(alice.address)).equal(false);
       expect(await erc7818Backlist.isBlacklisted(bob.address)).equal(false);
 
-      await erc7818Backlist.connect(bob).transferFrom(alice.address, bob.address, 100);
+      await erc7818Backlist.connect(bob)["transferFrom(address,address,uint256)"](alice.address, bob.address, 100);
 
-      expect(await erc7818Backlist.balanceOf(bob.address)).equal(100);
+      expect(await erc7818Backlist["balanceOf(address)"](bob.address)).equal(100);
     });
 
     it("[HAPPY] unable transfer to blacklist", async function () {
@@ -39,7 +39,7 @@ export const run = async () => {
       expect(await erc7818Backlist.isBlacklisted(alice.address)).equal(false);
       expect(await erc7818Backlist.isBlacklisted(bob.address)).equal(true);
 
-      await expect(erc7818Backlist.connect(alice).transfer(bob.address, 100))
+      await expect(erc7818Backlist.connect(alice)["transfer(address,uint256)"](bob.address, 100))
         .to.revertedWithCustomError(erc7818Backlist, ERC7818Backlist.errors.BlacklistedAddress)
         .withArgs(bob.address);
     });
@@ -55,7 +55,7 @@ export const run = async () => {
       expect(await erc7818Backlist.isBlacklisted(alice.address)).equal(true);
       expect(await erc7818Backlist.isBlacklisted(bob.address)).equal(false);
 
-      await expect(erc7818Backlist.connect(bob).transferFrom(alice.address, bob.address, 100))
+      await expect(erc7818Backlist.connect(bob)["transferFrom(address,address,uint256)"](alice.address, bob.address, 100))
         .to.revertedWithCustomError(erc7818Backlist, ERC7818Backlist.errors.BlacklistedAddress)
         .withArgs(alice.address);
     });

@@ -24,20 +24,3 @@ export const getAddress = async function (account: Signer | Contract) {
   }
   return (await account.getAddress()).toLowerCase();
 };
-
-// export const deployAgreementBaseForBilateral = async function (name: string) {
-//   const [deployer, alice, bob, jame] = await ethers.getSigners();
-//   const AGREEMENT = await ethers.getContractFactory(AGREEMENT_BASE_FOR_BILATERAL_CONTRACT, deployer);
-//   const agreementBase = await AGREEMENT.deploy(name);
-//   return {agreementBase, alice, bob, jame};
-// };
-
-// export const deployBilateralAgreementBase = async function (
-//   party: [PromiseOrValue<string>, PromiseOrValue<string>],
-//   implementation: string,
-// ) {
-//   const [deployer, alice, bob, jame] = await ethers.getSigners();
-//   const BILATERAL_AGREEMENT = await ethers.getContractFactory(BILATERAL_AGREEMENT_BASE_CONTRACT, deployer);
-//   const bilateralAgreementBase = await BILATERAL_AGREEMENT.deploy(party, implementation);
-//   return {bilateralAgreementBase, alice, bob, jame};
-// };

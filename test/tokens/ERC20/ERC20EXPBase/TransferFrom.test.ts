@@ -1,6 +1,6 @@
 import {expect} from "chai";
-import {deployERC20EXPBase} from "../../utils.test";
-import {ERROR_ERC20_INSUFFICIENT_ALLOWANCE, EVENT_APPROVAL, EVENT_TRANSFER, ZERO_ADDRESS} from "../../constant.test";
+import {deployERC20EXPBase} from "./utils.test";
+import {common, ERC20} from "../../../constant.test";
 
 export const run = async () => {
   describe("TransferFrom", async function () {
@@ -10,11 +10,11 @@ export const run = async () => {
       const amount = 100;
 
       await expect(erc20exp.mint(await alice.getAddress(), amount))
-        .to.be.emit(erc20exp, EVENT_TRANSFER)
-        .withArgs(ZERO_ADDRESS, await alice.getAddress(), amount);
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
+        .withArgs(common.zeroAddress, await alice.getAddress(), amount);
 
       await expect(erc20exp.connect(alice).approve(await bob.getAddress(), amount))
-        .to.be.emit(erc20exp, EVENT_APPROVAL)
+        .to.be.emit(erc20exp, ERC20.events.Approval)
         .withArgs(await alice.getAddress(), await bob.getAddress(), amount);
 
       expect(await erc20exp.allowance(await alice.getAddress(), await bob.getAddress())).to.equal(amount);
@@ -24,7 +24,7 @@ export const run = async () => {
           .connect(bob)
           ["transferFrom(address,address,uint256)"](await alice.getAddress(), await bob.getAddress(), amount),
       )
-        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(await alice.getAddress(), await bob.getAddress(), amount);
     });
 
@@ -35,11 +35,11 @@ export const run = async () => {
       const MAX_INT = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
       await expect(erc20exp.mint(await alice.getAddress(), amount))
-        .to.be.emit(erc20exp, EVENT_TRANSFER)
-        .withArgs(ZERO_ADDRESS, await alice.getAddress(), amount);
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
+        .withArgs(common.zeroAddress, await alice.getAddress(), amount);
 
       await expect(erc20exp.connect(alice).approve(await bob.getAddress(), MAX_INT))
-        .to.be.emit(erc20exp, EVENT_APPROVAL)
+        .to.be.emit(erc20exp, ERC20.events.Approval)
         .withArgs(await alice.getAddress(), await bob.getAddress(), MAX_INT);
 
       expect(await erc20exp.allowance(await alice.getAddress(), await bob.getAddress())).to.equal(MAX_INT);
@@ -49,7 +49,7 @@ export const run = async () => {
           .connect(bob)
           ["transferFrom(address,address,uint256)"](await alice.getAddress(), await bob.getAddress(), amount),
       )
-        .to.be.emit(erc20exp, EVENT_TRANSFER)
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(await alice.getAddress(), await bob.getAddress(), amount);
     });
 
@@ -59,11 +59,11 @@ export const run = async () => {
       const amount = 100;
 
       await expect(erc20exp.mint(await alice.getAddress(), amount))
-        .to.be.emit(erc20exp, EVENT_TRANSFER)
-        .withArgs(ZERO_ADDRESS, await alice.getAddress(), amount);
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
+        .withArgs(common.zeroAddress, await alice.getAddress(), amount);
 
       await expect(erc20exp.connect(alice).approve(await bob.getAddress(), amount))
-        .to.be.emit(erc20exp, EVENT_APPROVAL)
+        .to.be.emit(erc20exp, ERC20.events.Approval)
         .withArgs(await alice.getAddress(), await bob.getAddress(), amount);
 
       expect(await erc20exp.allowance(await alice.getAddress(), await bob.getAddress())).to.equal(amount);
@@ -73,9 +73,8 @@ export const run = async () => {
           .connect(bob)
           ["transferFrom(address,address,uint256)"](await alice.getAddress(), await bob.getAddress(), amount * 2),
       )
-        .to.be.revertedWithCustomError(erc20exp, ERROR_ERC20_INSUFFICIENT_ALLOWANCE)
+        .to.be.revertedWithCustomError(erc20exp, ERC20.errors.ERC20InsufficientAllowance)
         .withArgs(await bob.getAddress(), amount, amount * 2);
     });
   });
 };
-

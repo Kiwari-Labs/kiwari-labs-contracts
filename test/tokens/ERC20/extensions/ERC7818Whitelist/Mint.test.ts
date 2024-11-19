@@ -14,7 +14,7 @@ export const run = async () => {
       await expect(erc7818expWhitelist.mintSpendableWhitelist(aliceAddress, 1))
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, 1);
-      expect(await erc7818expWhitelist.balanceOf(aliceAddress)).equal(1);
+      expect(await erc7818expWhitelist["balanceOf(address)"](aliceAddress)).equal(1);
       expect(await erc7818expWhitelist.safeBalanceOf(aliceAddress)).equal(1);
     });
 
@@ -28,7 +28,7 @@ export const run = async () => {
       await expect(erc7818expWhitelist.mintUnspendableWhitelist(aliceAddress, 1))
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, 1);
-      expect(await erc7818expWhitelist.balanceOf(aliceAddress)).equal(1);
+      expect(await erc7818expWhitelist["balanceOf(address)"](aliceAddress)).equal(1);
       expect(await erc7818expWhitelist.safeBalanceOf(aliceAddress)).equal(0);
     });
 

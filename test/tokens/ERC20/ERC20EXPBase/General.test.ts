@@ -1,8 +1,8 @@
 import {expect} from "chai";
-import {mineBlock} from "../../utils.test";
-import {deployERC7818} from "./utils.test";
-import {common, ERC20, ERC7818} from "../../constant.test";
-import {calculateSlidingWindowState} from "../../utils/SlidingWindow/utils.test";
+import {mineBlock} from "../../../utils.test";
+import {deployERC20EXPBase} from "./utils.test";
+import {common, ERC20, ERC20EXPBase} from "../../../constant.test";
+import {calculateSlidingWindowState} from "../../../utils/SlidingWindow/utils.test";
 import {network} from "hardhat";
 
 export const run = async () => {
@@ -10,29 +10,29 @@ export const run = async () => {
     it("[HAPPY] query block per era", async function () {
       const blockPeriod = 400;
 
-      const {erc7818} = await deployERC7818({blockPeriod});
+      const {erc20exp} = await deployERC20EXPBase({blockPeriod});
 
       const self = calculateSlidingWindowState({blockPeriod});
-      expect(await erc7818.getBlockPerEra()).to.equal(self._blockPerEra);
+      expect(await erc20exp.getBlockPerEra()).to.equal(self._blockPerEra);
     });
 
     it("[HAPPY] query block per slot", async function () {
       const blockPeriod = 400;
       const slotSize = 4;
 
-      const {erc7818} = await deployERC7818({blockPeriod, slotSize});
+      const {erc20exp} = await deployERC20EXPBase({blockPeriod, slotSize});
 
       const self = calculateSlidingWindowState({blockPeriod, slotSize});
-      expect(await erc7818.getBlockPerSlot()).to.equal(self._blockPerSlot);
+      expect(await erc20exp.getBlockPerSlot()).to.equal(self._blockPerSlot);
     });
 
     it("[HAPPY] query slot per era", async function () {
       const slotSize = 4;
 
-      const {erc7818} = await deployERC7818({slotSize});
+      const {erc20exp} = await deployERC20EXPBase({slotSize});
 
       const self = calculateSlidingWindowState({slotSize});
-      expect(await erc7818.getSlotPerEra()).to.equal(self._slotSize);
+      expect(await erc20exp.getSlotPerEra()).to.equal(self._slotSize);
     });
 
     it("[HAPPY] query frame size in block length", async function () {
@@ -40,10 +40,10 @@ export const run = async () => {
       const slotSize = 4;
       const frameSize = 2;
 
-      const {erc7818} = await deployERC7818({blockPeriod, slotSize, frameSize});
+      const {erc20exp} = await deployERC20EXPBase({blockPeriod, slotSize, frameSize});
 
       const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
-      expect(await erc7818.getFrameSizeInBlockLength()).to.equal(self._frameSizeInBlockLength);
+      expect(await erc20exp.getFrameSizeInBlockLength()).to.equal(self._frameSizeInBlockLength);
     });
 
     it("[HAPPY] query frame size in era length", async function () {
@@ -51,10 +51,10 @@ export const run = async () => {
       const slotSize = 4;
       const frameSize = 2;
 
-      const {erc7818} = await deployERC7818({blockPeriod, slotSize, frameSize});
+      const {erc20exp} = await deployERC20EXPBase({blockPeriod, slotSize, frameSize});
 
       const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
-      expect(await erc7818.getFrameSizeInEraLength()).to.equal(self._frameSizeInEraAndSlotLength[0]);
+      expect(await erc20exp.getFrameSizeInEraLength()).to.equal(self._frameSizeInEraAndSlotLength[0]);
     });
 
     it("[HAPPY] query frame size in slot length", async function () {
@@ -62,10 +62,10 @@ export const run = async () => {
       const slotSize = 4;
       const frameSize = 2;
 
-      const {erc7818} = await deployERC7818({blockPeriod, slotSize, frameSize});
+      const {erc20exp} = await deployERC20EXPBase({blockPeriod, slotSize, frameSize});
 
       const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
-      expect(await erc7818.getFrameSizeInSlotLength()).to.equal(self._frameSizeInEraAndSlotLength[1]);
+      expect(await erc20exp.getFrameSizeInSlotLength()).to.equal(self._frameSizeInEraAndSlotLength[1]);
     });
 
     it("[HAPPY] query frame", async function () {
@@ -73,13 +73,13 @@ export const run = async () => {
       const slotSize = 4;
       const frameSize = 2;
 
-      const {erc7818} = await deployERC7818({blockPeriod, slotSize, frameSize});
+      const {erc20exp} = await deployERC20EXPBase({blockPeriod, slotSize, frameSize});
 
       const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
 
       await mineBlock(Number(self._blockPerSlot) * 5);
 
-      const [fromEra, toEra, fromSlot, toSlot] = await erc7818.frame();
+      const [fromEra, toEra, fromSlot, toSlot] = await erc20exp.frame();
 
       expect(fromEra).to.equal(0);
       expect(toEra).to.equal(1);
@@ -93,13 +93,13 @@ export const run = async () => {
       const slotSize = 4;
       const frameSize = 2;
 
-      const {erc7818} = await deployERC7818({blockPeriod, slotSize, frameSize});
+      const {erc20exp} = await deployERC20EXPBase({blockPeriod, slotSize, frameSize});
 
       const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
 
       await mineBlock(Number(self._blockPerSlot) * 5);
 
-      const [fromEra, toEra, fromSlot, toSlot] = await erc7818.safeFrame();
+      const [fromEra, toEra, fromSlot, toSlot] = await erc20exp.safeFrame();
 
       expect(fromEra).to.equal(0);
       expect(toEra).to.equal(1);
@@ -109,40 +109,40 @@ export const run = async () => {
     });
 
     it("[HAPPY] query name", async function () {
-      const {erc7818} = await deployERC7818({});
+      const {erc20exp} = await deployERC20EXPBase({});
 
-      expect(await erc7818.name()).to.equal(ERC7818.constructor.name);
+      expect(await erc20exp.name()).to.equal(ERC20EXPBase.constructor.name);
     });
 
     it("[HAPPY] query symbol", async function () {
-      const {erc7818} = await deployERC7818({});
+      const {erc20exp} = await deployERC20EXPBase({});
 
-      expect(await erc7818.symbol()).to.equal(ERC7818.constructor.symbol);
+      expect(await erc20exp.symbol()).to.equal(ERC20EXPBase.constructor.symbol);
     });
 
     it("[HAPPY] query total supply", async function () {
-      const {erc7818} = await deployERC7818({});
+      const {erc20exp} = await deployERC20EXPBase({});
 
       // Due to token can expiration there is no actual totalSupply.
-      expect(await erc7818.totalSupply()).to.equal(0);
+      expect(await erc20exp.totalSupply()).to.equal(0);
     });
 
     it("[HAPPY] query decimals", async function () {
-      const {erc7818} = await deployERC7818({});
+      const {erc20exp} = await deployERC20EXPBase({});
 
-      expect(await erc7818.decimals()).to.equal(18);
+      expect(await erc20exp.decimals()).to.equal(18);
     });
 
     it("[HAPPY] query block balance ", async function () {
-      const {erc7818, alice} = await deployERC7818({});
+      const {erc20exp, alice} = await deployERC20EXPBase({});
       const aliceAddress = await alice.getAddress();
       const amount = 1;
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
       const blockNumber = await network.provider.send("eth_blockNumber");
-      expect(await erc7818.getBlockBalance(blockNumber)).to.equal(1);
-      expect(await erc7818.getBlockBalance(blockNumber + 1n)).to.equal(0);
+      expect(await erc20exp.getBlockBalance(blockNumber)).to.equal(1);
+      expect(await erc20exp.getBlockBalance(blockNumber + 1n)).to.equal(0);
     });
   });
 };

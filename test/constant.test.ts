@@ -55,6 +55,12 @@ export const LightWeightSlidingWindow = {
   events: {},
 };
 
+export const AgreementBaseForBilateral = {
+  name: "MockAgreementBaseForBilateral",
+  errors: {},
+  events: {},
+};
+
 export const ERC20 = {
   errors: {
     ERC20InsufficientBalance: "ERC20InsufficientBalance",
@@ -115,8 +121,8 @@ export const ERC7818NearestExpiryQuery = {
   events: {},
 };
 
-export const ERC7818 = {
-  name: "MockERC7818",
+export const ERC20EXPBase = {
+  name: "MockERC20EXPBase",
   constructor: {
     name: "PointToken",
     symbol: "POINT",
@@ -174,11 +180,11 @@ export const contracts = {
     BilateralAgreementBase,
     SlidingWindow,
     LightWeightSlidingWindow,
-    // MockAgreementBaseForBilateral: "MockAgreementBaseForBilateral",
+    AgreementBaseForBilateral,
   },
   tokens: {
     ERC20,
-    ERC7818,
+    ERC20EXPBase,
     // MockLightWeightERC20EXPBase: "MockLightWeightERC20EXPBase",
   },
   utils: {

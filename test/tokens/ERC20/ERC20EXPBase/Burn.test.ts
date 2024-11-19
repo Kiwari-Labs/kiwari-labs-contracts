@@ -1,7 +1,7 @@
 import {expect} from "chai";
-import {mineBlock, skipToBlock} from "../../utils.test";
-import {deployERC7818} from "./utils.test";
-import {common, ERC20} from "../../constant.test";
+import {mineBlock, skipToBlock} from "../../../utils.test";
+import {deployERC20EXPBase} from "./utils.test";
+import {common, ERC20} from "../../../constant.test";
 
 export const run = async () => {
   describe("Burn", async function () {
@@ -10,45 +10,45 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc7818, alice} = await deployERC7818({});
+      const {erc20exp, alice} = await deployERC20EXPBase();
 
-      const blockPerSlot = await erc7818.getBlockPerSlot();
-      const blockPerFrame = await erc7818.getFrameSizeInBlockLength();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
 
       const expectExp = [];
 
       // Ensure we are in [era: 0, slot 0].
-      let [era, slot] = await erc7818.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(0);
 
       // Mint into [era: 0, slot 0].
       const amount = 1;
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount);
-      let list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount);
+      let list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
       // Skip to [era: 0, slot 1].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 1].
-      [era, slot] = await erc7818.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(1);
 
       // Mint into [era: 0, slot 1].
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount + amount);
-      list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount + amount);
+      list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
@@ -63,25 +63,25 @@ export const run = async () => {
       // mint      mint
 
       // Right now, the balance must be 2.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(2);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc7818.burn(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.burn(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, amount);
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1.
       await skipToBlock(expectExp[0]);
 
       // Right now, the balance must be 1.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 2.
       await skipToBlock(expectExp[1]);
 
       // Right now, the balance must be 0.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
     });
 
     it("[HAPPY] burn correctly if mint tokens into slot 1, 2 of era 0", async function () {
@@ -89,10 +89,10 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc7818, alice} = await deployERC7818({});
+      const {erc20exp, alice} = await deployERC20EXPBase();
 
-      const blockPerSlot = await erc7818.getBlockPerSlot();
-      const blockPerFrame = await erc7818.getFrameSizeInBlockLength();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
 
@@ -102,35 +102,35 @@ export const run = async () => {
       await mineBlock(blockPerSlot);
 
       // Ensure we are in [era: 0, slot 1].
-      let [era, slot] = await erc7818.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(1);
 
       // Mint into [era: 0, slot 1].
       const amount = 1;
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount);
-      let list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount);
+      let list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
       // Skip to [era: 0, slot 2].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 2].
-      [era, slot] = await erc7818.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(2);
 
       // Mint into [era: 0, slot 2].
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount + amount);
-      list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount + amount);
+      list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
@@ -145,25 +145,25 @@ export const run = async () => {
       //           mint      mint
 
       // Right now, the balance must be 2.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(2);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc7818.burn(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.burn(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, amount);
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1.
       await skipToBlock(expectExp[0]);
 
       // Right now, the balance must be 1.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 2.
       await skipToBlock(expectExp[1]);
 
       // Right now, the balance must be 0.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
     });
 
     it("[HAPPY] burn correctly if mint tokens into slot 2, 3 of era 0", async function () {
@@ -171,10 +171,10 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc7818, alice} = await deployERC7818({});
+      const {erc20exp, alice} = await deployERC20EXPBase();
 
-      const blockPerSlot = await erc7818.getBlockPerSlot();
-      const blockPerFrame = await erc7818.getFrameSizeInBlockLength();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
 
@@ -186,41 +186,41 @@ export const run = async () => {
       await mineBlock(blockPerSlot);
 
       // Ensure we are in [era: 0, slot 2].
-      let [era, slot] = await erc7818.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(2);
 
       // Mint into [era: 0, slot 2].
       const amount = 1;
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount + amount);
-      let list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount + amount);
+      let list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[1]) + blockPerFrame);
       expect(list.length).equal(2);
 
       // Skip to [era: 0, slot 3].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 3].
-      [era, slot] = await erc7818.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(3);
 
       // Mint into [era: 0, slot 3].
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount + amount + amount + amount);
-      list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount + amount + amount + amount);
+      list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[1]) + blockPerFrame);
       expect(list.length).equal(2);
 
@@ -235,25 +235,25 @@ export const run = async () => {
       //                     mint      mint
 
       // Right now, the balance must be 4.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(4);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(4);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc7818.burn(aliceAddress, 3))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.burn(aliceAddress, 3))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, 3);
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1,2.
       await skipToBlock(expectExp[0]);
 
       // Right now, the balance must be 1. Because we have burned 3 tokens before.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 3,4.
       await skipToBlock(expectExp[1]);
 
       // Right now, the balance must be 0.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
     });
 
     it("[HAPPY] burn correctly if mint tokens into slot 0, 1 of era 0 when frame size full era", async function () {
@@ -261,45 +261,45 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc7818, alice} = await deployERC7818({frameSize: 4, slotSize: 4});
+      const {erc20exp, alice} = await deployERC20EXPBase({frameSize: 4, slotSize: 4});
 
-      const blockPerSlot = await erc7818.getBlockPerSlot();
-      const blockPerFrame = await erc7818.getFrameSizeInBlockLength();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
 
       const expectExp = [];
 
       // Ensure we are in [era: 0, slot 0].
-      let [era, slot] = await erc7818.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(0);
 
       // Mint into [era: 0, slot 0].
       const amount = 1;
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount);
-      let list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount);
+      let list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
       // Skip to [era: 0, slot 1].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 1].
-      [era, slot] = await erc7818.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(1);
 
       // Mint into [era: 0, slot 1].
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount + amount);
-      list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount + amount);
+      list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
@@ -314,25 +314,25 @@ export const run = async () => {
       // mint      mint
 
       // Right now, the balance must be 2.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(2);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc7818.burn(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.burn(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, amount);
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1.
       await skipToBlock(expectExp[0]);
 
       // Right now, the balance must be 1.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 2.
       await skipToBlock(expectExp[1]);
 
       // Right now, the balance must be 0.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
     });
 
     it("[HAPPY] burn correctly if mint tokens into slot 1, 2 of era 0 when frame size full era", async function () {
@@ -340,10 +340,10 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc7818, alice} = await deployERC7818({frameSize: 4, slotSize: 4});
+      const {erc20exp, alice} = await deployERC20EXPBase({frameSize: 4, slotSize: 4});
 
-      const blockPerSlot = await erc7818.getBlockPerSlot();
-      const blockPerFrame = await erc7818.getFrameSizeInBlockLength();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
 
@@ -353,35 +353,35 @@ export const run = async () => {
       await mineBlock(blockPerSlot);
 
       // Ensure we are in [era: 0, slot 1].
-      let [era, slot] = await erc7818.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(1);
 
       // Mint into [era: 0, slot 1].
       const amount = 1;
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount);
-      let list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount);
+      let list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
       // Skip to [era: 0, slot 2].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 2].
-      [era, slot] = await erc7818.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(2);
 
       // Mint into [era: 0, slot 2].
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount + amount);
-      list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount + amount);
+      list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
@@ -396,25 +396,25 @@ export const run = async () => {
       //           mint      mint
 
       // Right now, the balance must be 2.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(2);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc7818.burn(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.burn(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, amount);
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1.
       await skipToBlock(expectExp[0]);
 
       // Right now, the balance must be 1.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 2.
       await skipToBlock(expectExp[1]);
 
       // Right now, the balance must be 0.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
     });
 
     it("[HAPPY] burn correctly if mint tokens into slot 2, 3 of era 0 when frame size full era", async function () {
@@ -422,10 +422,10 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc7818, alice} = await deployERC7818({frameSize: 4, slotSize: 4});
+      const {erc20exp, alice} = await deployERC20EXPBase({frameSize: 4, slotSize: 4});
 
-      const blockPerSlot = await erc7818.getBlockPerSlot();
-      const blockPerFrame = await erc7818.getFrameSizeInBlockLength();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
 
@@ -437,41 +437,41 @@ export const run = async () => {
       await mineBlock(blockPerSlot);
 
       // Ensure we are in [era: 0, slot 2].
-      let [era, slot] = await erc7818.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(2);
 
       // Mint into [era: 0, slot 2].
       const amount = 1;
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount + amount);
-      let list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount + amount);
+      let list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[1]) + blockPerFrame);
       expect(list.length).equal(2);
 
       // Skip to [era: 0, slot 3].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 3].
-      [era, slot] = await erc7818.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(3);
 
       // Mint into [era: 0, slot 3].
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount + amount + amount + amount);
-      list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount + amount + amount + amount);
+      list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[1]) + blockPerFrame);
       expect(list.length).equal(2);
 
@@ -486,25 +486,25 @@ export const run = async () => {
       //                     mint      mint
 
       // Right now, the balance must be 4.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(4);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(4);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc7818.burn(aliceAddress, 3))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.burn(aliceAddress, 3))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, 3);
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1,2.
       await skipToBlock(expectExp[0]);
 
       // Right now, the balance must be 1. Because we have burned 3 tokens before.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 3,4.
       await skipToBlock(expectExp[1]);
 
       // Right now, the balance must be 0.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
     });
 
     it("[HAPPY] burn correctly if mint tokens into slot 0, 1 of era 0 when frame size over era", async function () {
@@ -512,45 +512,45 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc7818, alice} = await deployERC7818({frameSize: 6, slotSize: 4});
+      const {erc20exp, alice} = await deployERC20EXPBase({frameSize: 6, slotSize: 4});
 
-      const blockPerSlot = await erc7818.getBlockPerSlot();
-      const blockPerFrame = await erc7818.getFrameSizeInBlockLength();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
 
       const expectExp = [];
 
       // Ensure we are in [era: 0, slot 0].
-      let [era, slot] = await erc7818.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(0);
 
       // Mint into [era: 0, slot 0].
       const amount = 1;
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount);
-      let list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount);
+      let list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
       // Skip to [era: 0, slot 1].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 1].
-      [era, slot] = await erc7818.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(1);
 
       // Mint into [era: 0, slot 1].
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount + amount);
-      list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount + amount);
+      list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
@@ -565,25 +565,25 @@ export const run = async () => {
       // mint      mint
 
       // Right now, the balance must be 2.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(2);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc7818.burn(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.burn(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, amount);
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1.
       await skipToBlock(expectExp[0]);
 
       // Right now, the balance must be 1.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 2.
       await skipToBlock(expectExp[1]);
 
       // Right now, the balance must be 0.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
     });
 
     it("[HAPPY] burn correctly if mint tokens into slot 1, 2 of era 0 when frame size over era", async function () {
@@ -591,10 +591,10 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc7818, alice} = await deployERC7818({frameSize: 6, slotSize: 4});
+      const {erc20exp, alice} = await deployERC20EXPBase({frameSize: 6, slotSize: 4});
 
-      const blockPerSlot = await erc7818.getBlockPerSlot();
-      const blockPerFrame = await erc7818.getFrameSizeInBlockLength();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
 
@@ -604,35 +604,35 @@ export const run = async () => {
       await mineBlock(blockPerSlot);
 
       // Ensure we are in [era: 0, slot 1].
-      let [era, slot] = await erc7818.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(1);
 
       // Mint into [era: 0, slot 1].
       const amount = 1;
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount);
-      let list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount);
+      let list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
       // Skip to [era: 0, slot 2].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 2].
-      [era, slot] = await erc7818.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(2);
 
       // Mint into [era: 0, slot 2].
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount + amount);
-      list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount + amount);
+      list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
@@ -647,25 +647,25 @@ export const run = async () => {
       //           mint      mint
 
       // Right now, the balance must be 2.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(2);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc7818.burn(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.burn(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, amount);
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1.
       await skipToBlock(expectExp[0]);
 
       // Right now, the balance must be 1.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 2.
       await skipToBlock(expectExp[1]);
 
       // Right now, the balance must be 0.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
     });
 
     it("[HAPPY] burn correctly if mint tokens into slot 2, 3 of era 0 when frame size over era", async function () {
@@ -673,10 +673,10 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc7818, alice} = await deployERC7818({frameSize: 6, slotSize: 4});
+      const {erc20exp, alice} = await deployERC20EXPBase({frameSize: 6, slotSize: 4});
 
-      const blockPerSlot = await erc7818.getBlockPerSlot();
-      const blockPerFrame = await erc7818.getFrameSizeInBlockLength();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
 
@@ -688,41 +688,41 @@ export const run = async () => {
       await mineBlock(blockPerSlot);
 
       // Ensure we are in [era: 0, slot 2].
-      let [era, slot] = await erc7818.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(2);
 
       // Mint into [era: 0, slot 2].
       const amount = 1;
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount + amount);
-      let list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount + amount);
+      let list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[1]) + blockPerFrame);
       expect(list.length).equal(2);
 
       // Skip to [era: 0, slot 3].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 3].
-      [era, slot] = await erc7818.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(3);
 
       // Mint into [era: 0, slot 3].
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount + amount + amount + amount);
-      list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount + amount + amount + amount);
+      list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[1]) + blockPerFrame);
       expect(list.length).equal(2);
 
@@ -737,25 +737,25 @@ export const run = async () => {
       //                     mint      mint
 
       // Right now, the balance must be 4.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(4);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(4);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc7818.burn(aliceAddress, 3))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.burn(aliceAddress, 3))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, 3);
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 1,2.
       await skipToBlock(expectExp[0]);
 
       // Right now, the balance must be 1. Because we have burned 3 tokens before.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to the expiry period of token 3,4.
       await skipToBlock(expectExp[1]);
 
       // Right now, the balance must be 0.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
     });
 
     it("[HAPPY] burn correctly if value less than block balance", async function () {
@@ -763,28 +763,28 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc7818, alice} = await deployERC7818({});
+      const {erc20exp, alice} = await deployERC20EXPBase();
 
-      const blockPerSlot = await erc7818.getBlockPerSlot();
-      const blockPerFrame = await erc7818.getFrameSizeInBlockLength();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
 
       const expectExp = [];
 
       // Ensure we are in [era: 0, slot 0].
-      let [era, slot] = await erc7818.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(0);
 
       // Mint into [era: 0, slot 0].
       const amount = 10;
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount);
-      let list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount);
+      let list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
@@ -799,19 +799,19 @@ export const run = async () => {
       // mint
 
       // Right now, the balance must be 10.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(10);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(10);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc7818.burn(aliceAddress, 5))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.burn(aliceAddress, 5))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, 5);
-      expect(await erc7818.balanceOf(aliceAddress)).equal(5);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(5);
 
       // Skip to the expiry period.
       await skipToBlock(expectExp[0]);
 
       // Right now, the balance must be 0.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
     });
 
     it("[HAPPY] burn correctly if mint mint at end era period", async function () {
@@ -819,10 +819,10 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc7818, alice} = await deployERC7818({});
+      const {erc20exp, alice} = await deployERC20EXPBase();
 
-      const blockPerSlot = await erc7818.getBlockPerSlot();
-      const blockPerFrame = await erc7818.getFrameSizeInBlockLength();
+      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const aliceAddress = await alice.getAddress();
 
@@ -836,18 +836,18 @@ export const run = async () => {
       await mineBlock(blockPerSlot);
 
       // Ensure we are in [era: 0, slot 3].
-      let [era, slot] = await erc7818.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(0);
       expect(slot).equal(3);
 
       // Mint into [era: 0, slot 3].
       const amount = 1;
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
-      expect(await erc7818.balanceOf(aliceAddress)).equal(amount);
-      let list = await erc7818.tokenList(aliceAddress, era, slot);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(amount);
+      let list = await erc20exp.tokenList(aliceAddress, era, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
@@ -862,26 +862,26 @@ export const run = async () => {
       //                                mint
 
       // Right now, the balance must be 1.
-      expect(await erc7818.balanceOf(aliceAddress)).equal(1);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
 
       // Skip to [era: 1, slot 0].
       await mineBlock(blockPerSlot);
 
       // Ensure we are in [era: 1, slot 0].
-      [era, slot] = await erc7818.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEraAndSlot();
       expect(era).equal(1);
       expect(slot).equal(0);
 
       // Mint into [era: 1, slot 0].
-      await expect(erc7818.mint(aliceAddress, amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.mint(aliceAddress, amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc7818.burn(aliceAddress, amount + amount))
-        .to.be.emit(erc7818, ERC20.events.Transfer)
+      await expect(erc20exp.burn(aliceAddress, amount + amount))
+        .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, amount + amount);
-      expect(await erc7818.balanceOf(aliceAddress)).equal(0);
+      expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
     });
 
     it("[UNHAPPY] burn from zero address", async function () {
@@ -889,10 +889,10 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc7818} = await deployERC7818({});
+      const {erc20exp} = await deployERC20EXPBase();
 
-      expect(erc7818.burn(common.zeroAddress, 1))
-        .to.be.revertedWithCustomError(erc7818, ERC20.errors.ERC20InvalidSender)
+      expect(erc20exp.burn(common.zeroAddress, 1))
+        .to.be.revertedWithCustomError(erc20exp, ERC20.errors.ERC20InvalidSender)
         .withArgs(common.zeroAddress);
     });
 
@@ -901,10 +901,10 @@ export const run = async () => {
       const startBlockNumber = 100;
 
       await mineBlock(startBlockNumber);
-      const {erc7818, alice} = await deployERC7818({});
+      const {erc20exp, alice} = await deployERC20EXPBase();
 
-      expect(erc7818.burn(await alice.getAddress(), 1))
-        .to.be.revertedWithCustomError(erc7818, ERC20.errors.ERC20InsufficientBalance)
+      expect(erc20exp.burn(await alice.getAddress(), 1))
+        .to.be.revertedWithCustomError(erc20exp, ERC20.errors.ERC20InsufficientBalance)
         .withArgs(await alice.getAddress(), 0, 1);
     });
   });

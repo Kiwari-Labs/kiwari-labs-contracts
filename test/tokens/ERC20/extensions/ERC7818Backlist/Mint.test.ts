@@ -1,6 +1,6 @@
 import {expect} from "chai";
-import { deployERC7818Backlist } from "./utils.test";
-import { ERC7818Backlist } from "../../../../constant.test";
+import {deployERC7818Backlist} from "./utils.test";
+import {ERC7818Backlist} from "../../../../constant.test";
 
 export const run = async () => {
   describe("Mint", async function () {
@@ -11,7 +11,7 @@ export const run = async () => {
 
       await erc7818Backlist.mint(alice.address, 100);
 
-      expect(await erc7818Backlist.balanceOf(alice.address)).equal(100);
+      expect(await erc7818Backlist["balanceOf(address)"](alice.address)).equal(100);
     });
 
     it("[HAPPY] unable mint to blacklist", async function () {

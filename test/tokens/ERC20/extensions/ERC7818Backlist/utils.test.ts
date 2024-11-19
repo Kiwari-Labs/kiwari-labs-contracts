@@ -1,5 +1,5 @@
 import {ethers} from "hardhat";
-import {ERC7818Backlist, ERC7818} from "../../../../constant.test";
+import {ERC7818Backlist, ERC20EXPBase} from "../../../../constant.test";
 
 export const deployERC7818Backlist = async function (
   blockPeriod = 400, // 400ms per block
@@ -11,8 +11,8 @@ export const deployERC7818Backlist = async function (
   const ERC7818_BACKLIST = await ethers.getContractFactory(ERC7818Backlist.name, deployer);
 
   const erc7818Backlist = await ERC7818_BACKLIST.deploy(
-    ERC7818.constructor.name,
-    ERC7818.constructor.symbol,
+    ERC20EXPBase.constructor.name,
+    ERC20EXPBase.constructor.symbol,
     blockPeriod,
     frameSize,
     slotSize,
