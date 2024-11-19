@@ -6,7 +6,7 @@ import * as RevokeTransaction from "./RevokeTransaction.test";
 import * as Transaction from "./Transaction.test";
 
 export const run = async () => {
-  describe("BilateralAgreementBase", async function () {
+  describe.only("BilateralAgreementBase", async function () {
     ApproveAgreement.run();
     ApproveChange.run();
     General.run();

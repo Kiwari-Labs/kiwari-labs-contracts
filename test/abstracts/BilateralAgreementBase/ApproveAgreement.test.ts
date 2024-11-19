@@ -1,7 +1,8 @@
 import {expect} from "chai";
-import {deployBilateralAgreementBase, deployAgreementBaseForBilateral, deployERC20EXPBase} from "../../utils.test";
-import {AGREEMENT_NAME} from "../../constant.test";
 import {AbiCoder} from "@ethersproject/abi";
+import {deployERC20EXPBase} from "../../tokens/ERC20/ERC20EXPBase/utils.test";
+import {deployAgreementBaseForBilateral, deployBilateralAgreementBase} from "./utils.test";
+import {AgreementBase} from "../../constant.test";
 
 export const run = async () => {
   describe("ApproveAgreement", async function () {
@@ -11,7 +12,7 @@ export const run = async () => {
       const blockPeriod = 400;
       const amount = 1000n;
 
-      const {agreementBase, alice, bob} = await deployAgreementBaseForBilateral(AGREEMENT_NAME);
+      const {agreementBase, alice, bob} = await deployAgreementBaseForBilateral(AgreementBase.name);
       const {bilateralAgreementBase} = await deployBilateralAgreementBase(
         [await alice.getAddress(), await bob.getAddress()],
         agreementBase.address,
