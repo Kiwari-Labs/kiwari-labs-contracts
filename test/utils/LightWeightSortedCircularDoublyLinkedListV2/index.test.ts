@@ -7,11 +7,11 @@ import * as Shrink from "./Shrink.test";
 
 export const run = async () => {
   describe("LightWeightSortedCircularDoublyLinkedListV2", async function () {
-    // General.run();
+    // TODO: General.run();
     Insertion.run();
-    Sorting.run();
-    Removal.run();
     Integration.run();
-    // Shrink.run();
+    Removal.run();
+    // TODO: Shrink.run();
+    Sorting.run();
   });
 };

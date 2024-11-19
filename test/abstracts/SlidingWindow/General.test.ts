@@ -155,7 +155,7 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, frameSize, slotSize});
 
-      const invalidSlotPerEra = common.minSlotPerEra + 1;
+      const invalidSlotPerEra = common.maxSlotPerEra + 1;
 
       await expect(slidingWindow.updateWindow(blockPeriod, frameSize, invalidSlotPerEra)).to.be.revertedWithCustomError(
         slidingWindow,

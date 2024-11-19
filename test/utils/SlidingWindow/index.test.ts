@@ -5,9 +5,9 @@ import * as CalculationSafeFrame from "./CalculationSafeFrame.test";
 
 export const run = async () => {
   describe("SlidingWindow", async function () {
-    General.run();
     CalculationEraAndSlot.run();
     CalculationFrame.run();
     CalculationSafeFrame.run();
+    General.run();
   });
 };

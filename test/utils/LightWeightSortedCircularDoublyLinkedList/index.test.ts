@@ -9,9 +9,9 @@ export const run = async () => {
   describe("LightWeightSortedCircularDoublyLinkedList", async function () {
     General.run();
     Insertion.run();
-    Sorting.run();
-    Removal.run();
     Integration.run();
+    Removal.run();
     Shrink.run();
+    Sorting.run();
   });
 };

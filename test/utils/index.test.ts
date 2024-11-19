@@ -7,11 +7,11 @@ import * as Comparators from "./Comparators/index.test";
 
 export const run = async () => {
   describe("utils", async function () {
+    Comparators.run();
+    LightWeightSlidingWindow.run();
     LightWeightSortedCircularDoublyLinkedList.run();
     LightWeightSortedCircularDoublyLinkedListV2.run();
-    SortedCircularDoublyLinkedList.run();
-    LightWeightSlidingWindow.run();
     SlidingWindow.run();
-    Comparators.run();
+    SortedCircularDoublyLinkedList.run();
   });
 };

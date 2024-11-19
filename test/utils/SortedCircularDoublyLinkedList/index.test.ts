@@ -10,10 +10,10 @@ export const run = async () => {
   describe("SortedCircularDoublyLinkedList", async function () {
     General.run();
     Insertion.run();
+    Integration.run();
+    Removal.run();
+    Shrink.run();
     Sorting.run();
     Updatable.run();
-    Removal.run();
-    Integration.run();
-    Shrink.run();
   });
 };
