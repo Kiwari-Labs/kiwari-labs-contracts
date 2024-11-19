@@ -6,7 +6,7 @@ import * as Integration from "./Integration.test";
 import * as Shrink from "./Shrink.test";
 
 export const run = async () => {
-  describe("LightWeightSortedCircularDoublyLinkedList", async function () {
+  describe("LightWeightSortedCircularDoublyLinkedListV2", async function () {
     // General.run();
     Insertion.run();
     Sorting.run();
