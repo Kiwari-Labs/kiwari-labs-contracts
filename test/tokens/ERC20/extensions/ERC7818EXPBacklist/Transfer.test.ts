@@ -1,6 +1,6 @@
 import {expect} from "chai";
-import {deployERC20EXBacklist} from "../../../../utils.test";
-import {ERROR_BLACKLISTED_ADDRESS} from "../../../../constant.test";
+import {deployERC20EXBacklist} from "./utils.test";
+import {ERC7818Backlist} from "../../../../constant.test";
 
 export const run = async () => {
   describe("Mint", async function () {
@@ -40,7 +40,7 @@ export const run = async () => {
       expect(await erc20ExpBacklist.isBlacklisted(bob.address)).equal(true);
 
       await expect(erc20ExpBacklist.connect(alice).transfer(bob.address, 100))
-        .to.revertedWithCustomError(erc20ExpBacklist, ERROR_BLACKLISTED_ADDRESS)
+        .to.revertedWithCustomError(erc20ExpBacklist, ERC7818Backlist.errors.BlacklistedAddress)
         .withArgs(bob.address);
     });
 
@@ -56,7 +56,7 @@ export const run = async () => {
       expect(await erc20ExpBacklist.isBlacklisted(bob.address)).equal(false);
 
       await expect(erc20ExpBacklist.connect(bob).transferFrom(alice.address, bob.address, 100))
-        .to.revertedWithCustomError(erc20ExpBacklist, ERROR_BLACKLISTED_ADDRESS)
+        .to.revertedWithCustomError(erc20ExpBacklist, ERC7818Backlist.errors.BlacklistedAddress)
         .withArgs(alice.address);
     });
   });

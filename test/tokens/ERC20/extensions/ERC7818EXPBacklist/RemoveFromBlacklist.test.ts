@@ -1,6 +1,6 @@
 import {expect} from "chai";
-import {deployERC20EXBacklist} from "../../../../utils.test";
-import {ZERO_ADDRESS, ERROR_INVALID_ADDRESS, EVENT_UNBLACKLISTED} from "../../../../constant.test";
+import {deployERC20EXBacklist} from "./utils.test";
+import {common, ERC7818Backlist} from "../../../../constant.test";
 
 export const run = async () => {
   describe("Remove From Blacklist", async function () {
@@ -12,7 +12,7 @@ export const run = async () => {
       expect(await erc20ExpBacklist.isBlacklisted(alice.address)).equal(true);
 
       await expect(erc20ExpBacklist.removeFromBlacklist(alice.address))
-        .to.emit(erc20ExpBacklist, EVENT_UNBLACKLISTED)
+        .to.emit(erc20ExpBacklist, ERC7818Backlist.events.Unblacklisted)
         .withArgs(deployer.address, alice.address);
 
       expect(await erc20ExpBacklist.isBlacklisted(alice.address)).equal(false);
@@ -21,9 +21,9 @@ export const run = async () => {
     it("[UNHAPPY] cannot unbacklist of zero address", async function () {
       const {erc20ExpBacklist} = await deployERC20EXBacklist();
 
-      await expect(erc20ExpBacklist.removeFromBlacklist(ZERO_ADDRESS)).to.be.revertedWithCustomError(
+      await expect(erc20ExpBacklist.removeFromBlacklist(common.zeroAddress)).to.be.revertedWithCustomError(
         erc20ExpBacklist,
-        ERROR_INVALID_ADDRESS,
+        ERC7818Backlist.errors.InvalidAddress,
       );
     });
   });

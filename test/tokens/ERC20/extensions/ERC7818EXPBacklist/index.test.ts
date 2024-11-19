@@ -4,7 +4,7 @@ import * as Mint from "./Mint.test";
 import * as Transfer from "./Transfer.test";
 
 export const run = async () => {
-  describe("ERC20EXPBacklist", async function () {
+  describe("ERC7818Backlist", async function () {
     RemoveFromBlacklist.run();
     AddToBlacklist.run();
     Mint.run();
