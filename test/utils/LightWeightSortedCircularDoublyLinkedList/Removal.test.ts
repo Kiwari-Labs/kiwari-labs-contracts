@@ -1,51 +1,51 @@
 import {expect} from "chai";
-import {deployLightWeightDoublyListLibrary} from "../../utils.test";
+import {deployLightWeightDoublyListLibrary} from "./utils.test";
 
 export const run = async () => {
   describe("Removal", async function () {
     it("[HAPPY] remove correctly", async function () {
-      const {doublyList} = await deployLightWeightDoublyListLibrary();
+      const {lightWeightDoublyList} = await deployLightWeightDoublyListLibrary();
 
       const index = 1;
-      await doublyList.insert(index);
-      expect(await doublyList.exist(index)).to.equal(true);
-      await doublyList.remove(index);
-      expect(await doublyList.exist(index)).to.equal(false);
-      expect(await doublyList.size()).to.equal(0);
+      await lightWeightDoublyList.insert(index);
+      expect(await lightWeightDoublyList.exist(index)).to.equal(true);
+      await lightWeightDoublyList.remove(index);
+      expect(await lightWeightDoublyList.exist(index)).to.equal(false);
+      expect(await lightWeightDoublyList.size()).to.equal(0);
     });
 
     it("[HAPPY] remove correctly from the head", async function () {
-      const {doublyList} = await deployLightWeightDoublyListLibrary({
+      const {lightWeightDoublyList} = await deployLightWeightDoublyListLibrary({
         autoList: true,
       });
 
-      const head = await doublyList.head();
-      const size = await doublyList.size();
-      expect(await doublyList.exist(head)).to.equal(true);
-      await doublyList.remove(head);
-      expect(await doublyList.exist(head)).to.equal(false);
-      expect(await doublyList.size()).to.equal(size.sub(1));
-      const list = await doublyList.ascending();
+      const head = await lightWeightDoublyList.head();
+      const size = await lightWeightDoublyList.size();
+      expect(await lightWeightDoublyList.exist(head)).to.equal(true);
+      await lightWeightDoublyList.remove(head);
+      expect(await lightWeightDoublyList.exist(head)).to.equal(false);
+      expect(await lightWeightDoublyList.size()).to.equal(size.sub(1));
+      const list = await lightWeightDoublyList.ascending();
       for (let i = 0; i < 9; i++) {
         expect(list[i]).to.equal(i + 2);
       }
-      const node = await doublyList.node(1);
+      const node = await lightWeightDoublyList.node(1);
       expect(node.prev).to.equal(0);
       expect(node.next).to.equal(0);
     });
 
     it("[HAPPY] remove correctly of a node", async function () {
-      const {doublyList} = await deployLightWeightDoublyListLibrary({
+      const {lightWeightDoublyList} = await deployLightWeightDoublyListLibrary({
         autoList: true,
       });
 
       const index = 5;
-      const size = await doublyList.size();
-      expect(await doublyList.exist(index)).to.equal(true);
-      await doublyList.remove(index);
-      expect(await doublyList.exist(index)).to.equal(false);
-      expect(await doublyList.size()).to.equal(size.sub(1));
-      const list = await doublyList.ascending();
+      const size = await lightWeightDoublyList.size();
+      expect(await lightWeightDoublyList.exist(index)).to.equal(true);
+      await lightWeightDoublyList.remove(index);
+      expect(await lightWeightDoublyList.exist(index)).to.equal(false);
+      expect(await lightWeightDoublyList.size()).to.equal(size.sub(1));
+      const list = await lightWeightDoublyList.ascending();
       for (let i = 0; i < 9; i++) {
         // Skip index 5.
         if (i < index - 1) {
@@ -57,26 +57,26 @@ export const run = async () => {
     });
 
     it("[HAPPY] remove correctly from the tail", async function () {
-      const {doublyList} = await deployLightWeightDoublyListLibrary({
+      const {lightWeightDoublyList} = await deployLightWeightDoublyListLibrary({
         autoList: true,
       });
 
-      const tail = await doublyList.tail();
-      const size = await doublyList.size();
-      expect(await doublyList.exist(tail)).to.equal(true);
-      await doublyList.remove(tail);
-      expect(await doublyList.exist(tail)).to.equal(false);
-      expect(await doublyList.size()).to.equal(size.sub(1));
-      const list = await doublyList.ascending();
+      const tail = await lightWeightDoublyList.tail();
+      const size = await lightWeightDoublyList.size();
+      expect(await lightWeightDoublyList.exist(tail)).to.equal(true);
+      await lightWeightDoublyList.remove(tail);
+      expect(await lightWeightDoublyList.exist(tail)).to.equal(false);
+      expect(await lightWeightDoublyList.size()).to.equal(size.sub(1));
+      const list = await lightWeightDoublyList.ascending();
       for (let i = 0; i < 9; i++) {
         expect(list[i]).to.equal(i + 1);
       }
     });
 
     it("[UNHAPPY] unable to remove unreal index", async function () {
-      const {doublyList} = await deployLightWeightDoublyListLibrary();
-      await doublyList.remove(1);
-      expect(await doublyList.size()).to.equal(0);
+      const {lightWeightDoublyList} = await deployLightWeightDoublyListLibrary();
+      await lightWeightDoublyList.remove(1);
+      expect(await lightWeightDoublyList.size()).to.equal(0);
     });
   });
 };
