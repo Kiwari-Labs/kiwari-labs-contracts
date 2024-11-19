@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "../../../../contracts/tokens/ERC20/ERC20EXPBase.sol";
 
-contract MockERC7818 is ERC20EXPBase {
+contract MockERC20EXPBase is ERC20EXPBase {
     constructor(
         string memory _name,
         string memory _symbol,
