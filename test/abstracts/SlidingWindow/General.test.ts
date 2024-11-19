@@ -1,16 +1,7 @@
 import {expect} from "chai";
-import {deploySlidingWindow, calculateSlidingWindowState, mineBlock, latestBlock} from "../../utils.test";
-import {
-  ERROR_INVALID_BLOCK_TIME,
-  ERROR_INVALID_FRAME_SIZE,
-  ERROR_INVALID_SLOT_PER_ERA,
-  MAXIMUM_BLOCK_TIME_IN_MILLISECONDS,
-  MAXIMUM_FRAME_SIZE,
-  MAXIMUM_SLOT_PER_ERA,
-  MINIMUM_BLOCK_TIME_IN_MILLISECONDS,
-  MINIMUM_FRAME_SIZE,
-  MINIMUM_SLOT_PER_ERA,
-} from "../../constant.test";
+import {calculateSlidingWindowState, deploySlidingWindow} from "./utils.test";
+import {common, SlidingWindow} from "../../constant.test";
+import { mineBlock } from "../../utils.test";
 
 export const run = async () => {
   describe("General", async function () {
@@ -83,11 +74,11 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, frameSize, slotSize});
 
-      const invalidBlockTime = MINIMUM_BLOCK_TIME_IN_MILLISECONDS - 1;
+      const invalidBlockTime = common.minBlockTimeInMilliseconds - 1;
 
       await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize, slotSize)).to.be.revertedWithCustomError(
         slidingWindow,
-        ERROR_INVALID_BLOCK_TIME,
+        SlidingWindow.errors.InvalidBlockTime,
       );
     });
 
@@ -99,11 +90,11 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, frameSize, slotSize});
 
-      const invalidBlockTime = MAXIMUM_BLOCK_TIME_IN_MILLISECONDS + 1;
+      const invalidBlockTime = common.maxBlockTimeInMilliseconds + 1;
 
       await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize, slotSize)).to.be.revertedWithCustomError(
         slidingWindow,
-        ERROR_INVALID_BLOCK_TIME,
+        SlidingWindow.errors.InvalidBlockTime,
       );
     });
 
@@ -115,11 +106,11 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, frameSize, slotSize});
 
-      const invalidFrameSize = MINIMUM_FRAME_SIZE - 1;
+      const invalidFrameSize = common.minFrameSize - 1;
 
       await expect(slidingWindow.updateWindow(blockPeriod, invalidFrameSize, slotSize)).to.be.revertedWithCustomError(
         slidingWindow,
-        ERROR_INVALID_FRAME_SIZE,
+        SlidingWindow.errors.InvalidFrameSize,
       );
     });
 
@@ -131,11 +122,11 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, frameSize, slotSize});
 
-      const invalidFrameSize = MAXIMUM_FRAME_SIZE + 1;
+      const invalidFrameSize = common.maxFrameSize + 1;
 
       await expect(slidingWindow.updateWindow(blockPeriod, invalidFrameSize, slotSize)).to.be.revertedWithCustomError(
         slidingWindow,
-        ERROR_INVALID_FRAME_SIZE,
+        SlidingWindow.errors.InvalidFrameSize,
       );
     });
 
@@ -147,11 +138,11 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, frameSize, slotSize});
 
-      const invalidSlotPerEra = MINIMUM_SLOT_PER_ERA - 1;
+      const invalidSlotPerEra = common.minSlotPerEra - 1;
 
       await expect(slidingWindow.updateWindow(blockPeriod, frameSize, invalidSlotPerEra)).to.be.revertedWithCustomError(
         slidingWindow,
-        ERROR_INVALID_SLOT_PER_ERA,
+        SlidingWindow.errors.InvalidSlotPerEra,
       );
     });
 
@@ -163,11 +154,11 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindow({startBlockNumber, blockPeriod, frameSize, slotSize});
 
-      const invalidSlotPerEra = MAXIMUM_SLOT_PER_ERA + 1;
+      const invalidSlotPerEra = common.minSlotPerEra + 1;
 
       await expect(slidingWindow.updateWindow(blockPeriod, frameSize, invalidSlotPerEra)).to.be.revertedWithCustomError(
         slidingWindow,
-        ERROR_INVALID_SLOT_PER_ERA,
+        SlidingWindow.errors.InvalidSlotPerEra,
       );
     });
 
