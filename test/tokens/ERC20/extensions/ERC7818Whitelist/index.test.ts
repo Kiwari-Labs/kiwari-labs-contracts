@@ -6,7 +6,7 @@ import * as Expiration from "./Expiration.test";
 import * as Transfer from "./Transfer.test";
 
 export const run = async () => {
-  describe("ERC20EXPWhitelist", async function () {
+  describe("ERC7818Whitelist", async function () {
     Whitelist.run();
     Mint.run();
     TransferFrom.run();
