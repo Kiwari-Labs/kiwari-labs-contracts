@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {deployLightWeightSlidingWindowLibrary} from "../../utils.test";
+import {deployLightWeightSlidingWindowLibrary} from "./utils.test";
 
 export const run = async () => {
   describe("CalculationEraAndSlot", async function () {
@@ -18,7 +18,11 @@ export const run = async () => {
       //    |
       //    * <-- the current block.
 
-      const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({startBlockNumber, blockPeriod, frameSize});
+      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({
+        startBlockNumber,
+        blockPeriod,
+        frameSize,
+      });
 
       const blockNumberList = [
         Math.floor(blockPeriodSlot * 0.25) + startBlockNumber,
@@ -27,7 +31,7 @@ export const run = async () => {
       ];
 
       for (let i = 0; i < blockNumberList.length; i++) {
-        const [era, slot] = await slidingWindow.calculateEraAndSlot(blockNumberList[i]);
+        const [era, slot] = await lightWeightSlidingWindow.calculateEraAndSlot(blockNumberList[i]);
         expect(era).to.equal(0);
         expect(slot).to.equal(0);
       }
@@ -48,7 +52,11 @@ export const run = async () => {
       //              |
       //              * <-- the current block.
 
-      const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({startBlockNumber, blockPeriod, frameSize});
+      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({
+        startBlockNumber,
+        blockPeriod,
+        frameSize,
+      });
 
       const blockNumberList = [
         Math.floor(blockPeriodSlot * 1.25) + startBlockNumber,
@@ -57,7 +65,7 @@ export const run = async () => {
       ];
 
       for (let i = 0; i < blockNumberList.length; i++) {
-        const [era, slot] = await slidingWindow.calculateEraAndSlot(blockNumberList[i]);
+        const [era, slot] = await lightWeightSlidingWindow.calculateEraAndSlot(blockNumberList[i]);
         expect(era).to.equal(0);
         expect(slot).to.equal(1);
       }
@@ -78,7 +86,11 @@ export const run = async () => {
       //                        |
       //                        * <-- the current block.
 
-      const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({startBlockNumber, blockPeriod, frameSize});
+      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({
+        startBlockNumber,
+        blockPeriod,
+        frameSize,
+      });
 
       const blockNumberList = [
         Math.floor(blockPeriodSlot * 2.25) + startBlockNumber,
@@ -87,7 +99,7 @@ export const run = async () => {
       ];
 
       for (let i = 0; i < blockNumberList.length; i++) {
-        const [era, slot] = await slidingWindow.calculateEraAndSlot(blockNumberList[i]);
+        const [era, slot] = await lightWeightSlidingWindow.calculateEraAndSlot(blockNumberList[i]);
         expect(era).to.equal(0);
         expect(slot).to.equal(2);
       }
@@ -108,7 +120,11 @@ export const run = async () => {
       //                                  |
       //                                  * <-- the current block.
 
-      const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({startBlockNumber, blockPeriod, frameSize});
+      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({
+        startBlockNumber,
+        blockPeriod,
+        frameSize,
+      });
 
       const blockNumberList = [
         Math.floor(blockPeriodSlot * 3.25) + startBlockNumber,
@@ -117,7 +133,7 @@ export const run = async () => {
       ];
 
       for (let i = 0; i < blockNumberList.length; i++) {
-        const [era, slot] = await slidingWindow.calculateEraAndSlot(blockNumberList[i]);
+        const [era, slot] = await lightWeightSlidingWindow.calculateEraAndSlot(blockNumberList[i]);
         expect(era).to.equal(0);
         expect(slot).to.equal(3);
       }
@@ -138,7 +154,11 @@ export const run = async () => {
       //                                            |
       //                                            * <-- the current block.
 
-      const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({startBlockNumber, blockPeriod, frameSize});
+      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({
+        startBlockNumber,
+        blockPeriod,
+        frameSize,
+      });
 
       const blockNumberList = [
         Math.floor(blockPeriodSlot * 4.25) + startBlockNumber,
@@ -147,7 +167,7 @@ export const run = async () => {
       ];
 
       for (let i = 0; i < blockNumberList.length; i++) {
-        const [era, slot] = await slidingWindow.calculateEraAndSlot(blockNumberList[i]);
+        const [era, slot] = await lightWeightSlidingWindow.calculateEraAndSlot(blockNumberList[i]);
         expect(era).to.equal(1);
         expect(slot).to.equal(0);
       }
@@ -171,7 +191,7 @@ export const run = async () => {
     //   //                                        |
     //   //                                        * <-- the current block.
 
-    //   const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({startBlockNumber, blockPeriod, frameSize});
+    //   const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({startBlockNumber, blockPeriod, frameSize});
 
     //   const blockNumberList = [
     //     blockPeriodEra + startBlockNumber - 3,
@@ -186,7 +206,7 @@ export const run = async () => {
     //   ];
 
     //   for (let i = 0; i < blockNumberList.length; i++) {
-    //     const [era, slot] = await slidingWindow.calculateEraAndSlot(blockNumberList[i]);
+    //     const [era, slot] = await lightWeightSlidingWindow.calculateEraAndSlot(blockNumberList[i]);
     //     expect(era).to.equal(0);
     //     expect(slot).to.equal(3);
     //   }
@@ -207,7 +227,7 @@ export const run = async () => {
     //   //                                          |
     //   //                                          * <-- the current block.
 
-    //   const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({startBlockNumber, blockPeriod, frameSize});
+    //   const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({startBlockNumber, blockPeriod, frameSize});
 
     //   const blockNumberList = [
     //     // blockPeriodEra + startBlockNumber - 3,
@@ -222,7 +242,7 @@ export const run = async () => {
     //   ];
 
     //   for (let i = 0; i < blockNumberList.length; i++) {
-    //     const [era, slot] = await slidingWindow.calculateEraAndSlot(blockNumberList[i]);
+    //     const [era, slot] = await lightWeightSlidingWindow.calculateEraAndSlot(blockNumberList[i]);
     //     expect(era).to.equal(1);
     //     expect(slot).to.equal(0);
     //   }

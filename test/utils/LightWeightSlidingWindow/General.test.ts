@@ -1,66 +1,58 @@
 import {expect} from "chai";
-import {deployLightWeightSlidingWindowLibrary, calculateLightWeightSlidingWindowState} from "../../utils.test";
-import {
-  ERROR_INVALID_BLOCK_TIME,
-  ERROR_INVALID_FRAME_SIZE,
-  MAXIMUM_BLOCK_TIME_IN_MILLISECONDS,
-  MAXIMUM_FRAME_SIZE,
-  MINIMUM_BLOCK_TIME_IN_MILLISECONDS,
-  MINIMUM_FRAME_SIZE,
-  SLOT_PER_ERA,
-} from "../../constant.test";
+import {common, LightWeightSlidingWindow} from "../../constant.test";
+import {calculateLightWeightSlidingWindowState, deployLightWeightSlidingWindowLibrary} from "./utils.test";
 
 export const run = async () => {
   describe("General", async function () {
     it("[HAPPY] query block per era", async function () {
       const blockPeriod = 400;
-      const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({blockPeriod});
+      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({blockPeriod});
       const self = calculateLightWeightSlidingWindowState({blockPeriod});
-      expect(await slidingWindow.getBlockPerEra()).to.equal(self._blockPerEra);
+      expect(await lightWeightSlidingWindow.getBlockPerEra()).to.equal(self._blockPerEra);
     });
 
     it("[HAPPY] query block per slot", async function () {
       const blockPeriod = 400;
-      const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({blockPeriod});
+      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({blockPeriod});
       const self = calculateLightWeightSlidingWindowState({blockPeriod});
-      expect(await slidingWindow.getBlockPerSlot()).to.equal(self._blockPerSlot);
+      expect(await lightWeightSlidingWindow.getBlockPerSlot()).to.equal(self._blockPerSlot);
     });
 
     it("[HAPPY] query slot per era", async function () {
-      const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({});
-      expect(await slidingWindow.getSlotPerEra()).to.equal(SLOT_PER_ERA);
+      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({});
+      expect(await lightWeightSlidingWindow.getSlotPerEra()).to.equal(common.slotPerEra);
     });
 
     it("[HAPPY] query frame size in block length", async function () {
       const blockPeriod = 400;
       const frameSize = 2;
-      const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({blockPeriod, frameSize});
+      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({blockPeriod, frameSize});
       const self = calculateLightWeightSlidingWindowState({blockPeriod, frameSize});
-      expect(await slidingWindow.getFrameSizeInBlockLength()).to.equal(self._frameSizeInBlockLength);
+      expect(await lightWeightSlidingWindow.getFrameSizeInBlockLength()).to.equal(self._frameSizeInBlockLength);
     });
 
     it("[HAPPY] query frame size in era length", async function () {
       const blockPeriod = 400;
       const frameSize = 2;
-      const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({blockPeriod, frameSize});
+      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({blockPeriod, frameSize});
       const self = calculateLightWeightSlidingWindowState({blockPeriod, frameSize});
-      expect(await slidingWindow.getFrameSizeInEraLength()).to.equal(self._frameSizeInEraAndSlotLength[0]);
+      expect(await lightWeightSlidingWindow.getFrameSizeInEraLength()).to.equal(self._frameSizeInEraAndSlotLength[0]);
     });
 
     it("[HAPPY] query frame size in slot length", async function () {
       const blockPeriod = 400;
       const frameSize = 2;
-      const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({blockPeriod, frameSize});
+      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({blockPeriod, frameSize});
       const self = calculateLightWeightSlidingWindowState({blockPeriod, frameSize});
-      expect(await slidingWindow.getFrameSizeInSlotLength()).to.equal(self._frameSizeInEraAndSlotLength[1]);
+      expect(await lightWeightSlidingWindow.getFrameSizeInSlotLength()).to.equal(self._frameSizeInEraAndSlotLength[1]);
     });
 
     it("[HAPPY] query frame size in era and slot length", async function () {
       const blockPeriod = 400;
       const frameSize = 2;
-      const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({blockPeriod, frameSize});
+      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({blockPeriod, frameSize});
       const self = calculateLightWeightSlidingWindowState({blockPeriod, frameSize});
-      const getFrameSizeInEraAndSlotLength = await slidingWindow.getFrameSizeInEraAndSlotLength();
+      const getFrameSizeInEraAndSlotLength = await lightWeightSlidingWindow.getFrameSizeInEraAndSlotLength();
       expect(getFrameSizeInEraAndSlotLength.length).to.equal(self._frameSizeInEraAndSlotLength.length);
       expect(getFrameSizeInEraAndSlotLength[0]).to.equal(self._frameSizeInEraAndSlotLength[0]);
       expect(getFrameSizeInEraAndSlotLength[1]).to.equal(self._frameSizeInEraAndSlotLength[1]);
@@ -71,17 +63,17 @@ export const run = async () => {
       const frameSize = 2;
       const startBlockNumber = 0;
 
-      const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({
+      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({
         startBlockNumber,
         blockPeriod,
         frameSize,
       });
 
-      const invalidBlockTime = MINIMUM_BLOCK_TIME_IN_MILLISECONDS - 1;
+      const invalidBlockTime = common.minBlockTimeInMilliseconds - 1;
 
-      await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize)).to.be.revertedWithCustomError(
-        slidingWindow,
-        ERROR_INVALID_BLOCK_TIME,
+      await expect(lightWeightSlidingWindow.updateWindow(invalidBlockTime, frameSize)).to.be.revertedWithCustomError(
+        lightWeightSlidingWindow,
+        LightWeightSlidingWindow.errors.InvalidBlockTime,
       );
     });
 
@@ -90,17 +82,17 @@ export const run = async () => {
       const frameSize = 2;
       const startBlockNumber = 0;
 
-      const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({
+      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({
         startBlockNumber,
         blockPeriod,
         frameSize,
       });
 
-      const invalidBlockTime = MAXIMUM_BLOCK_TIME_IN_MILLISECONDS + 1;
+      const invalidBlockTime = common.maxBlockTimeInMilliseconds + 1;
 
-      await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize)).to.be.revertedWithCustomError(
-        slidingWindow,
-        ERROR_INVALID_BLOCK_TIME,
+      await expect(lightWeightSlidingWindow.updateWindow(invalidBlockTime, frameSize)).to.be.revertedWithCustomError(
+        lightWeightSlidingWindow,
+        LightWeightSlidingWindow.errors.InvalidBlockTime,
       );
     });
 
@@ -109,17 +101,17 @@ export const run = async () => {
       const frameSize = 2;
       const startBlockNumber = 0;
 
-      const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({
+      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({
         startBlockNumber,
         blockPeriod,
         frameSize,
       });
 
-      const invalidFrameSize = MINIMUM_FRAME_SIZE - 1;
+      const invalidFrameSize = common.minFrameSize - 1;
 
-      await expect(slidingWindow.updateWindow(blockPeriod, invalidFrameSize)).to.be.revertedWithCustomError(
-        slidingWindow,
-        ERROR_INVALID_FRAME_SIZE,
+      await expect(lightWeightSlidingWindow.updateWindow(blockPeriod, invalidFrameSize)).to.be.revertedWithCustomError(
+        lightWeightSlidingWindow,
+        LightWeightSlidingWindow.errors.InvalidFrameSize,
       );
     });
 
@@ -128,17 +120,17 @@ export const run = async () => {
       const frameSize = 2;
       const startBlockNumber = 0;
 
-      const {slidingWindow} = await deployLightWeightSlidingWindowLibrary({
+      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({
         startBlockNumber,
         blockPeriod,
         frameSize,
       });
 
-      const invalidFrameSize = MAXIMUM_FRAME_SIZE + 1;
+      const invalidFrameSize = common.maxFrameSize + 1;
 
-      await expect(slidingWindow.updateWindow(blockPeriod, invalidFrameSize)).to.be.revertedWithCustomError(
-        slidingWindow,
-        ERROR_INVALID_FRAME_SIZE,
+      await expect(lightWeightSlidingWindow.updateWindow(blockPeriod, invalidFrameSize)).to.be.revertedWithCustomError(
+        lightWeightSlidingWindow,
+        LightWeightSlidingWindow.errors.InvalidFrameSize,
       );
     });
   });
