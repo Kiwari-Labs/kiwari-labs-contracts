@@ -1,7 +1,8 @@
 import {expect} from "chai";
-import {calculateSlidingWindowState, deploySlidingWindow} from "./utils.test";
+import {deploySlidingWindow} from "./utils.test";
 import {common, SlidingWindow} from "../../constant.test";
-import { mineBlock } from "../../utils.test";
+import {mineBlock} from "../../utils.test";
+import {calculateSlidingWindowState} from "../../utils/SlidingWindow/utils.test";
 
 export const run = async () => {
   describe("General", async function () {

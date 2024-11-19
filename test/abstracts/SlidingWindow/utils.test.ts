@@ -1,50 +1,5 @@
 import {ethers} from "hardhat";
-import {common, SlidingWindow} from "../../constant.test";
-
-export interface ISlidingWindowState {
-  _blockPerEra: Number;
-  _blockPerSlot: Number;
-  _frameSizeInBlockLength: Number;
-  _frameSizeInEraAndSlotLength: Array<Number>;
-  _startBlockNumber: Number;
-  _slotSize: Number;
-}
-
-export const calculateSlidingWindowState = function ({
-  startBlockNumber = 100,
-  blockPeriod = 400,
-  frameSize = 2,
-  slotSize = 4,
-}): ISlidingWindowState {
-  const self: ISlidingWindowState = {
-    _blockPerEra: 0,
-    _blockPerSlot: 0,
-    _frameSizeInBlockLength: 0,
-    _frameSizeInEraAndSlotLength: [],
-    _slotSize: 0,
-    _startBlockNumber: 0,
-  };
-
-  self._startBlockNumber = startBlockNumber;
-
-  // Why 'Math.floor', Since Solidity always rounds down.
-  const blockPerSlotCache = Math.floor(Math.floor(common.yearInMilliseconds / blockPeriod) / slotSize);
-  const blockPerEraCache = blockPerSlotCache * slotSize;
-
-  self._blockPerEra = blockPerEraCache;
-  self._blockPerSlot = blockPerSlotCache;
-  self._frameSizeInBlockLength = blockPerSlotCache * frameSize;
-  self._slotSize = slotSize;
-  if (frameSize <= slotSize) {
-    self._frameSizeInEraAndSlotLength[0] = 0;
-    self._frameSizeInEraAndSlotLength[1] = frameSize;
-  } else {
-    self._frameSizeInEraAndSlotLength[0] = frameSize / slotSize;
-    self._frameSizeInEraAndSlotLength[1] = frameSize % slotSize;
-  }
-
-  return self;
-};
+import {SlidingWindow} from "../../constant.test";
 
 export const deploySlidingWindow = async function ({
   startBlockNumber = 100, // start at a current block.number
