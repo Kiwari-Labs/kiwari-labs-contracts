@@ -34,8 +34,8 @@ export const run = async () => {
       await bilateralAgreementBase
         .connect(bob)
         .approveAgreement(abiCoder.encode(["address", "uint256"], [tokenB.address, amount]));
-      expect(await tokenA.balanceOf(bobAddress)).to.equal(amount);
-      expect(await tokenB.balanceOf(aliceAddress)).to.equal(amount);
+      expect(await tokenA["balanceOf(address)"](bobAddress)).to.equal(amount);
+      expect(await tokenB["balanceOf(address)"](aliceAddress)).to.equal(amount);
       expect((await bilateralAgreementBase.transaction(1)).executed).to.equal(true);
       expect(await bilateralAgreementBase.transactionLength()).to.equal(1);
     });

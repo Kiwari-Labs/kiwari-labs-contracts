@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title ERC20EXP Whitelist extension contract
+/// @title ERC7818 Whitelist extension contract
 /// @author Kiwari Labs
 
 import "../ERC20EXPBase.sol";
 
-abstract contract ERC20EXPWhitelist is ERC20EXPBase {
+abstract contract ERC7818Whitelist is ERC20EXPBase {
     /// @notice Struct to define balance infomation for each minter
     struct Whitelist {
         uint256 _spendableBalances;

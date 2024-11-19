@@ -4,16 +4,16 @@ export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const AGREEMENT_BASE_CONTRACT = "MockAgreementBase";
 export const AGREEMENT_BASE_FOR_BILATERAL_CONTRACT = "MockAgreementBaseForBilateral";
 export const BILATERAL_AGREEMENT_BASE_CONTRACT = "MockBilateralAgreementBase";
-export const ERC20_EXP_BASE_CONTRACT = "MockERC20EXPBase";
+export const ERC20_EXP_BASE_CONTRACT = "MockERC7818";
 export const LIGHT_WEIGHT_ERC20_EXP_BASE_CONTRACT = "MockLightWeightERC20EXPBase";
 export const SLIDING_WINDOW_CONTRACT = "MockSlidingWindow";
 export const LIGHT_WEIGHT_SLIDING_WINDOW_CONTRACT = "MockLightWeightSlidingWindow";
 
 // extensions
-export const ERC20_EXP_BACKLIST_CONTRACT = "MockERC20EXPBacklist";
-export const ERC20_EXP_MINT_QUOTA_CONTRACT = "MockERC20EXPMintQuota";
-export const ERC20_EXP_WHITELIST_CONTRACT = "MockERC20EXPWhitelist";
-export const ERC20_EXP_NEAREST_EXPIRY_QUERY_CONTRACT = "MockERC20EXPNearestExpiryQuery";
+export const ERC20_EXP_BACKLIST_CONTRACT = "MockERC7818Backlist";
+export const ERC20_EXP_MINT_QUOTA_CONTRACT = "MockERC7818MintQuota";
+export const ERC20_EXP_WHITELIST_CONTRACT = "MockERC7818Whitelist";
+export const ERC20_EXP_NEAREST_EXPIRY_QUERY_CONTRACT = "MockERC7818NearestExpiryQuery";
 export const LIGHT_WEIGHT_ERC20_EXP_WHITELIST_CONTRACT = "MockLightWeightERC20EXPWhitelist";
 
 // libraries

@@ -6,7 +6,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "../ERC20EXPBase.sol";
 
-abstract contract ERC20EXPBlacklist is ERC20EXPBase {
+abstract contract ERC7818Blacklist is ERC20EXPBase {
     /// @notice Emitted when an address is added to the blacklist
     /// @param caller Operate by the address
     /// @param account The address that was blacklisted

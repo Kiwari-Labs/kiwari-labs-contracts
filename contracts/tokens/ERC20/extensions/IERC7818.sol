@@ -9,26 +9,26 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 interface IERC7818 is IERC20 {
     /// @dev Retrieves the balance of a specific `id` owned by an account.
     /// @param account The address of the account.
-    /// @param id The ID it's can be round, period, epoch or token id.
+    /// @param id The ID it's can be round, period, epoch, or token id.
     /// @return uint256 The balance of the specified `id`.
     function balanceOf(address account, uint256 id) external view returns (uint256);
 
-    /// @dev Retrieves the current epoch.en contract.
+    /// @dev Retrieves the current epoch of the contract.
     /// @return uint256 The current epoch of the token contract, often used for determining active/expired states.
     function epoch() external view returns (uint256);
 
-    /// @dev Retrieves the duration (in blocks or ) a token remains valid.
+    /// @dev Retrieves the duration (in blocks or the time in seconds) a token remains valid.
     /// @return uint256 The validity duration in blocks or the time in seconds.
     function duration() external view returns (uint256);
 
     /// @dev Checks whether a specific token `id` is expired.
-    /// @param id The ID it's can be round, period, epoch or token id.
+    /// @param id The ID it's can be round, period, epoch, or token id.
     /// @return bool True if the token is expired, false otherwise.
     function expired(uint256 id) external view returns (bool);
 
     /// @dev Transfers a specific `id` and value to a recipient if not expired.
     /// @param to The recipient address.
-    /// @param id The ID it's can be round, period, epoch or token id.
+    /// @param id The ID it's can be round, period, epoch, or token id.
     /// @param value The amount to transfer.
     /// @return bool True if the transfer succeeded, false if it's expired.
     function transfer(address to, uint256 id, uint256 value) external returns (bool);

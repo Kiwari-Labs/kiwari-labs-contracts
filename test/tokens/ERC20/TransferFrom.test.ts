@@ -1,11 +1,11 @@
 import {expect} from "chai";
-import {deployLightWeightERC20EXPBase} from "../../utils.test";
+import {deployERC20EXPBase} from "../../utils.test";
 import {ERROR_ERC20_INSUFFICIENT_ALLOWANCE, EVENT_APPROVAL, EVENT_TRANSFER, ZERO_ADDRESS} from "../../constant.test";
 
 export const run = async () => {
   describe("TransferFrom", async function () {
     it("[HAPPY] transfer from alice to bob correctly", async function () {
-      const {erc20exp, alice, bob} = await deployLightWeightERC20EXPBase({});
+      const {erc20exp, alice, bob} = await deployERC20EXPBase({});
 
       const amount = 100;
 
@@ -29,7 +29,7 @@ export const run = async () => {
     });
 
     it("[HAPPY] alice approve maximum and transfer to bob correctly", async function () {
-      const {erc20exp, alice, bob} = await deployLightWeightERC20EXPBase({});
+      const {erc20exp, alice, bob} = await deployERC20EXPBase({});
 
       const amount = 100;
       const MAX_INT = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
@@ -54,7 +54,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] insufficient allowance", async function () {
-      const {erc20exp, alice, bob} = await deployLightWeightERC20EXPBase({});
+      const {erc20exp, alice, bob} = await deployERC20EXPBase({});
 
       const amount = 100;
 
@@ -78,3 +78,4 @@ export const run = async () => {
     });
   });
 };
+
