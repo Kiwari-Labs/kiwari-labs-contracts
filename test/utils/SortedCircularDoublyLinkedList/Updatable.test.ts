@@ -1,10 +1,11 @@
 import {expect} from "chai";
-import {deployDoublyListLibrary, padIndexToData} from "../../utils.test";
+import {deployDoublyListLibrary} from "./utils.test";
+import {padIndexToData} from "../../utils.test";
 
 export const run = async () => {
   describe("Updatable", async function () {
     it("[HAPPY] update correctly", async function () {
-      const {doublyList} = await deployDoublyListLibrary();
+      const {doublyList} = await deployDoublyListLibrary({});
 
       const index = 1;
       const data = padIndexToData(index);
@@ -17,7 +18,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] unable to update data into the unreal node", async function () {
-      const {doublyList} = await deployDoublyListLibrary();
+      const {doublyList} = await deployDoublyListLibrary({});
 
       const index = 1;
       await doublyList.updateNodeData(index, padIndexToData(index + 1));

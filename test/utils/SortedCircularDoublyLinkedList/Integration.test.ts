@@ -1,5 +1,6 @@
 import {expect} from "chai";
-import {deployDoublyListLibrary, padIndexToData} from "../../utils.test";
+import {deployDoublyListLibrary} from "./utils.test";
+import {padIndexToData} from "../../utils.test";
 
 export const run = async () => {
   describe("Integration", async function () {

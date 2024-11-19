@@ -1,10 +1,11 @@
 import {expect} from "chai";
-import {deployDoublyListLibrary, padIndexToData} from "../../utils.test";
+import {deployDoublyListLibrary} from "./utils.test";
+import {padIndexToData} from "../../utils.test";
 
 export const run = async () => {
   describe("Removal", async function () {
     it("[HAPPY] remove correctly", async function () {
-      const {doublyList} = await deployDoublyListLibrary();
+      const {doublyList} = await deployDoublyListLibrary({});
 
       const index = 1;
       const data = padIndexToData(index);
@@ -70,7 +71,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] unable to remove unreal index", async function () {
-      const {doublyList} = await deployDoublyListLibrary();
+      const {doublyList} = await deployDoublyListLibrary({});
       await doublyList.remove(1);
       expect(await doublyList.size()).to.equal(0);
     });

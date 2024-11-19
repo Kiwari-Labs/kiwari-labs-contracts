@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {deployDoublyListLibrary} from "../../utils.test";
+import {deployDoublyListLibrary} from "./utils.test";
 
 export const run = async () => {
   describe("Sorting", async function () {
@@ -20,13 +20,13 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] sort the empty array with asc", async function () {
-      const {doublyList} = await deployDoublyListLibrary();
+      const {doublyList} = await deployDoublyListLibrary({});
       const sorted = await doublyList.ascending();
       expect(sorted.length).to.equal(0);
     });
 
     it("[UNHAPPY] sort the empty array with des", async function () {
-      const {doublyList} = await deployDoublyListLibrary();
+      const {doublyList} = await deployDoublyListLibrary({});
       const sorted = await doublyList.descending();
       expect(sorted.length).to.equal(0);
     });

@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {deployDoublyListLibrary} from "../../utils.test";
+import {deployDoublyListLibrary} from "./utils.test";
 
 export const run = async () => {
   describe("General", async function () {
@@ -113,7 +113,7 @@ export const run = async () => {
     });
 
     it("[UNHAPPY] always returns empty when the linked list has no element", async function () {
-      const {doublyList} = await deployDoublyListLibrary();
+      const {doublyList} = await deployDoublyListLibrary({});
       let list = await doublyList.firstPartition();
       expect(list.length).to.equal(0);
       list = await doublyList.secondPartition();
