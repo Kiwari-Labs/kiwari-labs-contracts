@@ -1,7 +1,7 @@
 import {expect} from "chai";
 
 import {data as mockData} from "../../../mocks/data/shuffle_273_number";
-import { deployLightWeightDoublyListLibrary } from "./utils.test";
+import {deployLightWeightDoublyListLibrary} from "./utils.test";
 
 export const run = async () => {
   describe("Insertion", async function () {

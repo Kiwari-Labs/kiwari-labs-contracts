@@ -14,8 +14,6 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow {
     using SCDLL for SCDLL.List;
 
-    error ERC7818TransferExpired();
-
     string private _name;
     string private _symbol;
 
@@ -533,7 +531,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
     /// @inheritdoc IERC7818
     function transfer(address to, uint256 id, uint256 value) public override returns (bool) {
         if (_expired(id)) {
-            revert ERC7818TransferExpired();
+            revert IERC7818TransferExpired();
         }
         address owner = _msgSender();
         _transferSpecific(owner, to, id, value);
@@ -543,7 +541,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
     /// @inheritdoc IERC7818
     function transferFrom(address from, address to, uint256 id, uint256 value) public virtual returns (bool) {
         if (_expired(id)) {
-            revert ERC7818TransferExpired();
+            revert IERC7818TransferExpired();
         }
         address spender = _msgSender();
         _spendAllowance(from, spender, value);

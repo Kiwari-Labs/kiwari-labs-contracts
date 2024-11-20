@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import { deployDoublyListLibrary } from "./utils.test";
+import {deployDoublyListLibrary} from "./utils.test";
 
 export const run = async () => {
   describe("Shrink", async function () {

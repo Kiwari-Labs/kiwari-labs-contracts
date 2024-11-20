@@ -55,7 +55,9 @@ export const run = async () => {
       expect(await erc7818Backlist.isBlacklisted(alice.address)).equal(true);
       expect(await erc7818Backlist.isBlacklisted(bob.address)).equal(false);
 
-      await expect(erc7818Backlist.connect(bob)["transferFrom(address,address,uint256)"](alice.address, bob.address, 100))
+      await expect(
+        erc7818Backlist.connect(bob)["transferFrom(address,address,uint256)"](alice.address, bob.address, 100),
+      )
         .to.revertedWithCustomError(erc7818Backlist, ERC7818Backlist.errors.BlacklistedAddress)
         .withArgs(alice.address);
     });

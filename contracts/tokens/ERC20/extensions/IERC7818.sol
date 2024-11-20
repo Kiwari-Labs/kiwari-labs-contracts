@@ -7,6 +7,8 @@ pragma solidity >=0.8.0 <0.9.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface IERC7818 is IERC20 {
+    error IERC7818TransferExpired();
+
     /// @dev Retrieves the balance of a specific `id` owned by an account.
     /// @param account The address of the account.
     /// @param id The ID it's can be round, period, epoch, or token id.

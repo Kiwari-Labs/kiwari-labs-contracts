@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import { deployLightWeightDoublyListLibraryV2 } from "./utils.test";
+import {deployLightWeightDoublyListLibraryV2} from "./utils.test";
 
 export const run = async () => {
   describe("General", async function () {

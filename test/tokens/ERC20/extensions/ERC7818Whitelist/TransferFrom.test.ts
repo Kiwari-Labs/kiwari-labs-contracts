@@ -23,7 +23,9 @@ export const run = async () => {
 
       expect(await erc7818expWhitelist.allowance(aliceAddress, bobAddress)).to.equal(amount);
 
-      await expect(erc7818expWhitelist.connect(bob)["transferFrom(address,address,uint256)"](aliceAddress, bobAddress, amount))
+      await expect(
+        erc7818expWhitelist.connect(bob)["transferFrom(address,address,uint256)"](aliceAddress, bobAddress, amount),
+      )
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, amount)
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
