@@ -210,6 +210,26 @@ library SortedCircularDoublyLinkedList {
         }
     }
 
+    /// @notice Shrinks the list by setting a new head without cleaning up previous nodes.
+    /// @dev updates the head pointer to the specified `index` without traversing and cleaning up the previous nodes.
+    /// @param self The list to modify.
+    /// @param index The index to set as the new head of the list.
+    function lazyShrink(List storage self, uint256 index) internal {
+        if (exist(self, index)) {
+            self._nodes[SENTINEL][NEXT] = index; // forced link sentinel to new head
+            self._nodes[index][PREV] = SENTINEL; // forced link previous of index to sentinel
+
+            uint256 counter;
+            while (index != SENTINEL) {
+                unchecked {
+                    counter++;
+                }
+                index = self._nodes[index][NEXT];
+            }
+            self._size = counter;
+        }
+    }
+
     /// @notice Get the index of the head node in the linked list.
     /// @dev This function returns the index of the head node in the linked list.
     /// @param self The linked list.
