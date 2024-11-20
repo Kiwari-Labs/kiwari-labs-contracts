@@ -219,13 +219,14 @@ library SortedCircularDoublyLinkedList {
             self._nodes[SENTINEL][NEXT] = index; // forced link sentinel to new head
             self._nodes[index][PREV] = SENTINEL; // forced link previous of index to sentinel
 
-            self._size = 0;
+            uint256 counter;
             while (index != SENTINEL) {
                 unchecked {
-                    self._size++;
+                    counter++;
                 }
                 index = self._nodes[index][NEXT];
             }
+            self._size = counter;
         }
     }
 
