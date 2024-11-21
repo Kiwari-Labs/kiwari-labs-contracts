@@ -168,11 +168,10 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
             unchecked {
                 _recipient.slotBalance += value;
                 _recipient.blockBalances[blockNumberCache] += value;
+                _worldBlockBalances[blockNumberCache] += value;
             }
             _recipient.list.insert(blockNumberCache, (""));
-            _worldBlockBalances[blockNumberCache] += value;
         } else {
-            // Burn token.
             (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
             uint256 balance = _lookBackBalance(from, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
             if (balance < value) {
@@ -183,6 +182,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
             uint256 balanceCache = 0;
 
             if (to == address(0)) {
+                // Burn token.
                 while ((fromEra < toEra || (fromEra == toEra && fromSlot <= toSlot)) && pendingValue > 0) {
                     Slot storage _spender = _balances[from][fromEra][fromSlot];
 
@@ -239,8 +239,9 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
 
                                 _recipient.slotBalance += balanceCache;
                                 _recipient.blockBalances[key] += balanceCache;
-                                _recipient.list.insert(key, (""));
                             }
+                            _recipient.list.insert(key, (""));
+
                             key = _spender.list.next(key);
                             _spender.list.remove(_spender.list.previous(key));
                         } else {
@@ -275,28 +276,45 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
     function _updateSpecific(address from, address to, uint256 id, uint256 value) internal virtual {
         (uint256 era, uint8 slot) = _calculateEraAndSlot(id);
         if (from == address(0)) {
+            // Mint token.
             Slot storage _recipient = _balances[to][era][slot];
             unchecked {
                 _recipient.slotBalance += value;
                 _recipient.blockBalances[id] += value;
+                _worldBlockBalances[id] += value;
             }
-            _worldBlockBalances[id] += value;
+            _recipient.list.insert(id, (""));
         } else {
             Slot storage _spender = _balances[from][era][slot];
             uint256 balanceCache = _spender.blockBalances[id];
+
             if (balanceCache < value) {
                 revert ERC20InsufficientBalance(from, balanceCache, value);
             }
+
             if (to == address(0)) {
-                _spender.slotBalance -= value;
-                _spender.blockBalances[id] -= value;
-                _worldBlockBalances[id] -= value;
+                // Burn token.
+                unchecked {
+                    _spender.slotBalance -= value;
+                    _spender.blockBalances[id] -= value;
+                    _worldBlockBalances[id] -= value;
+                }
             } else {
+                // Transfer token.
                 Slot storage _recipient = _balances[from][era][slot];
-                _spender.slotBalance -= value;
-                _spender.blockBalances[id] -= value;
-                _recipient.slotBalance += value;
-                _recipient.blockBalances[id] += value;
+                unchecked {
+                    _spender.slotBalance -= value;
+                    _spender.blockBalances[id] -= value;
+
+                    _recipient.slotBalance += value;
+                    _recipient.blockBalances[id] += value;
+                }
+
+                _recipient.list.insert(id, (""));
+            }
+
+            if (_spender.blockBalances[id] == 0) {
+                _spender.list.remove(id);
             }
         }
 
@@ -350,6 +368,13 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
         _update(address(0), account, value);
     }
 
+    function _mintSpecific(address account, uint256 id, uint256 value) internal {
+        if (account == address(0)) {
+            revert ERC20InvalidReceiver(address(0));
+        }
+        _updateSpecific(address(0), account, id, value);
+    }
+
     /// @notice Burns a specified amount of tokens from an account.
     /// @dev This function updates the token balance by burning `value` amount of tokens from the `account`.
     /// Reverts if the `account` address is zero.
@@ -360,6 +385,13 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
             revert ERC20InvalidSender(address(0));
         }
         _update(account, address(0), value);
+    }
+
+    function _burnSpecific(address account, uint256 id, uint256 value) internal {
+        if (account == address(0)) {
+            revert ERC20InvalidSender(address(0));
+        }
+        _updateSpecific(account, address(0), id, value);
     }
 
     /// @notice Spends the specified allowance by reducing the allowance of the spender.
