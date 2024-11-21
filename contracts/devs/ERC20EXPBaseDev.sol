@@ -14,8 +14,6 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 abstract contract ERC20EXPBase is Context, IERC20Metadata, IERC20Errors, IERC7818, SlidingWindow {
     using SCDLL for SCDLL.List;
 
-    error ERC7818TransferExpired();
-
     string private _name;
     string private _symbol;
 
