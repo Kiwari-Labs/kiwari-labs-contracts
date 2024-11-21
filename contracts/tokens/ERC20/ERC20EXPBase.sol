@@ -368,7 +368,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
         _update(address(0), account, value);
     }
 
-    function _mintSpecific(address account, uint256 id, uint256 value) internal {
+    function _mint(address account, uint256 id, uint256 value) internal {
         if (account == address(0)) {
             revert ERC20InvalidReceiver(address(0));
         }
@@ -387,7 +387,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
         _update(account, address(0), value);
     }
 
-    function _burnSpecific(address account, uint256 id, uint256 value) internal {
+    function _burn(address account, uint256 id, uint256 value) internal {
         if (account == address(0)) {
             revert ERC20InvalidSender(address(0));
         }
