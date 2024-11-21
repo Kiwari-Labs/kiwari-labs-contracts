@@ -23,8 +23,8 @@ export const run = async () => {
       const tokenA = (await deployERC20EXPBase({blockPeriod})).erc20exp;
       const tokenB = (await deployERC20EXPBase({blockPeriod})).erc20exp;
 
-      await tokenA.mint(aliceAddress, amount);
-      await tokenB.mint(bobAddress, amount);
+      await tokenA["mint(address,uint256)"](aliceAddress, amount);
+      await tokenB["mint(address,uint256)"](bobAddress, amount);
 
       await tokenA.connect(alice).approve(bilateralAgreementBase.address, amount);
       await tokenB.connect(bob).approve(bilateralAgreementBase.address, amount);

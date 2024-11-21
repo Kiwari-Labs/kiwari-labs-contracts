@@ -137,7 +137,7 @@ export const run = async () => {
       const {erc20exp, alice} = await deployERC20EXPBase({});
       const aliceAddress = await alice.getAddress();
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
       const blockNumber = await network.provider.send("eth_blockNumber");

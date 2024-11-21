@@ -26,7 +26,7 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 0].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -43,7 +43,7 @@ export const run = async () => {
       expect(slot).equal(1);
 
       // Mint into [era: 0, slot 1].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -102,7 +102,7 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 1].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -119,7 +119,7 @@ export const run = async () => {
       expect(slot).equal(2);
 
       // Mint into [era: 0, slot 2].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -180,10 +180,10 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 2].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -200,10 +200,10 @@ export const run = async () => {
       expect(slot).equal(3);
 
       // Mint into [era: 0, slot 3].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -259,7 +259,7 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 0].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -276,7 +276,7 @@ export const run = async () => {
       expect(slot).equal(1);
 
       // Mint into [era: 0, slot 1].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -335,7 +335,7 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 1].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -352,7 +352,7 @@ export const run = async () => {
       expect(slot).equal(2);
 
       // Mint into [era: 0, slot 2].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -413,10 +413,10 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 2].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -433,10 +433,10 @@ export const run = async () => {
       expect(slot).equal(3);
 
       // Mint into [era: 0, slot 3].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -492,7 +492,7 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 0].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -509,7 +509,7 @@ export const run = async () => {
       expect(slot).equal(1);
 
       // Mint into [era: 0, slot 1].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -568,7 +568,7 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 1].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -585,7 +585,7 @@ export const run = async () => {
       expect(slot).equal(2);
 
       // Mint into [era: 0, slot 2].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -646,10 +646,10 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 2].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -666,10 +666,10 @@ export const run = async () => {
       expect(slot).equal(3);
 
       // Mint into [era: 0, slot 3].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -711,7 +711,7 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp} = await deployERC20EXPBase({});
 
-      expect(erc20exp.mint(common.zeroAddress, 1))
+      expect(erc20exp["mint(address,uint256)"](common.zeroAddress, 1))
         .to.be.revertedWithCustomError(erc20exp, ERC20.errors.ERC20InvalidReceiver)
         .withArgs(common.zeroAddress);
     });

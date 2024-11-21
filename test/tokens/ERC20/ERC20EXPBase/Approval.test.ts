@@ -9,7 +9,7 @@ export const run = async () => {
 
       const amount = 100;
 
-      await expect(erc20exp.mint(await alice.getAddress(), amount))
+      await expect(erc20exp["mint(address,uint256)"](await alice.getAddress(), amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, await alice.getAddress(), amount);
 
@@ -27,7 +27,7 @@ export const run = async () => {
 
       const MAX_INT = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
-      await expect(erc20exp.mint(await alice.getAddress(), amount))
+      await expect(erc20exp["mint(address,uint256)"](await alice.getAddress(), amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, await alice.getAddress(), amount);
 
@@ -43,7 +43,7 @@ export const run = async () => {
 
       const amount = 100;
 
-      await expect(erc20exp.mint(await alice.getAddress(), amount))
+      await expect(erc20exp["mint(address,uint256)"](await alice.getAddress(), amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, await alice.getAddress(), amount);
 

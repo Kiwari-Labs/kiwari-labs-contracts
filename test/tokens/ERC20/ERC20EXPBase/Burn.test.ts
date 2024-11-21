@@ -26,7 +26,7 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 0].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -43,7 +43,7 @@ export const run = async () => {
       expect(slot).equal(1);
 
       // Mint into [era: 0, slot 1].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -66,7 +66,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc20exp.burn(aliceAddress, amount))
+      await expect(erc20exp["burn(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, amount);
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
@@ -108,7 +108,7 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 1].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -125,7 +125,7 @@ export const run = async () => {
       expect(slot).equal(2);
 
       // Mint into [era: 0, slot 2].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -148,7 +148,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc20exp.burn(aliceAddress, amount))
+      await expect(erc20exp["burn(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, amount);
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
@@ -192,10 +192,10 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 2].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -212,10 +212,10 @@ export const run = async () => {
       expect(slot).equal(3);
 
       // Mint into [era: 0, slot 3].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -238,7 +238,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(4);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc20exp.burn(aliceAddress, 3))
+      await expect(erc20exp["burn(address,uint256)"](aliceAddress, 3))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, 3);
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
@@ -277,7 +277,7 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 0].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -294,7 +294,7 @@ export const run = async () => {
       expect(slot).equal(1);
 
       // Mint into [era: 0, slot 1].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -317,7 +317,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc20exp.burn(aliceAddress, amount))
+      await expect(erc20exp["burn(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, amount);
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
@@ -359,7 +359,7 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 1].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -376,7 +376,7 @@ export const run = async () => {
       expect(slot).equal(2);
 
       // Mint into [era: 0, slot 2].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -399,7 +399,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc20exp.burn(aliceAddress, amount))
+      await expect(erc20exp["burn(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, amount);
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
@@ -443,10 +443,10 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 2].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -463,10 +463,10 @@ export const run = async () => {
       expect(slot).equal(3);
 
       // Mint into [era: 0, slot 3].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -489,7 +489,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(4);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc20exp.burn(aliceAddress, 3))
+      await expect(erc20exp["burn(address,uint256)"](aliceAddress, 3))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, 3);
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
@@ -528,7 +528,7 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 0].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -545,7 +545,7 @@ export const run = async () => {
       expect(slot).equal(1);
 
       // Mint into [era: 0, slot 1].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -568,7 +568,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc20exp.burn(aliceAddress, amount))
+      await expect(erc20exp["burn(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, amount);
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
@@ -610,7 +610,7 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 1].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -627,7 +627,7 @@ export const run = async () => {
       expect(slot).equal(2);
 
       // Mint into [era: 0, slot 2].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -650,7 +650,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(2);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc20exp.burn(aliceAddress, amount))
+      await expect(erc20exp["burn(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, amount);
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
@@ -694,10 +694,10 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 2].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -714,10 +714,10 @@ export const run = async () => {
       expect(slot).equal(3);
 
       // Mint into [era: 0, slot 3].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -740,7 +740,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(4);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc20exp.burn(aliceAddress, 3))
+      await expect(erc20exp["burn(address,uint256)"](aliceAddress, 3))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, 3);
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(1);
@@ -779,7 +779,7 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 0].
       const amount = 10;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -802,7 +802,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(10);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc20exp.burn(aliceAddress, 5))
+      await expect(erc20exp["burn(address,uint256)"](aliceAddress, 5))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, 5);
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(5);
@@ -842,7 +842,7 @@ export const run = async () => {
 
       // Mint into [era: 0, slot 3].
       const amount = 1;
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
@@ -873,12 +873,12 @@ export const run = async () => {
       expect(slot).equal(0);
 
       // Mint into [era: 1, slot 0].
-      await expect(erc20exp.mint(aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, aliceAddress, amount);
 
       // Expectation is that the token will be burning from the head of the linked list.
-      await expect(erc20exp.burn(aliceAddress, amount + amount))
+      await expect(erc20exp["burn(address,uint256)"](aliceAddress, amount + amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(aliceAddress, common.zeroAddress, amount + amount);
       expect(await erc20exp["balanceOf(address)"](aliceAddress)).equal(0);
@@ -891,7 +891,7 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp} = await deployERC20EXPBase();
 
-      expect(erc20exp.burn(common.zeroAddress, 1))
+      expect(erc20exp["burn(address,uint256)"](common.zeroAddress, 1))
         .to.be.revertedWithCustomError(erc20exp, ERC20.errors.ERC20InvalidSender)
         .withArgs(common.zeroAddress);
     });
@@ -903,7 +903,7 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp, alice} = await deployERC20EXPBase();
 
-      expect(erc20exp.burn(await alice.getAddress(), 1))
+      expect(erc20exp["burn(address,uint256)"](await alice.getAddress(), 1))
         .to.be.revertedWithCustomError(erc20exp, ERC20.errors.ERC20InsufficientBalance)
         .withArgs(await alice.getAddress(), 0, 1);
     });

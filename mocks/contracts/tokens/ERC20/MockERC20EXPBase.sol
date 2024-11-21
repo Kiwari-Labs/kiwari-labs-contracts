@@ -29,4 +29,12 @@ contract MockERC20EXPBase is ERC20EXPBase {
         _transfer(from, to, value);
         return true;
     }
+
+    function mint(address to, uint256 id, uint256 value) public {
+        _mint(to, id, value);
+    }
+
+    function burn(address from, uint256 id, uint256 value) public {
+        _burn(from, id, value);
+    }
 }
