@@ -17,14 +17,12 @@ export const run = async () => {
         [await alice.getAddress(), await bob.getAddress()],
         agreementBase.address,
       );
-      const aliceAddress = await alice.getAddress();
-      const bobAddress = await bob.getAddress();
 
       const tokenA = (await deployERC20EXPBase({blockPeriod})).erc20exp;
       const tokenB = (await deployERC20EXPBase({blockPeriod})).erc20exp;
 
-      await tokenA["mint(address,uint256)"](aliceAddress, amount);
-      await tokenB["mint(address,uint256)"](bobAddress, amount);
+      await tokenA["mint(address,uint256)"](alice.address, amount);
+      await tokenB["mint(address,uint256)"](bob.address, amount);
 
       await tokenA.connect(alice).approve(bilateralAgreementBase.address, amount);
       await tokenB.connect(bob).approve(bilateralAgreementBase.address, amount);
@@ -35,8 +33,8 @@ export const run = async () => {
       await bilateralAgreementBase
         .connect(bob)
         .approveAgreement(abiCoder.encode(["address", "uint256"], [tokenB.address, amount]));
-      expect(await tokenA["balanceOf(address)"](bobAddress)).to.equal(amount);
-      expect(await tokenB["balanceOf(address)"](aliceAddress)).to.equal(amount);
+      expect(await tokenA["balanceOf(address)"](bob.address)).to.equal(amount);
+      expect(await tokenB["balanceOf(address)"](alice.address)).to.equal(amount);
       expect((await bilateralAgreementBase.transaction(1)).executed).to.equal(true);
       expect(await bilateralAgreementBase.transactionLength()).to.equal(1);
     });

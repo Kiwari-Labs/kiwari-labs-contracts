@@ -16,17 +16,17 @@ export const run = async () => {
   describe("Mint To Wholesaler", async function () {
     it("[HAPPY] correct mint", async function () {
       const {erc20expWhitelist, alice} = await deployLightWeightERC20EXPWhitelist({});
-      const aliceAddress = await alice.getAddress();
-      await expect(erc20expWhitelist.grantWholeSale(aliceAddress))
+
+      await expect(erc20expWhitelist.grantWholeSale(alice.address))
         .to.emit(erc20expWhitelist, "GrantWholeSale")
-        .withArgs(aliceAddress, true);
-      await expect(erc20expWhitelist.mintSpentWholeSale(aliceAddress, 1))
+        .withArgs(alice.address, true);
+      await expect(erc20expWhitelist.mintSpentWholeSale(alice.address, 1))
         .to.be.emit(erc20expWhitelist, "Transfer")
-        .withArgs(ZERO_ADDRESS, aliceAddress, 1);
-      await expect(erc20expWhitelist.mintUnspentWholeSale(aliceAddress, 1))
+        .withArgs(ZERO_ADDRESS, alice.address, 1);
+      await expect(erc20expWhitelist.mintUnspentWholeSale(alice.address, 1))
         .to.be.emit(erc20expWhitelist, "Transfer")
-        .withArgs(ZERO_ADDRESS, aliceAddress, 1);
-      expect(await erc20expWhitelist["balanceOf(address)"](aliceAddress)).to.equal(2);
+        .withArgs(ZERO_ADDRESS, alice.address, 1);
+      expect(await erc20expWhitelist["balanceOf(address)"](alice.address)).to.equal(2);
     });
 
     it("[UNHAPPY] mint to zero address", async function () {
@@ -55,11 +55,11 @@ export const run = async () => {
   describe("Mint To Retailer", async function () {
     it("[HAPPY] correct mint", async function () {
       const {erc20expWhitelist, alice} = await deployLightWeightERC20EXPWhitelist({});
-      const aliceAddress = await alice.getAddress();
-      await expect(erc20expWhitelist.mintRetail(aliceAddress, 1))
+
+      await expect(erc20expWhitelist.mintRetail(alice.address, 1))
         .to.be.emit(erc20expWhitelist, "Transfer")
-        .withArgs(ZERO_ADDRESS, aliceAddress, 1);
-      const balance = await erc20expWhitelist["balanceOf(address)"](aliceAddress);
+        .withArgs(ZERO_ADDRESS, alice.address, 1);
+      const balance = await erc20expWhitelist["balanceOf(address)"](alice.address);
       expect(balance).to.equal(1);
     });
 
@@ -72,11 +72,11 @@ export const run = async () => {
 
     it("[UNHAPPY] mint to non-retailer", async function () {
       const {erc20expWhitelist, alice} = await deployLightWeightERC20EXPWhitelist({});
-      const aliceAddress = await alice.getAddress();
-      await expect(erc20expWhitelist.grantWholeSale(aliceAddress))
+
+      await expect(erc20expWhitelist.grantWholeSale(alice.address))
         .to.emit(erc20expWhitelist, "GrantWholeSale")
-        .withArgs(aliceAddress, true);
-      await expect(erc20expWhitelist.mintRetail(aliceAddress, 1)).to.be.revertedWith(
+        .withArgs(alice.address, true);
+      await expect(erc20expWhitelist.mintRetail(alice.address, 1)).to.be.revertedWith(
         "can't mint expirable token to non retail account",
       );
     });

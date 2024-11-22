@@ -11,21 +11,19 @@ export const run = async () => {
       const {erc20expWhitelist, alice, bob} = await deployLightWeightERC20EXPWhitelist({});
 
       const oneEther = parseEther("1.0");
-      const aliceAddress = await alice.getAddress();
-      const bobAddress = await bob.getAddress();
 
-      const balanceAliceBeforeMint = await erc20expWhitelist["balanceOf(address)"](aliceAddress);
-      await expect(await erc20expWhitelist.mintRetail(aliceAddress, oneEther))
+      const balanceAliceBeforeMint = await erc20expWhitelist["balanceOf(address)"](alice.address);
+      await expect(await erc20expWhitelist.mintRetail(alice.address, oneEther))
         .to.emit(erc20expWhitelist, "Transfer")
-        .withArgs(ZERO_ADDRESS, aliceAddress, oneEther);
-      const balanceAliceAfterMint = await erc20expWhitelist["balanceOf(address)"](aliceAddress);
+        .withArgs(ZERO_ADDRESS, alice.address, oneEther);
+      const balanceAliceAfterMint = await erc20expWhitelist["balanceOf(address)"](alice.address);
       expect(balanceAliceBeforeMint).to.equal(0);
       expect(balanceAliceAfterMint).to.equal(oneEther);
 
-      await expect(erc20expWhitelist.connect(alice).transfer(bobAddress, oneEther))
+      await expect(erc20expWhitelist.connect(alice).transfer(bob.address, oneEther))
         .to.emit(erc20expWhitelist, "Transfer")
-        .withArgs(aliceAddress, bobAddress, oneEther);
-      const balanceBob = await erc20expWhitelist["balanceOf(address)"](bobAddress);
+        .withArgs(alice.address, bob.address, oneEther);
+      const balanceBob = await erc20expWhitelist["balanceOf(address)"](bob.address);
       expect(balanceBob).to.equal(oneEther);
     });
 
@@ -34,26 +32,24 @@ export const run = async () => {
 
       const oneEther = parseEther("1.0");
       const bulkEther = parseEther("273.0");
-      const aliceAddress = await alice.getAddress();
-      const bobAddress = await bob.getAddress();
 
-      const balanceAliceBeforeMint = await erc20expWhitelist["balanceOf(address)"](aliceAddress);
+      const balanceAliceBeforeMint = await erc20expWhitelist["balanceOf(address)"](alice.address);
       for (let index = 0; index < 273; index++) {
-        await expect(await erc20expWhitelist.mintRetail(aliceAddress, oneEther))
+        await expect(await erc20expWhitelist.mintRetail(alice.address, oneEther))
           .to.emit(erc20expWhitelist, "Transfer")
-          .withArgs(ZERO_ADDRESS, aliceAddress, oneEther);
+          .withArgs(ZERO_ADDRESS, alice.address, oneEther);
       }
-      const balanceAliceAfterMint = await erc20expWhitelist["balanceOf(address)"](aliceAddress);
+      const balanceAliceAfterMint = await erc20expWhitelist["balanceOf(address)"](alice.address);
       expect(balanceAliceBeforeMint).to.equal(0);
       expect(balanceAliceAfterMint).to.equal(bulkEther);
 
-      await expect(await erc20expWhitelist.connect(alice).transfer(bobAddress, bulkEther))
+      await expect(await erc20expWhitelist.connect(alice).transfer(bob.address, bulkEther))
         .to.emit(erc20expWhitelist, "Transfer")
-        .withArgs(aliceAddress, bobAddress, bulkEther);
-      const balanceAliceAfterTransfer = await erc20expWhitelist["balanceOf(address)"](aliceAddress);
-      const balanceBob = await erc20expWhitelist["balanceOf(address)"](bobAddress);
-      const aliceTokenList = await erc20expWhitelist.tokenList(aliceAddress, 0n, 0n);
-      const bobTokenList = await erc20expWhitelist.tokenList(bobAddress, 0n, 0n);
+        .withArgs(alice.address, bob.address, bulkEther);
+      const balanceAliceAfterTransfer = await erc20expWhitelist["balanceOf(address)"](alice.address);
+      const balanceBob = await erc20expWhitelist["balanceOf(address)"](bob.address);
+      const aliceTokenList = await erc20expWhitelist.tokenList(alice.address, 0n, 0n);
+      const bobTokenList = await erc20expWhitelist.tokenList(bob.address, 0n, 0n);
 
       expect(balanceBob).to.equal(bulkEther);
       expect(bobTokenList.length).to.equal(273);
@@ -68,12 +64,10 @@ export const run = async () => {
 
       const oneEther = parseEther("1.0");
       const twoEther = parseEther("2.0");
-      const aliceAddress = await alice.getAddress();
-      const bobAddress = await bob.getAddress();
 
-      await expect(await erc20expWhitelist.mintRetail(aliceAddress, oneEther))
+      await expect(await erc20expWhitelist.mintRetail(alice.address, oneEther))
         .to.emit(erc20expWhitelist, "Transfer")
-        .withArgs(ZERO_ADDRESS, aliceAddress, oneEther);
+        .withArgs(ZERO_ADDRESS, alice.address, oneEther);
 
       let currentEraAndSlot = await erc20expWhitelist.currentEraAndSlot();
       expect(currentEraAndSlot.era).to.equal(0);
@@ -85,16 +79,16 @@ export const run = async () => {
       expect(currentEraAndSlot.era).to.equal(0);
       expect(currentEraAndSlot.slot).to.equal(1);
 
-      await expect(await erc20expWhitelist.mintRetail(aliceAddress, oneEther))
+      await expect(await erc20expWhitelist.mintRetail(alice.address, oneEther))
         .to.emit(erc20expWhitelist, "Transfer")
-        .withArgs(ZERO_ADDRESS, aliceAddress, oneEther);
+        .withArgs(ZERO_ADDRESS, alice.address, oneEther);
 
-      const balanceAlice = await erc20expWhitelist["balanceOf(address)"](aliceAddress);
+      const balanceAlice = await erc20expWhitelist["balanceOf(address)"](alice.address);
       expect(balanceAlice).to.equal(twoEther);
-      await expect(await erc20expWhitelist.connect(alice).transfer(bobAddress, twoEther))
+      await expect(await erc20expWhitelist.connect(alice).transfer(bob.address, twoEther))
         .to.emit(erc20expWhitelist, "Transfer")
-        .withArgs(aliceAddress, bobAddress, twoEther);
-      const balanceBob = await erc20expWhitelist["balanceOf(address)"](bobAddress);
+        .withArgs(alice.address, bob.address, twoEther);
+      const balanceBob = await erc20expWhitelist["balanceOf(address)"](bob.address);
       expect(balanceBob).to.equal(twoEther);
     });
 

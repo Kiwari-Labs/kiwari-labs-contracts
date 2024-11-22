@@ -16,71 +16,71 @@ export const run = async () => {
   describe("Burn From Wholesaler", async function () {
     it("[HAPPY] correct burn", async function () {
       const {erc20expWhitelist, alice} = await deployLightWeightERC20EXPWhitelist({});
-      const aliceAddress = await alice.getAddress();
-      await expect(erc20expWhitelist.grantWholeSale(aliceAddress))
+
+      await expect(erc20expWhitelist.grantWholeSale(alice.address))
         .to.emit(erc20expWhitelist, "GrantWholeSale")
-        .withArgs(aliceAddress, true);
-      await expect(erc20expWhitelist.mintSpentWholeSale(aliceAddress, 1))
+        .withArgs(alice.address, true);
+      await expect(erc20expWhitelist.mintSpentWholeSale(alice.address, 1))
         .to.be.emit(erc20expWhitelist, "Transfer")
-        .withArgs(ZERO_ADDRESS, aliceAddress, 1);
-      await expect(erc20expWhitelist.mintUnspentWholeSale(aliceAddress, 1))
+        .withArgs(ZERO_ADDRESS, alice.address, 1);
+      await expect(erc20expWhitelist.mintUnspentWholeSale(alice.address, 1))
         .to.be.emit(erc20expWhitelist, "Transfer")
-        .withArgs(ZERO_ADDRESS, aliceAddress, 1);
-      await expect(erc20expWhitelist.burnSpentWholeSale(aliceAddress, 1))
+        .withArgs(ZERO_ADDRESS, alice.address, 1);
+      await expect(erc20expWhitelist.burnSpentWholeSale(alice.address, 1))
         .to.be.emit(erc20expWhitelist, "Transfer")
-        .withArgs(aliceAddress, ZERO_ADDRESS, 1);
-      await expect(erc20expWhitelist.burnUnspentWholeSale(aliceAddress, 1))
+        .withArgs(alice.address, ZERO_ADDRESS, 1);
+      await expect(erc20expWhitelist.burnUnspentWholeSale(alice.address, 1))
         .to.be.emit(erc20expWhitelist, "Transfer")
-        .withArgs(aliceAddress, ZERO_ADDRESS, 1);
-      expect(await erc20expWhitelist["balanceOf(address)"](aliceAddress)).to.equal(0);
+        .withArgs(alice.address, ZERO_ADDRESS, 1);
+      expect(await erc20expWhitelist["balanceOf(address)"](alice.address)).to.equal(0);
     });
 
     it("[UNHAPPY] burn from non-wholesaler", async function () {
       const {erc20expWhitelist, alice} = await deployLightWeightERC20EXPWhitelist({});
-      const aliceAddress = await alice.getAddress();
-      await expect(erc20expWhitelist.burnSpentWholeSale(aliceAddress, 1)).to.be.revertedWith(
+
+      await expect(erc20expWhitelist.burnSpentWholeSale(alice.address, 1)).to.be.revertedWith(
         "can't burn non-expirable token to non wholesale account",
       );
-      await expect(erc20expWhitelist.burnUnspentWholeSale(aliceAddress, 1)).to.be.revertedWith(
+      await expect(erc20expWhitelist.burnUnspentWholeSale(alice.address, 1)).to.be.revertedWith(
         "can't burn non-expirable token to non wholesale account",
       );
     });
 
     it("[UNHAPPY] insufficient balance to burn", async function () {
       const {erc20expWhitelist, alice} = await deployLightWeightERC20EXPWhitelist({});
-      const aliceAddress = await alice.getAddress();
-      await expect(erc20expWhitelist.grantWholeSale(aliceAddress))
+
+      await expect(erc20expWhitelist.grantWholeSale(alice.address))
         .to.emit(erc20expWhitelist, "GrantWholeSale")
-        .withArgs(aliceAddress, true);
-      await expect(erc20expWhitelist.burnSpentWholeSale(aliceAddress, 1))
+        .withArgs(alice.address, true);
+      await expect(erc20expWhitelist.burnSpentWholeSale(alice.address, 1))
         .to.be.revertedWithCustomError(erc20expWhitelist, "ERC20InsufficientBalance")
-        .withArgs(aliceAddress, 0, 1);
-      await expect(erc20expWhitelist.burnUnspentWholeSale(aliceAddress, 1))
+        .withArgs(alice.address, 0, 1);
+      await expect(erc20expWhitelist.burnUnspentWholeSale(alice.address, 1))
         .to.be.revertedWithCustomError(erc20expWhitelist, "ERC20InsufficientBalance")
-        .withArgs(aliceAddress, 0, 1);
+        .withArgs(alice.address, 0, 1);
     });
   });
 
   describe("Burn From Retailer", async function () {
     it("[HAPPY] correct burn", async function () {
       const {erc20expWhitelist, alice} = await deployLightWeightERC20EXPWhitelist({});
-      const aliceAddress = await alice.getAddress();
-      const beforeBalance = await erc20expWhitelist["balanceOf(address)"](aliceAddress);
-      await erc20expWhitelist.mintRetail(aliceAddress, 1);
+
+      const beforeBalance = await erc20expWhitelist["balanceOf(address)"](alice.address);
+      await erc20expWhitelist.mintRetail(alice.address, 1);
       expect(beforeBalance).to.equal(0);
-      expect(await erc20expWhitelist["balanceOf(address)"](aliceAddress)).to.equal(1);
-      await expect(erc20expWhitelist.burnRetail(aliceAddress, 1))
+      expect(await erc20expWhitelist["balanceOf(address)"](alice.address)).to.equal(1);
+      await expect(erc20expWhitelist.burnRetail(alice.address, 1))
         .to.emit(erc20expWhitelist, "Transfer")
-        .withArgs(aliceAddress, ZERO_ADDRESS, 1);
-      expect(await erc20expWhitelist["balanceOf(address)"](aliceAddress)).to.equal(0);
+        .withArgs(alice.address, ZERO_ADDRESS, 1);
+      expect(await erc20expWhitelist["balanceOf(address)"](alice.address)).to.equal(0);
     });
 
     it("[UNHAPPY] burn from non-retailer", async function () {
       // TODO: add test case (suitable logic and event response).
       const {erc20expWhitelist, alice} = await deployLightWeightERC20EXPWhitelist({});
-      const aliceAddress = await alice.getAddress();
-      await erc20expWhitelist.grantWholeSale(aliceAddress);
-      await expect(erc20expWhitelist.burnRetail(aliceAddress, 1)).to.be.revertedWith(
+
+      await erc20expWhitelist.grantWholeSale(alice.address);
+      await expect(erc20expWhitelist.burnRetail(alice.address, 1)).to.be.revertedWith(
         "can't burn expirable token to non retail account",
       );
     });
@@ -88,10 +88,10 @@ export const run = async () => {
     it("[UNHAPPY] insufficient balance to burn", async function () {
       // TODO: add test case (suitable logic and event response).
       const {erc20expWhitelist, alice} = await deployLightWeightERC20EXPWhitelist({});
-      const aliceAddress = await alice.getAddress();
-      await expect(erc20expWhitelist.burnRetail(aliceAddress, 1))
+
+      await expect(erc20expWhitelist.burnRetail(alice.address, 1))
         .to.be.revertedWithCustomError(erc20expWhitelist, "ERC20InsufficientBalance")
-        .withArgs(aliceAddress, 0, 1);
+        .withArgs(alice.address, 0, 1);
     });
   });
 };

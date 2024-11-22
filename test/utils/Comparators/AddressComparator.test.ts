@@ -6,28 +6,26 @@ export const run = async () => {
   describe("Address Comparator", async function () {
     it("[HAPPY] address equal", async function () {
       const {comparator, alice} = await deployComparatorLibrary({});
-      const aliceAddress = await alice.getAddress();
-      expect(await comparator.addressEqual(aliceAddress, aliceAddress)).to.equal(true);
+
+      expect(await comparator.addressEqual(alice.address, alice.address)).to.equal(true);
     });
 
     it("[UNHAPPY] address equal", async function () {
       const {comparator, alice, bob} = await deployComparatorLibrary({});
-      const aliceAddress = await alice.getAddress();
-      const bobAddress = await bob.getAddress();
-      expect(await comparator.addressEqual(aliceAddress, bobAddress)).to.equal(false);
+
+      expect(await comparator.addressEqual(alice.address, bob.address)).to.equal(false);
     });
 
     it("[HAPPY] address not equal", async function () {
       const {comparator, alice, bob} = await deployComparatorLibrary({});
-      const aliceAddress = await alice.getAddress();
-      const bobAddress = await bob.getAddress();
-      expect(await comparator.addressNotEqual(aliceAddress, bobAddress)).to.equal(true);
+
+      expect(await comparator.addressNotEqual(alice.address, bob.address)).to.equal(true);
     });
 
     it("[UNHAPPY] address not equal", async function () {
       const {comparator, alice} = await deployComparatorLibrary({});
-      const aliceAddress = await alice.getAddress();
-      expect(await comparator.addressNotEqual(aliceAddress, aliceAddress)).to.equal(false);
+
+      expect(await comparator.addressNotEqual(alice.address, alice.address)).to.equal(false);
     });
 
     it("[HAPPY] address zero", async function () {
@@ -37,8 +35,8 @@ export const run = async () => {
 
     it("[UNHAPPY] address zero", async function () {
       const {comparator, alice} = await deployComparatorLibrary({});
-      const aliceAddress = await alice.getAddress();
-      expect(await comparator.addressZero(aliceAddress)).to.equal(false);
+
+      expect(await comparator.addressZero(alice.address)).to.equal(false);
     });
   });
 };

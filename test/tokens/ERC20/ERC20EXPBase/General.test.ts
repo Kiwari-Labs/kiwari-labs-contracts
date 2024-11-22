@@ -135,11 +135,11 @@ export const run = async () => {
 
     it("[HAPPY] query block balance ", async function () {
       const {erc20exp, alice} = await deployERC20EXPBase({});
-      const aliceAddress = await alice.getAddress();
+
       const amount = 1;
-      await expect(erc20exp["mint(address,uint256)"](aliceAddress, amount))
+      await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
-        .withArgs(common.zeroAddress, aliceAddress, amount);
+        .withArgs(common.zeroAddress, alice.address, amount);
       const blockNumber = await network.provider.send("eth_blockNumber");
       expect(await erc20exp.getBlockBalance(blockNumber)).to.equal(1);
       expect(await erc20exp.getBlockBalance(blockNumber + 1n)).to.equal(0);

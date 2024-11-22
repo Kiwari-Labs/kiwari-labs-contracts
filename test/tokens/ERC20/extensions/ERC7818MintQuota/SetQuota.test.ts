@@ -7,14 +7,14 @@ export const run = async () => {
     it("[HAPPY] correct set quota", async function () {
       const {erc7818MintQuota, deployer, alice} = await deployERC7818MintQuota();
       const deployerAddress = await deployer.getAddress();
-      const aliceAddress = await alice.getAddress();
+
       const quota = 100;
 
-      await expect(erc7818MintQuota.setQuota(aliceAddress, quota))
+      await expect(erc7818MintQuota.setQuota(alice.address, quota))
         .to.emit(erc7818MintQuota, ERC7818MintQuota.events.QuotaSet)
-        .withArgs(deployerAddress, aliceAddress, quota);
+        .withArgs(deployerAddress, alice.address, quota);
 
-      expect(await erc7818MintQuota.remainingQuota(aliceAddress)).equal(quota);
+      expect(await erc7818MintQuota.remainingQuota(alice.address)).equal(quota);
     });
 
     it("[UNHAPPY] cannot set quota to zero address", async function () {

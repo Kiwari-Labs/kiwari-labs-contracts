@@ -6,172 +6,164 @@ export const run = async () => {
   describe("Transfer", async function () {
     it("[HAPPY] correct non whitelist transfer ", async function () {
       const {erc7818expWhitelist, deployer, alice, bob, jame} = await deployERC7818Whitelist();
-      const aliceAddress = await alice.getAddress();
-      const bobAddress = await bob.getAddress();
+
       const jameAddress = await jame.getAddress();
       const deployerAddress = await deployer.getAddress();
-      await expect(erc7818expWhitelist.grantWhitelist(aliceAddress))
+      await expect(erc7818expWhitelist.grantWhitelist(alice.address))
         .to.emit(erc7818expWhitelist, ERC7818Whitelist.events.WhitelistGranted)
-        .withArgs(deployerAddress, aliceAddress);
-      await expect(erc7818expWhitelist.mintSpendableWhitelist(aliceAddress, 1))
+        .withArgs(deployerAddress, alice.address);
+      await expect(erc7818expWhitelist.mintSpendableWhitelist(alice.address, 1))
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(common.zeroAddress, aliceAddress, 1);
-      expect(await erc7818expWhitelist["balanceOf(address)"](aliceAddress)).equal(1);
-      await expect(erc7818expWhitelist.connect(alice)["transfer(address,uint256)"](bobAddress, 1))
+        .withArgs(common.zeroAddress, alice.address, 1);
+      expect(await erc7818expWhitelist["balanceOf(address)"](alice.address)).equal(1);
+      await expect(erc7818expWhitelist.connect(alice)["transfer(address,uint256)"](bob.address, 1))
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(aliceAddress, common.zeroAddress, 1)
+        .withArgs(alice.address, common.zeroAddress, 1)
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(common.zeroAddress, bobAddress, 1);
-      expect(await erc7818expWhitelist["balanceOf(address)"](aliceAddress)).equal(0);
-      expect(await erc7818expWhitelist["balanceOf(address)"](bobAddress)).equal(1);
+        .withArgs(common.zeroAddress, bob.address, 1);
+      expect(await erc7818expWhitelist["balanceOf(address)"](alice.address)).equal(0);
+      expect(await erc7818expWhitelist["balanceOf(address)"](bob.address)).equal(1);
       await expect(erc7818expWhitelist.connect(bob)["transfer(address,uint256)"](jameAddress, 1))
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(bobAddress, jameAddress, 1);
-      expect(await erc7818expWhitelist["balanceOf(address)"](bobAddress)).equal(0);
+        .withArgs(bob.address, jameAddress, 1);
+      expect(await erc7818expWhitelist["balanceOf(address)"](bob.address)).equal(0);
       expect(await erc7818expWhitelist["balanceOf(address)"](jameAddress)).equal(1);
     });
 
     // In cases of Wholesale and Retail are still in the designing phase to be discussed later.
     it("[HAPPY] whitelist address transfer spendable balance to non whitelist address", async function () {
       const {erc7818expWhitelist, deployer, alice, bob} = await deployERC7818Whitelist();
-      const aliceAddress = await alice.getAddress();
-      const bobAddress = await bob.getAddress();
+
       const deployerAddress = await deployer.getAddress();
-      await expect(erc7818expWhitelist.grantWhitelist(aliceAddress))
+      await expect(erc7818expWhitelist.grantWhitelist(alice.address))
         .to.emit(erc7818expWhitelist, ERC7818Whitelist.events.WhitelistGranted)
-        .withArgs(deployerAddress, aliceAddress);
-      await expect(erc7818expWhitelist.mintSpendableWhitelist(aliceAddress, 1))
+        .withArgs(deployerAddress, alice.address);
+      await expect(erc7818expWhitelist.mintSpendableWhitelist(alice.address, 1))
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(common.zeroAddress, aliceAddress, 1);
-      await expect(erc7818expWhitelist.connect(alice)["transfer(address,uint256)"](bobAddress, 1))
+        .withArgs(common.zeroAddress, alice.address, 1);
+      await expect(erc7818expWhitelist.connect(alice)["transfer(address,uint256)"](bob.address, 1))
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(aliceAddress, common.zeroAddress, 1)
+        .withArgs(alice.address, common.zeroAddress, 1)
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(common.zeroAddress, bobAddress, 1);
-      expect(await erc7818expWhitelist["balanceOf(address)"](aliceAddress)).equal(0);
-      expect(await erc7818expWhitelist["balanceOf(address)"](bobAddress)).equal(1);
-      expect(await erc7818expWhitelist.safeBalanceOf(bobAddress)).equal(0);
+        .withArgs(common.zeroAddress, bob.address, 1);
+      expect(await erc7818expWhitelist["balanceOf(address)"](alice.address)).equal(0);
+      expect(await erc7818expWhitelist["balanceOf(address)"](bob.address)).equal(1);
+      expect(await erc7818expWhitelist.safeBalanceOf(bob.address)).equal(0);
     });
 
     it("[HAPPY] non whitelist address transfer un-spendable balance to whitelist address", async function () {
       const {erc7818expWhitelist, deployer, alice, bob} = await deployERC7818Whitelist();
-      const aliceAddress = await alice.getAddress();
-      const bobAddress = await bob.getAddress();
+
       const deployerAddress = await deployer.getAddress();
-      await expect(erc7818expWhitelist.grantWhitelist(aliceAddress))
+      await expect(erc7818expWhitelist.grantWhitelist(alice.address))
         .to.emit(erc7818expWhitelist, ERC7818Whitelist.events.WhitelistGranted)
-        .withArgs(deployerAddress, aliceAddress);
-      await expect(erc7818expWhitelist.mintSpendableWhitelist(aliceAddress, 1))
+        .withArgs(deployerAddress, alice.address);
+      await expect(erc7818expWhitelist.mintSpendableWhitelist(alice.address, 1))
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(common.zeroAddress, aliceAddress, 1);
-      await expect(erc7818expWhitelist.connect(alice)["transfer(address,uint256)"](bobAddress, 1))
+        .withArgs(common.zeroAddress, alice.address, 1);
+      await expect(erc7818expWhitelist.connect(alice)["transfer(address,uint256)"](bob.address, 1))
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(aliceAddress, common.zeroAddress, 1)
+        .withArgs(alice.address, common.zeroAddress, 1)
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(common.zeroAddress, bobAddress, 1);
-      await expect(erc7818expWhitelist.connect(bob)["transfer(address,uint256)"](aliceAddress, 1))
+        .withArgs(common.zeroAddress, bob.address, 1);
+      await expect(erc7818expWhitelist.connect(bob)["transfer(address,uint256)"](alice.address, 1))
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(bobAddress, common.zeroAddress, 1)
+        .withArgs(bob.address, common.zeroAddress, 1)
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(common.zeroAddress, aliceAddress, 1);
-      expect(await erc7818expWhitelist["balanceOf(address)"](aliceAddress)).equal(1);
-      expect(await erc7818expWhitelist["balanceOf(address)"](bobAddress)).equal(0);
-      expect(await erc7818expWhitelist.safeBalanceOf(bobAddress)).equal(0);
+        .withArgs(common.zeroAddress, alice.address, 1);
+      expect(await erc7818expWhitelist["balanceOf(address)"](alice.address)).equal(1);
+      expect(await erc7818expWhitelist["balanceOf(address)"](bob.address)).equal(0);
+      expect(await erc7818expWhitelist.safeBalanceOf(bob.address)).equal(0);
     });
 
     it("[HAPPY] whitelist address transfer spendable balance to whitelist address", async function () {
       const {erc7818expWhitelist, deployer, alice, bob} = await deployERC7818Whitelist();
-      const aliceAddress = await alice.getAddress();
-      const bobAddress = await bob.getAddress();
+
       const deployerAddress = await deployer.getAddress();
-      await expect(erc7818expWhitelist.grantWhitelist(aliceAddress))
+      await expect(erc7818expWhitelist.grantWhitelist(alice.address))
         .to.emit(erc7818expWhitelist, ERC7818Whitelist.events.WhitelistGranted)
-        .withArgs(deployerAddress, aliceAddress);
-      await expect(erc7818expWhitelist.grantWhitelist(bobAddress))
+        .withArgs(deployerAddress, alice.address);
+      await expect(erc7818expWhitelist.grantWhitelist(bob.address))
         .to.emit(erc7818expWhitelist, ERC7818Whitelist.events.WhitelistGranted)
-        .withArgs(deployerAddress, bobAddress);
-      await expect(erc7818expWhitelist.mintSpendableWhitelist(aliceAddress, 1))
+        .withArgs(deployerAddress, bob.address);
+      await expect(erc7818expWhitelist.mintSpendableWhitelist(alice.address, 1))
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(common.zeroAddress, aliceAddress, 1);
-      await expect(erc7818expWhitelist.connect(alice)["transfer(address,uint256)"](bobAddress, 1))
+        .withArgs(common.zeroAddress, alice.address, 1);
+      await expect(erc7818expWhitelist.connect(alice)["transfer(address,uint256)"](bob.address, 1))
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(aliceAddress, bobAddress, 1);
-      expect(await erc7818expWhitelist["balanceOf(address)"](aliceAddress)).equal(0);
-      expect(await erc7818expWhitelist["balanceOf(address)"](bobAddress)).equal(1);
-      expect(await erc7818expWhitelist.safeBalanceOf(bobAddress)).equal(1);
+        .withArgs(alice.address, bob.address, 1);
+      expect(await erc7818expWhitelist["balanceOf(address)"](alice.address)).equal(0);
+      expect(await erc7818expWhitelist["balanceOf(address)"](bob.address)).equal(1);
+      expect(await erc7818expWhitelist.safeBalanceOf(bob.address)).equal(1);
     });
 
     it("[HAPPY] whitelist address transfer un-spendable balance to whitelist address", async function () {
       const {erc7818expWhitelist, deployer, alice, bob} = await deployERC7818Whitelist();
-      const aliceAddress = await alice.getAddress();
-      const bobAddress = await bob.getAddress();
+
       const deployerAddress = await deployer.getAddress();
-      await expect(erc7818expWhitelist.grantWhitelist(aliceAddress))
+      await expect(erc7818expWhitelist.grantWhitelist(alice.address))
         .to.emit(erc7818expWhitelist, ERC7818Whitelist.events.WhitelistGranted)
-        .withArgs(deployerAddress, aliceAddress);
-      await expect(erc7818expWhitelist.grantWhitelist(bobAddress))
+        .withArgs(deployerAddress, alice.address);
+      await expect(erc7818expWhitelist.grantWhitelist(bob.address))
         .to.emit(erc7818expWhitelist, ERC7818Whitelist.events.WhitelistGranted)
-        .withArgs(deployerAddress, bobAddress);
-      await expect(erc7818expWhitelist.mintUnspendableWhitelist(aliceAddress, 1))
+        .withArgs(deployerAddress, bob.address);
+      await expect(erc7818expWhitelist.mintUnspendableWhitelist(alice.address, 1))
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(common.zeroAddress, aliceAddress, 1);
-      await expect(erc7818expWhitelist.connect(alice).transferUnspendable(bobAddress, 1))
+        .withArgs(common.zeroAddress, alice.address, 1);
+      await expect(erc7818expWhitelist.connect(alice).transferUnspendable(bob.address, 1))
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(aliceAddress, bobAddress, 1);
-      expect(await erc7818expWhitelist["balanceOf(address)"](aliceAddress)).equal(0);
-      expect(await erc7818expWhitelist["balanceOf(address)"](bobAddress)).equal(1);
-      expect(await erc7818expWhitelist.safeBalanceOf(bobAddress)).equal(0);
+        .withArgs(alice.address, bob.address, 1);
+      expect(await erc7818expWhitelist["balanceOf(address)"](alice.address)).equal(0);
+      expect(await erc7818expWhitelist["balanceOf(address)"](bob.address)).equal(1);
+      expect(await erc7818expWhitelist.safeBalanceOf(bob.address)).equal(0);
     });
 
     it("[UNHAPPY] whitelist address insufficient transfer un-spendable balance to whitelist address", async function () {
       const {erc7818expWhitelist, deployer, alice, bob} = await deployERC7818Whitelist();
-      const aliceAddress = await alice.getAddress();
-      const bobAddress = await bob.getAddress();
+
       const deployerAddress = await deployer.getAddress();
-      await expect(erc7818expWhitelist.grantWhitelist(aliceAddress))
+      await expect(erc7818expWhitelist.grantWhitelist(alice.address))
         .to.emit(erc7818expWhitelist, ERC7818Whitelist.events.WhitelistGranted)
-        .withArgs(deployerAddress, aliceAddress);
-      await expect(erc7818expWhitelist.grantWhitelist(bobAddress))
+        .withArgs(deployerAddress, alice.address);
+      await expect(erc7818expWhitelist.grantWhitelist(bob.address))
         .to.emit(erc7818expWhitelist, ERC7818Whitelist.events.WhitelistGranted)
-        .withArgs(deployerAddress, bobAddress);
+        .withArgs(deployerAddress, bob.address);
       await expect(
-        erc7818expWhitelist.connect(alice)["transfer(address,uint256)"](bobAddress, 1),
+        erc7818expWhitelist.connect(alice)["transfer(address,uint256)"](bob.address, 1),
       ).to.be.revertedWithCustomError(erc7818expWhitelist, ERC20.errors.ERC20InsufficientBalance);
     });
 
     it("[UNHAPPY] whitelist address transfer un-spendable balance to whitelist address", async function () {
       const {erc7818expWhitelist, deployer, alice, bob} = await deployERC7818Whitelist();
-      const aliceAddress = await alice.getAddress();
-      const bobAddress = await bob.getAddress();
+
       const deployerAddress = await deployer.getAddress();
-      await expect(erc7818expWhitelist.grantWhitelist(aliceAddress))
+      await expect(erc7818expWhitelist.grantWhitelist(alice.address))
         .to.emit(erc7818expWhitelist, ERC7818Whitelist.events.WhitelistGranted)
-        .withArgs(deployerAddress, aliceAddress);
-      await expect(erc7818expWhitelist.grantWhitelist(bobAddress))
+        .withArgs(deployerAddress, alice.address);
+      await expect(erc7818expWhitelist.grantWhitelist(bob.address))
         .to.emit(erc7818expWhitelist, ERC7818Whitelist.events.WhitelistGranted)
-        .withArgs(deployerAddress, bobAddress);
-      await expect(erc7818expWhitelist.mintUnspendableWhitelist(aliceAddress, 1))
+        .withArgs(deployerAddress, bob.address);
+      await expect(erc7818expWhitelist.mintUnspendableWhitelist(alice.address, 1))
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(common.zeroAddress, aliceAddress, 1);
-      await expect(erc7818expWhitelist.connect(alice)["transfer(address,uint256)"](bobAddress, 1))
+        .withArgs(common.zeroAddress, alice.address, 1);
+      await expect(erc7818expWhitelist.connect(alice)["transfer(address,uint256)"](bob.address, 1))
         .to.be.revertedWithCustomError(erc7818expWhitelist, ERC20.errors.ERC20InsufficientBalance)
-        .withArgs(aliceAddress, 0, 1);
+        .withArgs(alice.address, 0, 1);
     });
 
     it("[UNHAPPY] whitelist address transfer un-spendable balance to non whitelist address", async function () {
       const {erc7818expWhitelist, deployer, alice, bob} = await deployERC7818Whitelist();
-      const aliceAddress = await alice.getAddress();
-      const bobAddress = await bob.getAddress();
+
       const deployerAddress = await deployer.getAddress();
-      await expect(erc7818expWhitelist.grantWhitelist(aliceAddress))
+      await expect(erc7818expWhitelist.grantWhitelist(alice.address))
         .to.emit(erc7818expWhitelist, ERC7818Whitelist.events.WhitelistGranted)
-        .withArgs(deployerAddress, aliceAddress);
-      await expect(erc7818expWhitelist.mintUnspendableWhitelist(aliceAddress, 1))
+        .withArgs(deployerAddress, alice.address);
+      await expect(erc7818expWhitelist.mintUnspendableWhitelist(alice.address, 1))
         .to.be.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(common.zeroAddress, aliceAddress, 1);
-      await expect(erc7818expWhitelist.connect(alice)["transfer(address,uint256)"](bobAddress, 1))
+        .withArgs(common.zeroAddress, alice.address, 1);
+      await expect(erc7818expWhitelist.connect(alice)["transfer(address,uint256)"](bob.address, 1))
         .to.be.revertedWithCustomError(erc7818expWhitelist, ERC20.errors.ERC20InsufficientBalance)
-        .withArgs(aliceAddress, 0, 1);
+        .withArgs(alice.address, 0, 1);
     });
   });
 };
