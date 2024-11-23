@@ -1,6 +1,6 @@
 # @kiwarilabs/contracts
 
-This is a `solidity` smart contract library for provide multiple types of assets, agreement, campaigns, and utilities for Loyalty Program.
+A Solidity library for expirable tokens with time or block-based expiration.
 
 ### Installation
 
