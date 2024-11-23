@@ -53,7 +53,10 @@ library SlidingWindow {
     /// @param self The sliding window state.
     /// @param blockNumber The block number for which to calculate the epoch.
     /// @return epoch corresponding to the given block number.
-    function _calculateEpoch(SlidingWindowState storage self, uint256 blockNumber) private view returns (uint256 epoch) {
+    function _calculateEpoch(
+        SlidingWindowState storage self,
+        uint256 blockNumber
+    ) private view returns (uint256 epoch) {
         unchecked {
             uint256 startblockNumberCache = self._startBlockNumber;
             // Calculate epoch based on the difference between the current block and start block

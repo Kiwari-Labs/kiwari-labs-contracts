@@ -13,7 +13,7 @@
     "coverage": "npx hardhat coverage --solcoverjs ./.solcover.js",
     "coverage:clean": "npm run clean && npx hardhat coverage --solcoverjs ./.solcover.js",
     "docgen": "npx hardhat docgen",
-    "format": "yarn prettier:sol && yarn prettier:ts && yarn lint",
+    "format": "yarn prettier:sol && yarn prettier:ts",
     "prettier:packages": "prettier-package-json --write ./contracts/package.json ./package.json",
     "prettier:sol": "prettier --write --plugin=prettier-plugin-solidity '**/*.sol'",
     "prettier:ts": "prettier --write '**/*.ts'",

@@ -558,7 +558,11 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     }
 
     /// @custom:gas-inefficiency if not limit the size of array
-    function tokenList(address account, uint256 epoch, uint8 slot) external view virtual returns (uint256[] memory list) {
+    function tokenList(
+        address account,
+        uint256 epoch,
+        uint8 slot
+    ) external view virtual returns (uint256[] memory list) {
         list = _balances[account][epoch][slot].list.ascending();
     }
 }
