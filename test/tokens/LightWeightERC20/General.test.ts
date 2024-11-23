@@ -10,7 +10,7 @@ export const run = async () => {
       const {erc20exp} = await deployLightWeightERC20EXPBase({blockPeriod});
 
       const self = calculateSlidingWindowState({blockPeriod});
-      expect(await erc20exp.getBlockPerEra()).to.equal(self._blockPerEra);
+      expect(await erc20exp.getBlockPerEpoch()).to.equal(self._blockPerEpoch);
     });
 
     it("[HAPPY] query block per slot", async function () {
@@ -29,7 +29,7 @@ export const run = async () => {
       const {erc20exp} = await deployLightWeightERC20EXPBase({slotSize});
 
       const self = calculateSlidingWindowState({slotSize});
-      expect(await erc20exp.getSlotPerEra()).to.equal(self._slotSize);
+      expect(await erc20exp.getSlotPerEpoch()).to.equal(self._slotSize);
     });
 
     it("[HAPPY] query frame size in block length", async function () {
@@ -51,7 +51,7 @@ export const run = async () => {
       const {erc20exp} = await deployLightWeightERC20EXPBase({blockPeriod, slotSize, frameSize});
 
       const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
-      expect(await erc20exp.getFrameSizeInEraLength()).to.equal(self._frameSizeInEraAndSlotLength[0]);
+      expect(await erc20exp.getFrameSizeInEpochLength()).to.equal(self._frameSizeInEpochAndSlotLength[0]);
     });
 
     it("[HAPPY] query frame size in slot length", async function () {
@@ -62,7 +62,7 @@ export const run = async () => {
       const {erc20exp} = await deployLightWeightERC20EXPBase({blockPeriod, slotSize, frameSize});
 
       const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
-      expect(await erc20exp.getFrameSizeInSlotLength()).to.equal(self._frameSizeInEraAndSlotLength[1]);
+      expect(await erc20exp.getFrameSizeInSlotLength()).to.equal(self._frameSizeInEpochAndSlotLength[1]);
     });
 
     it("[HAPPY] query frame", async function () {
@@ -76,10 +76,10 @@ export const run = async () => {
 
       await mineBlock(Number(self._blockPerSlot) * 5);
 
-      const [fromEra, toEra, fromSlot, toSlot] = await erc20exp.frame();
+      const [fromEpoch, toEpoch, fromSlot, toSlot] = await erc20exp.frame();
 
-      expect(fromEra).to.equal(0);
-      expect(toEra).to.equal(1);
+      expect(fromEpoch).to.equal(0);
+      expect(toEpoch).to.equal(1);
 
       expect(fromSlot).to.equal(3);
       expect(toSlot).to.equal(1);
@@ -96,10 +96,10 @@ export const run = async () => {
 
       await mineBlock(Number(self._blockPerSlot) * 5);
 
-      const [fromEra, toEra, fromSlot, toSlot] = await erc20exp.safeFrame();
+      const [fromEpoch, toEpoch, fromSlot, toSlot] = await erc20exp.safeFrame();
 
-      expect(fromEra).to.equal(0);
-      expect(toEra).to.equal(1);
+      expect(fromEpoch).to.equal(0);
+      expect(toEpoch).to.equal(1);
 
       expect(fromSlot).to.equal(2);
       expect(toSlot).to.equal(1);

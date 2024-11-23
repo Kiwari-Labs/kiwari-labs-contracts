@@ -69,15 +69,15 @@ export const run = async () => {
         .to.emit(erc20expWhitelist, "Transfer")
         .withArgs(ZERO_ADDRESS, alice.address, oneEther);
 
-      let currentEraAndSlot = await erc20expWhitelist.currentEraAndSlot();
-      expect(currentEraAndSlot.era).to.equal(0);
-      expect(currentEraAndSlot.slot).to.equal(0);
+      let currentEpochAndSlot = await erc20expWhitelist.currentEpochAndSlot();
+      expect(currentEpochAndSlot.era).to.equal(0);
+      expect(currentEpochAndSlot.slot).to.equal(0);
 
       await mineUpTo((await erc20expWhitelist.getBlockPerSlot()) + 1);
 
-      currentEraAndSlot = await erc20expWhitelist.currentEraAndSlot();
-      expect(currentEraAndSlot.era).to.equal(0);
-      expect(currentEraAndSlot.slot).to.equal(1);
+      currentEpochAndSlot = await erc20expWhitelist.currentEpochAndSlot();
+      expect(currentEpochAndSlot.era).to.equal(0);
+      expect(currentEpochAndSlot.slot).to.equal(1);
 
       await expect(await erc20expWhitelist.mintRetail(alice.address, oneEther))
         .to.emit(erc20expWhitelist, "Transfer")

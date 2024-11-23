@@ -17,7 +17,7 @@ export const run = async () => {
       const expectExp = [];
 
       // Ensure we are in [era: 0, slot 0].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(0);
 
@@ -35,7 +35,7 @@ export const run = async () => {
       // Skip to [era: 0, slot 1].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 1].
-      [era, slot] = await erc20exp.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(1);
 
@@ -91,7 +91,7 @@ export const run = async () => {
       await mineBlock(blockPerSlot);
 
       // Ensure we are in [era: 0, slot 1].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(1);
 
@@ -109,7 +109,7 @@ export const run = async () => {
       // Skip to [era: 0, slot 2].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 2].
-      [era, slot] = await erc20exp.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(2);
 
@@ -167,7 +167,7 @@ export const run = async () => {
       await mineBlock(blockPerSlot);
 
       // Ensure we are in [era: 0, slot 2].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(2);
 
@@ -188,7 +188,7 @@ export const run = async () => {
       // Skip to [era: 0, slot 3].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 3].
-      [era, slot] = await erc20exp.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(3);
 
@@ -244,7 +244,7 @@ export const run = async () => {
       const expectExp = [];
 
       // Ensure we are in [era: 0, slot 0].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(0);
 
@@ -262,7 +262,7 @@ export const run = async () => {
       // Skip to [era: 0, slot 1].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 1].
-      [era, slot] = await erc20exp.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(1);
 
@@ -318,7 +318,7 @@ export const run = async () => {
       await mineBlock(blockPerSlot);
 
       // Ensure we are in [era: 0, slot 1].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(1);
 
@@ -336,7 +336,7 @@ export const run = async () => {
       // Skip to [era: 0, slot 2].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 2].
-      [era, slot] = await erc20exp.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(2);
 
@@ -394,7 +394,7 @@ export const run = async () => {
       await mineBlock(blockPerSlot);
 
       // Ensure we are in [era: 0, slot 2].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(2);
 
@@ -415,7 +415,7 @@ export const run = async () => {
       // Skip to [era: 0, slot 3].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 3].
-      [era, slot] = await erc20exp.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(3);
 
@@ -471,7 +471,7 @@ export const run = async () => {
       const expectExp = [];
 
       // Ensure we are in [era: 0, slot 0].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(0);
 
@@ -489,7 +489,7 @@ export const run = async () => {
       // Skip to [era: 0, slot 1].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 1].
-      [era, slot] = await erc20exp.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(1);
 
@@ -545,7 +545,7 @@ export const run = async () => {
       await mineBlock(blockPerSlot);
 
       // Ensure we are in [era: 0, slot 1].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(1);
 
@@ -563,7 +563,7 @@ export const run = async () => {
       // Skip to [era: 0, slot 2].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 2].
-      [era, slot] = await erc20exp.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(2);
 
@@ -621,7 +621,7 @@ export const run = async () => {
       await mineBlock(blockPerSlot);
 
       // Ensure we are in [era: 0, slot 2].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
+      let [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(2);
 
@@ -642,7 +642,7 @@ export const run = async () => {
       // Skip to [era: 0, slot 3].
       await mineBlock(blockPerSlot);
       // Ensure we are in [era: 0, slot 3].
-      [era, slot] = await erc20exp.currentEraAndSlot();
+      [era, slot] = await erc20exp.currentEpochAndSlot();
       expect(era).equal(0);
       expect(slot).equal(3);
 

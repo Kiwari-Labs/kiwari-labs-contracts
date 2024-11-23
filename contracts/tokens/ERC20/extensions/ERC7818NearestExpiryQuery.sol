@@ -16,8 +16,8 @@ abstract contract ERC7818NearestExpiryQuery is ERC20EXPBase {
     function _getNearestExpireBalanceOf(address account) internal view returns (uint256, uint256) {
         uint256 blockNumberCache = _blockNumberProvider();
         uint256 blockLengthCache = _getFrameSizeInBlockLength();
-        (uint256 fromEra, , uint8 fromSlot, ) = _safeFrame(blockNumberCache);
-        Slot storage _account = _slotOf(account, fromEra, fromSlot);
+        (uint256 fromEpoch, , uint8 fromSlot, ) = _safeFrame(blockNumberCache);
+        Slot storage _account = _slotOf(account, fromEpoch, fromSlot);
         blockNumberCache = _locateUnexpiredBlockBalance(_account.list, blockNumberCache, blockLengthCache);
         if (blockNumberCache == 0) {
             return (0, 0);

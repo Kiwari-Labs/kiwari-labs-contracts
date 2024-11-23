@@ -3,10 +3,10 @@ import {common} from "../../constant.test";
 import {LightWeightSlidingWindowLibrary} from "../../constant.test";
 
 export interface ILightWeightSlidingWindowState {
-  _blockPerEra: Number;
+  _blockPerEpoch: Number;
   _blockPerSlot: Number;
   _frameSizeInBlockLength: Number;
-  _frameSizeInEraAndSlotLength: Array<Number>;
+  _frameSizeInEpochAndSlotLength: Array<Number>;
   _startBlockNumber: Number;
 }
 
@@ -16,10 +16,10 @@ export const calculateLightWeightSlidingWindowState = function ({
   frameSize = 2,
 }): ILightWeightSlidingWindowState {
   const self: ILightWeightSlidingWindowState = {
-    _blockPerEra: 0,
+    _blockPerEpoch: 0,
     _blockPerSlot: 0,
     _frameSizeInBlockLength: 0,
-    _frameSizeInEraAndSlotLength: [],
+    _frameSizeInEpochAndSlotLength: [],
     _startBlockNumber: 0,
   };
 
@@ -34,24 +34,24 @@ export const calculateLightWeightSlidingWindowState = function ({
   // Convert this binary number back to decimal: 19723078
   // This is because shifting 78892315 to the right by 2 bits
   // results in 19723078, which is the floor value of 78892315 / 4.
-  const blockPerEraCache = blockPerSlotCache << common.twoBits;
+  const blockPerEpochCache = blockPerSlotCache << common.twoBits;
 
-  self._blockPerEra = blockPerEraCache;
+  self._blockPerEpoch = blockPerEpochCache;
   self._blockPerSlot = blockPerSlotCache;
   self._frameSizeInBlockLength = blockPerSlotCache * frameSize;
-  if (frameSize <= common.slotPerEra) {
-    self._frameSizeInEraAndSlotLength[0] = 0;
-    self._frameSizeInEraAndSlotLength[1] = frameSize;
+  if (frameSize <= common.slotPerEpoch) {
+    self._frameSizeInEpochAndSlotLength[0] = 0;
+    self._frameSizeInEpochAndSlotLength[1] = frameSize;
   } else {
     // Assume frame size equal to 2.
     // The number 2 in binary is [10].
     // Shifting [10] to the right by 2 positions results is [00].
     // Convert this binary number back to decimal: 0
-    self._frameSizeInEraAndSlotLength[0] = frameSize >> common.twoBits;
+    self._frameSizeInEpochAndSlotLength[0] = frameSize >> common.twoBits;
     // The number 2 in binary is 10.
     // The number 3 in binary is 11.
     // The binary result of 2 & 3 is 10, which is 2 in decimal.
-    self._frameSizeInEraAndSlotLength[1] = frameSize & common.threeBits;
+    self._frameSizeInEpochAndSlotLength[1] = frameSize & common.threeBits;
   }
 
   return self;

@@ -44,7 +44,7 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
         // _setBaseExpirationPeriod(blockTime_, frameSize_, slotSize_);
     }
 
-    mapping(uint256 id => mapping(address account => mapping(uint256 era => mapping(uint8 slot => Slot))))
+    mapping(uint256 id => mapping(address account => mapping(uint256 epoch => mapping(uint8 slot => Slot))))
         private _balances;
     mapping(uint256 id => Slide.SlidingWindowState) private _slidingWindowTokens;
     mapping(uint256 blockNumber => mapping(uint256 id => uint256 balance)) private _worldBlockBalances;
@@ -105,11 +105,11 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
     function _bufferSlotBalance(
         uint256 id,
         address account,
-        uint256 era,
+        uint256 epoch,
         uint8 slot,
         uint256 blockNumber
     ) private view returns (uint256 balance) {
-        Slot storage _spender = _balances[id][account][era][slot];
+        Slot storage _spender = _balances[id][account][epoch][slot];
         uint256 key = _locateUnexpiredBlockBalance(
             _spender.list,
             blockNumber,
@@ -126,13 +126,13 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
     function _slotBalance(
         uint256 id,
         address account,
-        uint256 era,
+        uint256 epoch,
         uint8 startSlot,
         uint8 endSlot
     ) private view returns (uint256 balance) {
         unchecked {
             for (; startSlot <= endSlot; startSlot++) {
-                balance += _balances[id][account][era][startSlot].slotBalance;
+                balance += _balances[id][account][epoch][startSlot].slotBalance;
             }
         }
         return balance;
@@ -141,35 +141,35 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
     function _lookBackBalance(
         uint256 id,
         address account,
-        uint256 fromEra,
-        uint256 toEra,
+        uint256 fromEpoch,
+        uint256 toEpoch,
         uint8 fromSlot,
         uint8 toSlot,
         uint256 blockNumber
     ) private view returns (uint256 balance) {
         unchecked {
-            balance = _bufferSlotBalance(id, account, fromEra, fromSlot, blockNumber);
-            // Go to the next slot. Increase the era if the slot is over the limit.
-            uint8 slotSizeCache = _slidingWindowTokens[id].getSlotPerEra();
+            balance = _bufferSlotBalance(id, account, fromEpoch, fromSlot, blockNumber);
+            // Go to the next slot. Increase the epoch if the slot is over the limit.
+            uint8 slotSizeCache = _slidingWindowTokens[id].getSlotPerEpoch();
             fromSlot = (fromSlot + 1) % slotSizeCache;
             if (fromSlot == 0) {
-                fromEra++;
+                fromEpoch++;
             }
 
-            // It is not possible if the fromEra is more than toEra.
-            if (fromEra == toEra) {
-                balance += _slotBalance(id, account, fromEra, fromSlot, toSlot);
+            // It is not possible if the fromEpoch is more than toEpoch.
+            if (fromEpoch == toEpoch) {
+                balance += _slotBalance(id, account, fromEpoch, fromSlot, toSlot);
             } else {
                 // Keep it simple stupid first by spliting into 3 part then sum.
-                // Part1: calulate balance at fromEra in naive in naive way O(n)
+                // Part1: calulate balance at fromEpoch in naive in naive way O(n)
                 uint8 maxSlotCache = slotSizeCache - 1;
-                balance += _slotBalance(id, account, fromEra, fromSlot, maxSlotCache);
-                // Part2: calulate balance betaween fromEra and toEra in naive way O(n)
-                for (uint256 era = fromEra + 1; era < toEra; era++) {
-                    balance += _slotBalance(id, account, era, 0, maxSlotCache);
+                balance += _slotBalance(id, account, fromEpoch, fromSlot, maxSlotCache);
+                // Part2: calulate balance betaween fromEpoch and toEpoch in naive way O(n)
+                for (uint256 epoch = fromEpoch + 1; epoch < toEpoch; epoch++) {
+                    balance += _slotBalance(id, account, epoch, 0, maxSlotCache);
                 }
-                // Part3:calulate balance at toEra in navie way O(n)
-                balance += _slotBalance(id, account, toEra, 0, toSlot);
+                // Part3:calulate balance at toEpoch in navie way O(n)
+                balance += _slotBalance(id, account, toEpoch, 0, toSlot);
             }
         }
     }
@@ -205,15 +205,15 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
             uint256 value = values.unsafeMemoryAccess(i);
             uint256 blockNumberCache = _blockNumberProvider();
             uint256 blockLengthCache = _slidingWindowTokens[id].getFrameSizeInBlockLength();
-            uint8 slotSizeCache = _slidingWindowTokens[id].getSlotPerEra();
+            uint8 slotSizeCache = _slidingWindowTokens[id].getSlotPerEpoch();
 
-            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindowTokens[id].frame(
+            (uint256 fromEpoch, uint256 toEpoch, uint8 fromSlot, uint8 toSlot) = _slidingWindowTokens[id].frame(
                 blockNumberCache
             );
 
             if (from == address(0)) {
                 // Mint token.
-                Slot storage _recipient = _balances[id][to][toEra][toSlot];
+                Slot storage _recipient = _balances[id][to][toEpoch][toSlot];
                 unchecked {
                     _recipient.slotBalance += value;
                     _recipient.blockBalances[blockNumberCache] += value;
@@ -222,7 +222,7 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
                 _worldBlockBalances[blockNumberCache][id] += value;
             } else {
                 // Burn token.
-                uint256 balance = _lookBackBalance(id, from, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
+                uint256 balance = _lookBackBalance(id, from, fromEpoch, toEpoch, fromSlot, toSlot, blockNumberCache);
                 if (balance < value) {
                     revert ERC1155InsufficientBalance(from, balance, value, id);
                 }
@@ -231,8 +231,8 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
                 uint256 balanceCache = 0;
 
                 if (to == address(0)) {
-                    while ((fromEra < toEra || (fromEra == toEra && fromSlot <= toSlot)) && pendingValue > 0) {
-                        Slot storage _spender = _balances[id][from][fromEra][fromSlot];
+                    while ((fromEpoch < toEpoch || (fromEpoch == toEpoch && fromSlot <= toSlot)) && pendingValue > 0) {
+                        Slot storage _spender = _balances[id][from][fromEpoch][fromSlot];
 
                         uint256 key = _locateUnexpiredBlockBalance(_spender.list, blockNumberCache, blockLengthCache);
 
@@ -258,21 +258,21 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
                             }
                         }
 
-                        // Go to the next slot. Increase the era if the slot is over the limit.
+                        // Go to the next slot. Increase the epoch if the slot is over the limit.
                         if (pendingValue > 0) {
                             unchecked {
                                 fromSlot = (fromSlot + 1) % slotSizeCache;
                                 if (fromSlot == 0) {
-                                    fromEra++;
+                                    fromEpoch++;
                                 }
                             }
                         }
                     }
                 } else {
                     // Transfer token.
-                    while ((fromEra < toEra || (fromEra == toEra && fromSlot <= toSlot)) && pendingValue > 0) {
-                        Slot storage _spender = _balances[id][from][fromEra][fromSlot];
-                        Slot storage _recipient = _balances[id][to][fromEra][fromSlot];
+                    while ((fromEpoch < toEpoch || (fromEpoch == toEpoch && fromSlot <= toSlot)) && pendingValue > 0) {
+                        Slot storage _spender = _balances[id][from][fromEpoch][fromSlot];
+                        Slot storage _recipient = _balances[id][to][fromEpoch][fromSlot];
 
                         uint256 key = _locateUnexpiredBlockBalance(_spender.list, blockNumberCache, blockLengthCache);
 
@@ -304,12 +304,12 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
                             }
                         }
 
-                        // Go to the next slot. Increase the era if the slot is over the limit.
+                        // Go to the next slot. Increase the epoch if the slot is over the limit.
                         if (pendingValue > 0) {
                             unchecked {
                                 fromSlot = (fromSlot + 1) % slotSizeCache;
                                 if (fromSlot == 0) {
-                                    fromEra++;
+                                    fromEpoch++;
                                 }
                             }
                         }
@@ -437,18 +437,18 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
     function _slotOf(
         uint256 id,
         address account,
-        uint256 fromEra,
+        uint256 fromEpoch,
         uint8 fromSlot
     ) internal view returns (Slot storage) {
-        return _balances[id][account][fromEra][fromSlot];
+        return _balances[id][account][fromEpoch][fromSlot];
     }
 
     function balanceOf(address account, uint256 id) public view virtual returns (uint256) {
         uint256 blockNumberCache = _blockNumberProvider();
-        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _slidingWindowTokens[id].frame(
+        (uint256 fromEpoch, uint256 toEpoch, uint8 fromSlot, uint8 toSlot) = _slidingWindowTokens[id].frame(
             blockNumberCache
         );
-        return _lookBackBalance(id, account, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
+        return _lookBackBalance(id, account, fromEpoch, toEpoch, fromSlot, toSlot, blockNumberCache);
     }
 
     function balanceOfBatch(

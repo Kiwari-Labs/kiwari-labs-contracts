@@ -16,28 +16,28 @@ interface ISlidingWindow {
     /// @param newFrameSizeInBlocks New frame size in blocks.
     event FrameSizeUpdated(uint256 oldFrameSizeInBlocks, uint256 newFrameSizeInBlocks);
 
-    /// @notice Returns the current era and slot within the sliding window.
-    /// @return era Current era number.
+    /// @notice Returns the current epoch and slot within the sliding window.
+    /// @return epoch Current epoch number.
     /// @return slot Current slot number.
-    function currentEraAndSlot() external view returns (uint256 era, uint8 slot);
+    function currentEpochAndSlot() external view returns (uint256 epoch, uint8 slot);
 
-    /// @notice Returns the current frame boundaries in terms of eras and slots.
-    /// @return fromEra Starting era of the current frame.
-    /// @return toEra Ending era of the current frame.
-    /// @return fromSlot Starting slot within the starting era of the current frame.
-    /// @return toSlot Ending slot within the ending era of the current frame.
-    function frame() external view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot);
+    /// @notice Returns the current frame boundaries in terms of epochs and slots.
+    /// @return fromEpoch Starting epoch of the current frame.
+    /// @return toEpoch Ending epoch of the current frame.
+    /// @return fromSlot Starting slot within the starting epoch of the current frame.
+    /// @return toSlot Ending slot within the ending epoch of the current frame.
+    function frame() external view returns (uint256 fromEpoch, uint256 toEpoch, uint8 fromSlot, uint8 toSlot);
 
-    /// @notice Returns the safe frame boundaries in terms of eras and slots based on the current block number.
-    /// @return fromEra Starting era of the safe frame.
-    /// @return toEra Ending era of the safe frame.
-    /// @return fromSlot Starting slot within the starting era of the safe frame.
-    /// @return toSlot Ending slot within the ending era of the safe frame.
-    function safeFrame() external view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot);
+    /// @notice Returns the safe frame boundaries in terms of epochs and slots based on the current block number.
+    /// @return fromEpoch Starting epoch of the safe frame.
+    /// @return toEpoch Ending epoch of the safe frame.
+    /// @return fromSlot Starting slot within the starting epoch of the safe frame.
+    /// @return toSlot Ending slot within the ending epoch of the safe frame.
+    function safeFrame() external view returns (uint256 fromEpoch, uint256 toEpoch, uint8 fromSlot, uint8 toSlot);
 
-    /// @notice Returns the number of blocks per era.
-    /// @return blockPerEra Number of blocks per era.
-    function getBlockPerEra() external view returns (uint40);
+    /// @notice Returns the number of blocks per epoch.
+    /// @return blockPerEpoch Number of blocks per epoch.
+    function getBlockPerEpoch() external view returns (uint40);
 
     /// @notice Returns the number of blocks per slot.
     /// @return blockPerSlot Number of blocks per slot.
@@ -47,19 +47,19 @@ interface ISlidingWindow {
     /// @return frameSizeInBlockLength Size of the frame in blocks.
     function getFrameSizeInBlockLength() external view returns (uint40);
 
-    /// @notice Returns the size of the sliding window frame in eras.
-    /// @return frameSizeInEraLength Size of the frame in eras.
-    function getFrameSizeInEraLength() external view returns (uint8);
+    /// @notice Returns the size of the sliding window frame in epochs.
+    /// @return frameSizeInEpochLength Size of the frame in epochs.
+    function getFrameSizeInEpochLength() external view returns (uint8);
 
     /// @notice Returns the size of the sliding window frame in slots.
     /// @return frameSizeInSlotLength Size of the frame in slots.
     function getFrameSizeInSlotLength() external view returns (uint8);
 
-    /// @notice Retrieves the frame size in era and slot length from the sliding window state.
-    /// @return An array containing frame size in era and slot length.
-    function getFrameSizeInEraAndSlotLength() external view returns (uint8[2] memory);
+    /// @notice Retrieves the frame size in epoch and slot length from the sliding window state.
+    /// @return An array containing frame size in epoch and slot length.
+    function getFrameSizeInEpochAndSlotLength() external view returns (uint8[2] memory);
 
-    /// @notice Returns the number of slots per era.
-    /// @return slotPerEra Number of slots per era.
-    function getSlotPerEra() external view returns (uint8);
+    /// @notice Returns the number of slots per epoch.
+    /// @return slotPerEpoch Number of slots per epoch.
+    function getSlotPerEpoch() external view returns (uint8);
 }

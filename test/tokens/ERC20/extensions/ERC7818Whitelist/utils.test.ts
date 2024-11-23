@@ -4,7 +4,7 @@ import {ERC7818Whitelist, ERC20EXPBase} from "../../../../constant.test";
 export const deployERC7818Whitelist = async function (
   blockPeriod = 400, // 400ms per block
   frameSize = 2, // frame size 2 slot
-  slotSize = 4, // 4 slot per era
+  slotSize = 4, // 4 slot per epoch
 ) {
   const [deployer, alice, bob, jame] = await ethers.getSigners();
 

@@ -18,22 +18,22 @@ contract MockLightWeightSlidingWindowLibrary {
 
     function frame(
         uint256 blockNumber
-    ) public view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
+    ) public view returns (uint256 fromEpoch, uint256 toEpoch, uint8 fromSlot, uint8 toSlot) {
         return slidingWindow.frame(blockNumber);
     }
 
     function safeFrame(
         uint256 blockNumber
-    ) public view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
+    ) public view returns (uint256 fromEpoch, uint256 toEpoch, uint8 fromSlot, uint8 toSlot) {
         return slidingWindow.safeFrame(blockNumber);
     }
 
-    function calculateEraAndSlot(uint256 blockNumber) public view returns (uint256 era, uint8 slot) {
-        return slidingWindow.calculateEraAndSlot(blockNumber);
+    function calculateEpochAndSlot(uint256 blockNumber) public view returns (uint256 epoch, uint8 slot) {
+        return slidingWindow.calculateEpochAndSlot(blockNumber);
     }
 
-    function getBlockPerEra() public view returns (uint40) {
-        return slidingWindow.getBlockPerEra();
+    function getBlockPerEpoch() public view returns (uint40) {
+        return slidingWindow.getBlockPerEpoch();
     }
 
     function getBlockPerSlot() public view returns (uint40) {
@@ -44,19 +44,19 @@ contract MockLightWeightSlidingWindowLibrary {
         return slidingWindow.getFrameSizeInBlockLength();
     }
 
-    function getFrameSizeInEraLength() public view returns (uint8) {
-        return slidingWindow.getFrameSizeInEraLength();
+    function getFrameSizeInEpochLength() public view returns (uint8) {
+        return slidingWindow.getFrameSizeInEpochLength();
     }
 
     function getFrameSizeInSlotLength() public view returns (uint8) {
         return slidingWindow.getFrameSizeInSlotLength();
     }
 
-    function getFrameSizeInEraAndSlotLength() public view returns (uint8[2] memory) {
-        return slidingWindow.getFrameSizeInEraAndSlotLength();
+    function getFrameSizeInEpochAndSlotLength() public view returns (uint8[2] memory) {
+        return slidingWindow.getFrameSizeInEpochAndSlotLength();
     }
 
-    function getSlotPerEra() public pure returns (uint8) {
-        return SlidingWindow.getSlotPerEra();
+    function getSlotPerEpoch() public pure returns (uint8) {
+        return SlidingWindow.getSlotPerEpoch();
     }
 }

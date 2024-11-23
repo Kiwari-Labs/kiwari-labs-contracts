@@ -5,7 +5,7 @@ import {common, ERC20} from "../../../constant.test";
 
 export const run = async () => {
   describe("Mint", async function () {
-    it("[HAPPY] mint correctly tokens into slot 0, 1 of era 0", async function () {
+    it("[HAPPY] mint correctly tokens into slot 0, 1 of epoch 0", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -17,41 +17,41 @@ export const run = async () => {
 
       const expectExp = [];
 
-      // Ensure we are in [era: 0, slot 0].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 0].
+      let [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(0);
 
-      // Mint into [era: 0, slot 0].
+      // Mint into [epoch: 0, slot 0].
       const amount = 1;
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount);
-      let list = await erc20exp.tokenList(alice.address, era, slot);
+      let list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
-      // Skip to [era: 0, slot 1].
+      // Skip to [epoch: 0, slot 1].
       await mineBlock(blockPerSlot);
-      // Ensure we are in [era: 0, slot 1].
-      [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 1].
+      [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(1);
 
-      // Mint into [era: 0, slot 1].
+      // Mint into [epoch: 0, slot 1].
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount + amount);
-      list = await erc20exp.tokenList(alice.address, era, slot);
+      list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
       // blocks in year equal to 78892315 since blocktime equal to 400ms.
-      // |-------------- 78892315 --------------|   <-- era 1.
+      // |-------------- 78892315 --------------|   <-- epoch 1.
       // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
       //  *  [0]    *  [1]       [2]       [3]
       //  ^         ^
@@ -76,7 +76,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(0);
     });
 
-    it("[HAPPY] mint correctly tokens into slot 1, 2 of era 0", async function () {
+    it("[HAPPY] mint correctly tokens into slot 1, 2 of epoch 0", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -88,44 +88,44 @@ export const run = async () => {
 
       const expectExp = [];
 
-      // Skip to [era: 0, slot 1].
+      // Skip to [epoch: 0, slot 1].
       await mineBlock(blockPerSlot);
 
-      // Ensure we are in [era: 0, slot 1].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 1].
+      let [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(1);
 
-      // Mint into [era: 0, slot 1].
+      // Mint into [epoch: 0, slot 1].
       const amount = 1;
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount);
-      let list = await erc20exp.tokenList(alice.address, era, slot);
+      let list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
-      // Skip to [era: 0, slot 2].
+      // Skip to [epoch: 0, slot 2].
       await mineBlock(blockPerSlot);
-      // Ensure we are in [era: 0, slot 2].
-      [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 2].
+      [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(2);
 
-      // Mint into [era: 0, slot 2].
+      // Mint into [epoch: 0, slot 2].
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount + amount);
-      list = await erc20exp.tokenList(alice.address, era, slot);
+      list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
       // blocks in year equal to 78892315 since blocktime equal to 400ms.
-      // |-------------- 78892315 --------------|   <-- era 1.
+      // |-------------- 78892315 --------------|   <-- epoch 1.
       // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
       //     [0]    *  [1]    *  [2]       [3]
       //            ^         ^
@@ -150,7 +150,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(0);
     });
 
-    it("[HAPPY] mint correctly tokens into slot 2, 3 of era 0", async function () {
+    it("[HAPPY] mint correctly tokens into slot 2, 3 of epoch 0", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -162,17 +162,17 @@ export const run = async () => {
 
       const expectExp = [];
 
-      // Skip to [era: 0, slot 1].
+      // Skip to [epoch: 0, slot 1].
       await mineBlock(blockPerSlot);
-      // Skip to [era: 0, slot 2].
+      // Skip to [epoch: 0, slot 2].
       await mineBlock(blockPerSlot);
 
-      // Ensure we are in [era: 0, slot 2].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 2].
+      let [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(2);
 
-      // Mint into [era: 0, slot 2].
+      // Mint into [epoch: 0, slot 2].
       const amount = 1;
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
@@ -182,18 +182,18 @@ export const run = async () => {
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount + amount);
-      let list = await erc20exp.tokenList(alice.address, era, slot);
+      let list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[1]) + blockPerFrame);
       expect(list.length).equal(2);
 
-      // Skip to [era: 0, slot 3].
+      // Skip to [epoch: 0, slot 3].
       await mineBlock(blockPerSlot);
-      // Ensure we are in [era: 0, slot 3].
-      [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 3].
+      [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(3);
 
-      // Mint into [era: 0, slot 3].
+      // Mint into [epoch: 0, slot 3].
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, alice.address, amount);
@@ -202,12 +202,12 @@ export const run = async () => {
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount + amount + amount + amount);
-      list = await erc20exp.tokenList(alice.address, era, slot);
+      list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[1]) + blockPerFrame);
       expect(list.length).equal(2);
 
       // blocks in year equal to 78892315 since blocktime equal to 400ms.
-      // |-------------- 78892315 --------------|   <-- era 1.
+      // |-------------- 78892315 --------------|   <-- epoch 1.
       // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
       //     [0]       [1]    *  [2]    *  [3]
       //                      ^         ^
@@ -232,7 +232,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(0);
     });
 
-    it("[HAPPY] mint correctly tokens into slot 0, 1 of era 0 when frame size full era", async function () {
+    it("[HAPPY] mint correctly tokens into slot 0, 1 of epoch 0 when frame size full epoch", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -244,41 +244,41 @@ export const run = async () => {
 
       const expectExp = [];
 
-      // Ensure we are in [era: 0, slot 0].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 0].
+      let [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(0);
 
-      // Mint into [era: 0, slot 0].
+      // Mint into [epoch: 0, slot 0].
       const amount = 1;
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount);
-      let list = await erc20exp.tokenList(alice.address, era, slot);
+      let list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
-      // Skip to [era: 0, slot 1].
+      // Skip to [epoch: 0, slot 1].
       await mineBlock(blockPerSlot);
-      // Ensure we are in [era: 0, slot 1].
-      [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 1].
+      [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(1);
 
-      // Mint into [era: 0, slot 1].
+      // Mint into [epoch: 0, slot 1].
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount + amount);
-      list = await erc20exp.tokenList(alice.address, era, slot);
+      list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
       // blocks in year equal to 78892315 since blocktime equal to 400ms.
-      // |-------------- 78892315 --------------|   <-- era 1.
+      // |-------------- 78892315 --------------|   <-- epoch 1.
       // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
       //  *  [0]    *  [1]       [2]       [3]
       //  ^         ^
@@ -303,7 +303,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(0);
     });
 
-    it("[HAPPY] mint correctly tokens into slot 1, 2 of era 0 when frame size full era", async function () {
+    it("[HAPPY] mint correctly tokens into slot 1, 2 of epoch 0 when frame size full epoch", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -315,44 +315,44 @@ export const run = async () => {
 
       const expectExp = [];
 
-      // Skip to [era: 0, slot 1].
+      // Skip to [epoch: 0, slot 1].
       await mineBlock(blockPerSlot);
 
-      // Ensure we are in [era: 0, slot 1].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 1].
+      let [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(1);
 
-      // Mint into [era: 0, slot 1].
+      // Mint into [epoch: 0, slot 1].
       const amount = 1;
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount);
-      let list = await erc20exp.tokenList(alice.address, era, slot);
+      let list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
-      // Skip to [era: 0, slot 2].
+      // Skip to [epoch: 0, slot 2].
       await mineBlock(blockPerSlot);
-      // Ensure we are in [era: 0, slot 2].
-      [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 2].
+      [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(2);
 
-      // Mint into [era: 0, slot 2].
+      // Mint into [epoch: 0, slot 2].
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount + amount);
-      list = await erc20exp.tokenList(alice.address, era, slot);
+      list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
       // blocks in year equal to 78892315 since blocktime equal to 400ms.
-      // |-------------- 78892315 --------------|   <-- era 1.
+      // |-------------- 78892315 --------------|   <-- epoch 1.
       // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
       //     [0]    *  [1]    *  [2]       [3]
       //            ^         ^
@@ -377,7 +377,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(0);
     });
 
-    it("[HAPPY] mint correctly tokens into slot 2, 3 of era 0 when frame size full era", async function () {
+    it("[HAPPY] mint correctly tokens into slot 2, 3 of epoch 0 when frame size full epoch", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -389,17 +389,17 @@ export const run = async () => {
 
       const expectExp = [];
 
-      // Skip to [era: 0, slot 1].
+      // Skip to [epoch: 0, slot 1].
       await mineBlock(blockPerSlot);
-      // Skip to [era: 0, slot 2].
+      // Skip to [epoch: 0, slot 2].
       await mineBlock(blockPerSlot);
 
-      // Ensure we are in [era: 0, slot 2].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 2].
+      let [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(2);
 
-      // Mint into [era: 0, slot 2].
+      // Mint into [epoch: 0, slot 2].
       const amount = 1;
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
@@ -409,18 +409,18 @@ export const run = async () => {
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount + amount);
-      let list = await erc20exp.tokenList(alice.address, era, slot);
+      let list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[1]) + blockPerFrame);
       expect(list.length).equal(2);
 
-      // Skip to [era: 0, slot 3].
+      // Skip to [epoch: 0, slot 3].
       await mineBlock(blockPerSlot);
-      // Ensure we are in [era: 0, slot 3].
-      [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 3].
+      [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(3);
 
-      // Mint into [era: 0, slot 3].
+      // Mint into [epoch: 0, slot 3].
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, alice.address, amount);
@@ -429,12 +429,12 @@ export const run = async () => {
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount + amount + amount + amount);
-      list = await erc20exp.tokenList(alice.address, era, slot);
+      list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[1]) + blockPerFrame);
       expect(list.length).equal(2);
 
       // blocks in year equal to 78892315 since blocktime equal to 400ms.
-      // |-------------- 78892315 --------------|   <-- era 1.
+      // |-------------- 78892315 --------------|   <-- epoch 1.
       // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
       //     [0]       [1]    *  [2]    *  [3]
       //                      ^         ^
@@ -459,7 +459,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(0);
     });
 
-    it("[HAPPY] mint correctly tokens into slot 0, 1 of era 0 when frame size over era", async function () {
+    it("[HAPPY] mint correctly tokens into slot 0, 1 of epoch 0 when frame size over epoch", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -471,41 +471,41 @@ export const run = async () => {
 
       const expectExp = [];
 
-      // Ensure we are in [era: 0, slot 0].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 0].
+      let [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(0);
 
-      // Mint into [era: 0, slot 0].
+      // Mint into [epoch: 0, slot 0].
       const amount = 1;
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount);
-      let list = await erc20exp.tokenList(alice.address, era, slot);
+      let list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
-      // Skip to [era: 0, slot 1].
+      // Skip to [epoch: 0, slot 1].
       await mineBlock(blockPerSlot);
-      // Ensure we are in [era: 0, slot 1].
-      [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 1].
+      [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(1);
 
-      // Mint into [era: 0, slot 1].
+      // Mint into [epoch: 0, slot 1].
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount + amount);
-      list = await erc20exp.tokenList(alice.address, era, slot);
+      list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
       // blocks in year equal to 78892315 since blocktime equal to 400ms.
-      // |-------------- 78892315 --------------|   <-- era 1.
+      // |-------------- 78892315 --------------|   <-- epoch 1.
       // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
       //  *  [0]    *  [1]       [2]       [3]
       //  ^         ^
@@ -530,7 +530,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(0);
     });
 
-    it("[HAPPY] mint correctly tokens into slot 1, 2 of era 0 when frame size over era", async function () {
+    it("[HAPPY] mint correctly tokens into slot 1, 2 of epoch 0 when frame size over epoch", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -542,44 +542,44 @@ export const run = async () => {
 
       const expectExp = [];
 
-      // Skip to [era: 0, slot 1].
+      // Skip to [epoch: 0, slot 1].
       await mineBlock(blockPerSlot);
 
-      // Ensure we are in [era: 0, slot 1].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 1].
+      let [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(1);
 
-      // Mint into [era: 0, slot 1].
+      // Mint into [epoch: 0, slot 1].
       const amount = 1;
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount);
-      let list = await erc20exp.tokenList(alice.address, era, slot);
+      let list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
-      // Skip to [era: 0, slot 2].
+      // Skip to [epoch: 0, slot 2].
       await mineBlock(blockPerSlot);
-      // Ensure we are in [era: 0, slot 2].
-      [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 2].
+      [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(2);
 
-      // Mint into [era: 0, slot 2].
+      // Mint into [epoch: 0, slot 2].
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount + amount);
-      list = await erc20exp.tokenList(alice.address, era, slot);
+      list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[0]) + blockPerFrame);
       expect(list.length).equal(1);
 
       // blocks in year equal to 78892315 since blocktime equal to 400ms.
-      // |-------------- 78892315 --------------|   <-- era 1.
+      // |-------------- 78892315 --------------|   <-- epoch 1.
       // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
       //     [0]    *  [1]    *  [2]       [3]
       //            ^         ^
@@ -604,7 +604,7 @@ export const run = async () => {
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(0);
     });
 
-    it("[HAPPY] mint correctly tokens into slot 2, 3 of era 0 when frame size over era", async function () {
+    it("[HAPPY] mint correctly tokens into slot 2, 3 of epoch 0 when frame size over epoch", async function () {
       // Start at block 100.
       const startBlockNumber = 100;
 
@@ -616,17 +616,17 @@ export const run = async () => {
 
       const expectExp = [];
 
-      // Skip to [era: 0, slot 1].
+      // Skip to [epoch: 0, slot 1].
       await mineBlock(blockPerSlot);
-      // Skip to [era: 0, slot 2].
+      // Skip to [epoch: 0, slot 2].
       await mineBlock(blockPerSlot);
 
-      // Ensure we are in [era: 0, slot 2].
-      let [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 2].
+      let [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(2);
 
-      // Mint into [era: 0, slot 2].
+      // Mint into [epoch: 0, slot 2].
       const amount = 1;
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
@@ -636,18 +636,18 @@ export const run = async () => {
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount + amount);
-      let list = await erc20exp.tokenList(alice.address, era, slot);
+      let list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[1]) + blockPerFrame);
       expect(list.length).equal(2);
 
-      // Skip to [era: 0, slot 3].
+      // Skip to [epoch: 0, slot 3].
       await mineBlock(blockPerSlot);
-      // Ensure we are in [era: 0, slot 3].
-      [era, slot] = await erc20exp.currentEraAndSlot();
-      expect(era).equal(0);
+      // Ensure we are in [epoch: 0, slot 3].
+      [epoch, slot] = await erc20exp.currentEpochAndSlot();
+      expect(epoch).equal(0);
       expect(slot).equal(3);
 
-      // Mint into [era: 0, slot 3].
+      // Mint into [epoch: 0, slot 3].
       await expect(erc20exp["mint(address,uint256)"](alice.address, amount))
         .to.be.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(common.zeroAddress, alice.address, amount);
@@ -656,12 +656,12 @@ export const run = async () => {
         .withArgs(common.zeroAddress, alice.address, amount);
 
       expect(await erc20exp["balanceOf(address)"](alice.address)).equal(amount + amount + amount + amount);
-      list = await erc20exp.tokenList(alice.address, era, slot);
+      list = await erc20exp.tokenList(alice.address, epoch, slot);
       expectExp.push(Number(list[1]) + blockPerFrame);
       expect(list.length).equal(2);
 
       // blocks in year equal to 78892315 since blocktime equal to 400ms.
-      // |-------------- 78892315 --------------|   <-- era 1.
+      // |-------------- 78892315 --------------|   <-- epoch 1.
       // {19723078}{19723078}{19723078}{19723078}   <-- 4 slot.
       //     [0]       [1]    *  [2]    *  [3]
       //                      ^         ^

@@ -6,9 +6,9 @@ export const common = {
   slotSize: 4,
   twoBits: 2,
   threeBits: 3,
-  slotPerEra: 4,
-  minSlotPerEra: 1,
-  maxSlotPerEra: 12,
+  slotPerEpoch: 4,
+  minSlotPerEpoch: 1,
+  maxSlotPerEpoch: 12,
   minFrameSize: 1,
   maxFrameSize: 64,
   minBlockTimeInMilliseconds: 100,
@@ -44,7 +44,7 @@ export const SlidingWindow = {
   errors: {
     InvalidBlockTime: "InvalidBlockTime",
     InvalidFrameSize: "InvalidFrameSize",
-    InvalidSlotPerEra: "InvalidSlotPerEra",
+    InvalidSlotPerEpoch: "InvalidSlotPerEpoch",
   },
   events: {},
 };

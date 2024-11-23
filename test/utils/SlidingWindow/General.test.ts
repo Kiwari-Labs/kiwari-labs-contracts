@@ -4,11 +4,11 @@ import {calculateSlidingWindowState, deploySlidingWindowLibrary} from "./utils.t
 
 export const run = async () => {
   describe("General", async function () {
-    it("[HAPPY] query block per era", async function () {
+    it("[HAPPY] query block per epoch", async function () {
       const blockPeriod = 400;
       const {slidingWindow} = await deploySlidingWindowLibrary({blockPeriod});
       const self = calculateSlidingWindowState({blockPeriod});
-      expect(await slidingWindow.getBlockPerEra()).to.equal(self._blockPerEra);
+      expect(await slidingWindow.getBlockPerEpoch()).to.equal(self._blockPerEpoch);
     });
 
     it("[HAPPY] query block per slot", async function () {
@@ -19,11 +19,11 @@ export const run = async () => {
       expect(await slidingWindow.getBlockPerSlot()).to.equal(self._blockPerSlot);
     });
 
-    it("[HAPPY] query slot per era", async function () {
+    it("[HAPPY] query slot per epoch", async function () {
       const slotSize = 4;
       const {slidingWindow} = await deploySlidingWindowLibrary({slotSize});
       const self = calculateSlidingWindowState({slotSize});
-      expect(await slidingWindow.getSlotPerEra()).to.equal(self._slotSize);
+      expect(await slidingWindow.getSlotPerEpoch()).to.equal(self._slotSize);
     });
 
     it("[HAPPY] query frame size in block length", async function () {
@@ -35,13 +35,13 @@ export const run = async () => {
       expect(await slidingWindow.getFrameSizeInBlockLength()).to.equal(self._frameSizeInBlockLength);
     });
 
-    it("[HAPPY] query frame size in era length", async function () {
+    it("[HAPPY] query frame size in epoch length", async function () {
       const blockPeriod = 400;
       const slotSize = 4;
       const frameSize = 2;
       const {slidingWindow} = await deploySlidingWindowLibrary({blockPeriod, slotSize, frameSize});
       const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
-      expect(await slidingWindow.getFrameSizeInEraLength()).to.equal(self._frameSizeInEraAndSlotLength[0]);
+      expect(await slidingWindow.getFrameSizeInEpochLength()).to.equal(self._frameSizeInEpochAndSlotLength[0]);
     });
 
     it("[HAPPY] query frame size in slot length", async function () {
@@ -50,19 +50,19 @@ export const run = async () => {
       const frameSize = 2;
       const {slidingWindow} = await deploySlidingWindowLibrary({blockPeriod, slotSize, frameSize});
       const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
-      expect(await slidingWindow.getFrameSizeInSlotLength()).to.equal(self._frameSizeInEraAndSlotLength[1]);
+      expect(await slidingWindow.getFrameSizeInSlotLength()).to.equal(self._frameSizeInEpochAndSlotLength[1]);
     });
 
-    it("[HAPPY] query frame size in era and slot length", async function () {
+    it("[HAPPY] query frame size in epoch and slot length", async function () {
       const blockPeriod = 400;
       const slotSize = 4;
       const frameSize = 2;
       const {slidingWindow} = await deploySlidingWindowLibrary({blockPeriod, slotSize, frameSize});
       const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
-      const getFrameSizeInEraAndSlotLength = await slidingWindow.getFrameSizeInEraAndSlotLength();
-      expect(getFrameSizeInEraAndSlotLength.length).to.equal(self._frameSizeInEraAndSlotLength.length);
-      expect(getFrameSizeInEraAndSlotLength[0]).to.equal(self._frameSizeInEraAndSlotLength[0]);
-      expect(getFrameSizeInEraAndSlotLength[1]).to.equal(self._frameSizeInEraAndSlotLength[1]);
+      const getFrameSizeInEpochAndSlotLength = await slidingWindow.getFrameSizeInEpochAndSlotLength();
+      expect(getFrameSizeInEpochAndSlotLength.length).to.equal(self._frameSizeInEpochAndSlotLength.length);
+      expect(getFrameSizeInEpochAndSlotLength[0]).to.equal(self._frameSizeInEpochAndSlotLength[0]);
+      expect(getFrameSizeInEpochAndSlotLength[1]).to.equal(self._frameSizeInEpochAndSlotLength[1]);
     });
 
     it("[UNHAPPY] update window reverts if the block time is less than the minimum", async function () {
@@ -137,12 +137,11 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindowLibrary({startBlockNumber, blockPeriod, frameSize, slotSize});
 
-      const invalidSlotPerEra = common.minSlotPerEra - 1;
+      const invalidSlotPerEpoch = common.minSlotPerEpoch - 1;
 
-      await expect(slidingWindow.updateWindow(blockPeriod, frameSize, invalidSlotPerEra)).to.be.revertedWithCustomError(
-        slidingWindow,
-        SlidingWindow.errors.InvalidSlotPerEra,
-      );
+      await expect(
+        slidingWindow.updateWindow(blockPeriod, frameSize, invalidSlotPerEpoch),
+      ).to.be.revertedWithCustomError(slidingWindow, SlidingWindow.errors.InvalidSlotPerEpoch);
     });
 
     it("[UNHAPPY] update window reverts if the slot size is more than maximum", async function () {
@@ -153,12 +152,11 @@ export const run = async () => {
 
       const {slidingWindow} = await deploySlidingWindowLibrary({startBlockNumber, blockPeriod, frameSize, slotSize});
 
-      const invalidSlotPerEra = common.maxSlotPerEra + 1;
+      const invalidSlotPerEpoch = common.maxSlotPerEpoch + 1;
 
-      await expect(slidingWindow.updateWindow(blockPeriod, frameSize, invalidSlotPerEra)).to.be.revertedWithCustomError(
-        slidingWindow,
-        SlidingWindow.errors.InvalidSlotPerEra,
-      );
+      await expect(
+        slidingWindow.updateWindow(blockPeriod, frameSize, invalidSlotPerEpoch),
+      ).to.be.revertedWithCustomError(slidingWindow, SlidingWindow.errors.InvalidSlotPerEpoch);
     });
   });
 };

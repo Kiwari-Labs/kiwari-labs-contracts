@@ -19,8 +19,8 @@ abstract contract ERC721EXPNearestExpiryQuery is ERC721EXPBase {
     function _getNearestExpireBalanceOf(address account) internal view returns (uint256[] memory, uint256) {
         uint256 blockNumberCache = _blockNumberProvider();
         uint256 blockLengthCache = _getFrameSizeInBlockLength();
-        (uint256 fromEra, , uint8 fromSlot, ) = _safeFrame(blockNumberCache);
-        Slot storage _account = _slotOf(account, fromEra, fromSlot);
+        (uint256 fromEpoch, , uint8 fromSlot, ) = _safeFrame(blockNumberCache);
+        Slot storage _account = _slotOf(account, fromEpoch, fromSlot);
         uint256 blockNumberIndexCache = _account.list.head();
         uint256[] memory tokenIds;
         unchecked {

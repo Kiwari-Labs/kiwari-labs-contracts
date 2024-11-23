@@ -17,17 +17,17 @@ contract MockSlidingWindow is SlidingWindow {
 
     function frame(
         uint256 blockNumber
-    ) public view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
+    ) public view returns (uint256 fromEpoch, uint256 toEpoch, uint8 fromSlot, uint8 toSlot) {
         return _frame(blockNumber);
     }
 
     function safeFrame(
         uint256 blockNumber
-    ) public view returns (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) {
+    ) public view returns (uint256 fromEpoch, uint256 toEpoch, uint8 fromSlot, uint8 toSlot) {
         return _safeFrame(blockNumber);
     }
 
-    function calculateEraAndSlot(uint256 blockNumber) public view returns (uint256 era, uint8 slot) {
-        return _calculateEraAndSlot(blockNumber);
+    function calculateEpochAndSlot(uint256 blockNumber) public view returns (uint256 epoch, uint8 slot) {
+        return _calculateEpochAndSlot(blockNumber);
     }
 }

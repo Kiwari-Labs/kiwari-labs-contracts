@@ -44,7 +44,7 @@ abstract contract ERC721EXPBase is
         mapping(uint256 blockNumber => EnumSet.UintSet set) blockBalances; // didn't require to be in sorted list for saving gas
     }
 
-    mapping(address account => mapping(uint256 era => mapping(uint8 slot => Slot))) private _balances;
+    mapping(address account => mapping(uint256 epoch => mapping(uint8 slot => Slot))) private _balances;
     mapping(uint256 tokenId => uint256 blockNumber) private _mintedBlockOfTokens;
     mapping(uint256 blockNumber => uint256 balance) private _worldBlockBalances;
 
@@ -66,13 +66,13 @@ abstract contract ERC721EXPBase is
 
     function _slotBalance(
         address account,
-        uint256 era,
+        uint256 epoch,
         uint8 startSlot,
         uint8 endSlot
     ) private view returns (uint256 balance) {
         unchecked {
             for (; startSlot <= endSlot; startSlot++) {
-                balance += _balances[account][era][startSlot].slotBalance;
+                balance += _balances[account][epoch][startSlot].slotBalance;
             }
         }
         return balance;
@@ -80,35 +80,35 @@ abstract contract ERC721EXPBase is
 
     function _lookBackBalance(
         address account,
-        uint256 fromEra,
-        uint256 toEra,
+        uint256 fromEpoch,
+        uint256 toEpoch,
         uint8 fromSlot,
         uint8 toSlot,
         uint256 blockNumber
     ) private view returns (uint256 balance) {
         unchecked {
-            balance = _bufferSlotBalance(account, fromEra, fromSlot, blockNumber);
-            // Go to the next slot. Increase the era if the slot is over the limit.
-            uint8 slotSizeCache = _getSlotPerEra();
+            balance = _bufferSlotBalance(account, fromEpoch, fromSlot, blockNumber);
+            // Go to the next slot. Increase the epoch if the slot is over the limit.
+            uint8 slotSizeCache = _getSlotPerEpoch();
             fromSlot = (fromSlot + 1) % slotSizeCache;
             if (fromSlot == 0) {
-                fromEra++;
+                fromEpoch++;
             }
 
-            // It is not possible if the fromEra is more than toEra.
-            if (fromEra == toEra) {
-                balance += _slotBalance(account, fromEra, fromSlot, toSlot);
+            // It is not possible if the fromEpoch is more than toEpoch.
+            if (fromEpoch == toEpoch) {
+                balance += _slotBalance(account, fromEpoch, fromSlot, toSlot);
             } else {
                 // Keep it simple stupid first by spliting into 3 part then sum.
-                // Part1: calulate balance at fromEra in naive in naive way O(n)
+                // Part1: calulate balance at fromEpoch in naive in naive way O(n)
                 uint8 maxSlotCache = slotSizeCache - 1;
-                balance += _slotBalance(account, fromEra, fromSlot, maxSlotCache);
-                // Part2: calulate balance betaween fromEra and toEra in naive way O(n)
-                for (uint256 era = fromEra + 1; era < toEra; era++) {
-                    balance += _slotBalance(account, era, 0, maxSlotCache);
+                balance += _slotBalance(account, fromEpoch, fromSlot, maxSlotCache);
+                // Part2: calulate balance betaween fromEpoch and toEpoch in naive way O(n)
+                for (uint256 epoch = fromEpoch + 1; epoch < toEpoch; epoch++) {
+                    balance += _slotBalance(account, epoch, 0, maxSlotCache);
                 }
-                // Part3:calulate balance at toEra in navie way O(n)
-                balance += _slotBalance(account, toEra, 0, toSlot);
+                // Part3:calulate balance at toEpoch in navie way O(n)
+                balance += _slotBalance(account, toEpoch, 0, toSlot);
             }
         }
     }
@@ -119,11 +119,11 @@ abstract contract ERC721EXPBase is
     /// and leading to higher computational costs during operations.
     function _bufferSlotBalance(
         address account,
-        uint256 era,
+        uint256 epoch,
         uint8 slot,
         uint256 blockNumber
     ) private view returns (uint256 balance) {
-        Slot storage _spender = _balances[account][era][slot];
+        Slot storage _spender = _balances[account][epoch][slot];
         uint256 expirationPeriodInBlockLengthCache = _getFrameSizeInBlockLength();
         uint256 blockNumberCache = _spender.list.head();
         unchecked {
@@ -137,8 +137,8 @@ abstract contract ERC721EXPBase is
         }
     }
 
-    function _slotOf(address account, uint256 fromEra, uint8 fromSlot) internal view returns (Slot storage) {
-        return _balances[account][fromEra][fromSlot];
+    function _slotOf(address account, uint256 fromEpoch, uint8 fromSlot) internal view returns (Slot storage) {
+        return _balances[account][fromEpoch][fromSlot];
     }
 
     function _isExpired(uint256 tokenId) internal view returns (bool) {
@@ -225,10 +225,10 @@ abstract contract ERC721EXPBase is
         }
         address from = _ownerOf(tokenId);
         uint256 mintedBlockCache = _mintedBlockOfTokens[tokenId];
-        (uint256 era, uint8 slot) = _calculateEraAndSlot(mintedBlockCache);
+        (uint256 epoch, uint8 slot) = _calculateEpochAndSlot(mintedBlockCache);
 
-        Slot storage _spender = _balances[from][era][slot];
-        Slot storage _recepient = _balances[from][era][slot];
+        Slot storage _spender = _balances[from][epoch][slot];
+        Slot storage _recepient = _balances[from][epoch][slot];
 
         // Perform (optional) operator check
         if (auth != address(0)) {
@@ -355,8 +355,8 @@ abstract contract ERC721EXPBase is
             revert ERC721InvalidOwner(address(0));
         }
         uint256 blockNumberCache = _blockNumberProvider();
-        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
-        return _lookBackBalance(owner, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
+        (uint256 fromEpoch, uint256 toEpoch, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
+        return _lookBackBalance(owner, fromEpoch, toEpoch, fromSlot, toSlot, blockNumberCache);
     }
 
     function _safeTransfer(address from, address to, uint256 tokenId) internal {
