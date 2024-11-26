@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.5.0 <0.9.0;
 
-import "../../../contracts/abstracts/LightWeightERC20EXPBase.sol";
+import "../../../contracts/tokens/ERC20/LightWeightERC20EXPBase.sol";
 
 contract MockLightWeightERC20EXPBase is ERC20EXPBase {
     constructor(

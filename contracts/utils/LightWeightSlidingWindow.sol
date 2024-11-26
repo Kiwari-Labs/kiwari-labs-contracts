@@ -126,14 +126,15 @@ library SlidingWindow {
     /// @param self The sliding window state to update.
     /// @param blockTime The time duration of each block in milliseconds.
     /// @param frameSize The size of the frame in slots.
+    /// @param development The development mode flag.
     /// @custom:truncate https://docs.soliditylang.org/en/latest/types.html#division
     function updateSlidingWindow(
         SlidingWindowState storage self,
         uint24 blockTime,
         uint8 frameSize,
-        bool dev
+        bool development
     ) internal {
-        if (!dev) {
+        if (!development) {
             if (blockTime < MINIMUM_BLOCK_TIME_IN_MILLISECONDS || blockTime > MAXIMUM_BLOCK_TIME_IN_MILLISECONDS) {
                 revert InvalidBlockTime();
             }

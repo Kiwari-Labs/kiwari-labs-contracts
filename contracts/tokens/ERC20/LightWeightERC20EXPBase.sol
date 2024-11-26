@@ -4,9 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 /// @title LightWeight ERC20EXP Base abstract contract
 /// @author Kiwari Labs
 
-import {SlidingWindow} from "./LightWeightSlidingWindow.sol";
-import {PU128SCDLL as SCDLL} from "../utils/datastructure/PU128SCDLL.sol";
-import {IERC7818} from "../tokens/ERC20/extensions/IERC7818.sol";
+import {SlidingWindow} from "../../abstracts/LightWeightSlidingWindow.sol";
+import {PU128SCDLL as SCDLL} from "../../utils/datastructure/PU128SCDLL.sol";
+import {IERC7818} from "./extensions/IERC7818.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -33,15 +33,16 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @param name_ The name of the token.
     /// @param symbol_ The symbol of the token.
     /// @param blockNumber_ The starting block number for the sliding window.
-    /// @param blockTime_ The duration of each block in milliseconds..
+    /// @param blockTime_ The duration of each block in milliseconds.
+    /// @param development The development mode flag.
     constructor(
         string memory name_,
         string memory symbol_,
         uint256 blockNumber_,
         uint16 blockTime_,
         uint8 frameSize_,
-        bool mode_
-    ) SlidingWindow(blockNumber_, blockTime_, frameSize_, mode_) {
+        bool development_
+    ) SlidingWindow(blockNumber_, blockTime_, frameSize_, development_) {
         _name = name_;
         _symbol = symbol_;
     }
