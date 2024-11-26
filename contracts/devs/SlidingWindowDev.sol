@@ -183,21 +183,6 @@ abstract contract SlidingWindow is ISlidingWindow {
     }
 
     /// @inheritdoc ISlidingWindow
-    function getFrameSizeInEpochLength() external view virtual returns (uint8) {
-        return _getFrameSizeInEpochLength();
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function getFrameSizeInSlotLength() external view virtual returns (uint8) {
-        return _getFrameSizeInSlotLength();
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function getFrameSizeInEpochAndSlotLength() external view virtual returns (uint8[2] memory) {
-        return _getFrameSizeInEpochAndSlotLength();
-    }
-
-    /// @inheritdoc ISlidingWindow
     function getSlotPerEpoch() external view virtual returns (uint8) {
         return _getSlotPerEpoch();
     }

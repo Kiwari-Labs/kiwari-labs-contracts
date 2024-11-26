@@ -44,18 +44,6 @@ contract MockSlidingWindowLibrary {
         return slidingWindow.getFrameSizeInBlockLength();
     }
 
-    function getFrameSizeInEpochLength() public view returns (uint8) {
-        return slidingWindow.getFrameSizeInEpochLength();
-    }
-
-    function getFrameSizeInSlotLength() public view returns (uint8) {
-        return slidingWindow.getFrameSizeInSlotLength();
-    }
-
-    function getFrameSizeInEpochAndSlotLength() public view returns (uint8[2] memory) {
-        return slidingWindow.getFrameSizeInEpochAndSlotLength();
-    }
-
     function getSlotPerEpoch() public view returns (uint8) {
         return slidingWindow.getSlotPerEpoch();
     }

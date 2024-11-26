@@ -46,28 +46,6 @@ export const run = async () => {
       expect(await erc20exp.getFrameSizeInBlockLength()).to.equal(self._frameSizeInBlockLength);
     });
 
-    it("[HAPPY] query frame size in epoch length", async function () {
-      const blockPeriod = 400;
-      const slotSize = 4;
-      const frameSize = 2;
-
-      const {erc20exp} = await deployERC20EXPBase({blockPeriod, slotSize, frameSize});
-
-      const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
-      expect(await erc20exp.getFrameSizeInEpochLength()).to.equal(self._frameSizeInEpochAndSlotLength[0]);
-    });
-
-    it("[HAPPY] query frame size in slot length", async function () {
-      const blockPeriod = 400;
-      const slotSize = 4;
-      const frameSize = 2;
-
-      const {erc20exp} = await deployERC20EXPBase({blockPeriod, slotSize, frameSize});
-
-      const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
-      expect(await erc20exp.getFrameSizeInSlotLength()).to.equal(self._frameSizeInEpochAndSlotLength[1]);
-    });
-
     it("[HAPPY] query frame", async function () {
       const blockPeriod = 400;
       const slotSize = 4;

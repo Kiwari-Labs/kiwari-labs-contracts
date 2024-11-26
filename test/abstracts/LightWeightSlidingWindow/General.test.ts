@@ -33,37 +33,6 @@ export const run = async () => {
       expect(await lightWeightSlidingWindow.getFrameSizeInBlockLength()).to.equal(self._frameSizeInBlockLength);
     });
 
-    it("[HAPPY] query frame size in epoch length", async function () {
-      const blockPeriod = 400;
-      const frameSize = 2;
-      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindow({blockPeriod, frameSize});
-      const self = calculateLightWeightSlidingWindowState({blockPeriod, frameSize});
-      expect(await lightWeightSlidingWindow.getFrameSizeInEpochLength()).to.equal(
-        self._frameSizeInEpochAndSlotLength[0],
-      );
-    });
-
-    it("[HAPPY] query frame size in slot length", async function () {
-      const blockPeriod = 400;
-      const frameSize = 2;
-      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindow({blockPeriod, frameSize});
-      const self = calculateLightWeightSlidingWindowState({blockPeriod, frameSize});
-      expect(await lightWeightSlidingWindow.getFrameSizeInSlotLength()).to.equal(
-        self._frameSizeInEpochAndSlotLength[1],
-      );
-    });
-
-    it("[HAPPY] query frame size in epoch and slot length", async function () {
-      const blockPeriod = 400;
-      const frameSize = 2;
-      const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindow({blockPeriod, frameSize});
-      const self = calculateLightWeightSlidingWindowState({blockPeriod, frameSize});
-      const getFrameSizeInEpochAndSlotLength = await lightWeightSlidingWindow.getFrameSizeInEpochAndSlotLength();
-      expect(getFrameSizeInEpochAndSlotLength.length).to.equal(self._frameSizeInEpochAndSlotLength.length);
-      expect(getFrameSizeInEpochAndSlotLength[0]).to.equal(self._frameSizeInEpochAndSlotLength[0]);
-      expect(getFrameSizeInEpochAndSlotLength[1]).to.equal(self._frameSizeInEpochAndSlotLength[1]);
-    });
-
     it("[UNHAPPY] update window reverts if the block time is less than the minimum", async function () {
       const blockPeriod = 400;
       const frameSize = 2;

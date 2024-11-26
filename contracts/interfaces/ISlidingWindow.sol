@@ -49,15 +49,15 @@ interface ISlidingWindow {
 
     /// @notice Returns the size of the sliding window frame in epochs.
     /// @return frameSizeInEpochLength Size of the frame in epochs.
-    function getFrameSizeInEpochLength() external view returns (uint8);
+    // function getFrameSizeInEpochLength() external view returns (uint8);
 
     /// @notice Returns the size of the sliding window frame in slots.
     /// @return frameSizeInSlotLength Size of the frame in slots.
-    function getFrameSizeInSlotLength() external view returns (uint8);
+    // function getFrameSizeInSlotLength() external view returns (uint8);
 
     /// @notice Retrieves the frame size in epoch and slot length from the sliding window state.
     /// @return An array containing frame size in epoch and slot length.
-    function getFrameSizeInEpochAndSlotLength() external view returns (uint8[2] memory);
+    // function getFrameSizeInEpochAndSlotLength() external view returns (uint8[2] memory);
 
     /// @notice Returns the number of slots per epoch.
     /// @return slotPerEpoch Number of slots per epoch.

@@ -19,7 +19,6 @@ library SlidingWindow {
         uint40 _blockPerEpoch;
         uint40 _blockPerSlot;
         uint40 _frameSizeInBlockLength;
-        uint8[2] _frameSizeInEpochAndSlotLength;
         uint256 _startBlockNumber;
     }
 
@@ -31,18 +30,16 @@ library SlidingWindow {
     /// the sliding window frame, as defined by `_frameSizeInBlockLength` in the sliding window state `self`.
     /// It checks if the `blockNumber` is greater than or equal to `_frameSizeInBlockLength`. If true, it calculates
     /// the difference; otherwise, it returns zero blocks indicating the block number is within the sliding window frame.
-    /// @param self The sliding window state to use for calculations.
+    /// @param frameSizeInBlockLength frameSizeInBlockLength
     /// @param blockNumber The current block number to calculate the difference from.
-    /// @return blocks The difference in blocks between the current block and the start of the sliding window frame.
+    /// @return result The difference in blocks between the current block and the start of the sliding window frame.
     function _calculateBlockDifferent(
-        SlidingWindowState storage self,
+        uint256 frameSizeInBlockLength,
         uint256 blockNumber
-    ) private view returns (uint256 blocks) {
-        uint256 frameSizeInBlockLengthCache = self._frameSizeInBlockLength;
-        unchecked {
-            if (blockNumber >= frameSizeInBlockLengthCache) {
-                // If the current block is beyond the expiration period
-                blocks = blockNumber - frameSizeInBlockLengthCache;
+    ) private pure returns (uint256 result) {
+        assembly {
+            if or(gt(blockNumber, frameSizeInBlockLength), eq(blockNumber, frameSizeInBlockLength)) {
+                result := sub(blockNumber, frameSizeInBlockLength)
             }
         }
     }
@@ -50,18 +47,19 @@ library SlidingWindow {
     /// @notice Calculates the epoch based on the provided block number and sliding window state.
     /// @dev Computes the epoch by determining the difference between the current block number and the start block number,
     /// then dividing this difference by the number of blocks per epoch. Uses unchecked arithmetic for performance considerations.
-    /// @param self The sliding window state.
+    /// @param startBlockNumber startBlockNumber.
+    /// @param blockPerEpoch blockPerEpoch.
     /// @param blockNumber The block number for which to calculate the epoch.
-    /// @return epoch corresponding to the given block number.
+    /// @return result epoch corresponding to the given block number.
     function _calculateEpoch(
-        SlidingWindowState storage self,
+        uint256 startBlockNumber,
+        uint256 blockPerEpoch,
         uint256 blockNumber
-    ) private view returns (uint256 epoch) {
-        unchecked {
-            uint256 startblockNumberCache = self._startBlockNumber;
-            // Calculate epoch based on the difference between the current block and start block
-            if (startblockNumberCache > 0 && blockNumber > startblockNumberCache) {
-                epoch = (blockNumber - startblockNumberCache) / self._blockPerEpoch;
+    ) private pure returns (uint256 result) {
+        assembly {
+            if and(gt(startBlockNumber, 0x00), gt(blockNumber, startBlockNumber)) {
+                blockNumber := sub(blockNumber, startBlockNumber)
+                result := div(blockNumber, blockPerEpoch)
             }
         }
     }
@@ -71,23 +69,23 @@ library SlidingWindow {
     /// the current block number and the start block number, the number of blocks per epoch, and the slot size.
     /// The `switch` statement handles whether the block number is greater than the start block number.
     /// Uses unchecked arithmetic for performance considerations.
-    /// @param self The sliding window state.
+    /// @param startblockNumber startblockNumber
+    /// @param blockPerEpoch blockPerEpoch
     /// @param blockNumber The block number for which to calculate the slot.
-    /// @return slot corresponding to the given block number.
-    function _calculateSlot(SlidingWindowState storage self, uint256 blockNumber) private view returns (uint8 slot) {
+    /// @return result slot corresponding to the given block number.
+    function _calculateSlot(
+        uint256 startblockNumber,
+        uint256 blockPerEpoch,
+        uint256 blockNumber
+    ) private pure returns (uint8 result) {
         unchecked {
-            uint256 startblockNumberCache = self._startBlockNumber;
-            uint40 blockPerYearCache = self._blockPerEpoch;
             assembly {
-                switch gt(blockNumber, startblockNumberCache)
+                switch gt(blockNumber, startblockNumber)
                 case 1 {
-                    slot := div(
-                        mod(sub(blockNumber, startblockNumberCache), blockPerYearCache),
-                        shr(TWO_BITS, blockPerYearCache)
-                    )
+                    result := div(mod(sub(blockNumber, startblockNumber), blockPerEpoch), shr(TWO_BITS, blockPerEpoch))
                 }
                 default {
-                    slot := 0
+                    result := 0
                 }
             }
         }
@@ -97,17 +95,23 @@ library SlidingWindow {
     /// @dev The adjustment is based on the number of blocks per slot. If the current block number
     /// is greater than the number of blocks per slot, it subtracts the block per slot from
     /// the block number to obtain the adjusted block number.
-    /// @param self The sliding window state.
+    /// @param blockPerSlot blockPerSlot
     /// @param blockNumber The current block number.
-    /// @return Updated block number after adjustment.
-    function _frameBuffer(SlidingWindowState storage self, uint256 blockNumber) private view returns (uint256) {
-        unchecked {
-            uint256 blockPerSlotCache = self._blockPerSlot;
-            if (blockNumber > blockPerSlotCache) {
-                blockNumber = blockNumber - blockPerSlotCache;
+    /// @return result Updated block number after adjustment.
+    function _calculateFrameBuffer(uint256 blockPerSlot, uint256 blockNumber) private pure returns (uint256 result) {
+        assembly {
+            if gt(blockNumber, blockPerSlot) {
+                result := sub(blockNumber, blockPerSlot)
             }
         }
-        return blockNumber;
+    }
+
+    function _calculateEpochAndSlot(
+        SlidingWindowState memory state,
+        uint256 blockNumber
+    ) internal pure returns (uint256 epoch, uint8 slot) {
+        epoch = _calculateEpoch(state._startBlockNumber, state._blockPerEpoch, blockNumber);
+        slot = _calculateSlot(state._startBlockNumber, state._blockPerEpoch, blockNumber);
     }
 
     /// @notice Updates the parameters of the sliding window based on the given block time and frame size.
@@ -133,14 +137,11 @@ library SlidingWindow {
             self._blockPerEpoch = blockPerEpochCache;
             self._blockPerSlot = blockPerSlotCache;
             self._frameSizeInBlockLength = blockPerSlotCache * frameSize;
-            if (frameSize <= SLOT_PER_EPOCH) {
-                self._frameSizeInEpochAndSlotLength[0] = 0;
-                self._frameSizeInEpochAndSlotLength[1] = frameSize;
-            } else {
-                self._frameSizeInEpochAndSlotLength[0] = frameSize >> TWO_BITS;
-                self._frameSizeInEpochAndSlotLength[1] = frameSize & THREE_BITS;
-            }
         }
+    }
+
+    function updateStartBlock(SlidingWindowState storage self, uint256 blockNumber) internal {
+        self._startBlockNumber = blockNumber;
     }
 
     /// @notice Calculates the current epoch and slot within the sliding window based on the given block number.
@@ -156,10 +157,9 @@ library SlidingWindow {
     function calculateEpochAndSlot(
         SlidingWindowState storage self,
         uint256 blockNumber
-    ) internal view returns (uint256 epoch, uint8 slot) {
-        epoch = _calculateEpoch(self, blockNumber);
-        slot = _calculateSlot(self, blockNumber);
-        return (epoch, slot);
+    ) internal pure returns (uint256 epoch, uint8 slot) {
+        SlidingWindowState memory state = self;
+        return (_calculateEpochAndSlot(state, blockNumber));
     }
 
     /// @notice Determines the sliding window frame based on the provided block number.
@@ -176,10 +176,11 @@ library SlidingWindow {
     function frame(
         SlidingWindowState storage self,
         uint256 blockNumber
-    ) internal view returns (uint256 fromEpoch, uint256 toEpoch, uint8 fromSlot, uint8 toSlot) {
-        (toEpoch, toSlot) = calculateEpochAndSlot(self, blockNumber);
-        blockNumber = _calculateBlockDifferent(self, blockNumber);
-        (fromEpoch, fromSlot) = calculateEpochAndSlot(self, blockNumber);
+    ) internal pure returns (uint256 fromEpoch, uint256 toEpoch, uint8 fromSlot, uint8 toSlot) {
+        SlidingWindowState memory state = self;
+        (toEpoch, toSlot) = _calculateEpochAndSlot(state, blockNumber);
+        blockNumber = _calculateBlockDifferent(state._frameSizeInBlockLength, blockNumber);
+        (fromEpoch, fromSlot) = _calculateEpochAndSlot(state, blockNumber);
     }
 
     /// @notice Computes a safe frame of epochs and slots relative to a given block number.
@@ -194,11 +195,12 @@ library SlidingWindow {
     function safeFrame(
         SlidingWindowState storage self,
         uint256 blockNumber
-    ) internal view returns (uint256 fromEpoch, uint256 toEpoch, uint8 fromSlot, uint8 toSlot) {
-        (toEpoch, toSlot) = calculateEpochAndSlot(self, blockNumber);
-        blockNumber = _calculateBlockDifferent(self, blockNumber);
-        blockNumber = _frameBuffer(self, blockNumber);
-        (fromEpoch, fromSlot) = calculateEpochAndSlot(self, blockNumber);
+    ) internal pure returns (uint256 fromEpoch, uint256 toEpoch, uint8 fromSlot, uint8 toSlot) {
+        SlidingWindowState memory state = self;
+        (toEpoch, toSlot) = _calculateEpochAndSlot(state, blockNumber);
+        blockNumber = _calculateBlockDifferent(state._frameSizeInBlockLength, blockNumber);
+        blockNumber = _calculateFrameBuffer(state._blockPerSlot, blockNumber);
+        (fromEpoch, fromSlot) = _calculateEpochAndSlot(state, blockNumber);
     }
 
     /// @notice Retrieves the number of blocks per epoch from the sliding window state.
@@ -223,30 +225,6 @@ library SlidingWindow {
     /// @return The frame size in block length.
     function getFrameSizeInBlockLength(SlidingWindowState storage self) internal view returns (uint40) {
         return self._frameSizeInBlockLength;
-    }
-
-    /// @notice Retrieves the frame size in epoch length from the sliding window state.
-    /// @dev Uses the sliding window state to fetch the frame size in terms of epoch length.
-    /// @param self The sliding window state.
-    /// @return The frame size in epoch length.
-    function getFrameSizeInEpochLength(SlidingWindowState storage self) internal view returns (uint8) {
-        return self._frameSizeInEpochAndSlotLength[0];
-    }
-
-    /// @notice Retrieves the frame size in slot length from the sliding window state.
-    /// @dev Uses the sliding window state to fetch the frame size in terms of slot length.
-    /// @param self The sliding window state.
-    /// @return The frame size in slot length.
-    function getFrameSizeInSlotLength(SlidingWindowState storage self) internal view returns (uint8) {
-        return self._frameSizeInEpochAndSlotLength[1];
-    }
-
-    /// @notice Retrieves the frame size in epoch and slot length from the sliding window state.
-    /// @dev Uses the sliding window state to fetch the frame size in terms of epoch and slot length.
-    /// @param self The sliding window state.
-    /// @return An array containing frame size in epoch and slot length.
-    function getFrameSizeInEpochAndSlotLength(SlidingWindowState storage self) internal view returns (uint8[2] memory) {
-        return self._frameSizeInEpochAndSlotLength;
     }
 
     /// @notice Retrieves the number of slots per epoch, which is a constant value.

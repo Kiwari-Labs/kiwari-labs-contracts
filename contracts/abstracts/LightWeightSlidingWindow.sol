@@ -13,7 +13,7 @@ abstract contract SlidingWindow is ISlidingWindow {
     Slide.SlidingWindowState private _slidingWindow;
 
     constructor(uint256 blockNumber_, uint16 blockTime_, uint8 frameSize_) {
-        _slidingWindow._startBlockNumber = blockNumber_ != 0 ? blockNumber_ : _blockNumberProvider();
+        _slidingWindow.updateStartBlock(blockNumber_ != 0 ? blockNumber_ : _blockNumberProvider());
         _updateSlidingWindow(blockTime_, frameSize_);
     }
 
@@ -102,27 +102,6 @@ abstract contract SlidingWindow is ISlidingWindow {
         return _slidingWindow.getFrameSizeInBlockLength();
     }
 
-    /// @notice Retrieves the frame size in epoch length from the sliding window state.
-    /// @dev Uses the sliding window state to fetch the frame size in terms of epoch length.
-    /// @return The frame size in epoch length.
-    function _getFrameSizeInEpochLength() internal view returns (uint8) {
-        return _slidingWindow.getFrameSizeInEpochLength();
-    }
-
-    /// @notice Retrieves the frame size in slot length from the sliding window state.
-    /// @dev Uses the sliding window state to fetch the frame size in terms of slot length.
-    /// @return The frame size in slot length.
-    function _getFrameSizeInSlotLength() internal view returns (uint8) {
-        return _slidingWindow.getFrameSizeInSlotLength();
-    }
-
-    /// @notice Retrieves the frame size in epoch and slot length from the sliding window state.
-    /// @dev Uses the sliding window state to fetch the frame size in terms of epoch and slot length.
-    /// @return An array containing frame size in epoch and slot length.
-    function _getFrameSizeInEpochAndSlotLength() internal view returns (uint8[2] memory) {
-        return _slidingWindow.getFrameSizeInEpochAndSlotLength();
-    }
-
     /// @notice Retrieves the number of slots per epoch from the sliding window state.
     /// @return The number of slots per epoch configured in the sliding window state.
     /// @dev This function returns the `_slotSize` attribute from the provided sliding window state `self`,
@@ -164,21 +143,6 @@ abstract contract SlidingWindow is ISlidingWindow {
     /// @inheritdoc ISlidingWindow
     function getFrameSizeInBlockLength() external view override returns (uint40) {
         return _getFrameSizeInBlockLength();
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function getFrameSizeInEpochLength() external view override returns (uint8) {
-        return _getFrameSizeInEpochLength();
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function getFrameSizeInSlotLength() external view override returns (uint8) {
-        return _getFrameSizeInSlotLength();
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function getFrameSizeInEpochAndSlotLength() external view returns (uint8[2] memory) {
-        return _getFrameSizeInEpochAndSlotLength();
     }
 
     /// @inheritdoc ISlidingWindow

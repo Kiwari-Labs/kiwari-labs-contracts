@@ -37,36 +37,6 @@ export const run = async () => {
       expect(await slidingWindow.getFrameSizeInBlockLength()).to.equal(self._frameSizeInBlockLength);
     });
 
-    it("[HAPPY] query frame size in epoch length", async function () {
-      const blockPeriod = 400;
-      const slotSize = 4;
-      const frameSize = 2;
-      const {slidingWindow} = await deploySlidingWindow({blockPeriod, slotSize, frameSize});
-      const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
-      expect(await slidingWindow.getFrameSizeInEpochLength()).to.equal(self._frameSizeInEpochAndSlotLength[0]);
-    });
-
-    it("[HAPPY] query frame size in slot length", async function () {
-      const blockPeriod = 400;
-      const slotSize = 4;
-      const frameSize = 2;
-      const {slidingWindow} = await deploySlidingWindow({blockPeriod, slotSize, frameSize});
-      const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
-      expect(await slidingWindow.getFrameSizeInSlotLength()).to.equal(self._frameSizeInEpochAndSlotLength[1]);
-    });
-
-    it("[HAPPY] query frame size in epoch and slot length", async function () {
-      const blockPeriod = 400;
-      const slotSize = 4;
-      const frameSize = 2;
-      const {slidingWindow} = await deploySlidingWindow({blockPeriod, slotSize, frameSize});
-      const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
-      const getFrameSizeInEpochAndSlotLength = await slidingWindow.getFrameSizeInEpochAndSlotLength();
-      expect(getFrameSizeInEpochAndSlotLength.length).to.equal(self._frameSizeInEpochAndSlotLength.length);
-      expect(getFrameSizeInEpochAndSlotLength[0]).to.equal(self._frameSizeInEpochAndSlotLength[0]);
-      expect(getFrameSizeInEpochAndSlotLength[1]).to.equal(self._frameSizeInEpochAndSlotLength[1]);
-    });
-
     it("[UNHAPPY] update window reverts if the block time is less than the minimum", async function () {
       const blockPeriod = 400;
       const slotSize = 4;

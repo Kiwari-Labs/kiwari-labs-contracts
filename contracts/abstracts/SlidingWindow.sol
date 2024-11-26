@@ -20,7 +20,7 @@ abstract contract SlidingWindow is ISlidingWindow {
     /// @param frameSize_ The frame size for the sliding window.
     /// @param slotSize_ The slot size for the sliding window.
     constructor(uint256 blockNumber_, uint16 blockTime_, uint8 frameSize_, uint8 slotSize_) {
-        _slidingWindow._startBlockNumber = blockNumber_ != 0 ? blockNumber_ : _blockNumberProvider();
+        _slidingWindow.updateStartBlock(blockNumber_ != 0 ? blockNumber_ : _blockNumberProvider());
         _updateSlidingWindow(blockTime_, frameSize_, slotSize_);
     }
 
@@ -110,27 +110,6 @@ abstract contract SlidingWindow is ISlidingWindow {
         return _slidingWindow.getFrameSizeInBlockLength();
     }
 
-    /// @notice Retrieves the frame size in epoch length from the sliding window state.
-    /// @dev Uses the sliding window state to fetch the frame size in terms of epoch length.
-    /// @return The frame size in epoch length.
-    function _getFrameSizeInEpochLength() internal view virtual returns (uint8) {
-        return _slidingWindow.getFrameSizeInEpochLength();
-    }
-
-    /// @notice Retrieves the frame size in slot length from the sliding window state.
-    /// @dev Uses the sliding window state to fetch the frame size in terms of slot length.
-    /// @return The frame size in slot length.
-    function _getFrameSizeInSlotLength() internal view virtual returns (uint8) {
-        return _slidingWindow.getFrameSizeInSlotLength();
-    }
-
-    /// @notice Retrieves the frame size in epoch and slot length from the sliding window state.
-    /// @dev Uses the sliding window state to fetch the frame size in terms of epoch and slot length.
-    /// @return An array containing frame size in epoch and slot length.
-    function _getFrameSizeInEpochAndSlotLength() internal view virtual returns (uint8[2] memory) {
-        return _slidingWindow.getFrameSizeInEpochAndSlotLength();
-    }
-
     /// @notice Retrieves the number of slots per epoch from the sliding window state.
     /// @dev This function returns the `_slotSize` attribute from the provided sliding window state `self`,
     /// which represents the number of slots per epoch in the sliding window configuration.
@@ -172,21 +151,6 @@ abstract contract SlidingWindow is ISlidingWindow {
     /// @inheritdoc ISlidingWindow
     function getFrameSizeInBlockLength() external view virtual returns (uint40) {
         return _getFrameSizeInBlockLength();
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function getFrameSizeInEpochLength() external view virtual returns (uint8) {
-        return _getFrameSizeInEpochLength();
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function getFrameSizeInSlotLength() external view virtual returns (uint8) {
-        return _getFrameSizeInSlotLength();
-    }
-
-    /// @inheritdoc ISlidingWindow
-    function getFrameSizeInEpochAndSlotLength() external view virtual returns (uint8[2] memory) {
-        return _getFrameSizeInEpochAndSlotLength();
     }
 
     /// @inheritdoc ISlidingWindow
