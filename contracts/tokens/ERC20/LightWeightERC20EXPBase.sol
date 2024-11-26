@@ -34,7 +34,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @param symbol_ The symbol of the token.
     /// @param blockNumber_ The starting block number for the sliding window.
     /// @param blockTime_ The duration of each block in milliseconds.
-    /// @param development The development mode flag.
+    /// @param development_ The development mode flag.
     constructor(
         string memory name_,
         string memory symbol_,
@@ -145,7 +145,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
         unchecked {
             balance = _bufferSlotBalance(account, fromEpoch, fromSlot, blockNumber);
             // Go to the next slot. Increase the epoch if the slot is over the limit.
-            uint8 slotSizeCache = _getSlotPerEpoch();
+            uint8 slotSizeCache = _getSlotsPerEpoch();
             fromSlot = (fromSlot + 1) % slotSizeCache;
             if (fromSlot == 0) {
                 fromEpoch++;
@@ -188,7 +188,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
 
         uint256 blockNumberCache = _blockNumberProvider();
         uint256 blockLengthCache = _getFrameSizeInBlockLength();
-        uint8 slotSizeCache = _getSlotPerEpoch();
+        uint8 slotSizeCache = _getSlotsPerEpoch();
 
         if (from == address(0)) {
             // Mint expirable token.

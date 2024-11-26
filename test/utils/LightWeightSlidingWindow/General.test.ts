@@ -8,19 +8,19 @@ export const run = async () => {
       const blockPeriod = 400;
       const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({blockPeriod});
       const self = calculateLightWeightSlidingWindowState({blockPeriod});
-      expect(await lightWeightSlidingWindow.getBlockPerEpoch()).to.equal(self._blockPerEpoch);
+      expect(await lightWeightSlidingWindow.getBlocksPerEpoch()).to.equal(self._blockPerEpoch);
     });
 
     it("[HAPPY] query block per slot", async function () {
       const blockPeriod = 400;
       const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({blockPeriod});
       const self = calculateLightWeightSlidingWindowState({blockPeriod});
-      expect(await lightWeightSlidingWindow.getBlockPerSlot()).to.equal(self._blockPerSlot);
+      expect(await lightWeightSlidingWindow.getBlocksPerSlot()).to.equal(self._blockPerSlot);
     });
 
     it("[HAPPY] query slot per epoch", async function () {
       const {lightWeightSlidingWindow} = await deployLightWeightSlidingWindowLibrary({});
-      expect(await lightWeightSlidingWindow.getSlotPerEpoch()).to.equal(common.slotPerEpoch);
+      expect(await lightWeightSlidingWindow.getSlotsPerEpoch()).to.equal(common.slotPerEpoch);
     });
 
     it("[HAPPY] query frame size in block length", async function () {

@@ -32,19 +32,19 @@ contract MockSlidingWindowLibrary {
         return slidingWindow.calculateEpochAndSlot(blockNumber);
     }
 
-    function getBlockPerEpoch() public view returns (uint40) {
-        return slidingWindow.getBlockPerEpoch();
+    function getBlocksPerEpoch() public view returns (uint40) {
+        return slidingWindow.getBlocksPerEpoch();
     }
 
-    function getBlockPerSlot() public view returns (uint40) {
-        return slidingWindow.getBlockPerSlot();
+    function getBlocksPerSlot() public view returns (uint40) {
+        return slidingWindow.getBlocksPerSlot();
     }
 
     function getFrameSizeInBlockLength() public view returns (uint40) {
         return slidingWindow.getFrameSizeInBlockLength();
     }
 
-    function getSlotPerEpoch() public view returns (uint8) {
-        return slidingWindow.getSlotPerEpoch();
+    function getSlotsPerEpoch() public view returns (uint8) {
+        return slidingWindow.getSlotsPerEpoch();
     }
 }

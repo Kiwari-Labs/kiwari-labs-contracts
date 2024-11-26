@@ -16,7 +16,7 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp, alice} = await deployLightWeightERC20EXPBase({});
 
-      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerSlot = await erc20exp.getBlocksPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const expectExp = [];
@@ -93,7 +93,7 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp, alice} = await deployLightWeightERC20EXPBase({});
 
-      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerSlot = await erc20exp.getBlocksPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const expectExp = [];
@@ -173,7 +173,7 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp, alice} = await deployLightWeightERC20EXPBase({});
 
-      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerSlot = await erc20exp.getBlocksPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const expectExp = [];
@@ -261,7 +261,7 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp, alice} = await deployLightWeightERC20EXPBase({frameSize: 4});
 
-      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerSlot = await erc20exp.getBlocksPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const expectExp = [];
@@ -338,7 +338,7 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp, alice} = await deployLightWeightERC20EXPBase({frameSize: 4});
 
-      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerSlot = await erc20exp.getBlocksPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const expectExp = [];
@@ -418,7 +418,7 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp, alice} = await deployLightWeightERC20EXPBase({frameSize: 4});
 
-      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerSlot = await erc20exp.getBlocksPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const expectExp = [];
@@ -506,7 +506,7 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp, alice} = await deployLightWeightERC20EXPBase({frameSize: 6});
 
-      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerSlot = await erc20exp.getBlocksPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const expectExp = [];
@@ -583,7 +583,7 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp, alice} = await deployLightWeightERC20EXPBase({frameSize: 6});
 
-      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerSlot = await erc20exp.getBlocksPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const expectExp = [];
@@ -663,7 +663,7 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp, alice} = await deployLightWeightERC20EXPBase({frameSize: 6});
 
-      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerSlot = await erc20exp.getBlocksPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const expectExp = [];
@@ -751,7 +751,7 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp, alice} = await deployLightWeightERC20EXPBase({});
 
-      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerSlot = await erc20exp.getBlocksPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const expectExp = [];
@@ -805,7 +805,7 @@ export const run = async () => {
       await mineBlock(startBlockNumber);
       const {erc20exp, alice} = await deployLightWeightERC20EXPBase({});
 
-      const blockPerSlot = await erc20exp.getBlockPerSlot();
+      const blockPerSlot = await erc20exp.getBlocksPerSlot();
       const blockPerFrame = await erc20exp.getFrameSizeInBlockLength();
 
       const expectExp = [];

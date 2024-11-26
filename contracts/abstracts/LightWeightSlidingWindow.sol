@@ -12,6 +12,12 @@ abstract contract SlidingWindow is ISlidingWindow {
 
     Slide.SlidingWindowState private _slidingWindow;
 
+    /// @notice Constructs the Sliding Window Contract with the initial parameters.
+    /// @dev Initializes the sliding window with the provided parameters.
+    /// If `blockNumber_` is zero, the current block number is fetched using `_blockNumberProvider()`.
+    /// @param blockNumber_ The initial block number for the sliding window. If zero, the current block number is used.
+    /// @param blockTime_ The block time to be used for the sliding window.
+    /// @param frameSize_ The frame size for the sliding window.
     constructor(uint256 blockNumber_, uint16 blockTime_, uint8 frameSize_, bool development_) {
         _slidingWindow.updateStartBlock(blockNumber_ != 0 ? blockNumber_ : _blockNumberProvider());
         _updateSlidingWindow(blockTime_, frameSize_, development_);
@@ -85,15 +91,15 @@ abstract contract SlidingWindow is ISlidingWindow {
     /// @notice Retrieves the number of blocks per epoch from the sliding window state.
     /// @dev Uses the sliding window state to fetch the blocks per epoch.
     /// @return The number of blocks per epoch.
-    function _getBlockPerEpoch() internal view returns (uint40) {
-        return _slidingWindow.getBlockPerEpoch();
+    function _getBlocksPerEpoch() internal view returns (uint40) {
+        return _slidingWindow.getBlocksPerEpoch();
     }
 
     /// @notice Retrieves the number of blocks per slot from the sliding window state.
     /// @dev Uses the sliding window state to fetch the blocks per slot.
     /// @return The number of blocks per slot.
-    function _getBlockPerSlot() internal view returns (uint40) {
-        return _slidingWindow.getBlockPerSlot();
+    function _getBlocksPerSlot() internal view returns (uint40) {
+        return _slidingWindow.getBlocksPerSlot();
     }
 
     /// @notice Retrieves the frame size in block length from the sliding window state.
@@ -107,8 +113,8 @@ abstract contract SlidingWindow is ISlidingWindow {
     /// @return The number of slots per epoch configured in the sliding window state.
     /// @dev This function returns the `_slotSize` attribute from the provided sliding window state `self`,
     /// which represents the number of slots per epoch in the sliding window configuration.
-    function _getSlotPerEpoch() internal pure returns (uint8) {
-        return Slide.getSlotPerEpoch();
+    function _getSlotsPerEpoch() internal pure returns (uint8) {
+        return Slide.getSlotsPerEpoch();
     }
 
     /// @inheritdoc ISlidingWindow
@@ -132,13 +138,13 @@ abstract contract SlidingWindow is ISlidingWindow {
     }
 
     /// @inheritdoc ISlidingWindow
-    function getBlockPerEpoch() external view override returns (uint40) {
-        return _getBlockPerEpoch();
+    function getBlocksPerEpoch() external view override returns (uint40) {
+        return _getBlocksPerEpoch();
     }
 
     /// @inheritdoc ISlidingWindow
-    function getBlockPerSlot() external view override returns (uint40) {
-        return _getBlockPerSlot();
+    function getBlocksPerSlot() external view override returns (uint40) {
+        return _getBlocksPerSlot();
     }
 
     /// @inheritdoc ISlidingWindow
@@ -147,7 +153,7 @@ abstract contract SlidingWindow is ISlidingWindow {
     }
 
     /// @inheritdoc ISlidingWindow
-    function getSlotPerEpoch() external pure override returns (uint8) {
-        return _getSlotPerEpoch();
+    function getSlotsPerEpoch() external pure override returns (uint8) {
+        return _getSlotsPerEpoch();
     }
 }

@@ -37,11 +37,11 @@ interface ISlidingWindow {
 
     /// @notice Returns the number of blocks per epoch.
     /// @return blockPerEpoch Number of blocks per epoch.
-    function getBlockPerEpoch() external view returns (uint40);
+    function getBlocksPerEpoch() external view returns (uint40);
 
     /// @notice Returns the number of blocks per slot.
     /// @return blockPerSlot Number of blocks per slot.
-    function getBlockPerSlot() external view returns (uint40);
+    function getBlocksPerSlot() external view returns (uint40);
 
     /// @notice Returns the size of the sliding window frame in blocks.
     /// @return frameSizeInBlockLength Size of the frame in blocks.
@@ -61,5 +61,5 @@ interface ISlidingWindow {
 
     /// @notice Returns the number of slots per epoch.
     /// @return slotPerEpoch Number of slots per epoch.
-    function getSlotPerEpoch() external view returns (uint8);
+    function getSlotsPerEpoch() external view returns (uint8);
 }

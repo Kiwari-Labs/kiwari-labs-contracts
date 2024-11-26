@@ -92,15 +92,15 @@ abstract contract SlidingWindow is ISlidingWindow {
     /// @notice Retrieves the number of blocks per epoch from the sliding window state.
     /// @dev Uses the sliding window state to fetch the blocks per epoch.
     /// @return The number of blocks per epoch.
-    function _getBlockPerEpoch() internal view virtual returns (uint40) {
-        return _slidingWindow.getBlockPerEpoch();
+    function _getBlocksPerEpoch() internal view virtual returns (uint40) {
+        return _slidingWindow.getBlocksPerEpoch();
     }
 
     /// @notice Retrieves the number of blocks per slot from the sliding window state.
     /// @dev Uses the sliding window state to fetch the blocks per slot.
     /// @return The number of blocks per slot.
-    function _getBlockPerSlot() internal view virtual returns (uint40) {
-        return _slidingWindow.getBlockPerSlot();
+    function _getBlocksPerSlot() internal view virtual returns (uint40) {
+        return _slidingWindow.getBlocksPerSlot();
     }
 
     /// @notice Retrieves the frame size in block length from the sliding window state.
@@ -114,8 +114,8 @@ abstract contract SlidingWindow is ISlidingWindow {
     /// @dev This function returns the `_slotSize` attribute from the provided sliding window state `self`,
     /// which represents the number of slots per epoch in the sliding window configuration.
     /// @return The number of slots per epoch configured in the sliding window state.
-    function _getSlotPerEpoch() internal view virtual returns (uint8) {
-        return _slidingWindow.getSlotPerEpoch();
+    function _getSlotsPerEpoch() internal view virtual returns (uint8) {
+        return _slidingWindow.getSlotsPerEpoch();
     }
 
     /// @inheritdoc ISlidingWindow
@@ -139,13 +139,13 @@ abstract contract SlidingWindow is ISlidingWindow {
     }
 
     /// @inheritdoc ISlidingWindow
-    function getBlockPerEpoch() external view virtual returns (uint40) {
-        return _getBlockPerEpoch();
+    function getBlocksPerEpoch() external view virtual returns (uint40) {
+        return _getBlocksPerEpoch();
     }
 
     /// @inheritdoc ISlidingWindow
-    function getBlockPerSlot() external view virtual returns (uint40) {
-        return _getBlockPerSlot();
+    function getBlocksPerSlot() external view virtual returns (uint40) {
+        return _getBlocksPerSlot();
     }
 
     /// @inheritdoc ISlidingWindow
@@ -154,7 +154,7 @@ abstract contract SlidingWindow is ISlidingWindow {
     }
 
     /// @inheritdoc ISlidingWindow
-    function getSlotPerEpoch() external view virtual returns (uint8) {
-        return _getSlotPerEpoch();
+    function getSlotsPerEpoch() external view virtual returns (uint8) {
+        return _getSlotsPerEpoch();
     }
 }

@@ -73,7 +73,7 @@ export const run = async () => {
       expect(currentEpochAndSlot.era).to.equal(0);
       expect(currentEpochAndSlot.slot).to.equal(0);
 
-      await mineUpTo((await erc20expWhitelist.getBlockPerSlot()) + 1);
+      await mineUpTo((await erc20expWhitelist.getBlocksPerSlot()) + 1);
 
       currentEpochAndSlot = await erc20expWhitelist.currentEpochAndSlot();
       expect(currentEpochAndSlot.era).to.equal(0);

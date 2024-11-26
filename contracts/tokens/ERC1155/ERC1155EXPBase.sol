@@ -150,7 +150,7 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
         unchecked {
             balance = _bufferSlotBalance(id, account, fromEpoch, fromSlot, blockNumber);
             // Go to the next slot. Increase the epoch if the slot is over the limit.
-            uint8 slotSizeCache = _slidingWindowTokens[id].getSlotPerEpoch();
+            uint8 slotSizeCache = _slidingWindowTokens[id].getSlotsPerEpoch();
             fromSlot = (fromSlot + 1) % slotSizeCache;
             if (fromSlot == 0) {
                 fromEpoch++;
@@ -205,7 +205,7 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
             uint256 value = values.unsafeMemoryAccess(i);
             uint256 blockNumberCache = _blockNumberProvider();
             uint256 blockLengthCache = _slidingWindowTokens[id].getFrameSizeInBlockLength();
-            uint8 slotSizeCache = _slidingWindowTokens[id].getSlotPerEpoch();
+            uint8 slotSizeCache = _slidingWindowTokens[id].getSlotsPerEpoch();
 
             (uint256 fromEpoch, uint256 toEpoch, uint8 fromSlot, uint8 toSlot) = _slidingWindowTokens[id].frame(
                 blockNumberCache

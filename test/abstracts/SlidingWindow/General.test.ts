@@ -10,7 +10,7 @@ export const run = async () => {
       const blockPeriod = 400;
       const {slidingWindow} = await deploySlidingWindow({blockPeriod});
       const self = calculateSlidingWindowState({blockPeriod});
-      expect(await slidingWindow.getBlockPerEpoch()).to.equal(self._blockPerEpoch);
+      expect(await slidingWindow.getBlocksPerEpoch()).to.equal(self._blockPerEpoch);
     });
 
     it("[HAPPY] query block per slot", async function () {
@@ -18,14 +18,14 @@ export const run = async () => {
       const slotSize = 4;
       const {slidingWindow} = await deploySlidingWindow({blockPeriod, slotSize});
       const self = calculateSlidingWindowState({blockPeriod, slotSize});
-      expect(await slidingWindow.getBlockPerSlot()).to.equal(self._blockPerSlot);
+      expect(await slidingWindow.getBlocksPerSlot()).to.equal(self._blockPerSlot);
     });
 
     it("[HAPPY] query slot per epoch", async function () {
       const slotSize = 4;
       const {slidingWindow} = await deploySlidingWindow({slotSize});
       const self = calculateSlidingWindowState({slotSize});
-      expect(await slidingWindow.getSlotPerEpoch()).to.equal(self._slotSize);
+      expect(await slidingWindow.getSlotsPerEpoch()).to.equal(self._slotSize);
     });
 
     it("[HAPPY] query frame size in block length", async function () {

@@ -223,7 +223,7 @@ library SlidingWindow {
     /// @dev Uses the sliding window state to fetch the blocks per epoch.
     /// @param self The sliding window state.
     /// @return The number of blocks per epoch.
-    function getBlockPerEpoch(SlidingWindowState storage self) internal view returns (uint40) {
+    function getBlocksPerEpoch(SlidingWindowState storage self) internal view returns (uint40) {
         return self.blocksPerEpoch;
     }
 
@@ -231,7 +231,7 @@ library SlidingWindow {
     /// @dev Uses the sliding window state to fetch the blocks per slot.
     /// @param self The sliding window state.
     /// @return The number of blocks per slot.
-    function getBlockPerSlot(SlidingWindowState storage self) internal view returns (uint40) {
+    function getBlocksPerSlot(SlidingWindowState storage self) internal view returns (uint40) {
         return self.blocksPerSlot;
     }
 
@@ -248,7 +248,7 @@ library SlidingWindow {
     /// which represents the number of slots per epoch in the sliding window configuration.
     /// @param self The sliding window state containing the configuration.
     /// @return The number of slots per epoch configured in the sliding window state.
-    function getSlotPerEpoch(SlidingWindowState storage self) internal view returns (uint8) {
+    function getSlotsPerEpoch(SlidingWindowState storage self) internal view returns (uint8) {
         return self.slotSize;
     }
 }

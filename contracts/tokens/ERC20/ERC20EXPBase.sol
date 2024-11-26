@@ -119,7 +119,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
         unchecked {
             balance = _bufferSlotBalance(account, fromEpoch, fromSlot, blockNumber);
             // Go to the next slot. Increase the epoch if the slot is over the limit.
-            uint8 slotSizeCache = _getSlotPerEpoch();
+            uint8 slotSizeCache = _getSlotsPerEpoch();
             fromSlot = (fromSlot + 1) % slotSizeCache;
             if (fromSlot == 0) {
                 fromEpoch++;
@@ -159,7 +159,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
     function _update(address from, address to, uint256 value) internal virtual {
         uint256 blockNumberCache = _blockNumberProvider();
         uint256 blockLengthCache = _getFrameSizeInBlockLength();
-        uint8 slotSizeCache = _getSlotPerEpoch();
+        uint8 slotSizeCache = _getSlotsPerEpoch();
 
         if (from == address(0)) {
             // Mint token.

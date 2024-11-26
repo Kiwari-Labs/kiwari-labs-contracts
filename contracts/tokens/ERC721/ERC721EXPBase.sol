@@ -89,7 +89,7 @@ abstract contract ERC721EXPBase is
         unchecked {
             balance = _bufferSlotBalance(account, fromEpoch, fromSlot, blockNumber);
             // Go to the next slot. Increase the epoch if the slot is over the limit.
-            uint8 slotSizeCache = _getSlotPerEpoch();
+            uint8 slotSizeCache = _getSlotsPerEpoch();
             fromSlot = (fromSlot + 1) % slotSizeCache;
             if (fromSlot == 0) {
                 fromEpoch++;
