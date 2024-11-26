@@ -118,7 +118,7 @@ library SlidingWindow {
         uint256 blockNumber
     ) internal pure returns (uint256 epoch, uint8 slot) {
         epoch = _calculateEpoch(state.startBlockNumber, state.blocksPerEpoch, blockNumber);
-        slot = _calculateSlot(state.startBlockNumber, state.blocksPerEpoch, blockNumber);
+        slot = _calculateSlot(state.startBlockNumber, state.blocksPerEpoch, blockNumber, state.slotSize);
     }
 
     /// @dev This function sets the `startBlockNumber` in the sliding window state to the provided `blockNumber`.
@@ -152,7 +152,7 @@ library SlidingWindow {
         if (frameSize < MINIMUM_FRAME_SIZE || frameSize > MAXIMUM_FRAME_SIZE) {
             revert InvalidFrameSize();
         }
-        if (slotSize < MINIMUM_SLOTS_PER_EPOCH || slotSize > MAXIMUM_SLOT_PER_EPOCH) {
+        if (slotSize < MINIMUM_SLOTS_PER_EPOCH || slotSize > MAXIMUM_SLOTS_PER_EPOCH) {
             revert InvalidSlotPerEpoch();
         }
         unchecked {

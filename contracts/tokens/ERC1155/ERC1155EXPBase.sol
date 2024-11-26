@@ -92,7 +92,7 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
     // @TODO
     function _updateSlingWindowOfId(uint256 id) internal {
         // Perform check is id start or not
-        if (_slidingWindowTokens[id]._startBlockNumber == 0) {
+        if (_slidingWindowTokens[id].startBlockNumber == 0) {
             // @TODO init slidng window state
             // if (params) {
             // init config sliding window state

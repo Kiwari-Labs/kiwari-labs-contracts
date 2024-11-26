@@ -9,7 +9,7 @@ contract MockLightWeightERC20EXPBase is ERC20EXPBase {
         string memory _symbol,
         uint16 blockTime_,
         uint8 frameSize_
-    ) ERC20EXPBase(_name, _symbol, block.number, blockTime_, frameSize_) {}
+    ) ERC20EXPBase(_name, _symbol, block.number, blockTime_, frameSize_, false) {}
 
     function mint(address to, uint256 value) public {
         _mint(to, value);

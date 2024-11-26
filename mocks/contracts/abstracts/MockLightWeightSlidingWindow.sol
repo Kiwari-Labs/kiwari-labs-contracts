@@ -8,10 +8,10 @@ contract MockLightWeightSlidingWindow is SlidingWindow {
         uint256 startBlockNumber,
         uint16 blockPeriod,
         uint8 frameSize
-    ) SlidingWindow(startBlockNumber, blockPeriod, frameSize) {}
+    ) SlidingWindow(startBlockNumber, blockPeriod, frameSize, false) {}
 
     function updateWindow(uint24 blockTime, uint8 frameSize) public {
-        _updateSlidingWindow(blockTime, frameSize);
+        _updateSlidingWindow(blockTime, frameSize, false);
     }
 
     function frame(

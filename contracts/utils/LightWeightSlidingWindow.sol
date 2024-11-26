@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 /// @title A lightweight version of the Sliding Window Algorithm. this contract provide efficiency and handy sliding window algorithm.
 /// @author Kiwari Labs
-/// @notice Some parameter was pre-define as a constant variable.
+/// @notice Some parameter was pre-define as a constant variable. and development mode functionality allows the bypassing check.
 
 library SlidingWindow {
     uint8 private constant TWO_BITS = 2;
@@ -127,12 +127,19 @@ library SlidingWindow {
     /// @param blockTime The time duration of each block in milliseconds.
     /// @param frameSize The size of the frame in slots.
     /// @custom:truncate https://docs.soliditylang.org/en/latest/types.html#division
-    function updateSlidingWindow(SlidingWindowState storage self, uint24 blockTime, uint8 frameSize) internal {
-        if (blockTime < MINIMUM_BLOCK_TIME_IN_MILLISECONDS || blockTime > MAXIMUM_BLOCK_TIME_IN_MILLISECONDS) {
-            revert InvalidBlockTime();
-        }
-        if (frameSize < MINIMUM_FRAME_SIZE || frameSize > MAXIMUM_FRAME_SIZE) {
-            revert InvalidFrameSize();
+    function updateSlidingWindow(
+        SlidingWindowState storage self,
+        uint24 blockTime,
+        uint8 frameSize,
+        bool dev
+    ) internal {
+        if (!dev) {
+            if (blockTime < MINIMUM_BLOCK_TIME_IN_MILLISECONDS || blockTime > MAXIMUM_BLOCK_TIME_IN_MILLISECONDS) {
+                revert InvalidBlockTime();
+            }
+            if (frameSize < MINIMUM_FRAME_SIZE || frameSize > MAXIMUM_FRAME_SIZE) {
+                revert InvalidFrameSize();
+            }
         }
         unchecked {
             uint40 blockPerSlotCache = (YEAR_IN_MILLISECONDS / blockTime) >> TWO_BITS;

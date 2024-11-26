@@ -8,7 +8,7 @@ contract MockSlidingWindowLibrary {
     SlidingWindow.SlidingWindowState public slidingWindow;
 
     constructor(uint256 startBlockNumber, uint16 blockPeriod, uint8 frameSize, uint8 slotSize) {
-        slidingWindow._startBlockNumber = startBlockNumber != 0 ? startBlockNumber : block.number;
+        slidingWindow.updateStartBlock(startBlockNumber != 0 ? startBlockNumber : block.number);
         slidingWindow.updateSlidingWindow(blockPeriod, frameSize, slotSize);
     }
 

@@ -12,9 +12,9 @@ abstract contract SlidingWindow is ISlidingWindow {
 
     Slide.SlidingWindowState private _slidingWindow;
 
-    constructor(uint256 blockNumber_, uint16 blockTime_, uint8 frameSize_) {
+    constructor(uint256 blockNumber_, uint16 blockTime_, uint8 frameSize_, bool mode_) {
         _slidingWindow.updateStartBlock(blockNumber_ != 0 ? blockNumber_ : _blockNumberProvider());
-        _updateSlidingWindow(blockTime_, frameSize_);
+        _updateSlidingWindow(blockTime_, frameSize_, mode_);
     }
 
     /// @notice Allows for override in subsecond blocktime network.
@@ -34,8 +34,9 @@ abstract contract SlidingWindow is ISlidingWindow {
     /// MINIMUM_FRAME_SIZE, MAXIMUM_FRAME_SIZE, and SLOT_PER_EPOCH.
     /// @param blockTime The time duration of each block in milliseconds.
     /// @param frameSize The size of the frame in slots.
-    function _updateSlidingWindow(uint24 blockTime, uint8 frameSize) internal {
-        _slidingWindow.updateSlidingWindow(blockTime, frameSize);
+    /// @param mode The flag development mode.
+    function _updateSlidingWindow(uint24 blockTime, uint8 frameSize, bool mode) internal {
+        _slidingWindow.updateSlidingWindow(blockTime, frameSize, mode);
     }
 
     /// @notice Calculates the current epoch and slot within the sliding window based on the given block number.
