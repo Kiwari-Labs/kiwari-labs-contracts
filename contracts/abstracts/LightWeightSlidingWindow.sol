@@ -18,7 +18,7 @@ abstract contract SlidingWindow is ISlidingWindow {
     /// @param blockNumber_ The initial block number for the sliding window. If zero, the current block number is used.
     /// @param blockTime_ The block time to be used for the sliding window.
     /// @param frameSize_ The frame size for the sliding window.
-    constructor(uint256 blockNumber_, uint16 blockTime_, uint8 frameSize_, bool development_) {
+    constructor(uint256 blockNumber_, uint40 blockTime_, uint8 frameSize_, bool development_) {
         _slidingWindow.updateStartBlock(blockNumber_ != 0 ? blockNumber_ : _blockNumberProvider());
         _updateSlidingWindow(blockTime_, frameSize_, development_);
     }
@@ -41,7 +41,7 @@ abstract contract SlidingWindow is ISlidingWindow {
     /// @param blockTime The time duration of each block in milliseconds.
     /// @param frameSize The size of the frame in slots.
     /// @param development The development mode flag.
-    function _updateSlidingWindow(uint24 blockTime, uint8 frameSize, bool development) internal {
+    function _updateSlidingWindow(uint40 blockTime, uint8 frameSize, bool development) internal {
         _slidingWindow.updateSlidingWindow(blockTime, frameSize, development);
     }
 

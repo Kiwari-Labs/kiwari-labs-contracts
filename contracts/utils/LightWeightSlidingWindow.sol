@@ -130,7 +130,7 @@ library SlidingWindow {
     /// @custom:truncate https://docs.soliditylang.org/en/latest/types.html#division
     function updateSlidingWindow(
         SlidingWindowState storage self,
-        uint24 blockTime,
+        uint40 blockTime,
         uint8 frameSize,
         bool development
     ) internal {

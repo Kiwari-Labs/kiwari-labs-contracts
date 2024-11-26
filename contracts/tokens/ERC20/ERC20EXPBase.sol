@@ -38,7 +38,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
         string memory name_,
         string memory symbol_,
         uint256 blockNumber_,
-        uint16 blockTime_,
+        uint24 blockTime_,
         uint8 frameSize_,
         uint8 slotSize_
     ) SlidingWindow(blockNumber_, blockTime_, frameSize_, slotSize_) {
