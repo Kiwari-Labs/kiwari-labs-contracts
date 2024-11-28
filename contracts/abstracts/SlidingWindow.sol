@@ -19,7 +19,7 @@ abstract contract SlidingWindow is ISlidingWindow {
     /// @param blockTime_ The block time to be used for the sliding window.
     /// @param frameSize_ The frame size for the sliding window.
     /// @param slotSize_ The slot size for the sliding window.
-    constructor(uint256 blockNumber_, uint16 blockTime_, uint8 frameSize_, uint8 slotSize_) {
+    constructor(uint256 blockNumber_, uint24 blockTime_, uint8 frameSize_, uint8 slotSize_) {
         _slidingWindow.updateStartBlock(blockNumber_ != 0 ? blockNumber_ : _blockNumberProvider());
         _updateSlidingWindow(blockTime_, frameSize_, slotSize_);
     }
