@@ -7,13 +7,13 @@ contract MockLightWeightSlidingWindowLibrary {
     using SlidingWindow for SlidingWindow.SlidingWindowState;
     SlidingWindow.SlidingWindowState public slidingWindow;
 
-    constructor(uint256 startBlockNumber, uint16 blockPeriod, uint8 frameSize) {
+    constructor(uint256 startBlockNumber, uint40 blockPeriod, uint8 frameSize) {
         slidingWindow.updateStartBlock(startBlockNumber != 0 ? startBlockNumber : block.number);
         slidingWindow.updateSlidingWindow(blockPeriod, frameSize, false);
     }
 
-    function updateWindow(uint24 blockTime, uint8 frameSize) public {
-        slidingWindow.updateSlidingWindow(blockTime, frameSize, false);
+    function updateWindow(uint40 blockTime, uint8 frameSize, bool development) public {
+        slidingWindow.updateSlidingWindow(blockTime, frameSize, development);
     }
 
     function frame(

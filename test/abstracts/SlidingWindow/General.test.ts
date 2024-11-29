@@ -47,7 +47,7 @@ export const run = async () => {
 
       const invalidBlockTime = common.minBlockTimeInMilliseconds - 1;
 
-      await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize, slotSize)).to.be.revertedWithCustomError(
+      await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize, slotSize, false)).to.be.revertedWithCustomError(
         slidingWindow,
         SlidingWindow.errors.InvalidBlockTime,
       );
@@ -63,7 +63,7 @@ export const run = async () => {
 
       const invalidBlockTime = common.maxBlockTimeInMilliseconds + 1;
 
-      await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize, slotSize)).to.be.revertedWithCustomError(
+      await expect(slidingWindow.updateWindow(invalidBlockTime, frameSize, slotSize, false)).to.be.revertedWithCustomError(
         slidingWindow,
         SlidingWindow.errors.InvalidBlockTime,
       );
@@ -79,7 +79,7 @@ export const run = async () => {
 
       const invalidFrameSize = common.minFrameSize - 1;
 
-      await expect(slidingWindow.updateWindow(blockPeriod, invalidFrameSize, slotSize)).to.be.revertedWithCustomError(
+      await expect(slidingWindow.updateWindow(blockPeriod, invalidFrameSize, slotSize, false)).to.be.revertedWithCustomError(
         slidingWindow,
         SlidingWindow.errors.InvalidFrameSize,
       );
@@ -95,7 +95,7 @@ export const run = async () => {
 
       const invalidFrameSize = common.maxFrameSize + 1;
 
-      await expect(slidingWindow.updateWindow(blockPeriod, invalidFrameSize, slotSize)).to.be.revertedWithCustomError(
+      await expect(slidingWindow.updateWindow(blockPeriod, invalidFrameSize, slotSize, false)).to.be.revertedWithCustomError(
         slidingWindow,
         SlidingWindow.errors.InvalidFrameSize,
       );
@@ -112,7 +112,7 @@ export const run = async () => {
       const invalidSlotPerEpoch = common.minSlotPerEpoch - 1;
 
       await expect(
-        slidingWindow.updateWindow(blockPeriod, frameSize, invalidSlotPerEpoch),
+        slidingWindow.updateWindow(blockPeriod, frameSize, invalidSlotPerEpoch, false),
       ).to.be.revertedWithCustomError(slidingWindow, SlidingWindow.errors.InvalidSlotPerEpoch);
     });
 
@@ -127,7 +127,7 @@ export const run = async () => {
       const invalidSlotPerEpoch = common.maxSlotPerEpoch + 1;
 
       await expect(
-        slidingWindow.updateWindow(blockPeriod, frameSize, invalidSlotPerEpoch),
+        slidingWindow.updateWindow(blockPeriod, frameSize, invalidSlotPerEpoch, false),
       ).to.be.revertedWithCustomError(slidingWindow, SlidingWindow.errors.InvalidSlotPerEpoch);
     });
 

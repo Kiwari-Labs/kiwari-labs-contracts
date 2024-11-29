@@ -44,7 +44,7 @@ export const run = async () => {
 
       const invalidBlockTime = common.minBlockTimeInMilliseconds - 1;
 
-      await expect(lightWeightSlidingWindow.updateWindow(invalidBlockTime, frameSize)).to.be.revertedWithCustomError(
+      await expect(lightWeightSlidingWindow.updateWindow(invalidBlockTime, frameSize, false)).to.be.revertedWithCustomError(
         lightWeightSlidingWindow,
         LightWeightSlidingWindow.errors.InvalidBlockTime,
       );
@@ -63,7 +63,7 @@ export const run = async () => {
 
       const invalidBlockTime = common.maxBlockTimeInMilliseconds + 1;
 
-      await expect(lightWeightSlidingWindow.updateWindow(invalidBlockTime, frameSize)).to.be.revertedWithCustomError(
+      await expect(lightWeightSlidingWindow.updateWindow(invalidBlockTime, frameSize, false)).to.be.revertedWithCustomError(
         lightWeightSlidingWindow,
         LightWeightSlidingWindow.errors.InvalidBlockTime,
       );
@@ -82,7 +82,7 @@ export const run = async () => {
 
       const invalidFrameSize = common.minFrameSize - 1;
 
-      await expect(lightWeightSlidingWindow.updateWindow(blockPeriod, invalidFrameSize)).to.be.revertedWithCustomError(
+      await expect(lightWeightSlidingWindow.updateWindow(blockPeriod, invalidFrameSize, false)).to.be.revertedWithCustomError(
         lightWeightSlidingWindow,
         LightWeightSlidingWindow.errors.InvalidFrameSize,
       );
@@ -101,7 +101,7 @@ export const run = async () => {
 
       const invalidFrameSize = common.maxFrameSize + 1;
 
-      await expect(lightWeightSlidingWindow.updateWindow(blockPeriod, invalidFrameSize)).to.be.revertedWithCustomError(
+      await expect(lightWeightSlidingWindow.updateWindow(blockPeriod, invalidFrameSize, false)).to.be.revertedWithCustomError(
         lightWeightSlidingWindow,
         LightWeightSlidingWindow.errors.InvalidFrameSize,
       );
