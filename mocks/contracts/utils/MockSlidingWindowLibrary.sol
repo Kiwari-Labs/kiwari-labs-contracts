@@ -7,13 +7,13 @@ contract MockSlidingWindowLibrary {
     using SlidingWindow for SlidingWindow.SlidingWindowState;
     SlidingWindow.SlidingWindowState public slidingWindow;
 
-    constructor(uint256 startBlockNumber, uint16 blockPeriod, uint8 frameSize, uint8 slotSize) {
+    constructor(uint256 startBlockNumber, uint40 blockPeriod, uint8 frameSize, uint8 slotSize) {
         slidingWindow.updateStartBlock(startBlockNumber != 0 ? startBlockNumber : block.number);
-        slidingWindow.updateSlidingWindow(blockPeriod, frameSize, slotSize);
+        slidingWindow.updateSlidingWindow(blockPeriod, frameSize, slotSize, false);
     }
 
-    function updateWindow(uint24 blockTime, uint8 frameSize, uint8 slotSize) public {
-        slidingWindow.updateSlidingWindow(blockTime, frameSize, slotSize);
+    function updateWindow(uint40 blockTime, uint8 frameSize, uint8 slotSize, bool development) public {
+        slidingWindow.updateSlidingWindow(blockTime, frameSize, slotSize, development);
     }
 
     function frame(

@@ -7,10 +7,10 @@ contract MockERC20EXPBase is ERC20EXPBase {
     constructor(
         string memory _name,
         string memory _symbol,
-        uint16 blockTime_,
+        uint40 blockTime_,
         uint8 frameSize_,
         uint8 slotSize_
-    ) ERC20EXPBase(_name, _symbol, block.number, blockTime_, frameSize_, slotSize_) {}
+    ) ERC20EXPBase(_name, _symbol, block.number, blockTime_, frameSize_, slotSize_, false) {}
 
     function mint(address to, uint256 value) public {
         _mint(to, value);

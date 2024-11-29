@@ -56,10 +56,11 @@ abstract contract ERC721EXPBase is
         string memory name_,
         string memory symbol_,
         uint256 blockNumber_,
-        uint16 blockTime_,
+        uint40 blockTime_,
         uint8 frameSize_,
-        uint8 slotSize_
-    ) SlidingWindow(blockNumber_, blockTime_, frameSize_, slotSize_) {
+        uint8 slotSize_,
+        bool development_
+    ) SlidingWindow(blockNumber_, blockTime_, frameSize_, slotSize_, development_) {
         _name = name_;
         _symbol = symbol_;
     }

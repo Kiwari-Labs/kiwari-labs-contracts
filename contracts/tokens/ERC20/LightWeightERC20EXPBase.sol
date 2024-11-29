@@ -34,6 +34,7 @@ abstract contract ERC20EXPBase is Context, IERC20, IERC20Metadata, IERC20Errors,
     /// @param symbol_ The symbol of the token.
     /// @param blockNumber_ The starting block number for the sliding window.
     /// @param blockTime_ The duration of each block in milliseconds.
+    /// @param frameSize_ The window size.
     /// @param development_ The development mode flag.
     constructor(
         string memory name_,

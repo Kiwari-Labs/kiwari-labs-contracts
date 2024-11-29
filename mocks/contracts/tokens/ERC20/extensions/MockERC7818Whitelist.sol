@@ -7,10 +7,10 @@ contract MockERC7818Whitelist is ERC7818Whitelist {
     constructor(
         string memory _name,
         string memory _symbol,
-        uint16 blockTime_,
+        uint40 blockTime_,
         uint8 frameSize_,
         uint8 slotSize_
-    ) ERC20EXPBase(_name, _symbol, block.number, blockTime_, frameSize_, slotSize_) {}
+    ) ERC20EXPBase(_name, _symbol, block.number, blockTime_, frameSize_, slotSize_, false) {}
 
     function grantWhitelist(address account) public {
         _grantWhitelist(account);

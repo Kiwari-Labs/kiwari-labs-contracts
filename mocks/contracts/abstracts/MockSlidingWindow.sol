@@ -6,13 +6,13 @@ import "../../../contracts/abstracts/SlidingWindow.sol";
 contract MockSlidingWindow is SlidingWindow {
     constructor(
         uint256 startBlockNumber,
-        uint16 blockPeriod,
+        uint40 blockPeriod,
         uint8 frameSize,
         uint8 slotSize
-    ) SlidingWindow(startBlockNumber, blockPeriod, frameSize, slotSize) {}
+    ) SlidingWindow(startBlockNumber, blockPeriod, frameSize, slotSize, false) {}
 
-    function updateWindow(uint24 blockTime, uint8 frameSize, uint8 slotSize) public {
-        _updateSlidingWindow(blockTime, frameSize, slotSize);
+    function updateWindow(uint40 blockTime, uint8 frameSize, uint8 slotSize, bool development) public {
+        _updateSlidingWindow(blockTime, frameSize, slotSize, development);
     }
 
     function frame(

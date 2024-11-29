@@ -33,15 +33,19 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
     /// @param name_ The name of the token.
     /// @param symbol_ The symbol of the token.
     /// @param blockNumber_ The starting block number for the sliding window.
-    /// @param blockTime_ The duration of each block in milliseconds..
+    /// @param blockTime_ The duration of each block in milliseconds.
+    /// @param frameSize_ The window size.
+    /// @param slotSize_ The slot size of each epoch.
+    /// @param development_ The development mode flag.
     constructor(
         string memory name_,
         string memory symbol_,
         uint256 blockNumber_,
-        uint24 blockTime_,
+        uint40 blockTime_,
         uint8 frameSize_,
-        uint8 slotSize_
-    ) SlidingWindow(blockNumber_, blockTime_, frameSize_, slotSize_) {
+        uint8 slotSize_,
+        bool development_
+    ) SlidingWindow(blockNumber_, blockTime_, frameSize_, slotSize_, development_) {
         _name = name_;
         _symbol = symbol_;
     }

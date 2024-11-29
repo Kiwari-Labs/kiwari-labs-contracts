@@ -139,21 +139,25 @@ library SlidingWindow {
     /// @param blockTime The time duration of each block in milliseconds.
     /// @param frameSize The size of the frame in slots.
     /// @param slotSize The size of the slot per epoch.
+    /// @param development The development mode flag.
     /// @custom:truncate https://docs.soliditylang.org/en/latest/types.html#division
     function updateSlidingWindow(
         SlidingWindowState storage self,
-        uint24 blockTime,
+        uint40 blockTime,
         uint8 frameSize,
-        uint8 slotSize
+        uint8 slotSize,
+        bool development
     ) internal {
-        if (blockTime < MINIMUM_BLOCK_TIME_IN_MILLISECONDS || blockTime > MAXIMUM_BLOCK_TIME_IN_MILLISECONDS) {
-            revert InvalidBlockTime();
-        }
-        if (frameSize < MINIMUM_FRAME_SIZE || frameSize > MAXIMUM_FRAME_SIZE) {
-            revert InvalidFrameSize();
-        }
-        if (slotSize < MINIMUM_SLOTS_PER_EPOCH || slotSize > MAXIMUM_SLOTS_PER_EPOCH) {
-            revert InvalidSlotPerEpoch();
+        if (!development) {
+            if (blockTime < MINIMUM_BLOCK_TIME_IN_MILLISECONDS || blockTime > MAXIMUM_BLOCK_TIME_IN_MILLISECONDS) {
+                revert InvalidBlockTime();
+            }
+            if (frameSize < MINIMUM_FRAME_SIZE || frameSize > MAXIMUM_FRAME_SIZE) {
+                revert InvalidFrameSize();
+            }
+            if (slotSize < MINIMUM_SLOTS_PER_EPOCH || slotSize > MAXIMUM_SLOTS_PER_EPOCH) {
+                revert InvalidSlotPerEpoch();
+            }
         }
         unchecked {
             uint40 blockPerSlotCache = (YEAR_IN_MILLISECONDS / blockTime) / slotSize;
