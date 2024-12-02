@@ -111,7 +111,7 @@ export const run = async () => {
       expect(await erc20exp.decimals()).to.equal(18);
     });
 
-    it("[HAPPY] query block balance ", async function () {
+    it("[HAPPY] query block balance", async function () {
       const {erc20exp, alice} = await deployERC20EXPBase({});
 
       const amount = 1;
@@ -121,6 +121,33 @@ export const run = async () => {
       const blockNumber = await network.provider.send("eth_blockNumber");
       expect(await erc20exp.getBlockBalance(blockNumber)).to.equal(1);
       expect(await erc20exp.getBlockBalance(blockNumber + 1n)).to.equal(0);
+    });
+
+    it("[HAPPY] query duration", async function () {
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+
+      const {erc20exp} = await deployERC20EXPBase({blockPeriod, slotSize, frameSize});
+
+      const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
+      expect(await erc20exp.duration()).to.equal(self._frameSizeInBlockLength);
+    });
+
+    it("[HAPPY] query epoch", async function () {
+      const blockPeriod = 400;
+      const slotSize = 4;
+      const frameSize = 2;
+
+      const {erc20exp} = await deployERC20EXPBase({blockPeriod, slotSize, frameSize});
+
+      const self = calculateSlidingWindowState({blockPeriod, slotSize, frameSize});
+
+      expect(await erc20exp.epoch()).to.equal(0);
+
+      await mineBlock(Number(self._blockPerEpoch));
+
+      expect(await erc20exp.epoch()).to.equal(1);
     });
   });
 };
