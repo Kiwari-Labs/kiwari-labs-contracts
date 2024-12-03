@@ -20,40 +20,33 @@ library BLSW {
     error InvalidBlockTime();
     error InvalidWindowSize();
 
-    /// @custom:returnearlypattern
     function _computeEpoch(
         uint256 initialBlockNumber,
         uint256 blockNumber,
         uint256 duration
-    ) private pure returns (uint256) {
+    ) private pure returns (uint256 result) {
         assembly {
             if and(gt(blockNumber, initialBlockNumber), gt(initialBlockNumber, 0)) {
-                mstore(0x20, div(sub(blockNumber, initialBlockNumber), duration))
-                return(0x20, 0x20)
+                result := div(sub(blockNumber, initialBlockNumber), duration)
             }
-            return(0x20, 0x20)
         }
     }
 
-    /// @custom:returnearlypattern
-    function _computeEpochRange(uint256 current, uint256 windowSize, bool safe) private pure returns (uint256) {
+    function _computeEpochRange(uint256 current, uint256 windowSize, bool safe) private pure returns (uint256 result) {
         assembly {
             let from := sub(current, windowSize)
             if safe {
                 if gt(current, windowSize) {
-                    mstore(0x20, sub(from, 0x1))
-                    return(0x20, 0x20)
+                    result := sub(from, 0x1)
                 }
-                return(0x20, 0x20)
             }
             if iszero(lt(current, windowSize)) {
-                mstore(0x20, from)
-                return(0x20, 0x20)
+                result := from
             }
         }
     }
 
-    function getCurrentEpoch(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint256) {
+    function epoch(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint256) {
         return _computeEpoch(self.initialBlockNumber, blockNumber, self.blocksPerEpoch);
     }
 
@@ -70,7 +63,7 @@ library BLSW {
         uint256 blockNumber
     ) internal view returns (uint256, uint256) {
         uint256 current = _computeEpoch(self.initialBlockNumber, blockNumber, self.blocksPerEpoch);
-        return (current, _computeEpochRange(current, self.windowSize, false));
+        return (_computeEpochRange(current, self.windowSize, false), current);
     }
 
     /// @notice buffering 1 `epoch` for ensure
@@ -79,7 +72,7 @@ library BLSW {
         uint256 blockNumber
     ) internal view returns (uint256, uint256) {
         uint256 current = _computeEpoch(self.initialBlockNumber, blockNumber, self.blocksPerEpoch);
-        return (current, _computeEpochRange(current, self.windowSize, true));
+        return (_computeEpochRange(current, self.windowSize, true), current);
     }
 
     /// @custom:truncate https://docs.soliditylang.org/en/latest/types.html#division

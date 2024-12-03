@@ -5,34 +5,34 @@ import {BLSW as LSW} from "../../../contracts/utils/algorithms/BLSW.sol";
 
 contract MockBLSW {
     using LSW for LSW.SlidingWindowState;
-    LSW.SlidingWindowState public slidingWindow;
+    LSW.SlidingWindowState public state;
 
     constructor(uint256 startBlockNumber, uint40 blockPeriod, uint8 frameSize) {
-        slidingWindow.initializedBlock(startBlockNumber != 0 ? startBlockNumber : block.number);
-        slidingWindow.initializedState(blockPeriod, frameSize, false);
+        state.initializedBlock(startBlockNumber != 0 ? startBlockNumber : block.number);
+        state.initializedState(blockPeriod, frameSize, false);
     }
 
     function updateWindow(uint40 blockTime, uint8 windowSize, bool development) public {
-        slidingWindow.initializedState(blockTime, windowSize, development);
+        state.initializedState(blockTime, windowSize, development);
     }
 
-    function frame(uint256 blockNumber) public view returns (uint256 from, uint256 to) {
-        return slidingWindow.windowRange(blockNumber);
+    function window(uint256 blockNumber) public view returns (uint256, uint256) {
+        return state.windowRange(blockNumber);
     }
 
-    function safeFrame(uint256 blockNumber) public view returns (uint256 from, uint256 to) {
-        return slidingWindow.safeWindowRange(blockNumber);
+    function safeWindow(uint256 blockNumber) public view returns (uint256, uint256) {
+        return state.safeWindowRange(blockNumber);
     }
 
-    function calculateEpoch(uint256 blockNumber) public view returns (uint256 epoch) {
-        return slidingWindow.getCurrentEpoch(blockNumber);
+    function epoch(uint256 blockNumber) public view returns (uint256) {
+        return state.epoch(blockNumber);
     }
 
-    function getBlocksPerEpoch() public view returns (uint40) {
-        return slidingWindow.blocksInEpoch();
+    function blocksInEpoch() public view returns (uint40) {
+        return state.blocksInEpoch();
     }
 
-    function getFrameSizeInBlockLength() public view returns (uint40) {
-        return slidingWindow.blocksInWindow();
+    function blocksInWindow() public view returns (uint40) {
+        return state.blocksInWindow();
     }
 }
