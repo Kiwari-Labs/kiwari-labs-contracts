@@ -144,6 +144,12 @@ export const SlidingWindowLibrary = {
   events: {},
 };
 
+export const BLSWLibrary = {
+  name: "MockBLSW",
+  errors: {},
+  events: {},
+};
+
 export const SortedCircularDoublyLinkedListLibrary = {
   name: "MockSortedCircularDoublyLinkedListLibrary",
   errors: {},
