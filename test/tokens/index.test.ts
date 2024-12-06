@@ -6,6 +6,6 @@ export const run = async () => {
   describe("tokens", async function () {
     ERC20.run();
     ERC721.run();
-    ERC1155.run;
+    ERC1155.run();
   });
 };

@@ -7,21 +7,21 @@ export const run = async () => {
   describe("Agreement", async function () {
     let abiCoder = new AbiCoder();
 
-    it("[HAPPY] verifyAgreement successful", async function () {
+    it("[SUCCESS] verifyAgreement successful", async function () {
       const {agreementBase} = await deployAgreementBase(AgreementBase.constructor.name);
       const payload = abiCoder.encode(["bool"], [true]);
       const respond = await agreementBase.callStatic.verifyAgreement(payload, payload);
       expect(respond).to.equal(true);
     });
 
-    it("[UNHAPPY] verifyAgreement unsuccessful", async function () {
+    it("[FAILED] verifyAgreement unsuccessful", async function () {
       const {agreementBase} = await deployAgreementBase(AgreementBase.constructor.name);
       const payload = abiCoder.encode(["bool"], [false]);
       const respond = await agreementBase.callStatic.verifyAgreement(payload, payload);
       expect(respond).to.equal(false);
     });
 
-    it("[HAPPY] agreement successful", async function () {
+    it("[SUCCESS] agreement successful", async function () {
       const {agreementBase} = await deployAgreementBase(AgreementBase.constructor.name);
       const payload = abiCoder.encode(["bool"], [true]);
       const respond = await agreementBase.callStatic.agreement(payload, payload);
@@ -32,7 +32,7 @@ export const run = async () => {
       );
     });
 
-    it("[UNHAPPY] agreement unsuccessful", async function () {
+    it("[FAILED] agreement unsuccessful", async function () {
       const {agreementBase} = await deployAgreementBase(AgreementBase.constructor.name);
       const payload = abiCoder.encode(["bool"], [false]);
       await expect(agreementBase.agreement(payload, payload))

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title ERC20EXP Blacklist extension contract
+/// @title ERC20EXP Blacklist extension
 /// @author Kiwari Labs
 
 import "../ERC20EXPBase.sol";

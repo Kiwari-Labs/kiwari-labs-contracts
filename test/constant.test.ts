@@ -1,5 +1,13 @@
+import {MaxUint256, ZeroAddress} from "ethers";
+
+export const constants = {
+  MaxUint256: MaxUint256,
+  ZeroAddress: ZeroAddress,
+};
+
 export const common = {
-  zeroAddress: "0x0000000000000000000000000000000000000000",
+  blockTime: 250, // assuming 250ms blocktime
+  windowSize: 4, //
   expirePeriod: 4,
   blockPeriod: 400,
   frameSize: 2,
@@ -110,15 +118,9 @@ export const ERC7818Whitelist = {
     NotExistInWhitelist: "NotExistInWhitelist",
   },
   events: {
-    WhitelistGranted: "WhitelistGranted",
-    WhitelistRevoked: "WhitelistRevoked",
+    Whitelisted: "Whitelisted",
+    Unwhitelisted: "Unwhitelisted",
   },
-};
-
-export const ERC7818NearestExpiryQuery = {
-  name: "MockERC7818NearestExpiryQuery",
-  errors: {},
-  events: {},
 };
 
 export const ERC20EXPBase = {
@@ -133,7 +135,6 @@ export const ERC20EXPBase = {
     ERC7818Backlist,
     ERC7818MintQuota,
     ERC7818Whitelist,
-    ERC7818NearestExpiryQuery,
     // MockLightWeightERC20EXPWhitelist: "MockLightWeightERC20EXPWhitelist",
   },
 };
@@ -191,7 +192,6 @@ export const contracts = {
   tokens: {
     ERC20,
     ERC20EXPBase,
-    // MockLightWeightERC20EXPBase: "MockLightWeightERC20EXPBase",
   },
   utils: {
     SlidingWindowLibrary,

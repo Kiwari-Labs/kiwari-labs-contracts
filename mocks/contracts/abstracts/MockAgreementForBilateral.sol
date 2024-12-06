@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.5.0 <0.9.0;
 
-import "../../../contracts/abstracts/AgreementBase.sol";
+import "../../../contracts/abstracts/AbstractAgreement.sol";
 
-contract MockAgreementBaseForBilateral is AgreementBase {
-    constructor(string memory name) AgreementBase(name) {}
+contract MockAgreementBaseForBilateral is AbstractAgreement {
+    constructor(string memory name) AbstractAgreement(name) {}
 
     function bumpMajorVersion() public {
         _bumpMajorVersion();

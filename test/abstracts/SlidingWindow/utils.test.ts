@@ -7,7 +7,7 @@ export const deploySlidingWindow = async function ({
   frameSize = 2, // frame size 2 slot
   slotSize = 4, // 4 slot per epoch
 }) {
-  const [deployer, alice, bob, jame] = await ethers.getSigners();
+  const [deployer, alice, bob, charlie] = await ethers.getSigners();
 
   const SlidingWindowContract = await ethers.getContractFactory(SlidingWindow.name, deployer);
 
@@ -20,6 +20,6 @@ export const deploySlidingWindow = async function ({
     deployer,
     alice,
     bob,
-    jame,
+    charlie,
   };
 };

@@ -1,10 +1,13 @@
+import "@nomicfoundation/hardhat-chai-matchers";
+import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-toolbox";
+import "@nomicfoundation/hardhat-network-helpers";
 import "hardhat-gas-reporter";
-import "hardhat-deploy";
 import "hardhat-ignore-warnings";
 // import 'hardhat-storage-layout';
 
 import {HardhatUserConfig} from "hardhat/types";
+
 import path from "path";
 import {config as dotenvConfig} from "dotenv";
 dotenvConfig({path: path.resolve(__dirname, "./.env")});
@@ -64,6 +67,9 @@ const config: HardhatUserConfig = {
   warnings: "warn",
   docgen: {
     outputDir: "./docs",
+  },
+  mocha: {
+    slow: 20,
   },
 };
 

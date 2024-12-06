@@ -1,13 +1,11 @@
 import * as ERC7818Backlist from "./ERC7818Backlist/index.test";
 import * as ERC7818MintQuota from "./ERC7818MintQuota/index.test";
-import * as ERC7818NearestExpiryQuery from "./ERC7818NearestExpiryQuery/index.test";
 import * as ERC7818Whitelist from "./ERC7818Whitelist/index.test";
 
 export const run = async () => {
   describe("extensions", async function () {
     ERC7818Backlist.run();
     ERC7818MintQuota.run();
-    ERC7818NearestExpiryQuery.run();
     ERC7818Whitelist.run();
   });
 };

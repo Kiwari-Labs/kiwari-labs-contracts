@@ -8,16 +8,15 @@ contract MockERC7818Whitelist is ERC7818Whitelist {
         string memory _name,
         string memory _symbol,
         uint40 blockTime_,
-        uint8 frameSize_,
-        uint8 slotSize_
-    ) ERC20EXPBase(_name, _symbol, block.number, blockTime_, frameSize_, slotSize_, false) {}
+        uint8 windowSize_
+    ) ERC20EXPBase(_name, _symbol, block.number, blockTime_, windowSize_, false) {}
 
-    function grantWhitelist(address account) public {
-        _grantWhitelist(account);
+    function addToWhitelist(address account) public {
+        _addToWhitelist(account);
     }
 
-    function revokeWhitelist(address account) public {
-        _revokeWhitelist(account);
+    function removeFromWhitelist(address account) public {
+        _removeFromWhitelist(account);
     }
 
     function transferUnspendable(address to, uint256 value) public {
@@ -30,18 +29,18 @@ contract MockERC7818Whitelist is ERC7818Whitelist {
     }
 
     function mintSpendableWhitelist(address to, uint256 value) public {
-        _mintWhitelist(to, value, true);
+        _mintToWhitelist(to, value, true);
     }
 
     function mintUnspendableWhitelist(address to, uint256 value) public {
-        _mintWhitelist(to, value, false);
+        _mintToWhitelist(to, value, false);
     }
 
     function burnSpendableWhitelist(address to, uint256 value) public {
-        _burnWhitelist(to, value, true);
+        _burnFromWhitelist(to, value, true);
     }
 
     function burnUnspendableWhitelist(address to, uint256 value) public {
-        _burnWhitelist(to, value, false);
+        _burnFromWhitelist(to, value, false);
     }
 }

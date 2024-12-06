@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title ERC7818 Mint Quota extension contract
+/// @title ERC7818 Mint Quota extension
 /// @author Kiwari Labs
 
 import "../ERC20EXPBase.sol";

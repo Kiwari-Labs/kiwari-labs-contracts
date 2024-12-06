@@ -1,9 +1,10 @@
-import * as Mint from "./Mint.test";
-import * as TransferFrom from "./TransferFrom.test";
-import * as Burn from "./Burn.test";
+import * as Mint from "./mint.test";
+import * as TransferFrom from "./transferFrom.test";
+import * as Burn from "./burn.test";
 import * as Expiration from "./Expiration.test";
-import * as Transfer from "./Transfer.test";
-import * as Whitelist from "./Whitelist.test";
+import * as Transfer from "./transfer.test";
+import * as AddToWhitelist from "./addToWhitelist.test";
+import * as RemoveFromWhitelist from "./removeFromWhitelist.test";
 
 export const run = async () => {
   describe("ERC7818Whitelist", async function () {
@@ -12,6 +13,7 @@ export const run = async () => {
     Burn.run();
     Expiration.run();
     Transfer.run();
-    Whitelist.run();
+    AddToWhitelist.run();
+    RemoveFromWhitelist.run();
   });
 };

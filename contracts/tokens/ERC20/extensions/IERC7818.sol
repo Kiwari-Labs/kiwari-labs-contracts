@@ -1,46 +1,65 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title ERC-7818: Expirable ERC20
-/// @author sirawt (@MASDXI), ADISAKBOONMARK (@ADISAKBOONMARK)
-/// @dev Interface for creating expirable ERC20 tokens.
+/// @title ERC-7818 interface
+/// @dev Interface for adding expirable functionality to ERC20 tokens.
+
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface IERC7818 is IERC20 {
-    /// @dev This error is thrown when attempting to transfer an expired token.
-    error ERC7818TransferExpired();
+    error ERC7818TransferredExpiredToken();
 
-    /// @dev Retrieves the balance of a specific `id` owned by an account.
+    /// @dev Enum represents the types of `epoch` that can be used.
+    /// @notice The implementing contract may use one of these types to define how the `epoch` is measured.
+    enum EPOCH_TYPE {
+        BLOCKS_BASED, // measured in the number of blocks (e.g., 1000 blocks)
+        TIME_BASED // measured in seconds (UNIX time) (e.g., 1000 seconds)
+    }
+
+    /// @dev Retrieves the balance of specific `epoch` owned by an account.
+    /// @param epoch The `epoch for which the balance is checked.
     /// @param account The address of the account.
-    /// @param id The ID it's can be round, period, epoch, or token id.
-    /// @return uint256 The balance of the specified `id`.
-    function balanceOf(address account, uint256 id) external view returns (uint256);
+    /// @return uint256 The balance of the specified `epoch`.
+    /// @notice "MUST" return 0 if the specified `epoch` is expired.
+    function balanceOfAtEpoch(uint256 epoch, address account) external view returns (uint256);
 
-    /// @dev Retrieves the current epoch of the contract.
-    /// @return uint256 The current epoch of the token contract, often used for determining active/expired states.
-    function epoch() external view returns (uint256);
+    /// @dev Retrieves the latest `epoch` currently tracked by the contract.
+    /// @return uint256 The latest `epoch` of the contract.
+    function currentEpoch() external view returns (uint256);
 
-    /// @dev Retrieves the duration (in blocks or the time in seconds) a token remains valid.
-    /// @return uint256 The validity duration in blocks or the time in seconds.
-    function duration() external view returns (uint256);
+    /// @dev Retrieves the duration of a single `epoch`.
+    /// @return uint256 The duration of a single `epoch`.
+    /// @notice The unit of the `epoch` length is determined by the `validityPeriodType()` function.
+    function epochLength() external view returns (uint256);
 
-    /// @dev Checks whether a specific token `id` is expired.
-    /// @param id The ID it's can be round, period, epoch, or token id.
+    /// @dev Returns the type of the `epoch`.
+    /// @return EPOCH_TYPE Enum value indicating the unit of `epoch`.
+    function epochType() external view returns (EPOCH_TYPE);
+
+    /// @dev Retrieves the validity duration in `epoch` counts.
+    /// @return uint256 The validity duration in `epoch` counts.
+    function validityDuration() external view returns (uint256);
+
+    /// @dev Checks whether a specific `epoch` is expired.
+    /// @param epoch The `epoch` to check.
     /// @return bool True if the token is expired, false otherwise.
-    function expired(uint256 id) external view returns (bool);
+    /// @notice Implementing contracts "MUST" define and document the logic for determining expiration,
+    ///typically by comparing the latest epoch with the given `epoch` value,
+    ///based on the `EPOCH_TYPE` measurement (e.g., block count or time duration).
+    function isEpochExpired(uint256 epoch) external view returns (bool);
 
-    /// @dev Transfers a specific `id` and value to a recipient if not expired.
+    /// @dev Transfers token specific `epoch` and value to a recipient.
+    /// @param epoch The `epoch` for the transfer.
     /// @param to The recipient address.
-    /// @param id The ID it's can be round, period, epoch, or token id.
     /// @param value The amount to transfer.
-    /// @return bool True if the transfer succeeded, false if it's expired.
-    function transfer(address to, uint256 id, uint256 value) external returns (bool);
+    /// @return bool True if the transfer succeeded, otherwise false.
+    function transferAtEpoch(uint256 epoch, address to, uint256 value) external returns (bool);
 
-    /// @dev Transfers a specific `id` and value from one account to another if not expired.
+    /// @dev Transfers token at specific `epoch` and value from one account to another.
+    /// @param epoch The `epoch` for the transfer.
     /// @param from The sender's address.
     /// @param to The recipient's address.
-    /// @param id The ID it's can be round, period, epoch or token id.
     /// @param value The amount to transfer.
-    /// @return bool True if the transfer succeeded, false if it's expired.
-    function transferFrom(address from, address to, uint256 id, uint256 value) external returns (bool);
+    /// @return bool True if the transfer succeeded, otherwise false.
+    function transferFromAtEpoch(uint256 epoch, address from, address to, uint256 value) external returns (bool);
 }

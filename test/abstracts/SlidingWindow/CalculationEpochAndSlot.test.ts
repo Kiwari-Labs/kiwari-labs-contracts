@@ -3,7 +3,7 @@ import {deploySlidingWindow} from "./utils.test";
 
 export const run = async () => {
   describe("CalculationEpochAndSlot", async function () {
-    it("[HAPPY] calculate correctly epoch and slot if the current block is in the first slot period of the first epoch", async function () {
+    it("[SUCCESS] calculate correctly epoch and slot if the current block is in the first slot period of the first epoch", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const slotSize = 4;
@@ -34,7 +34,7 @@ export const run = async () => {
       }
     });
 
-    it("[HAPPY] calculate correctly epoch and slot if the current block is in the second slot period of the first epoch", async function () {
+    it("[SUCCESS] calculate correctly epoch and slot if the current block is in the second slot period of the first epoch", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const slotSize = 4;
@@ -65,7 +65,7 @@ export const run = async () => {
       }
     });
 
-    it("[HAPPY] calculate correctly epoch and slot if the current block is in the third slot period of the first epoch", async function () {
+    it("[SUCCESS] calculate correctly epoch and slot if the current block is in the third slot period of the first epoch", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const slotSize = 4;
@@ -96,7 +96,7 @@ export const run = async () => {
       }
     });
 
-    it("[HAPPY] calculate correctly epoch and slot if the current block is in the fourth slot period of the first epoch", async function () {
+    it("[SUCCESS] calculate correctly epoch and slot if the current block is in the fourth slot period of the first epoch", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const slotSize = 4;
@@ -127,7 +127,7 @@ export const run = async () => {
       }
     });
 
-    it("[HAPPY] calculate correctly epoch and slot if the current block is in the first slot period of the second epoch", async function () {
+    it("[SUCCESS] calculate correctly epoch and slot if the current block is in the first slot period of the second epoch", async function () {
       const startBlockNumber = 100;
       const blockPeriod = 400;
       const slotSize = 4;
@@ -161,7 +161,7 @@ export const run = async () => {
     // Skip the cases below.
     // Reason: https://github.com/MASDXI/ERC20EXP/pull/20#issuecomment-2206762148
 
-    // it("[HAPPY] calculate correctly epoch and slot if the current block is in the last day period of the first epoch", async function () {
+    // it("[SUCCESS] calculate correctly epoch and slot if the current block is in the last day period of the first epoch", async function () {
     //   const startBlockNumber = 100;
     //   const blockPeriod = 400;
     //   const slotSize = 4;
@@ -198,7 +198,7 @@ export const run = async () => {
     //   }
     // });
 
-    // it("[HAPPY] calculate correctly epoch and slot if the current block is in the first day period of the second epoch", async function () {
+    // it("[SUCCESS] calculate correctly epoch and slot if the current block is in the first day period of the second epoch", async function () {
     //   const startBlockNumber = 100;
     //   const blockPeriod = 400;
     //   const slotSize = 4;

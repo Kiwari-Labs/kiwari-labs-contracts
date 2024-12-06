@@ -1,12 +1,27 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title ERC7818 Whitelist extension contract
+/// @title ERC7818 Whitelist extension
 /// @author Kiwari Labs
 
 import "../ERC20EXPBase.sol";
 
 abstract contract ERC7818Whitelist is ERC20EXPBase {
+    /// @notice Emitted when an address is added to the whitelist
+    /// @param caller Operate by the address
+    /// @param account The address that was whitelist
+    event Whitelisted(address indexed caller, address indexed account);
+
+    /// @notice Emitted when an address is removed from the whitelist
+    /// @param caller Operate by the address
+    /// @param account The address that was removed from the whitelist
+    event Unwhitelisted(address indexed caller, address indexed account);
+
+    /// @notice Custom error definitions
+    error InvalidWhitelistAddress();
+    error NotExistInWhitelist();
+    error ExistInWhitelist();
+
     /// @notice Struct to define balance infomation for each minter
     struct Whitelist {
         uint256 _spendableBalances;
@@ -14,18 +29,9 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
     }
 
     /// @notice Mapping whitelist address
-    mapping(address account => bool auth) private _whitelist;
+    mapping(address => bool) private _whitelist;
     /// @notice Mapping from whitelist address to their whitelist balance details
-    mapping(address account => Whitelist whitelist) private _balances;
-
-    /// @notice Custom error definitions
-    error InvalidWhitelistAddress();
-    error NotExistInWhitelist();
-    error ExistInWhitelist();
-
-    /// @notice Events
-    event WhitelistGranted(address indexed caller, address indexed whitelist);
-    event WhitelistRevoked(address indexed caller, address indexed whitelist);
+    mapping(address => Whitelist) private _balances;
 
     /// @notice Updates the spendable balance by either minting or burning non-expirable tokens.
     /// @dev This function handles the minting of tokens to the `to` address if `from` is the zero address,
@@ -113,7 +119,7 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
     /// @param to The address of the whitelist account from which tokens will be burned.
     /// @param value The amount of tokens to burn.
     /// @param spendable Set to true to burn tokens from spendable balance, false to burn from unspendable balance.
-    function _burnWhitelist(address to, uint256 value, bool spendable) internal virtual {
+    function _burnFromWhitelist(address to, uint256 value, bool spendable) internal virtual {
         if (_whitelist[to]) {
             if (spendable) {
                 _updateSpendableBalance(to, address(0), value);
@@ -130,7 +136,7 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
     /// @param to The address of the retail account receiving the minted tokens.
     /// @param value The amount of tokens to mint.
     /// @param spendable Set to true to mint tokens to spendable balance, false to mint to unspendable balance.
-    function _mintWhitelist(address to, uint256 value, bool spendable) internal virtual {
+    function _mintToWhitelist(address to, uint256 value, bool spendable) internal virtual {
         if (_whitelist[to]) {
             if (spendable) {
                 _updateSpendableBalance(address(0), to, value);
@@ -145,31 +151,31 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
     /// @notice Adds an address to the whitelist.
     /// @dev Grants whitelist status to the specified address.
     /// @param account The address to whitelist.
-    function _grantWhitelist(address account) internal virtual {
+    function _addToWhitelist(address account) internal virtual {
         if (_whitelist[account]) {
             revert ExistInWhitelist();
         } else {
             address caller = _msgSender();
             _whitelist[account] = true;
-            emit WhitelistGranted(caller, account);
+            emit Whitelisted(caller, account);
         }
     }
 
     /// @notice Revokes whitelist status from an account and burns any associated tokens.
     /// @dev Removes the account from the whitelist and burns its spendable and unspendable balances.
     /// @param account The address of the account to revoke whitelist status from.
-    function _revokeWhitelist(address account) internal virtual {
+    function _removeFromWhitelist(address account) internal virtual {
         if (_whitelist[account]) {
             address caller = _msgSender();
             Whitelist memory balanceInfo = _balances[account];
             if (balanceInfo._spendableBalances > 0) {
-                _burnWhitelist(account, balanceInfo._spendableBalances, true);
+                _burnFromWhitelist(account, balanceInfo._spendableBalances, true);
             }
             if (balanceInfo._unspendableBalances > 0) {
-                _burnWhitelist(account, balanceInfo._unspendableBalances, false);
+                _burnFromWhitelist(account, balanceInfo._unspendableBalances, false);
             }
             _whitelist[account] = false;
-            emit WhitelistRevoked(caller, account);
+            emit Unwhitelisted(caller, account);
         } else {
             revert NotExistInWhitelist();
         }
@@ -187,10 +193,10 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
         } else if (selector == 1) {
             // consolidate by burning non whitelist balance and mint non-expirable to whitelist unspendable balance.
             _burn(from, value);
-            _mintWhitelist(to, value, false);
+            _mintToWhitelist(to, value, false);
         } else if (selector == 2) {
             // consolidate by burning whitelist spendable balance and mint expirable to retail balance.
-            _burnWhitelist(from, value, true);
+            _burnFromWhitelist(from, value, true);
             _mint(to, value);
         } else {
             // wholesale to wholesale transfer only use spendable balance.
@@ -225,7 +231,7 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
     /// @dev Checks if the given address is a whitelist account.
     /// @param account The address to check.
     /// @return bool Returns true if the address is a whitelist account, false otherwise.
-    function whitelist(address account) external view returns (bool) {
+    function isWhitelist(address account) external view returns (bool) {
         return _whitelist[account];
     }
 }

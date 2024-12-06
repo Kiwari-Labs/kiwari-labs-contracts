@@ -11,7 +11,7 @@ library BLSW {
     uint24 private constant MAXIMUM_BLOCKTIME = 0x927C0; // 600_000 ms
     uint40 private constant YEAR_IN_MILLISECONDS = 0x758F07A30; // 31_556_926_000 ms
 
-    struct SlidingWindowState {
+    struct Window {
         uint256 initialBlockNumber;
         uint40 blocksPerEpoch;
         uint8 windowSize;
@@ -46,42 +46,31 @@ library BLSW {
         }
     }
 
-    function epoch(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint256) {
+    function epoch(Window storage self, uint256 blockNumber) internal view returns (uint256) {
         return _computeEpoch(self.initialBlockNumber, blockNumber, self.blocksPerEpoch);
     }
 
-    function blocksInEpoch(SlidingWindowState storage self) internal view returns (uint40) {
+    function blocksInEpoch(Window storage self) internal view returns (uint40) {
         return self.blocksPerEpoch;
     }
 
-    function blocksInWindow(SlidingWindowState storage self) internal view returns (uint40) {
+    function blocksInWindow(Window storage self) internal view returns (uint40) {
         return self.blocksPerEpoch * self.windowSize;
     }
 
-    function windowRange(
-        SlidingWindowState storage self,
-        uint256 blockNumber
-    ) internal view returns (uint256, uint256) {
+    function windowRange(Window storage self, uint256 blockNumber) internal view returns (uint256, uint256) {
         uint256 current = _computeEpoch(self.initialBlockNumber, blockNumber, self.blocksPerEpoch);
         return (_computeEpochRange(current, self.windowSize, false), current);
     }
 
     /// @notice buffering 1 `epoch` for ensure
-    function safeWindowRange(
-        SlidingWindowState storage self,
-        uint256 blockNumber
-    ) internal view returns (uint256, uint256) {
+    function safeWindowRange(Window storage self, uint256 blockNumber) internal view returns (uint256, uint256) {
         uint256 current = _computeEpoch(self.initialBlockNumber, blockNumber, self.blocksPerEpoch);
         return (_computeEpochRange(current, self.windowSize, true), current);
     }
 
     /// @custom:truncate https://docs.soliditylang.org/en/latest/types.html#division
-    function initializedState(
-        SlidingWindowState storage self,
-        uint40 blockTime,
-        uint8 windowSize,
-        bool development
-    ) internal {
+    function initializedState(Window storage self, uint40 blockTime, uint8 windowSize, bool development) internal {
         if (!development) {
             if (blockTime < MINIMUM_BLOCKTIME || blockTime > MAXIMUM_BLOCKTIME) {
                 revert InvalidBlockTime();
@@ -96,7 +85,7 @@ library BLSW {
         }
     }
 
-    function initializedBlock(SlidingWindowState storage self, uint256 blockNumber) internal {
+    function initializedBlock(Window storage self, uint256 blockNumber) internal {
         self.initialBlockNumber = blockNumber;
     }
 }

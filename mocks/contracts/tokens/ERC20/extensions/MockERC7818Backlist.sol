@@ -8,9 +8,8 @@ contract MockERC7818Backlist is ERC7818Blacklist {
         string memory _name,
         string memory _symbol,
         uint40 blockTime_,
-        uint8 frameSize_,
-        uint8 slotSize_
-    ) ERC20EXPBase(_name, _symbol, block.number, blockTime_, frameSize_, slotSize_, false) {}
+        uint8 windowSize_
+    ) ERC20EXPBase(_name, _symbol, block.number, blockTime_, windowSize_, false) {}
 
     function addToBlacklist(address account) public {
         _addToBlacklist(account);

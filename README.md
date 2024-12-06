@@ -22,15 +22,13 @@ import "@kiwarilabs/contracts/tokens/ERC20/ERC20EXPBase.sol";
 
 /* @dev creates a loyalty point with token expiration functionality. 
 * `blockTime_` The average block time of the network, measured in milliseconds.
-* `frameSize_` represents the total number of slots that form one full expiration cycle. 
-* `slotSize_`  defines the total number of slots in a year. 
-*              For example, 4 slots/year could imply each slot lasts 3 months.
+* `windowSize_` represents the total number of slots that form one full expiration cycle.  
+*              For example, Sliding Window make 4 epochs/year could imply each epoch lasts 3 months.
 */
 contract MyLoyaltyPoint is ERC20EXPBase {
   constructor(
     uint16 blockTime_,  // block time of the network (in milliseconds)
-    uint8 frameSize_,   // Number of slots in one expiration cycle (e.g., 4 slots for annual expiration)
-    uint8 slotSize_     // Total slots per year (e.g., 4 slots/year)
+    uint8 windowSize_,   // Number of slots in one expiration cycle (e.g., 4 for annual expiration)
   ) ERC20EXPBase("MyLoyaltyPoint", "MLP", block.number, blockTime_, frameSize_, slotSize_) {}
 }
 ```

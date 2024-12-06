@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {AbiCoder} from "@ethersproject/abi";
-import {deployERC20EXPBase} from "../../tokens/ERC20/ERC20EXPBase/utils.test";
+import {deployERC20EXPBase} from "../../tokens/ERC20/base/deployer.test";
 import {deployAgreementBaseForBilateral, deployBilateralAgreementBase} from "./utils.test";
 import {AgreementBase} from "../../constant.test";
 
@@ -8,13 +8,13 @@ export const run = async () => {
   describe("ApproveAgreement", async function () {
     let abiCoder = new AbiCoder();
 
-    it("[HAPPY] bilateral agreement implementation", async function () {
+    it("[SUCCESS] bilateral agreement implementation", async function () {
       const blockPeriod = 400;
       const amount = 1000n;
 
       const {agreementBase, alice, bob} = await deployAgreementBaseForBilateral(AgreementBase.name);
       const {bilateralAgreementBase} = await deployBilateralAgreementBase(
-        [await alice.getAddress(), await bob.getAddress()],
+        [alice.address, alice.address],
         agreementBase.address,
       );
 

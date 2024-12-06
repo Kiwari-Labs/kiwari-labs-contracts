@@ -1,7 +1,7 @@
-import * as AddToBlacklist from "./AddToBlacklist.test";
-import * as RemoveFromBlacklist from "./RemoveFromBlacklist.test";
-import * as Mint from "./Mint.test";
-import * as Transfer from "./Transfer.test";
+import * as AddToBlacklist from "./addToBlacklist.test";
+import * as RemoveFromBlacklist from "./removeFromBlacklist.test";
+import * as Mint from "./mint.test";
+import * as Transfer from "./transfer.test";
 
 export const run = async () => {
   describe("ERC7818Backlist", async function () {
