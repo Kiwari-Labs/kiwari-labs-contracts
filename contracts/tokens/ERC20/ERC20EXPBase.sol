@@ -48,7 +48,7 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
         _symbol = symbol_;
     }
 
-    // @TODO NatSpec
+    // @TODO
     function _computeBalanceOverEpochRange(
         uint256 fromEpoch,
         uint256 toEpoch,
@@ -61,7 +61,7 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
         }
     }
 
-    // @TODO NatSpec
+    // @TODO
     function _computeBalanceAtEpoch(
         uint256 epoch,
         address account,
@@ -107,7 +107,7 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
         }
     }
 
-    // @TODO NatSpec
+    // @TODO
     function _refreshBalanceAtEpoch(address account, uint256 epoch, uint256 blockNumber, uint256 duration) private {
         Epoch storage _account = _balances[epoch][account];
         if (_account.list.size() > 0) {
@@ -129,7 +129,7 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
         }
     }
 
-    // @TODO NatSpec
+    // @TODO
     function _expired(uint256 epoch) internal view returns (bool) {
         unchecked {
             (uint256 fromEpoch, ) = _safeWindowRange(_blockNumberProvider());
@@ -264,7 +264,7 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
         _update(address(0), account, value);
     }
 
-    // @TODO NatSpec
+    // @TODO
     function _mintToEpoch(uint256 epoch, address account, uint256 value) internal {
         if (account == address(0)) {
             revert ERC20InvalidReceiver(address(0));
@@ -284,7 +284,7 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
         _update(account, address(0), value);
     }
 
-    // @TODO NatSpec
+    // @TODO
     function _burnFromEpoch(uint256 epoch, address account, uint256 value) internal {
         if (account == address(0)) {
             revert ERC20InvalidSender(address(0));

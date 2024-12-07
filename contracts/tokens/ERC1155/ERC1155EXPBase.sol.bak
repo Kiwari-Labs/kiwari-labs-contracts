@@ -201,7 +201,7 @@ abstract contract ERC1155EXPBase is Context, ERC165, IERC1155, IERC1155Errors, I
 
         for (uint256 i = 0; i < ids.length; ++i) {
             uint256 id = ids.unsafeMemoryAccess(i);
-            // @TODO uncommented _updateSlingWindowOfId(id);
+            // @TODOuncommented _updateSlingWindowOfId(id);
             uint256 value = values.unsafeMemoryAccess(i);
             uint256 blockNumberCache = _blockNumberProvider();
             uint256 blockLengthCache = _slidingWindowTokens[id].getFrameSizeInBlockLength();
