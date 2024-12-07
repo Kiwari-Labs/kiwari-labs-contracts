@@ -1,10 +1,7 @@
 import {ethers} from "hardhat";
-import {ERC7818Whitelist, ERC20EXPBase} from "../../../../constant.test";
+import {ERC7818Whitelist, ERC20EXPBase, common} from "../../../../constant.test";
 
-export const deployERC7818Whitelist = async function (
-  blockTime = 250, // 400ms per block
-  windowSize = 2, // frame size 2 slot
-) {
+export const deployERC7818Whitelist = async function (blockTime = common.blockTime, windowSize = common.windowSize) {
   const [deployer, alice, bob, charlie] = await ethers.getSigners();
 
   const ERC7818_WHITELIST = await ethers.getContractFactory(ERC7818Whitelist.name, deployer);

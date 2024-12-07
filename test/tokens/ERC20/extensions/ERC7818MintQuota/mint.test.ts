@@ -13,7 +13,6 @@ export const run = async () => {
 
     it("[SUCCESS] mintQuota", async function () {
       const {erc7818MintQuota, deployer, alice} = await deployERC7818MintQuota();
-      
 
       await expect(erc7818MintQuota.setQuota(alice.address, quota))
         .to.emit(erc7818MintQuota, ERC7818MintQuota.events.QuotaSet)
@@ -42,7 +41,7 @@ export const run = async () => {
     /* behavior */
     it("[FAILED] mintQuota with no longer authorized minter", async function () {
       const {erc7818MintQuota, deployer, alice} = await deployERC7818MintQuota();
-      
+
       await expect(erc7818MintQuota.setQuota(alice.address, quota))
         .to.emit(erc7818MintQuota, ERC7818MintQuota.events.QuotaSet)
         .withArgs(deployer.address, alice.address, quota);

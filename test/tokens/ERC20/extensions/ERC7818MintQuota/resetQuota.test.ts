@@ -13,7 +13,7 @@ export const run = async () => {
 
     it("[SUCCESS] resetQuota", async function () {
       const {erc7818MintQuota, deployer, alice} = await deployERC7818MintQuota();
-      
+
       await expect(erc7818MintQuota.setQuota(alice.address, quota))
         .to.emit(erc7818MintQuota, ERC7818MintQuota.events.QuotaSet)
         .withArgs(deployer.address, alice.address, quota);

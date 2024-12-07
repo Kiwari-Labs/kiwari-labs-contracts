@@ -1,16 +1,21 @@
 import {expect} from "chai";
-import {common, SlidingWindow} from "../../../constant.test";
-import {calculateSlidingWindowState, deployBLSW} from "./utils.test";
+import {SlidingWindow} from "../../../constant.test";
+import {calculateSlidingWindowState, deployBLSW} from "./deployer.test";
+import {hardhat_reset} from "../../../utils.test";
 
 export const run = async () => {
   describe("General", async function () {
-    it("[SUCCESS]block per epoch", async function () {
+    beforeEach(async function () {
+      await hardhat_reset();
+    });
+
+    it("[SUCCESS] blocksInEpoch", async function () {
       const {slidingWindow} = await deployBLSW({});
       const self = calculateSlidingWindowState({});
       expect(await slidingWindow.blocksInEpoch()).to.equal(self._blocksPerEpoch);
     });
 
-    it("[SUCCESS]window size in block length", async function () {
+    it("[SUCCESS] blocksInWindow", async function () {
       // const slotSize = 4;
       // const frameSize = 2;
       // const {slidingWindow} = await deployBLSW({blockPeriod, slotSize, frameSize});
@@ -18,7 +23,7 @@ export const run = async () => {
       // expect(await slidingWindow.getFrameSizeInBlockLength()).to.equal(self._frameSizeInBlockLength);
     });
 
-    it("[FAILED] update window reverts if the block time is less than the minimum", async function () {
+    it("[FAILED] windowSize", async function () {
       // const slotSize = 4;
       // const frameSize = 2;
       // const startBlockNumber = 0;

@@ -1,10 +1,7 @@
 import {ethers} from "hardhat";
-import {ERC7818Backlist, ERC20EXPBase} from "../../../../constant.test";
+import {ERC7818Backlist, ERC20EXPBase, common} from "../../../../constant.test";
 
-export const deployERC7818Backlist = async function (
-  blockTime = 250,
-  windowSize = 4,
-) {
+export const deployERC7818Backlist = async function (blockTime = common.blockTime, windowSize = common.windowSize) {
   const [deployer, alice, bob, charlie] = await ethers.getSigners();
 
   const ERC7818_BACKLIST = await ethers.getContractFactory(ERC7818Backlist.name, deployer);

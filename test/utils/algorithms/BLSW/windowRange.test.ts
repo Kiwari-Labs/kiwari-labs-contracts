@@ -1,19 +1,17 @@
 import {expect} from "chai";
-import {deployBLSW} from "./utils.test";
-import {network} from "hardhat";
-import {skipToBlock} from "../../../utils.test";
-import {time} from "@nomicfoundation/hardhat-network-helpers";
+import {deployBLSW} from "./deployer.test";
+import {hardhat_latestBlock, hardhat_mine, hardhat_reset} from "../../../utils.test";
 
 export const run = async () => {
   describe("CalculationWindow", async function () {
     beforeEach(async function () {
-      await network.provider.send("hardhat_reset");
+      await hardhat_reset();
     });
 
     it("[SUCCESS] calculate correctly window from current block number", async function () {
       const {slidingWindow} = await deployBLSW({startBlockNumber: 1});
       const blocks = await slidingWindow.blocksInEpoch();
-      await skipToBlock(blocks);
+      await hardhat_mine(blocks);
       const [from, to] = await slidingWindow.windowRange(blocks + 1);
       expect(from).to.equal(0);
       expect(to).to.equal(1);
@@ -23,8 +21,8 @@ export const run = async () => {
       const {slidingWindow} = await deployBLSW({startBlockNumber: 1});
       const epochs = Math.floor(Math.random() * 101);
       const blocks = (await slidingWindow.blocksInEpoch()) * epochs;
-      await skipToBlock(blocks);
-      const latestBlock = await time.latestBlock();
+      await hardhat_mine(blocks);
+      const latestBlock = await hardhat_latestBlock();
       const [from, to] = await slidingWindow.windowRange(blocks);
       const blocksInWindow = await slidingWindow.blocksInWindow();
       let fromEpoch;

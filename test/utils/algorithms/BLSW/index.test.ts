@@ -1,13 +1,13 @@
-import * as General from "./General.test";
-import * as CalculationEpoch from "./CalculationEpoch.test";
-import * as CalculationFrame from "./CalculationWindow.test";
-import * as CalculationSafeFrame from "./CalculationSafeWindow.test";
+import * as General from "./general.test";
+import * as Epoch from "./epoch.test";
+import * as WindowRange from "./windowRange.test";
+import * as SafeWindowRange from "./safeWindowRange.test";
 
 export const run = async () => {
-  describe("BlockBasedLazySlidingWindow", async function () {
-    CalculationEpoch.run();
-    CalculationFrame.run();
-    CalculationSafeFrame.run();
+  describe("BlockBasedLazySlidingWindow (BLSW)", async function () {
     General.run();
+    Epoch.run();
+    WindowRange.run();
+    SafeWindowRange.run();
   });
 };

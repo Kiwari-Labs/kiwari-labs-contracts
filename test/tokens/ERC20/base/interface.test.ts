@@ -2,7 +2,7 @@ import {expect} from "chai";
 import {hardhat_latestBlock, hardhat_mine, hardhat_reset} from "../../../utils.test";
 import {deployERC20EXPBase} from "./deployer.test";
 import {ERC20EXPBase} from "../../../constant.test";
-import {calculateSlidingWindowState} from "../../../utils/algorithms/BLSW/utils.test";
+import {calculateSlidingWindowState} from "../../../utils/algorithms/BLSW/deployer.test";
 
 export const run = async () => {
   describe("Interfaces", async function () {

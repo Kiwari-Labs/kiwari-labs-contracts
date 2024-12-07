@@ -96,10 +96,9 @@ export const run = async () => {
       const {erc7818expWhitelist, alice, bob} = await deployERC7818Whitelist();
       await erc7818expWhitelist.addToWhitelist(alice.address);
       await erc7818expWhitelist.addToWhitelist(bob.address);
-      await expect(erc7818expWhitelist.connect(alice).transfer(bob.address, amount)).to.be.revertedWithCustomError(
-        erc7818expWhitelist,
-        ERC20.errors.ERC20InsufficientBalance,
-      );
+      await expect(
+        erc7818expWhitelist.connect(alice).transferUnspendable(bob.address, amount),
+      ).to.be.revertedWithCustomError(erc7818expWhitelist, ERC20.errors.ERC20InsufficientBalance);
     });
 
     it("[FAILED] whitelist transfer un-spendable balance `to` whitelist", async function () {
