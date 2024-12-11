@@ -1,28 +1,17 @@
 import {MaxUint256, ZeroAddress} from "ethers";
 
 export const constants = {
-  MaxUint256: MaxUint256,
-  ZeroAddress: ZeroAddress,
-};
-
-export const common = {
-  blockTime: 250, // assuming 250ms blocktime
-  windowSize: 4, //
-  expirePeriod: 4,
-  blockPeriod: 400,
-  frameSize: 2,
-  slotSize: 4,
-  twoBits: 2,
-  threeBits: 3,
-  slotPerEpoch: 4,
-  minSlotPerEpoch: 1,
-  maxSlotPerEpoch: 12,
-  minFrameSize: 1,
-  maxFrameSize: 64,
-  minBlockTimeInMilliseconds: 100,
-  maxBlockTimeInMilliseconds: 600_000,
-  yearInMilliseconds: 31_556_926_000,
-  dayInMilliseconds: 86_400_000,
+  MAX_UINT256: MaxUint256,
+  ZERO_ADDRESS: ZeroAddress,
+  BLOCK_TIME: 250,
+  WINDOW_SIZE: 4,
+  BLOCKS_IN_EPOCH: 0,
+  BLOCKS_IN_WINDOW: 0,
+  MIN_WINDOW_SIZE: 1,
+  MAX_WINDOW_SIZE: 32,
+  MIN_BLOCK_TIME: 100,
+  MAX_BLOCK_TIME: 600_000,
+  YEAR_IN_MILLISECONDS: 31_556_926_000,
 };
 
 export const AgreementBase = {
@@ -51,8 +40,7 @@ export const SlidingWindow = {
   name: "MockSlidingWindow",
   errors: {
     InvalidBlockTime: "InvalidBlockTime",
-    InvalidFrameSize: "InvalidFrameSize",
-    InvalidSlotPerEpoch: "InvalidSlotPerEpoch",
+    InvalidWindowSize: "InvalidWindowSize",
   },
   events: {},
 };
@@ -158,19 +146,13 @@ export const SortedCircularDoublyLinkedListLibrary = {
 };
 
 export const LightWeightSortedCircularDoublyLinkedListLibrary = {
-  name: "MockLightWeightSortedCircularDoublyLinkedListLibrary",
+  name: "MockXort128",
   errors: {},
   events: {},
 };
 
-export const PU128SCDLL = {
+export const Xort128 = {
   name: "MockLightWeightSortedCircularDoublyLinkedListLibraryV2",
-  errors: {},
-  events: {},
-};
-
-export const LightWeightSlidingWindowLibrary = {
-  name: "MockLightWeightSlidingWindowLibrary",
   errors: {},
   events: {},
 };
@@ -196,9 +178,9 @@ export const contracts = {
   utils: {
     SlidingWindowLibrary,
     SortedCircularDoublyLinkedListLibrary,
-    LightWeightSlidingWindowLibrary,
-    LightWeightSortedCircularDoublyLinkedListLibrary,
-    PU128SCDLL,
+    // LightWeightSlidingWindowLibrary,
+    // LightWeightSortedCircularDoublyLinkedListLibrary,
+    // PU128SCDLL,
     comparators: {
       Comparator,
     },

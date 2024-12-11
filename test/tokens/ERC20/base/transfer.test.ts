@@ -49,7 +49,7 @@ export const run = async () => {
     //   const expectAmount = 10;
     //   await expect(erc20exp.mint(alice.address, amount))
     //     .to.emit(erc20exp, ERC20.events.Transfer)
-    //     .withArgs(constants.ZeroAddress, alice.address, amount);
+    //     .withArgs(constants.ZERO_ADDRESS, alice.address, amount);
     //   expect(await erc20exp.balanceOf(alice.address)).to.equal(amount);
     //   await expect(erc20exp.connect(alice).transfer(bob.address, expectAmount))
     //     .to.emit(erc20exp, ERC20.events.Transfer)
@@ -119,16 +119,16 @@ export const run = async () => {
 
     it("[FAILED] transfer with invalid sender", async function () {
       const {erc20exp, alice} = await deployERC20EXPBase({});
-      expect(erc20exp.connect(alice).transfer(constants.ZeroAddress, amount))
+      expect(erc20exp.connect(alice).transfer(constants.ZERO_ADDRESS, amount))
         .to.be.revertedWithCustomError(erc20exp, ERC20.errors.ERC20InvalidSender)
-        .withArgs(constants.ZeroAddress);
+        .withArgs(constants.ZERO_ADDRESS);
     });
 
     it("[FAILED] transfer with invalid receiver", async function () {
       const {erc20exp, alice} = await deployERC20EXPBase({});
-      await expect(erc20exp.connect(alice).transfer(constants.ZeroAddress, amount))
+      await expect(erc20exp.connect(alice).transfer(constants.ZERO_ADDRESS, amount))
         .to.be.revertedWithCustomError(erc20exp, ERC20.errors.ERC20InvalidReceiver)
-        .withArgs(constants.ZeroAddress);
+        .withArgs(constants.ZERO_ADDRESS);
     });
 
     it("[FAILED] transfer with insufficient balance", async function () {

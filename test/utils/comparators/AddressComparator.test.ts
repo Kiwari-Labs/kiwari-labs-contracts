@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {deployComparatorLibrary} from "./utils.test";
-import {common} from "../../constant.test";
+import {constants} from "../../constant.test";
 
 export const run = async () => {
   describe("Address Comparator", async function () {
@@ -30,7 +30,7 @@ export const run = async () => {
 
     it("[SUCCESS] address zero", async function () {
       const {comparator} = await deployComparatorLibrary({});
-      expect(await comparator.addressZero(constants.ZeroAddress)).to.equal(true);
+      expect(await comparator.addressZero(constants.ZERO_ADDRESS)).to.equal(true);
     });
 
     it("[FAILED] address zero", async function () {

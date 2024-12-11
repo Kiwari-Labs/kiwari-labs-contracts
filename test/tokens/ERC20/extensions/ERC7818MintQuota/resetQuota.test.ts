@@ -30,7 +30,7 @@ export const run = async () => {
 
     it("[FAILED] resetQuota of zero address", async function () {
       const {erc7818MintQuota} = await deployERC7818MintQuota();
-      await expect(erc7818MintQuota.resetQuota(constants.ZeroAddress)).to.be.revertedWithCustomError(
+      await expect(erc7818MintQuota.resetQuota(constants.ZERO_ADDRESS)).to.be.revertedWithCustomError(
         erc7818MintQuota,
         ERC7818MintQuota.errors.InvalidMinterAddress,
       );

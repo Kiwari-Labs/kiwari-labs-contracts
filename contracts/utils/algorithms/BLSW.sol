@@ -5,7 +5,7 @@ pragma solidity >=0.8.0 <0.9.0;
 /// @author Kiwari Labs
 
 library BLSW {
-    uint8 private constant MINIMUM_WINDOW_SIZE = 0x1; // 1 epoch
+    uint8 private constant MINIMUM_WINDOW_SIZE = 0x01; // 1 epoch
     uint8 private constant MAXIMUM_WINDOW_SIZE = 0x20; // 32 epoch
     uint8 private constant MINIMUM_BLOCKTIME = 0x64; // 100 ms
     uint24 private constant MAXIMUM_BLOCKTIME = 0x927C0; // 600_000 ms
@@ -14,10 +14,11 @@ library BLSW {
     struct Window {
         uint256 initialBlockNumber;
         uint40 blocksPerEpoch;
-        uint8 windowSize;
+        uint40 blocksPerWindow;
+        uint8 epochsPerWindow;
     }
-
-    error InvalidBlockTime();
+    
+    error InvalidBlockTime(); 
     error InvalidWindowSize();
 
     function _computeEpoch(
@@ -55,23 +56,27 @@ library BLSW {
     }
 
     function blocksInWindow(Window storage self) internal view returns (uint40) {
-        return self.blocksPerEpoch * self.windowSize;
+        return self.blocksPerWindow;
     }
 
     function windowRange(Window storage self, uint256 blockNumber) internal view returns (uint256, uint256) {
         uint256 current = _computeEpoch(self.initialBlockNumber, blockNumber, self.blocksPerEpoch);
-        return (_computeEpochRange(current, self.windowSize, false), current);
+        return (_computeEpochRange(current, self.epochsPerWindow, false), current);
+    }
+
+    function windowSize(Window storage self) internal view returns (uint8) {
+        return self.epochsPerWindow;
     }
 
     /// @notice buffering 1 `epoch` for ensure
     function safeWindowRange(Window storage self, uint256 blockNumber) internal view returns (uint256, uint256) {
         uint256 current = _computeEpoch(self.initialBlockNumber, blockNumber, self.blocksPerEpoch);
-        return (_computeEpochRange(current, self.windowSize, true), current);
+        return (_computeEpochRange(current, self.epochsPerWindow, true), current);
     }
 
     /// @custom:truncate https://docs.soliditylang.org/en/latest/types.html#division
-    function initializedState(Window storage self, uint40 blockTime, uint8 windowSize, bool development) internal {
-        if (!development) {
+    function initializedState(Window storage self, uint40 blockTime, uint8 windowSize, bool safe) internal {
+        if (safe) {
             if (blockTime < MINIMUM_BLOCKTIME || blockTime > MAXIMUM_BLOCKTIME) {
                 revert InvalidBlockTime();
             }
@@ -80,8 +85,10 @@ library BLSW {
             }
         }
         unchecked {
-            self.blocksPerEpoch = (YEAR_IN_MILLISECONDS / blockTime) >> 2;
-            self.windowSize = windowSize;
+            uint40 blocksPerEpoch = (YEAR_IN_MILLISECONDS / blockTime) >> 2;
+            self.blocksPerEpoch = blocksPerEpoch;
+            self.blocksPerWindow = blocksPerEpoch * windowSize;
+            self.epochsPerWindow = windowSize;
         }
     }
 

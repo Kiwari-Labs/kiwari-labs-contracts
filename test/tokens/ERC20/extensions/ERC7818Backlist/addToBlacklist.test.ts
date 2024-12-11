@@ -18,7 +18,7 @@ export const run = async () => {
 
     it("[FAILED] addToBlacklist with zero address", async function () {
       const {erc7818Backlist} = await deployERC7818Backlist();
-      await expect(erc7818Backlist.addToBlacklist(constants.ZeroAddress)).to.be.revertedWithCustomError(
+      await expect(erc7818Backlist.addToBlacklist(constants.ZERO_ADDRESS)).to.be.revertedWithCustomError(
         erc7818Backlist,
         ERC7818Backlist.errors.InvalidAddress,
       );

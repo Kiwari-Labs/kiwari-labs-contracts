@@ -19,7 +19,7 @@ export const run = async () => {
       expect(await erc7818expWhitelist.balanceOf(alice.address)).to.equal(amount);
       await expect(erc7818expWhitelist.connect(alice).transfer(bob.address, amount))
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(alice.address, constants.ZeroAddress, amount);
+        .withArgs(alice.address, constants.ZERO_ADDRESS, amount);
       expect(await erc7818expWhitelist.balanceOf(alice.address)).to.equal(0);
       expect(await erc7818expWhitelist.balanceOf(bob.address)).to.equal(amount);
       await expect(erc7818expWhitelist.connect(bob).transfer(jameAddress, amount))
@@ -36,12 +36,12 @@ export const run = async () => {
         .withArgs(deployer.address, alice.address);
       await expect(erc7818expWhitelist.mintSpendableWhitelist(alice.address, amount))
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(constants.ZeroAddress, alice.address, amount);
+        .withArgs(constants.ZERO_ADDRESS, alice.address, amount);
       await expect(erc7818expWhitelist.connect(alice).transfer(bob.address, amount))
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(alice.address, constants.ZeroAddress, amount)
+        .withArgs(alice.address, constants.ZERO_ADDRESS, amount)
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(constants.ZeroAddress, bob.address, amount);
+        .withArgs(constants.ZERO_ADDRESS, bob.address, amount);
       expect(await erc7818expWhitelist.balanceOf(alice.address)).to.equal(0);
       expect(await erc7818expWhitelist.balanceOf(bob.address)).to.equal(amount);
       expect(await erc7818expWhitelist.safeBalanceOf(bob.address)).to.equal(0);
@@ -53,14 +53,14 @@ export const run = async () => {
       await erc7818expWhitelist.mintSpendableWhitelist(alice.address, amount);
       await expect(erc7818expWhitelist.connect(alice).transfer(bob.address, amount))
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(alice.address, constants.ZeroAddress, amount)
+        .withArgs(alice.address, constants.ZERO_ADDRESS, amount)
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(constants.ZeroAddress, bob.address, amount);
+        .withArgs(constants.ZERO_ADDRESS, bob.address, amount);
       await expect(erc7818expWhitelist.connect(bob).transfer(alice.address, amount))
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(bob.address, constants.ZeroAddress, amount)
+        .withArgs(bob.address, constants.ZERO_ADDRESS, amount)
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(constants.ZeroAddress, alice.address, amount);
+        .withArgs(constants.ZERO_ADDRESS, alice.address, amount);
       expect(await erc7818expWhitelist.balanceOf(alice.address)).to.equal(amount);
       expect(await erc7818expWhitelist.balanceOf(bob.address)).to.equal(0);
       expect(await erc7818expWhitelist.safeBalanceOf(bob.address)).to.equal(0);

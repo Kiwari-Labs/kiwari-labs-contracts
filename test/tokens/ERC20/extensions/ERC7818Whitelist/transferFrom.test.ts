@@ -17,16 +17,16 @@ export const run = async () => {
         .withArgs(deployer.address, alice.address);
       await expect(erc7818expWhitelist.mintSpendableWhitelist(alice.address, amount))
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(constants.ZeroAddress, alice.address, amount);
+        .withArgs(constants.ZERO_ADDRESS, alice.address, amount);
       await expect(erc7818expWhitelist.connect(alice).approve(bob.address, amount))
         .to.emit(erc7818expWhitelist, ERC20.events.Approval)
         .withArgs(alice.address, bob.address, amount);
       expect(await erc7818expWhitelist.allowance(alice.address, bob.address)).to.equal(amount);
       await expect(erc7818expWhitelist.connect(bob).transferFrom(alice.address, bob.address, amount))
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(alice.address, constants.ZeroAddress, amount)
+        .withArgs(alice.address, constants.ZERO_ADDRESS, amount)
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(constants.ZeroAddress, bob.address, amount);
+        .withArgs(constants.ZERO_ADDRESS, bob.address, amount);
     });
   });
 };

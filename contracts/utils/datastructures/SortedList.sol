@@ -8,7 +8,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 library SortedList {
     struct List {
-        uint256 _size;
         mapping(uint256 => mapping(bool => uint256)) _nodes;
     }
 
@@ -21,21 +20,23 @@ library SortedList {
      * @dev This function constructs an array `list` that holds indices of nodes in the linked list,
      * starting from either the front or the back based on the `direction` parameter.
      * @param self The linked list state where the operation is performed.
+     * @param length The size of array
      * @return array containing the indices of nodes in the linked list, ordered according to the specified direction.
      */
-    function _toArray(List storage self) private view returns (uint256[] memory array) {
+    function _toArray(List storage self, uint256 length) private view returns (uint256[] memory array) {
         // return early pattern
-        uint256 length = self._size;
-        if (length == 0) return array;
-
-        uint256 element;
+        uint256 element = front(self);
         array = new uint256[](length);
-        array[0] = self._nodes[element][NEXT];
+        if (element == SENTINEL) return array;
+        uint128 index;
         unchecked {
-            for (uint256 i = length - 1; i > 0; i--) {
-                array[i] = self._nodes[element][PREVIOUS];
-                element = array[i];
+            for (; element != SENTINEL; index++) {
+                array[index] = element;
+                element = next(self, element);
             }
+        }
+        assembly {
+            mstore(array, index)
         }
     }
 
@@ -49,27 +50,20 @@ library SortedList {
         if (!lazy) {
             if (contains(self, index)) return;
         }
-        uint256 length = self._size;
-        if (length == SENTINEL) {
+        uint256 last = self._nodes[SENTINEL][PREVIOUS];
+        uint256 first = self._nodes[SENTINEL][NEXT];
+        if (first == SENTINEL) {
             self._nodes[SENTINEL][NEXT] = index;
             self._nodes[SENTINEL][PREVIOUS] = index;
             self._nodes[index][PREVIOUS] = SENTINEL;
             self._nodes[index][NEXT] = SENTINEL;
-            unchecked {
-                self._size++;
-            }
             return;
         }
-        uint256 last = self._nodes[SENTINEL][PREVIOUS];
-        uint256 first = self._nodes[SENTINEL][NEXT];
         if (index < first) {
             self._nodes[SENTINEL][NEXT] = index;
             self._nodes[first][PREVIOUS] = index;
             self._nodes[index][PREVIOUS] = SENTINEL;
             self._nodes[index][NEXT] = first;
-            unchecked {
-                self._size++;
-            }
             return;
         }
         if (index > last) {
@@ -77,21 +71,11 @@ library SortedList {
             self._nodes[last][NEXT] = index;
             self._nodes[index][PREVIOUS] = last;
             self._nodes[index][NEXT] = SENTINEL;
-            unchecked {
-                self._size++;
-            }
             return;
         }
         uint256 cursor = first;
-        if (cursor - first > last - cursor) {
-            while (index > cursor) {
-                cursor = self._nodes[cursor][NEXT];
-            }
-        } else {
-            cursor = last;
-            while (index < cursor) {
-                cursor = self._nodes[cursor][PREVIOUS];
-            }
+        // O(n)
+        while (index > cursor) {
             cursor = self._nodes[cursor][NEXT];
         }
         uint256 tmpPrev = self._nodes[cursor][PREVIOUS];
@@ -99,9 +83,6 @@ library SortedList {
         self._nodes[cursor][PREVIOUS] = index;
         self._nodes[index][PREVIOUS] = tmpPrev;
         self._nodes[index][NEXT] = cursor;
-        unchecked {
-            self._size++;
-        }
     }
 
     /*
@@ -137,18 +118,6 @@ library SortedList {
         if (contains(self, element)) {
             self._nodes[SENTINEL][NEXT] = element; // forced link sentinel to new front
             self._nodes[element][PREVIOUS] = SENTINEL; // forced link previous of element to sentinel
-
-            uint256 counter;
-            while (element != SENTINEL) {
-                unchecked {
-                    counter++;
-                }
-                element = self._nodes[element][NEXT];
-            }
-
-            assembly {
-                sstore(self.slot, counter)
-            }
         }
     }
 
@@ -162,7 +131,6 @@ library SortedList {
     function contains(List storage self, uint256 element) internal view returns (bool result) {
         uint256 beforeElement = self._nodes[element][PREVIOUS];
         uint256 afterSentinel = self._nodes[SENTINEL][NEXT];
-
         assembly {
             result := or(eq(afterSentinel, element), gt(beforeElement, 0))
         }
@@ -217,7 +185,7 @@ library SortedList {
      * @return The _size of the linked list.
      */
     function size(List storage self) internal view returns (uint256) {
-        return self._size;
+        return _toArray(self, 512).length;
     }
 
     /*
@@ -227,6 +195,6 @@ library SortedList {
      * @return array containing the indices of nodes in ascending order.
      */
     function toArray(List storage self) internal view returns (uint256[] memory array) {
-        return _toArray(self);
+        return _toArray(self, 512);
     }
 }

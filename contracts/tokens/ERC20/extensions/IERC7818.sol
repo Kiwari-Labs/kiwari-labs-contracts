@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 /// @title ERC-7818 interface
 /// @dev Interface for adding expirable functionality to ERC20 tokens.
+/// see https://eips.ethereum.org/EIPS/eip-7818
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 

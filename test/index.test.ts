@@ -9,5 +9,5 @@ describe("Scenario", async function () {
 
   // abstracts.run();
   tokens.run();
-  // utils.run();
+  utils.run();
 });

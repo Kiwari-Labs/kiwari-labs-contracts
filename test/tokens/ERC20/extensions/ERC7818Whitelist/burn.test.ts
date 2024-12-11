@@ -18,10 +18,10 @@ export const run = async () => {
         .withArgs(deployer.address, alice.address);
       await expect(erc7818expWhitelist.mintSpendableWhitelist(alice.address, amount))
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(constants.ZeroAddress, alice.address, amount);
+        .withArgs(constants.ZERO_ADDRESS, alice.address, amount);
       await expect(erc7818expWhitelist.burnSpendableWhitelist(alice.address, amount))
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(alice.address, constants.ZeroAddress, amount);
+        .withArgs(alice.address, constants.ZERO_ADDRESS, amount);
       expect(await erc7818expWhitelist.balanceOf(alice.address)).to.equal(0);
     });
 
@@ -32,10 +32,10 @@ export const run = async () => {
         .withArgs(deployer.address, alice.address);
       await expect(erc7818expWhitelist.mintUnspendableWhitelist(alice.address, amount))
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(constants.ZeroAddress, alice.address, amount);
+        .withArgs(constants.ZERO_ADDRESS, alice.address, amount);
       await expect(erc7818expWhitelist.burnUnspendableWhitelist(alice.address, amount))
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(alice.address, constants.ZeroAddress, amount);
+        .withArgs(alice.address, constants.ZERO_ADDRESS, amount);
       expect(await erc7818expWhitelist.balanceOf(alice.address)).to.equal(0);
     });
 

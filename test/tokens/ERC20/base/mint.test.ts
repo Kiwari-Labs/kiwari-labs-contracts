@@ -15,7 +15,7 @@ export const run = async () => {
       const {erc20exp, alice} = await deployERC20EXPBase({});
       await expect(erc20exp.mint(alice.address, amount))
         .to.emit(erc20exp, ERC20.events.Transfer)
-        .withArgs(constants.ZeroAddress, alice.address, amount);
+        .withArgs(constants.ZERO_ADDRESS, alice.address, amount);
 
       const epoch = await erc20exp.currentEpoch();
       const latestBlock = await hardhat_latestBlock();
@@ -30,9 +30,9 @@ export const run = async () => {
 
     it("[FAILED] mint to zero address", async function () {
       const {erc20exp} = await deployERC20EXPBase({});
-      await expect(erc20exp.mint(constants.ZeroAddress, amount))
+      await expect(erc20exp.mint(constants.ZERO_ADDRESS, amount))
         .to.be.revertedWithCustomError(erc20exp, ERC20.errors.ERC20InvalidReceiver)
-        .withArgs(constants.ZeroAddress);
+        .withArgs(constants.ZERO_ADDRESS);
     });
   });
 };

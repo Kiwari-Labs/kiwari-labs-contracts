@@ -1,7 +1,10 @@
 import {ethers} from "hardhat";
-import {ERC7818MintQuota, ERC20EXPBase, common} from "../../../../constant.test";
+import {ERC7818MintQuota, ERC20EXPBase, constants} from "../../../../constant.test";
 
-export const deployERC7818MintQuota = async function (blockTime = common.blockTime, windowSize = common.windowSize) {
+export const deployERC7818MintQuota = async function (
+  blockTime = constants.BLOCK_TIME,
+  windowSize = constants.WINDOW_SIZE,
+) {
   const [deployer, alice, bob, charlie] = await ethers.getSigners();
 
   const ERC7818_MINT_QUOTA = await ethers.getContractFactory(ERC7818MintQuota.name, deployer);

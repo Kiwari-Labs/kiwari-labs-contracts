@@ -237,6 +237,7 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
         _update(_blockNumberProvider(), from, to, value);
     }
 
+    // @TODO
     function _updateAtEpoch(uint256 epoch, address from, address to, uint256 value) internal virtual {
         uint256 blockNumber = _blockNumberProvider();
         (uint256 fromEpoch, uint256 toEpoch) = _safeWindowRange(blockNumber);

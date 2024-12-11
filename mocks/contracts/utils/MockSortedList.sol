@@ -6,7 +6,7 @@ import "../../../contracts/utils/datastructures/SortedList.sol";
 contract MockSortedList {
     using SortedList for SortedList.List;
 
-    SortedList.List public list;
+    SortedList.List private list;
 
     function contains(uint256 index) public view returns (bool) {
         return list.contains(index);
@@ -51,7 +51,7 @@ contract MockSortedList {
     function back() public view returns (uint256) {
         return list.back();
     }
-    
+
     function array() public view returns (uint256[] memory) {
         return list.toArray();
     }
