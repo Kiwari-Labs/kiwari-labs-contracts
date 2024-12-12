@@ -45,8 +45,8 @@ interface IERC7818 is IERC20 {
     /// @param epoch The `epoch` to check.
     /// @return bool True if the token is expired, false otherwise.
     /// @notice Implementing contracts "MUST" define and document the logic for determining expiration,
-    ///typically by comparing the latest epoch with the given `epoch` value,
-    ///based on the `EPOCH_TYPE` measurement (e.g., block count or time duration).
+    /// typically by comparing the latest epoch with the given `epoch` value,
+    /// based on the `EPOCH_TYPE` measurement (e.g., block count or time duration).
     function isEpochExpired(uint256 epoch) external view returns (bool);
 
     /// @dev Transfers token specific `epoch` and value to a recipient.
