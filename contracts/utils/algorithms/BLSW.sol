@@ -17,38 +17,40 @@ library BLSW {
         uint40 blocksPerWindow;
         uint8 epochsPerWindow;
     }
-    
-    error InvalidBlockTime(); 
+
+    error InvalidBlockTime();
     error InvalidWindowSize();
 
-    function _computeEpoch(
-        uint256 initialBlockNumber,
-        uint256 blockNumber,
-        uint256 duration
-    ) private pure returns (uint256 result) {
+    function _computeEpoch(uint256 initialBlockNumber, uint256 blockNumber, uint256 duration) private pure returns (uint256 current) {
         assembly {
             if and(gt(blockNumber, initialBlockNumber), gt(initialBlockNumber, 0)) {
-                result := div(sub(blockNumber, initialBlockNumber), duration)
+                current := div(sub(blockNumber, initialBlockNumber), duration)
             }
         }
     }
 
-    function _computeEpochRange(uint256 current, uint256 windowSize, bool safe) private pure returns (uint256 result) {
+    function _computeEpochRange(
+        uint256 initialBlockNumber,
+        uint256 blockNumber,
+        uint256 duration,
+        uint256 windowSize,
+        bool safe
+    ) private pure returns (uint256 fromEpoch, uint256 toEpoch) {
         assembly {
-            let from := sub(current, windowSize)
+            if and(gt(blockNumber, initialBlockNumber), gt(initialBlockNumber, 0)) {
+                toEpoch := div(sub(blockNumber, initialBlockNumber), duration)
+            }
+
+            let from := sub(toEpoch, windowSize)
             if safe {
-                if gt(current, windowSize) {
-                    result := sub(from, 0x1)
+                if gt(toEpoch, windowSize) {
+                    fromEpoch := sub(from, 0x1)
                 }
             }
-            if iszero(lt(current, windowSize)) {
-                result := from
+            if iszero(lt(toEpoch, windowSize)) {
+                fromEpoch := from
             }
         }
-    }
-
-    function epoch(Window storage self, uint256 blockNumber) internal view returns (uint256) {
-        return _computeEpoch(self.initialBlockNumber, blockNumber, self.blocksPerEpoch);
     }
 
     function blocksInEpoch(Window storage self) internal view returns (uint40) {
@@ -59,19 +61,21 @@ library BLSW {
         return self.blocksPerWindow;
     }
 
-    function windowRange(Window storage self, uint256 blockNumber) internal view returns (uint256, uint256) {
-        uint256 current = _computeEpoch(self.initialBlockNumber, blockNumber, self.blocksPerEpoch);
-        return (_computeEpochRange(current, self.epochsPerWindow, false), current);
+    function epoch(Window storage self, uint256 blockNumber) internal view returns (uint256) {
+        return _computeEpoch(self.initialBlockNumber, blockNumber, self.blocksPerEpoch);
     }
 
     function windowSize(Window storage self) internal view returns (uint8) {
         return self.epochsPerWindow;
     }
 
+    function windowRange(Window storage self, uint256 blockNumber) internal view returns (uint256, uint256) {
+        return _computeEpochRange(self.initialBlockNumber, blockNumber, self.blocksPerEpoch, self.epochsPerWindow, false);
+    }
+
     /// @notice buffering 1 `epoch` for ensure
     function safeWindowRange(Window storage self, uint256 blockNumber) internal view returns (uint256, uint256) {
-        uint256 current = _computeEpoch(self.initialBlockNumber, blockNumber, self.blocksPerEpoch);
-        return (_computeEpochRange(current, self.epochsPerWindow, true), current);
+        return _computeEpochRange(self.initialBlockNumber, blockNumber, self.blocksPerEpoch, self.epochsPerWindow, true);
     }
 
     /// @custom:truncate https://docs.soliditylang.org/en/latest/types.html#division
