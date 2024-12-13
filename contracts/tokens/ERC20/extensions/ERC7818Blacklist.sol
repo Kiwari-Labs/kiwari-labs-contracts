@@ -64,11 +64,7 @@ abstract contract ERC7818Blacklist is ERC20EXPBase {
         emit Unblacklisted(_msgSender(), account);
     }
 
-    function _update(
-        address from,
-        address to,
-        uint256 value
-    ) internal virtual override notBlacklisted(from) notBlacklisted(to) {
+    function _update(address from, address to, uint256 value) internal virtual override notBlacklisted(from) notBlacklisted(to) {
         super._update(from, to, value);
     }
 }

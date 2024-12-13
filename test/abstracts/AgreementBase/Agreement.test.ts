@@ -26,10 +26,7 @@ export const run = async () => {
       const payload = abiCoder.encode(["bool"], [true]);
       const respond = await agreementBase.callStatic.agreement(payload, payload);
       expect(respond).to.equal(true);
-      await expect(agreementBase.agreement(payload, payload)).to.emit(
-        agreementBase,
-        AgreementBase.events.AgreementComplete,
-      );
+      await expect(agreementBase.agreement(payload, payload)).to.emit(agreementBase, AgreementBase.events.AgreementComplete);
     });
 
     it("[FAILED] agreement unsuccessful", async function () {

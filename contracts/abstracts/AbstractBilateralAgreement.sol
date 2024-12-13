@@ -46,12 +46,7 @@ abstract contract AbstractBilateralAgreement is Context {
     event Initialized();
     event ImplementationUpdated(address indexed oldImplementation, address indexed newImplementation);
     event TransactionFinalized(uint256 indexed index);
-    event TransactionRecorded(
-        uint256 indexed index,
-        address indexed sender,
-        TRANSACTION_TYPE indexed transactionType,
-        bytes data
-    );
+    event TransactionRecorded(uint256 indexed index, address indexed sender, TRANSACTION_TYPE indexed transactionType, bytes data);
     event TransactionRejected(uint256 indexed index, address indexed sender);
     event TransactionRevoked(uint256 indexed index, address indexed sender);
 
@@ -132,11 +127,7 @@ abstract contract AbstractBilateralAgreement is Context {
     /// @param sender The address of the party submitting the transaction.
     /// @param transactionType The type of transaction being submitted (e.g., LOGIC_CHANGE).
     /// @param data The encoded transaction data, which includes the token address and value for transfer.
-    function _submitTransaction(
-        address sender,
-        TRANSACTION_TYPE transactionType,
-        bytes calldata data
-    ) private transactionWriter(sender) {
+    function _submitTransaction(address sender, TRANSACTION_TYPE transactionType, bytes calldata data) private transactionWriter(sender) {
         uint256 transactionIndexCache = _getCurrentIndex();
         bool transactionCreation;
         uint8 party = (sender == _parties[0]) ? 0 : 1;
@@ -197,10 +188,7 @@ abstract contract AbstractBilateralAgreement is Context {
     /// If valid, the transaction is marked as executed, and the token and value are transferred to the counterparty.
     /// @param sender The address of the party rejecting the transaction.
     /// @param index The index of the transaction to be rejected.
-    function _rejectTransaction(
-        address sender,
-        uint256 index
-    ) private transactionExists(index) transactionWriter(sender) {
+    function _rejectTransaction(address sender, uint256 index) private transactionExists(index) transactionWriter(sender) {
         uint8 counterparty = (sender == _parties[0]) ? 1 : 0;
         Transaction memory transactionCache = _transactions[index];
         if (!_transactionConfirmed[index][sender] && (transactionCache.confirmations == 1)) {

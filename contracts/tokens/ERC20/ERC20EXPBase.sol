@@ -49,11 +49,7 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
     }
 
     // @TODO
-    function _computeBalanceOverEpochRange(
-        uint256 fromEpoch,
-        uint256 toEpoch,
-        address account
-    ) private view returns (uint256 balance) {
+    function _computeBalanceOverEpochRange(uint256 fromEpoch, uint256 toEpoch, address account) private view returns (uint256 balance) {
         unchecked {
             for (; fromEpoch <= toEpoch; fromEpoch++) {
                 balance += _balances[fromEpoch][account].totalBalance;

@@ -50,10 +50,7 @@ library xort128 {
     function contains(List storage self, uint256 element) internal view returns (bool result) {
         assembly {
             let base := xor(self.slot, MAX_UINT128)
-            result := or(
-                gt(shr(0x80, sload(xor(base, element))), 0),
-                eq(and(sload(xor(base, SENTINEL)), MAX_UINT128), element)
-            )
+            result := or(gt(shr(0x80, sload(xor(base, element))), 0), eq(and(sload(xor(base, SENTINEL)), MAX_UINT128), element))
         }
     }
 

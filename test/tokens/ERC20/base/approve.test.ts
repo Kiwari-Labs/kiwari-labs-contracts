@@ -1,13 +1,7 @@
 import {expect} from "chai";
 import {ERC20, constants} from "../../../constant.test";
 import {deployERC20EXPBase} from "./deployer.test";
-import {
-  hardhat_impersonate,
-  hardhat_reset,
-  hardhat_setBalance,
-  hardhat_stopImpersonating,
-  ethers,
-} from "../../../utils.test";
+import {hardhat_impersonate, hardhat_reset, hardhat_setBalance, hardhat_stopImpersonating, ethers} from "../../../utils.test";
 import {parseEther} from "ethers";
 
 export const run = async () => {

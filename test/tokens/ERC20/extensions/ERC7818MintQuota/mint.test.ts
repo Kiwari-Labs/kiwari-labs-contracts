@@ -47,9 +47,10 @@ export const run = async () => {
         .withArgs(deployer.address, alice.address, quota);
       expect(await erc7818MintQuota.remainingQuota(alice.address)).to.equal(quota);
       expect(await erc7818MintQuota.minted(alice.address)).to.equal(0);
-      await expect(
-        erc7818MintQuota.connect(alice).mintQuota(alice.address, quota + quota),
-      ).to.be.revertedWithCustomError(erc7818MintQuota, ERC7818MintQuota.errors.MintQuotaExceeded);
+      await expect(erc7818MintQuota.connect(alice).mintQuota(alice.address, quota + quota)).to.be.revertedWithCustomError(
+        erc7818MintQuota,
+        ERC7818MintQuota.errors.MintQuotaExceeded,
+      );
     });
   });
 };
