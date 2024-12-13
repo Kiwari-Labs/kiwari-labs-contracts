@@ -44,7 +44,11 @@ export const run = async () => {
       const duration = await erc20exp.validityDuration();
       expect(await erc20exp.isEpochExpired(0)).to.equal(false);
       await hardhat_mine(epochLength * duration);
+
       /* buffer 1 epoch */
+      await hardhat_mine(epochLength);
+      expect(await erc20exp.isEpochExpired(0)).to.equal(false);
+
       await hardhat_mine(epochLength);
       expect(await erc20exp.isEpochExpired(0)).to.equal(true);
     });

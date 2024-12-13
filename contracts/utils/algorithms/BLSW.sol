@@ -42,13 +42,13 @@ library BLSW {
             }
 
             let from := sub(toEpoch, windowSize)
+            if iszero(lt(toEpoch, windowSize)) {
+                fromEpoch := from
+            }
             if safe {
                 if gt(toEpoch, windowSize) {
                     fromEpoch := sub(from, 0x1)
                 }
-            }
-            if iszero(lt(toEpoch, windowSize)) {
-                fromEpoch := from
             }
         }
     }
