@@ -11,25 +11,19 @@ export const run = async () => {
 
     it("[SUCCESS] bump major version", async function () {
       const {agreementBase} = await deployAgreementBase(AgreementBase.constructor.name);
-      await expect(agreementBase.bumpMajorVersion())
-        .to.emit(agreementBase, AgreementBase.events.BumpMajorVersion)
-        .withArgs(100, 200);
+      await expect(agreementBase.bumpMajorVersion()).to.emit(agreementBase, AgreementBase.events.BumpMajorVersion).withArgs(100, 200);
       expect(await agreementBase.version()).to.equal(200);
     });
 
     it("[SUCCESS] bump minor version", async function () {
       const {agreementBase} = await deployAgreementBase(AgreementBase.constructor.name);
-      await expect(agreementBase.bumpMinorVersion())
-        .to.emit(agreementBase, AgreementBase.events.BumpMinorVersion)
-        .withArgs(100, 110);
+      await expect(agreementBase.bumpMinorVersion()).to.emit(agreementBase, AgreementBase.events.BumpMinorVersion).withArgs(100, 110);
       expect(await agreementBase.version()).to.equal(110);
     });
 
     it("[SUCCESS] bump patch version", async function () {
       const {agreementBase} = await deployAgreementBase(AgreementBase.constructor.name);
-      await expect(agreementBase.bumpPatchVersion())
-        .to.emit(agreementBase, AgreementBase.events.BumpPatchVersion)
-        .withArgs(100, 101);
+      await expect(agreementBase.bumpPatchVersion()).to.emit(agreementBase, AgreementBase.events.BumpPatchVersion).withArgs(100, 101);
       expect(await agreementBase.version()).to.equal(101);
     });
   });

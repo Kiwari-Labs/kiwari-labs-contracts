@@ -19,11 +19,7 @@ library TLSW {
     error InvalidDuration();
     error InvalidWindowSize();
 
-    function _computeEpoch(
-        uint256 startTimestamp,
-        uint256 blockNumber,
-        uint256 duration
-    ) private pure returns (uint256) {
+    function _computeEpoch(uint256 startTimestamp, uint256 blockNumber, uint256 duration) private pure returns (uint256) {
         assembly {
             if and(gt(blockNumber, startTimestamp), gt(startTimestamp, 0)) {
                 mstore(0x20, div(sub(blockNumber, startTimestamp), duration))
@@ -61,30 +57,19 @@ library TLSW {
         return self.secondsPerEpoch * self.windowSize;
     }
 
-    function windowRange(
-        SlidingWindowState storage self,
-        uint256 blockNumber
-    ) internal view returns (uint256 from, uint256 to) {
+    function windowRange(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint256 from, uint256 to) {
         uint256 current = _computeEpoch(self.initialTimestamp, blockNumber, self.secondsPerEpoch);
         return (current, _computeEpochRange(current, self.windowSize, false));
     }
 
     /// @notice buffering 1 `epoch` for ensure
-    function safeWindowRange(
-        SlidingWindowState storage self,
-        uint256 blockNumber
-    ) internal view returns (uint256 from, uint256 to) {
+    function safeWindowRange(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint256 from, uint256 to) {
         uint256 current = _computeEpoch(self.initialTimestamp, blockNumber, self.secondsPerEpoch);
         return (current, _computeEpochRange(current, self.windowSize, true));
     }
 
     /// @custom:truncate https://docs.soliditylang.org/en/latest/types.html#division
-    function initializedState(
-        SlidingWindowState storage self,
-        uint40 secondsPerEpoch,
-        uint8 windowSize,
-        bool development
-    ) internal {
+    function initializedState(SlidingWindowState storage self, uint40 secondsPerEpoch, uint8 windowSize, bool development) internal {
         if (!development) {
             if (secondsPerEpoch < MINIMUM_DURATION || secondsPerEpoch > MAXIMUM_DURATION) {
                 revert InvalidDuration();

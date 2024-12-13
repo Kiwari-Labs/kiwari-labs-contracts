@@ -23,11 +23,7 @@ library SCDLL {
     /// @param listSize The size of the list to partition.
     /// @param direction The direction of traversal: NEXT for forward, PREV for backward.
     /// @return part An array containing the indices of nodes in the partition.
-    function _partition(
-        List storage self,
-        uint256 listSize,
-        bool direction
-    ) private view returns (uint256[] memory part) {
+    function _partition(List storage self, uint256 listSize, bool direction) private view returns (uint256[] memory part) {
         unchecked {
             part = new uint256[](listSize);
             uint256 index;

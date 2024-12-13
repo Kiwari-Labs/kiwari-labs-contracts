@@ -33,13 +33,13 @@ export const deployBLSW = async function ({
   startBlockNumber = 1,
   blockTime = constants.BLOCK_TIME,
   windowSize = constants.WINDOW_SIZE,
-  development = false
+  development = false,
 }) {
   const [deployer, alice, bob, charlie] = await ethers.getSigners();
   const BLSW = await ethers.getContractFactory(BLSWLibrary.name, deployer);
   const slidingWindow = await BLSW.deploy(startBlockNumber, blockTime, windowSize, development);
   await slidingWindow.waitForDeployment();
-  
+
   return {
     slidingWindow,
     deployer,
