@@ -61,12 +61,12 @@ library BLSW {
         return self.blocksPerWindow;
     }
 
-    function epoch(Window storage self, uint256 blockNumber) internal view returns (uint256) {
-        return _computeEpoch(self.initialBlockNumber, blockNumber, self.blocksPerEpoch);
-    }
-
     function windowSize(Window storage self) internal view returns (uint8) {
         return self.epochsPerWindow;
+    }
+
+    function epoch(Window storage self, uint256 blockNumber) internal view returns (uint256) {
+        return _computeEpoch(self.initialBlockNumber, blockNumber, self.blocksPerEpoch);
     }
 
     function windowRange(Window storage self, uint256 blockNumber) internal view returns (uint256, uint256) {

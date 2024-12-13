@@ -10,82 +10,76 @@ library TLSW {
     uint16 private constant MINIMUM_DURATION = 0xE10; // 3_600 sec
     uint32 private constant MAXIMUM_DURATION = 0x1E1853E; // 31_556_926  sec
 
-    struct SlidingWindowState {
-        uint40 secondsPerEpoch;
-        uint8 windowSize;
+    struct Window {
         uint256 initialTimestamp;
+        uint40 secondsPerEpoch;
+        uint40 secondsPerWindow;
+        uint8 epochsPerWindow;
     }
 
     error InvalidDuration();
     error InvalidWindowSize();
 
-    function _computeEpoch(
-        uint256 startTimestamp,
-        uint256 blockNumber,
-        uint256 duration
-    ) private pure returns (uint256) {
+    function _computeEpoch(uint256 initialTimestamp, uint256 currentTime, uint256 duration) private pure returns (uint256 current) {
         assembly {
-            if and(gt(blockNumber, startTimestamp), gt(startTimestamp, 0)) {
-                mstore(0x20, div(sub(blockNumber, startTimestamp), duration))
-                return(0x20, 0x20)
+            if and(gt(currentTime, initialTimestamp), gt(initialTimestamp, 0)) {
+                current := div(sub(currentTime, initialTimestamp), duration)
             }
         }
     }
 
-    function _computeEpochRange(uint256 current, uint256 windowSize, bool safe) private pure returns (uint256) {
+    function _computeEpochRange(
+        uint256 initialTimestamp,
+        uint256 currentTime,
+        uint256 duration,
+        uint256 windowSize,
+        bool safe
+    ) private pure returns (uint256 fromEpoch, uint256 toEpoch) {
         assembly {
-            let from := sub(current, windowSize)
-            if iszero(lt(current, windowSize)) {
-                mstore(0x20, from)
-                return(0x20, 0x20)
+            if and(gt(currentTime, initialTimestamp), gt(initialTimestamp, 0)) {
+                toEpoch := div(sub(currentTime, initialTimestamp), duration)
             }
+
+            let from := sub(toEpoch, windowSize)
             if safe {
-                if gt(current, windowSize) {
-                    mstore(0x20, sub(from, 0x1))
-                    return(0x20, 0x20)
+                if gt(toEpoch, windowSize) {
+                    fromEpoch := sub(from, 0x1)
                 }
-                return(0x20, 0x20)
+            }
+            if iszero(lt(toEpoch, windowSize)) {
+                fromEpoch := from
             }
         }
     }
 
-    function getCurrentEpoch(SlidingWindowState storage self, uint256 blockNumber) internal view returns (uint256) {
-        return _computeEpoch(self.initialTimestamp, blockNumber, self.secondsPerEpoch);
-    }
-
-    function secondsInEpoch(SlidingWindowState storage self) internal view returns (uint40) {
+    function secondsInEpoch(Window storage self) internal view returns (uint40) {
         return self.secondsPerEpoch;
     }
 
-    function secondsInWindow(SlidingWindowState storage self) internal view returns (uint40) {
-        return self.secondsPerEpoch * self.windowSize;
+    function secondsInWindow(Window storage self) internal view returns (uint40) {
+        return self.secondsPerWindow;
     }
 
-    function windowRange(
-        SlidingWindowState storage self,
-        uint256 blockNumber
-    ) internal view returns (uint256 from, uint256 to) {
-        uint256 current = _computeEpoch(self.initialTimestamp, blockNumber, self.secondsPerEpoch);
-        return (current, _computeEpochRange(current, self.windowSize, false));
+    function windowSize(Window storage self) internal view returns (uint8) {
+        return self.epochsPerWindow;
+    }
+
+    function epoch(Window storage self, uint256 currentTime) internal view returns (uint256) {
+        return _computeEpoch(self.initialTimestamp, currentTime, self.secondsPerEpoch);
+    }
+
+    function windowRange(Window storage self, uint256 currentTime) internal view returns (uint256, uint256) {
+        return _computeEpochRange(self.initialTimestamp, currentTime, self.secondsPerEpoch, self.secondsPerWindow, false);
     }
 
     /// @notice buffering 1 `epoch` for ensure
-    function safeWindowRange(
-        SlidingWindowState storage self,
-        uint256 blockNumber
-    ) internal view returns (uint256 from, uint256 to) {
-        uint256 current = _computeEpoch(self.initialTimestamp, blockNumber, self.secondsPerEpoch);
-        return (current, _computeEpochRange(current, self.windowSize, true));
+    function safeWindowRange(Window storage self, uint256 currentTime) internal view returns (uint256, uint256) {
+        return _computeEpochRange(self.initialTimestamp, currentTime, self.secondsPerEpoch, self.secondsPerWindow, true);
     }
 
     /// @custom:truncate https://docs.soliditylang.org/en/latest/types.html#division
-    function initializedState(
-        SlidingWindowState storage self,
-        uint40 secondsPerEpoch,
-        uint8 windowSize,
-        bool development
-    ) internal {
-        if (!development) {
+    function initializedState(Window storage self, uint40 secondsPerEpoch, uint8 windowSize, bool safe) internal {
+        if (safe) {
             if (secondsPerEpoch < MINIMUM_DURATION || secondsPerEpoch > MAXIMUM_DURATION) {
                 revert InvalidDuration();
             }
@@ -95,11 +89,12 @@ library TLSW {
         }
         unchecked {
             self.secondsPerEpoch = secondsPerEpoch;
-            self.windowSize = windowSize;
+            self.secondsPerWindow = secondsPerEpoch * windowSize;
+            self.epochsPerWindow = windowSize;
         }
     }
 
-    function initializedTimestamp(SlidingWindowState storage self, uint256 timestamp) internal {
-        self.initialTimestamp = timestamp;
+    function initializedTimestamp(Window storage self, uint256 currentTime) internal {
+        self.initialTimestamp = currentTime;
     }
 }
