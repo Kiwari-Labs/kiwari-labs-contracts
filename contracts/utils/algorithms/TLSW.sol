@@ -5,10 +5,10 @@ pragma solidity >=0.8.0 <0.9.0;
 /// @author Kiwari Labs
 
 library TLSW {
-    uint8 private constant MINIMUM_WINDOW_SIZE = 0x1; // 1 epoch
+    uint8 private constant MINIMUM_WINDOW_SIZE = 0x01; // 1 epoch
     uint8 private constant MAXIMUM_WINDOW_SIZE = 0x20; // 32 epoch
-    uint16 private constant MINIMUM_DURATION = 0xE10; // 3_600 sec
-    uint32 private constant MAXIMUM_DURATION = 0x1E1853E; // 31_556_926  sec
+    uint40 private constant MINIMUM_DURATION = 0xE10; // 3_600 sec
+    uint40 private constant MAXIMUM_DURATION = 0x1E1853E; // 31_556_926  sec
 
     struct Window {
         uint256 initialTimestamp;
