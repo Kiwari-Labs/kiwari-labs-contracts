@@ -7,9 +7,6 @@ pragma solidity >=0.8.0 <0.9.0;
 library BLSW {
     uint8 private constant MINIMUM_WINDOW_SIZE = 0x01; // 1 epoch
     uint8 private constant MAXIMUM_WINDOW_SIZE = 0x20; // 32 epoch
-    uint8 private constant MINIMUM_BLOCKTIME = 0x64; // 100 ms
-    uint24 private constant MAXIMUM_BLOCKTIME = 0x927C0; // 600_000 ms
-    uint40 private constant YEAR_IN_MILLISECONDS = 0x758F07A30; // 31_556_926_000 ms
 
     struct Window {
         uint256 initialBlockNumber;
@@ -18,7 +15,6 @@ library BLSW {
         uint8 epochsPerWindow;
     }
 
-    error InvalidBlockTime();
     error InvalidWindowSize();
 
     function _computeEpoch(uint256 initialBlockNumber, uint256 blockNumber, uint256 duration) private pure returns (uint256 current) {
@@ -79,17 +75,13 @@ library BLSW {
     }
 
     /// @custom:truncate https://docs.soliditylang.org/en/latest/types.html#division
-    function initializedState(Window storage self, uint40 blockTime, uint8 windowSize, bool safe) internal {
+    function initializedState(Window storage self, uint40 blocksPerEpoch, uint8 windowSize, bool safe) internal {
         if (safe) {
-            if (blockTime < MINIMUM_BLOCKTIME || blockTime > MAXIMUM_BLOCKTIME) {
-                revert InvalidBlockTime();
-            }
             if (windowSize < MINIMUM_WINDOW_SIZE || windowSize > MAXIMUM_WINDOW_SIZE) {
                 revert InvalidWindowSize();
             }
         }
         unchecked {
-            uint40 blocksPerEpoch = (YEAR_IN_MILLISECONDS / blockTime) >> 2;
             self.blocksPerEpoch = blocksPerEpoch;
             self.blocksPerWindow = blocksPerEpoch * windowSize;
             self.epochsPerWindow = windowSize;
