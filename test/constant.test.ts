@@ -1,105 +1,188 @@
-export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+import {MaxUint256, ZeroAddress} from "ethers";
 
-// abstracts
-export const AGREEMENT_BASE_CONTRACT = "MockAgreementBase";
-export const AGREEMENT_BASE_FOR_BILATERAL_CONTRACT = "MockAgreementBaseForBilateral";
-export const BILATERAL_AGREEMENT_BASE_CONTRACT = "MockBilateralAgreementBase";
-export const ERC20_EXP_BASE_CONTRACT = "MockERC20EXPBase";
-export const LIGHT_WEIGHT_ERC20_EXP_BASE_CONTRACT = "MockLightWeightERC20EXPBase";
-export const SLIDING_WINDOW_CONTRACT = "MockSlidingWindow";
-export const LIGHT_WEIGHT_SLIDING_WINDOW_CONTRACT = "MockLightWeightSlidingWindow";
+export const constants = {
+  MAX_UINT256: MaxUint256,
+  ZERO_ADDRESS: ZeroAddress,
+  BLOCK_TIME: 250,
+  WINDOW_SIZE: 4,
+  BLOCKS_IN_EPOCH: 0,
+  BLOCKS_IN_WINDOW: 0,
+  MIN_WINDOW_SIZE: 1,
+  MAX_WINDOW_SIZE: 32,
+  MIN_BLOCK_TIME: 100,
+  MAX_BLOCK_TIME: 600_000,
+  YEAR_IN_MILLISECONDS: 31_556_926_000,
+};
 
-// extensions
-export const ERC20_EXP_BACKLIST_CONTRACT = "MockERC20EXPBacklist";
-export const ERC20_EXP_MINT_QUOTA_CONTRACT = "MockERC20EXPMintQuota";
-export const ERC20_EXP_WHITELIST_CONTRACT = "MockERC20EXPWhitelist";
-export const ERC20_EXP_NEAREST_EXPIRY_QUERY_CONTRACT = "MockERC20EXPNearestExpiryQuery";
-export const LIGHT_WEIGHT_ERC20_EXP_WHITELIST_CONTRACT = "MockLightWeightERC20EXPWhitelist";
+export const AgreementBase = {
+  name: "MockAgreementBase",
+  constructor: {
+    name: "MockAgreement",
+  },
+  errors: {
+    AgreementFailed: "AgreementFailed",
+  },
+  events: {
+    AgreementComplete: "AgreementComplete",
+    BumpMajorVersion: "BumpMajorVersion",
+    BumpMinorVersion: "BumpMinorVersion",
+    BumpPatchVersion: "BumpPatchVersion",
+  },
+};
 
-// libraries
-export const SLIDING_WINDOW_LIBRARY_CONTRACT = "MockSlidingWindowLibrary";
-export const LIGHT_WEIGHT_SLIDING_WINDOW_LIBRARY_CONTRACT = "MockLightWeightSlidingWindowLibrary";
-export const SORTED_CIRCULAR_DOUBLY_LINKED_LIST_LIBRARY_CONTRACT = "MockSortedCircularDoublyLinkedListLibrary";
-export const LIGHT_WEIGHT_SORTED_CIRCULAR_DOUBLY_LINKED_LIST_LIBRARY_CONTRACT =
-  "MockLightWeightSortedCircularDoublyLinkedListLibrary";
-export const COMPARATOR_LIBRARY_CONTRACT = "MockComparator";
-export const PU128SCDLL_CONTRACT = "MockLightWeightSortedCircularDoublyLinkedListLibraryV2";
+export const BilateralAgreementBase = {
+  name: "MockBilateralAgreementBase",
+  errors: {},
+  events: {},
+};
 
-export const AGREEMENT_NAME = "MockAgreement";
+export const SlidingWindow = {
+  name: "MockSlidingWindow",
+  errors: {
+    InvalidBlockTime: "InvalidBlockTime",
+    InvalidWindowSize: "InvalidWindowSize",
+  },
+  events: {},
+};
 
-export const ERC20_EXP_EXPIRE_PERIOD = 4;
+export const LightWeightSlidingWindow = {
+  name: "MockLightWeightSlidingWindow",
+  errors: {...SlidingWindow.errors},
+  events: {},
+};
 
-export const ERC20_EXP_BLOCK_PERIOD = 400;
-export const ERC20_EXP_FRAME_SIZE = 2;
-export const ERC20_EXP_SLOT_SIZE = 4;
-export const ERC20_EXP_NAME = "PointToken";
-export const ERC20_EXP_SYMBOL = "POINT";
+export const AgreementBaseForBilateral = {
+  name: "MockAgreementBaseForBilateral",
+  errors: {},
+  events: {},
+};
 
-export const TWO_BITS = 2;
-export const THREE_BITS = 3;
-export const SLOT_PER_ERA = 4;
-export const MINIMUM_SLOT_PER_ERA = 1;
-export const MAXIMUM_SLOT_PER_ERA = 12;
-export const MINIMUM_FRAME_SIZE = 1;
-export const MAXIMUM_FRAME_SIZE = 64;
-export const MINIMUM_BLOCK_TIME_IN_MILLISECONDS = 100;
-export const MAXIMUM_BLOCK_TIME_IN_MILLISECONDS = 600_000;
-export const YEAR_IN_MILLISECONDS = 31_556_926_000;
+export const ERC20 = {
+  errors: {
+    ERC20InsufficientBalance: "ERC20InsufficientBalance",
+    ERC20InvalidApprover: "ERC20InvalidApprover",
+    ERC20InvalidSpender: "ERC20InvalidSpender",
+    ERC20InvalidReceiver: "ERC20InvalidReceiver",
+    ERC20InvalidSender: "ERC20InvalidSender",
+    ERC20InsufficientAllowance: "ERC20InsufficientAllowance",
+  },
+  events: {
+    Transfer: "Transfer",
+    Approval: "Approval",
+  },
+};
 
-export const DAY_IN_MILLISECONDS = 86_400_000;
+export const ERC7818Backlist = {
+  name: "MockERC7818Backlist",
+  errors: {
+    BlacklistedAddress: "BlacklistedAddress",
+    InvalidAddress: "InvalidAddress",
+  },
+  events: {
+    Blacklisted: "Blacklisted",
+    Unblacklisted: "Unblacklisted",
+  },
+};
 
-// custom error
-export const ERROR_AGREEMENT_FAILED = "AgreementFailed";
+export const ERC7818MintQuota = {
+  name: "MockERC7818MintQuota",
+  errors: {
+    UnauthorizedMinter: "UnauthorizedMinter",
+    MintQuotaExceeded: "MintQuotaExceeded",
+    InvalidMinterAddress: "InvalidMinterAddress",
+  },
+  events: {
+    QuotaSet: "QuotaSet",
+    QuotaReset: "QuotaReset",
+    QuotaMinted: "QuotaMinted",
+  },
+};
 
-export const ERROR_INVALID_BLOCK_TIME = "InvalidBlockTime";
-export const ERROR_INVALID_FRAME_SIZE = "InvalidFrameSize";
-export const ERROR_INVALID_SLOT_PER_ERA = "InvalidSlotPerEra";
+export const ERC7818Whitelist = {
+  name: "MockERC7818Whitelist",
+  errors: {
+    InvalidWhitelistAddress: "InvalidWhitelistAddress",
+    ExistInWhitelist: "ExistInWhitelist",
+    NotExistInWhitelist: "NotExistInWhitelist",
+  },
+  events: {
+    Whitelisted: "Whitelisted",
+    Unwhitelisted: "Unwhitelisted",
+  },
+};
 
-export const ERROR_INVALID_WHITELIST_ADDRESS = "InvalidWhitelistAddress";
-export const ERROR_EXIST_IN_WHITELIST = "ExistInWhitelist";
-export const ERROR_NOT_EXIST_IN_WHITELIST = "NotExistInWhitelist";
+export const ERC20EXPBase = {
+  name: "MockERC20EXPBase",
+  constructor: {
+    name: "PointToken",
+    symbol: "POINT",
+  },
+  errors: {},
+  events: {},
+  extensions: {
+    ERC7818Backlist,
+    ERC7818MintQuota,
+    ERC7818Whitelist,
+    // MockLightWeightERC20EXPWhitelist: "MockLightWeightERC20EXPWhitelist",
+  },
+};
 
-export const ERROR_UNAUTHORIZED_MINTER = "UnauthorizedMinter";
-export const ERROR_MINT_QUOTA_EXCEEDED = "MintQuotaExceeded";
-export const ERROR_INVALID_MINTER_ADDRESS = "InvalidMinterAddress";
+export const SlidingWindowLibrary = {
+  name: "MockSlidingWindowLibrary",
+  errors: {},
+  events: {},
+};
 
-export const ERROR_ERC20_INVALID_SENDER = "ERC20InvalidSender";
-export const ERROR_ERC20_INVALID_RECEIVER = "ERC20InvalidReceiver";
-export const ERROR_ERC20_INSUFFICIENT_BALANCE = "ERC20InsufficientBalance";
-export const ERROR_ERC20_INVALID_APPROVER = "ERC20InvalidApprover";
-export const ERROR_ERC20_INVALID_SPENDER = "ERC20InvalidSpender";
-export const ERROR_ERC20_INSUFFICIENT_ALLOWANCE = "ERC20InsufficientAllowance";
+export const BLSWLibrary = {
+  name: "MockBLSW",
+  errors: {},
+  events: {},
+};
 
-export const ERROR_BLACKLISTED_ADDRESS = "BlacklistedAddress";
-export const ERROR_INVALID_ADDRESS = "InvalidAddress";
+export const SortedCircularDoublyLinkedListLibrary = {
+  name: "MockSortedCircularDoublyLinkedListLibrary",
+  errors: {},
+  events: {},
+};
 
-// events
-export const EVENT_AGREEMENT_COMPLETE = "AgreementComplete";
-export const EVENT_AGREEMENT_BUMP_MAJOR_VERSION = "BumpMajorVersion";
-export const EVENT_AGREEMENT_BUMP_MINOR_VERSION = "BumpMinorVersion";
-export const EVENT_AGREEMENT_BUMP_PATCH_VERSION = "BumpPatchVersion";
+export const LightWeightSortedCircularDoublyLinkedListLibrary = {
+  name: "MockXort128",
+  errors: {},
+  events: {},
+};
 
-export const EVENT_TRANSFER = "Transfer";
-export const EVENT_APPROVAL = "Approval";
+export const Xort128 = {
+  name: "MockLightWeightSortedCircularDoublyLinkedListLibraryV2",
+  errors: {},
+  events: {},
+};
 
-export const EVENT_WHITELIST_GRANTED = "WhitelistGranted";
-export const EVENT_WHITELIST_REVOKED = "WhitelistRevoked";
+export const Comparator = {
+  name: "MockComparator",
+  errors: {},
+  events: {},
+};
 
-export const EVENT_QUOTA_SET = "QuotaSet";
-export const EVENT_QUOTA_RESET = "QuotaReset";
-export const EVENT_QUOTA_MINTED = "QuotaMinted";
-
-export const EVENT_BLACKLISTED = "Blacklisted";
-export const EVENT_UNBLACKLISTED = "Unblacklisted";
-
-export interface SlidingWindowState extends LightWeightSlidingWindowState {
-  _slotSize: Number;
-}
-
-export interface LightWeightSlidingWindowState {
-  _blockPerEra: Number;
-  _blockPerSlot: Number;
-  _frameSizeInBlockLength: Number;
-  _frameSizeInEraAndSlotLength: Array<Number>;
-  _startBlockNumber: Number;
-}
+export const contracts = {
+  abstracts: {
+    AgreementBase,
+    BilateralAgreementBase,
+    SlidingWindow,
+    LightWeightSlidingWindow,
+    AgreementBaseForBilateral,
+  },
+  tokens: {
+    ERC20,
+    ERC20EXPBase,
+  },
+  utils: {
+    SlidingWindowLibrary,
+    SortedCircularDoublyLinkedListLibrary,
+    // LightWeightSlidingWindowLibrary,
+    // LightWeightSortedCircularDoublyLinkedListLibrary,
+    // PU128SCDLL,
+    comparators: {
+      Comparator,
+    },
+  },
+};

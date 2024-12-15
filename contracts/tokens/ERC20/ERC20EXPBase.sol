@@ -1,261 +1,226 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title ERC20EXP Base abstract contract
+/// @title ERC20EXP Base
 /// @author Kiwari Labs
 
-import {SlidingWindow} from "../../abstracts/SlidingWindow.sol";
-import {SortedCircularDoublyLinkedList as SCDLL} from "../../utils/SortedCircularDoublyLinkedList.sol";
-import {IERC7818} from "./IERC7818.sol";
+import {AbstractBLSW as BLSW} from "../../abstracts/AbstractBLSW.sol";
+import {SCDLL} from "../../utils/datastructures/LSCDLL.sol";
+import {IERC7818} from "./extensions/IERC7818.sol";
+import {IERC7818NearestExpiryQuery} from "./extensions/IERC7818NearestExpiryQuery.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow {
+abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC7818NearestExpiryQuery {
     using SCDLL for SCDLL.List;
 
     string private _name;
     string private _symbol;
 
-    /// @notice Struct representing a slot containing balances mapped by blocks.
-    struct Slot {
-        uint256 slotBalance;
-        mapping(uint256 blockNumber => uint256 balance) blockBalances;
+    struct Epoch {
+        uint256 totalBalance;
+        mapping(uint256 => uint256) balances;
         SCDLL.List list;
     }
 
-    mapping(address account => mapping(uint256 era => mapping(uint8 slot => Slot))) private _balances;
-    mapping(address account => mapping(address spneder => uint256 balance)) private _allowances;
-    mapping(uint256 blockNumber => uint256 balance) private _worldBlockBalances;
+    mapping(uint256 => mapping(address => Epoch)) private _balances;
+    mapping(address => mapping(address => uint256)) private _allowances;
+    mapping(uint256 => uint256) private _worldStateBalances;
 
     /// @notice Constructor function to initialize the token contract with specified parameters.
     /// @dev Initializes the token contract by setting the name, symbol, and initializing the sliding window parameters.
     /// @param name_ The name of the token.
     /// @param symbol_ The symbol of the token.
     /// @param blockNumber_ The starting block number for the sliding window.
-    /// @param blockTime_ The duration of each block in milliseconds..
+    /// @param blockTime_ The duration of each block in milliseconds.
+    /// @param windowSize_ The window size.
+    /// @param development_ The development mode flag.
     constructor(
         string memory name_,
         string memory symbol_,
         uint256 blockNumber_,
-        uint16 blockTime_,
-        uint8 frameSize_,
-        uint8 slotSize_
-    ) SlidingWindow(blockNumber_, blockTime_, frameSize_, slotSize_) {
+        uint40 blockTime_,
+        uint8 windowSize_,
+        bool development_
+    ) BLSW(blockNumber_, blockTime_, windowSize_, development_) {
         _name = name_;
         _symbol = symbol_;
     }
 
-    /// @notice Retrieves the total slot balance for the specified account and era,
-    /// iterating through the range of slots from startSlot to endSlot inclusive.
-    /// This function reads slot balances stored in a mapping `_balances`.
-    /// @dev This function assumes that the provided `startSlot` is less than or equal to `endSlot`.
-    /// It calculates the cumulative balance by summing the `slotBalance` of each slot within the specified range.
-    /// @param account The address of the account for which the balance is being queried.
-    /// @param era The era (time period) from which to retrieve balances.
-    /// @param startSlot The starting slot index within the era to retrieve balances.
-    /// @param endSlot The ending slot index within the era to retrieve balances.
-    /// @return balance The total balance across the specified slots within the era.
-    function _slotBalance(
-        address account,
-        uint256 era,
-        uint8 startSlot,
-        uint8 endSlot
-    ) private view returns (uint256 balance) {
+    // @TODO
+    function _computeBalanceOverEpochRange(uint256 fromEpoch, uint256 toEpoch, address account) private view returns (uint256 balance) {
         unchecked {
-            for (; startSlot <= endSlot; startSlot++) {
-                balance += _balances[account][era][startSlot].slotBalance;
+            for (; fromEpoch <= toEpoch; fromEpoch++) {
+                balance += _balances[fromEpoch][account].totalBalance;
+            }
+        }
+    }
+
+    // @TODO
+    function _computeBalanceAtEpoch(
+        uint256 epoch,
+        address account,
+        uint256 blockNumber,
+        uint256 duration
+    ) private view returns (uint256 balance) {
+        uint256 element = _findValidBalance(account, epoch, blockNumber, duration);
+        Epoch storage _account = _balances[epoch][account];
+        unchecked {
+            while (element > 0) {
+                balance += _account.balances[element];
+                element = _account.list.next(element);
             }
         }
         return balance;
     }
 
-    /// @notice Calculates the total buffered balance within a specific era and slot for the given account,
-    /// considering all block balances that have not expired relative to the current block number.
-    /// This function iterates through a sorted list of block indices and sums up corresponding balances.
-    /// @dev This function is used to determine the total buffered balance for an account within a specific era and slot.
-    /// It loops through a sorted list of block indices stored in `_spender.list` and sums up the balances from `_spender.blockBalances`.
-    /// @param account The address of the account for which the balance is being calculated.
-    /// @param era The era (time period) from which to retrieve balances.
-    /// @param slot The specific slot within the era to retrieve balances.
-    /// @param blockNumber The current block number for determining balance validity.
-    /// @return balance The total buffered balance within the specified era and slot.
-    /// @custom:gas-inefficiency This function can consume significant gas due to potentially
-    /// iterating through a large array of block indices.
-    function _bufferSlotBalance(
-        address account,
-        uint256 era,
-        uint8 slot,
-        uint256 blockNumber
-    ) private view returns (uint256 balance) {
-        Slot storage _spender = _balances[account][era][slot];
-        uint256 key = _locateUnexpiredBlockBalance(_spender.list, blockNumber, _getFrameSizeInBlockLength());
-        while (key > 0) {
-            unchecked {
-                balance += _spender.blockBalances[key];
-            }
-            key = _spender.list.next(key);
-        }
-    }
-
-    /// @notice Optimized to assume fromEra and fromSlot are already buffered, covering
-    /// the gap between fromEra and toEra using slotBalance and summing to balance.
-    /// @dev Returns the available balance from the given account, eras, and slots.
-    /// @param account The address of the account for which the balance is being queried.
-    /// @param fromEra The starting era for the balance lookup.
-    /// @param toEra The ending era for the balance lookup.
-    /// @param fromSlot The starting slot within the starting era for the balance lookup.
-    /// @param toSlot The ending slot within the ending era for the balance lookup.
+    /// @notice Finds the index of the first valid block balance in a sorted list of block numbers.
+    /// A block balance index is considered valid if the difference between the current blockNumber
+    /// and the block number at the index (key) is less than the duration.
+    /// @dev This function is used to determine the first valid block balance index within a sorted circular doubly linked list.
+    /// It iterates through the list starting from the head and stops when it finds a valid index or reaches the end of the list.
+    /// @param account The account address.
+    /// @param epoch The epoch number.
     /// @param blockNumber The current block number.
-    /// @return balance The available balance.
-    function _lookBackBalance(
+    /// @param duration The maximum allowed difference between blockNumber and the key.
+    /// @return element The index of the first valid block balance.
+    function _findValidBalance(
         address account,
-        uint256 fromEra,
-        uint256 toEra,
-        uint8 fromSlot,
-        uint8 toSlot,
-        uint256 blockNumber
-    ) private view returns (uint256 balance) {
+        uint256 epoch,
+        uint256 blockNumber,
+        uint256 duration
+    ) private view returns (uint256 element) {
+        SCDLL.List storage list = _balances[epoch][account].list;
+        element = list.head();
         unchecked {
-            balance = _bufferSlotBalance(account, fromEra, fromSlot, blockNumber);
-            // Go to the next slot. Increase the era if the slot is over the limit.
-            uint8 slotSizeCache = _getSlotPerEra();
-            fromSlot = (fromSlot + 1) % slotSizeCache;
-            if (fromSlot == 0) {
-                fromEra++;
-            }
-
-            // It is not possible if the fromEra is more than toEra.
-            if (fromEra == toEra) {
-                balance += _slotBalance(account, fromEra, fromSlot, toSlot);
-            } else {
-                // Keep it simple stupid first by spliting into 3 part then sum.
-                // Part1: calulate balance at fromEra in naive in naive way O(n)
-                uint8 maxSlotCache = slotSizeCache - 1;
-                balance += _slotBalance(account, fromEra, fromSlot, maxSlotCache);
-                // Part2: calulate balance betaween fromEra and toEra in naive way O(n)
-                for (uint256 era = fromEra + 1; era < toEra; era++) {
-                    balance += _slotBalance(account, era, 0, maxSlotCache);
+            while (blockNumber - element >= duration) {
+                if (element == 0) {
+                    break;
                 }
-                // Part3:calulate balance at toEra in navie way O(n)
-                balance += _slotBalance(account, toEra, 0, toSlot);
+                element = list.next(element);
             }
         }
     }
 
-    /// @notice Internal function to update token balances during token transfers or operations.
+    // @TODO
+    function _refreshBalanceAtEpoch(address account, uint256 epoch, uint256 blockNumber, uint256 duration) private {
+        Epoch storage _account = _balances[epoch][account];
+        if (_account.list.size() > 0) {
+            uint256 element = _account.list.head();
+            uint256 balance;
+            unchecked {
+                while (blockNumber - element >= duration) {
+                    if (element == 0) {
+                        break;
+                    }
+                    balance += _account.balances[element];
+                    element = _account.list.next(element);
+                }
+            }
+            if (balance > 0) {
+                _account.list.lazyShrink(element);
+                _account.totalBalance -= balance;
+            }
+        }
+    }
+
+    // @TODO
+    function _expired(uint256 epoch) internal view returns (bool) {
+        unchecked {
+            (uint256 fromEpoch, ) = _safeWindowRange(_blockNumberProvider());
+            if (epoch < fromEpoch) {
+                return true;
+            }
+        }
+    }
+
+    /// @notice Internal function to update token balances during token transfers with FIFO.
     /// @dev Handles various scenarios including minting, burning, and transferring tokens with expiration logic.
     /// @param from The address from which tokens are being transferred (or minted/burned).
     /// @param to The address to which tokens are being transferred (or burned to if `to` is `zero address`).
     /// @param value The amount of tokens being transferred, minted, or burned.
-    function _update(address from, address to, uint256 value) internal virtual {
-        uint256 blockNumberCache = _blockNumberProvider();
-        uint256 blockLengthCache = _getFrameSizeInBlockLength();
-        uint8 slotSizeCache = _getSlotPerEra();
-
+    function _update(uint256 blockNumber, address from, address to, uint256 value) private {
         if (from == address(0)) {
-            // Mint token.
-            (uint256 currentEra, uint8 currentSlot) = _calculateEraAndSlot(blockNumberCache);
-            Slot storage _recipient = _balances[to][currentEra][currentSlot];
+            // mint token to current epoch.
+            uint256 epoch = _epoch(blockNumber);
+            Epoch storage _recipient = _balances[epoch][to];
             unchecked {
-                _recipient.slotBalance += value;
-                _recipient.blockBalances[blockNumberCache] += value;
+                _recipient.totalBalance += value;
+                _recipient.balances[blockNumber] += value;
+                _worldStateBalances[blockNumber] += value;
             }
-            _recipient.list.insert(blockNumberCache, (""));
-            _worldBlockBalances[blockNumberCache] += value;
+            _recipient.list.insert(blockNumber);
         } else {
-            // Burn token.
-            (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
-            uint256 balance = _lookBackBalance(from, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
+            uint256 blockLengthCache = _getBlocksInWindow();
+            (uint256 fromEpoch, uint256 toEpoch) = _safeWindowRange(blockNumber);
+            _refreshBalanceAtEpoch(from, fromEpoch, blockNumber, blockLengthCache);
+            uint256 balance = _computeBalanceOverEpochRange(fromEpoch, toEpoch, from);
             if (balance < value) {
                 revert ERC20InsufficientBalance(from, balance, value);
             }
-
             uint256 pendingValue = value;
-            uint256 balanceCache = 0;
-
             if (to == address(0)) {
-                while ((fromEra < toEra || (fromEra == toEra && fromSlot <= toSlot)) && pendingValue > 0) {
-                    Slot storage _spender = _balances[from][fromEra][fromSlot];
-
-                    uint256 key = _locateUnexpiredBlockBalance(_spender.list, blockNumberCache, blockLengthCache);
-
-                    while (key > 0 && pendingValue > 0) {
-                        balanceCache = _spender.blockBalances[key];
-
-                        if (balanceCache <= pendingValue) {
+                // burn token from
+                while (fromEpoch <= toEpoch && pendingValue > 0) {
+                    Epoch storage _spender = _balances[fromEpoch][from];
+                    uint256 element = _spender.list.head();
+                    while (element > 0 && pendingValue > 0) {
+                        balance = _spender.balances[element];
+                        if (balance <= pendingValue) {
                             unchecked {
-                                pendingValue -= balanceCache;
-                                _spender.slotBalance -= balanceCache;
-                                _spender.blockBalances[key] -= balanceCache;
-                                _worldBlockBalances[key] -= balanceCache;
+                                pendingValue -= balance;
+                                _spender.totalBalance -= balance;
+                                _spender.balances[element] -= balance;
+                                _worldStateBalances[element] -= balance;
                             }
-                            key = _spender.list.next(key);
-                            _spender.list.remove(_spender.list.previous(key));
+                            element = _spender.list.next(element);
+                            _spender.list.remove(_spender.list.previous(element));
                         } else {
                             unchecked {
-                                _spender.slotBalance -= pendingValue;
-                                _spender.blockBalances[key] -= pendingValue;
-                                _worldBlockBalances[key] -= pendingValue;
+                                _spender.totalBalance -= pendingValue;
+                                _spender.balances[element] -= pendingValue;
+                                _worldStateBalances[element] -= pendingValue;
                             }
                             pendingValue = 0;
                         }
                     }
-
-                    // Go to the next slot. Increase the era if the slot is over the limit.
                     if (pendingValue > 0) {
-                        unchecked {
-                            fromSlot = (fromSlot + 1) % slotSizeCache;
-                            if (fromSlot == 0) {
-                                fromEra++;
-                            }
-                        }
+                        fromEpoch++;
                     }
                 }
             } else {
                 // Transfer token.
-                while ((fromEra < toEra || (fromEra == toEra && fromSlot <= toSlot)) && pendingValue > 0) {
-                    Slot storage _spender = _balances[from][fromEra][fromSlot];
-                    Slot storage _recipient = _balances[to][fromEra][fromSlot];
-
-                    uint256 key = _locateUnexpiredBlockBalance(_spender.list, blockNumberCache, blockLengthCache);
-
-                    while (key > 0 && pendingValue > 0) {
-                        balanceCache = _spender.blockBalances[key];
-
-                        if (balanceCache <= pendingValue) {
+                while (fromEpoch <= toEpoch && pendingValue > 0) {
+                    Epoch storage _spender = _balances[fromEpoch][from];
+                    Epoch storage _recipient = _balances[fromEpoch][to];
+                    uint256 element = _spender.list.head();
+                    while (element > 0 && pendingValue > 0) {
+                        balance = _spender.balances[element];
+                        if (balance <= pendingValue) {
                             unchecked {
-                                pendingValue -= balanceCache;
-                                _spender.slotBalance -= balanceCache;
-                                _spender.blockBalances[key] -= balanceCache;
-
-                                _recipient.slotBalance += balanceCache;
-                                _recipient.blockBalances[key] += balanceCache;
-                                _recipient.list.insert(key, (""));
+                                pendingValue -= balance;
+                                _spender.totalBalance -= balance;
+                                _spender.balances[element] -= balance;
+                                _recipient.totalBalance += balance;
+                                _recipient.balances[element] += balance;
                             }
-                            key = _spender.list.next(key);
-                            _spender.list.remove(_spender.list.previous(key));
+                            _recipient.list.insert(element);
+                            element = _spender.list.next(element);
+                            _spender.list.remove(_spender.list.previous(element));
                         } else {
                             unchecked {
-                                _spender.slotBalance -= pendingValue;
-                                _spender.blockBalances[key] -= pendingValue;
-
-                                _recipient.slotBalance += pendingValue;
-                                _recipient.blockBalances[key] += pendingValue;
+                                _spender.totalBalance -= pendingValue;
+                                _spender.balances[element] -= pendingValue;
+                                _recipient.totalBalance += pendingValue;
+                                _recipient.balances[element] += pendingValue;
                             }
-                            _recipient.list.insert(key, (""));
+                            _recipient.list.insert(element);
                             pendingValue = 0;
                         }
                     }
-
-                    // Go to the next slot. Increase the era if the slot is over the limit.
                     if (pendingValue > 0) {
-                        unchecked {
-                            fromSlot = (fromSlot + 1) % slotSizeCache;
-                            if (fromSlot == 0) {
-                                fromEra++;
-                            }
-                        }
+                        fromEpoch++;
                     }
                 }
             }
@@ -264,39 +229,24 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
         emit Transfer(from, to, value);
     }
 
-    /// @notice Retrieves the Slot storage for a given account, era, and slot.
-    /// @dev This function accesses the `_balances` mapping to return the Slot associated with the specified account, era, and slot.
-    /// @param account The address of the account whose slot is being queried.
-    /// @param fromEra The era during which the slot was created or updated.
-    /// @param fromSlot The slot identifier within the era for the account.
-    /// @return slot The storage reference to the Slot structure for the given account, era, and slot.
-    function _slotOf(address account, uint256 fromEra, uint8 fromSlot) internal view returns (Slot storage) {
-        return _balances[account][fromEra][fromSlot];
+    function _update(address from, address to, uint256 value) internal virtual {
+        _update(_blockNumberProvider(), from, to, value);
     }
 
-    /// @notice Finds the index of the first valid block balance in a sorted list of block numbers.
-    /// A block balance index is considered valid if the difference between the current blockNumber
-    /// and the block number at the index (key) is less than the expirationPeriodInBlockLength.
-    /// @dev This function is used to determine the first valid block balance index within a sorted circular doubly linked list.
-    /// It iterates through the list starting from the head and stops when it finds a valid index or reaches the end of the list.
-    /// @param list The sorted circular doubly linked list of block numbers.
-    /// @param blockNumber The current block number.
-    /// @param expirationPeriodInBlockLength The maximum allowed difference between blockNumber and the key.
-    /// @return key The index of the first valid block balance.
-    function _locateUnexpiredBlockBalance(
-        SCDLL.List storage list,
-        uint256 blockNumber,
-        uint256 expirationPeriodInBlockLength
-    ) internal view returns (uint256 key) {
-        key = list.head();
-        unchecked {
-            while (blockNumber - key >= expirationPeriodInBlockLength) {
-                if (key == 0) {
-                    break;
-                }
-                key = list.next(key);
-            }
+    // @TODO
+    function _updateAtEpoch(uint256 epoch, address from, address to, uint256 value) internal virtual {
+        uint256 blockNumber = _blockNumberProvider();
+        (uint256 fromEpoch, uint256 toEpoch) = _safeWindowRange(blockNumber);
+        if (epoch == toEpoch) {
+            _update(blockNumber, from, to, value);
+        } else if (epoch > toEpoch) {
+            // future
+        } else if (epoch < fromEpoch) {
+            // past
+        } else {
+            // between fromEpoch to toEpoch - 1
         }
+        emit Transfer(from, to, value);
     }
 
     /// @notice Mints new tokens to a specified account.
@@ -311,6 +261,14 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
         _update(address(0), account, value);
     }
 
+    // @TODO
+    function _mintToEpoch(uint256 epoch, address account, uint256 value) internal {
+        if (account == address(0)) {
+            revert ERC20InvalidReceiver(address(0));
+        }
+        _updateAtEpoch(epoch, address(0), account, value);
+    }
+
     /// @notice Burns a specified amount of tokens from an account.
     /// @dev This function updates the token balance by burning `value` amount of tokens from the `account`.
     /// Reverts if the `account` address is zero.
@@ -321,6 +279,14 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
             revert ERC20InvalidSender(address(0));
         }
         _update(account, address(0), value);
+    }
+
+    // @TODO
+    function _burnFromEpoch(uint256 epoch, address account, uint256 value) internal {
+        if (account == address(0)) {
+            revert ERC20InvalidSender(address(0));
+        }
+        _updateAtEpoch(epoch, account, address(0), value);
     }
 
     /// @notice Spends the specified allowance by reducing the allowance of the spender.
@@ -388,12 +354,27 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
         _update(from, to, value);
     }
 
+    function _transferAtEpoch(uint256 epoch, address from, address to, uint256 value) internal {
+        if (from == address(0)) {
+            revert ERC20InvalidSender(address(0));
+        }
+        if (to == address(0)) {
+            revert ERC20InvalidReceiver(address(0));
+        }
+        _updateAtEpoch(epoch, from, to, value);
+    }
+
     /// @notice Retrieves the total balance stored at a specific block.
-    /// @dev This function returns the balance of the given block from the internal `_worldBlockBalances` mapping.
+    /// @dev This function returns the balance of the given block from the internal `_worldStateBalances` mapping.
     /// @param blockNumber The block number for which the balance is being queried.
     /// @return balance The total balance stored at the given block number.
-    function getBlockBalance(uint256 blockNumber) external view virtual returns (uint256) {
-        return _worldBlockBalances[blockNumber];
+    function getWorldStateBalance(uint256 blockNumber) external view virtual returns (uint256) {
+        return _worldStateBalances[blockNumber];
+    }
+
+    /// @custom:gas-inefficiency if not limit the size of array
+    function tokenList(address account, uint256 epoch) external view virtual returns (uint256[] memory list) {
+        list = _balances[epoch][account].list.ascending();
     }
 
     /// @dev See {IERC20Metadata-name}.
@@ -422,9 +403,17 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
     /// @dev Calculates and returns the available balance based on the frame.
     /// @dev See {IERC20-balanceOf}.
     function balanceOf(address account) public view virtual returns (uint256) {
-        uint256 blockNumberCache = _blockNumberProvider();
-        (uint256 fromEra, uint256 toEra, uint8 fromSlot, uint8 toSlot) = _frame(blockNumberCache);
-        return _lookBackBalance(account, fromEra, toEra, fromSlot, toSlot, blockNumberCache);
+        uint256 blockNumber = _blockNumberProvider();
+        (uint256 fromEpoch, uint256 toEpoch) = _safeWindowRange(blockNumber);
+        uint256 balance = _computeBalanceAtEpoch(fromEpoch, account, blockNumber, _getBlocksInWindow());
+        if (fromEpoch == toEpoch) {
+            return balance;
+        }
+        if (fromEpoch < toEpoch) {
+            fromEpoch += 1;
+        }
+        balance += _computeBalanceOverEpochRange(fromEpoch, toEpoch, account);
+        return balance;
     }
 
     /// @dev See {IERC20-allowance}.
@@ -455,17 +444,75 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC7818, SlidingWindow
     }
 
     /// @inheritdoc IERC7818
-    function tokenList(address account, uint256 era, uint8 slot) external view virtual returns (uint256[] memory list) {
-        list = _balances[account][era][slot].list.ascending();
+    function balanceOfAtEpoch(uint256 epoch, address account) external view returns (uint256) {
+        uint256 blockNumber = _blockNumberProvider();
+        (uint256 fromEpoch, uint256 toEpoch) = _safeWindowRange(blockNumber);
+        if (epoch < fromEpoch || epoch > toEpoch) {
+            return 0;
+        }
+        if (epoch == fromEpoch) {
+            return _computeBalanceAtEpoch(epoch, account, blockNumber, _getBlocksInWindow());
+        }
+        return _balances[epoch][account].totalBalance;
     }
 
     /// @inheritdoc IERC7818
-    function balanceOfBlock(uint256 blockNumber) public view virtual returns (uint256) {
-        return _worldBlockBalances[blockNumber];
+    function currentEpoch() public view virtual returns (uint256) {
+        return _epoch(_blockNumberProvider());
     }
 
     /// @inheritdoc IERC7818
-    function expiryDuration() public view virtual returns (uint256) {
-        return _getFrameSizeInBlockLength();
+    function epochLength() public view virtual returns (uint256) {
+        return _getBlocksPerEpoch();
+    }
+
+    /// @inheritdoc IERC7818
+    /// @dev unit in number of blocks.
+    function epochType() public pure returns (EPOCH_TYPE) {
+        return IERC7818.EPOCH_TYPE.BLOCKS_BASED;
+    }
+
+    /// @inheritdoc IERC7818
+    function validityDuration() public view virtual returns (uint256) {
+        return _getWindowSize();
+    }
+
+    /// @inheritdoc IERC7818
+    function isEpochExpired(uint256 id) public view virtual returns (bool) {
+        return _expired(id);
+    }
+
+    /// @inheritdoc IERC7818
+    function transferAtEpoch(uint256 epoch, address to, uint256 value) public virtual returns (bool) {
+        if (_expired(epoch)) {
+            revert ERC7818TransferredExpiredToken();
+        }
+        address owner = _msgSender();
+        _transferAtEpoch(epoch, owner, to, value);
+        return true;
+    }
+
+    /// @inheritdoc IERC7818
+    function transferFromAtEpoch(uint256 epoch, address from, address to, uint256 value) public virtual returns (bool) {
+        if (_expired(epoch)) {
+            revert ERC7818TransferredExpiredToken();
+        }
+        address spender = _msgSender();
+        _spendAllowance(from, spender, value);
+        _transferAtEpoch(epoch, from, to, value);
+        return true;
+    }
+
+    /// @inheritdoc IERC7818NearestExpiryQuery
+    // solc-ignore-next-line unused-call-retval
+    function getNearestExpiryOf(address account) public view virtual returns (uint256, uint256) {
+        uint256 blockNumber = _blockNumberProvider();
+        uint256 epoch = _epoch(blockNumber);
+        uint256 duration = _getBlocksInWindow();
+        blockNumber = _findValidBalance(account, epoch, blockNumber, duration);
+        if (blockNumber != 0) {
+            Epoch storage _account = _balances[epoch][account];
+            return (_account.balances[blockNumber], blockNumber + duration);
+        }
     }
 }

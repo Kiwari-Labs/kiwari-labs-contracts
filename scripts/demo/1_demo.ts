@@ -2,7 +2,7 @@ import {mine} from "@nomicfoundation/hardhat-network-helpers";
 import {parseEther} from "ethers/lib/utils";
 import {network, ethers} from "hardhat";
 
-// @TODO before demostrate.
+// @TODO before demonstrate.
 // import alice private key to wallet.
 // import bob private key to wallet.
 // start local network with 'npx hardhat node'.
@@ -50,7 +50,7 @@ async function main() {
   //   console.log("bobBalance:", bobBalance.toString());
   //   const aliceBalanceAfter = await erc20exp["balanceOf(address)"](aliceAddress);
   //   console.log("aliceBalanceAfter:", aliceBalanceAfter.toString());
-  //   const era = await erc20exp.blockPerEra();
+  //   const epoch = await erc20exp.blockPerEpoch();
   //   await network.provider.send("hardhat_mine", [10000000]);
   //   console.log("skip to expire block");
   //   console.log("currentBlock:", await ethers.provider.getBlockNumber());
