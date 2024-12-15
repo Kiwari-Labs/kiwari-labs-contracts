@@ -11,9 +11,9 @@ abstract contract AbstractBLSW {
 
     slide.Window private _window;
 
-    constructor(uint256 blockNumber_, uint40 blockTime_, uint8 windowSize_, bool safe_) {
-        _window.initializedBlock(blockNumber_ != 0 ? blockNumber_ : _blockNumberProvider());
-        _updateSlidingWindow(blockTime_, windowSize_, safe_);
+    constructor(uint256 startBlockNumber_, uint40 blocksPerEpoch_, uint8 windowSize_, bool safe_) {
+        _window.initializedBlock(startBlockNumber_ != 0 ? startBlockNumber_ : _blockNumberProvider());
+        _updateSlidingWindow(blocksPerEpoch_, windowSize_, safe_);
     }
 
     /// @notice for support both Layer 1 (L1) and Layer 2 (L2) networks.
@@ -21,8 +21,8 @@ abstract contract AbstractBLSW {
         return block.number; // default
     }
 
-    function _updateSlidingWindow(uint40 blockTime, uint8 windowSize, bool safe) internal {
-        _window.initializedState(blockTime, windowSize, safe);
+    function _updateSlidingWindow(uint40 blocksPerEpoch, uint8 windowSize, bool safe) internal {
+        _window.initializedState(blocksPerEpoch, windowSize, safe);
         // emit
     }
 

@@ -32,18 +32,18 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
     /// @dev Initializes the token contract by setting the name, symbol, and initializing the sliding window parameters.
     /// @param name_ The name of the token.
     /// @param symbol_ The symbol of the token.
-    /// @param blockNumber_ The starting block number for the sliding window.
-    /// @param blockTime_ The duration of each block in milliseconds.
+    /// @param startBlockNumber_ TODO:
+    /// @param blocksPerEpoch_ TODO:
     /// @param windowSize_ The window size.
     /// @param development_ The development mode flag.
     constructor(
         string memory name_,
         string memory symbol_,
-        uint256 blockNumber_,
-        uint40 blockTime_,
+        uint256 startBlockNumber_,
+        uint40 blocksPerEpoch_,
         uint8 windowSize_,
         bool development_
-    ) BLSW(blockNumber_, blockTime_, windowSize_, development_) {
+    ) BLSW(startBlockNumber_, blocksPerEpoch_, windowSize_, development_) {
         _name = name_;
         _symbol = symbol_;
     }

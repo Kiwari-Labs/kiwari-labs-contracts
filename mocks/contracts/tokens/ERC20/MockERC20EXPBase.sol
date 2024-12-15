@@ -7,9 +7,9 @@ contract MockERC20EXPBase is ERC20EXPBase {
     constructor(
         string memory _name,
         string memory _symbol,
-        uint40 blockTime_,
+        uint40 blocksPerEpoch_,
         uint8 windowSize_
-    ) ERC20EXPBase(_name, _symbol, block.number, blockTime_, windowSize_, false) {}
+    ) ERC20EXPBase(_name, _symbol, block.number, blocksPerEpoch_, windowSize_, false) {}
 
     function mint(address to, uint256 value) public {
         _mint(to, value);

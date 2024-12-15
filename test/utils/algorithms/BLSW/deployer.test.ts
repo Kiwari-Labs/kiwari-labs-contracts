@@ -1,12 +1,12 @@
 import {ethers} from "hardhat";
 import {BLSWLibrary, constants} from "../../../constant.test";
-import {NumberLike} from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
+import {MockBLSW} from "../../../../typechain-types/mocks/contracts/utils";
 
 export interface Window {
-  _blocksPerEpoch: NumberLike;
-  _blocksPerWindow: NumberLike;
-  _windowSize: NumberLike;
-  _initialBlockNumber: NumberLike;
+  _blocksPerEpoch: number;
+  _blocksPerWindow: number;
+  _windowSize: number;
+  _initialBlockNumber: number;
 }
 
 export const calculateSlidingWindowState = function ({
@@ -35,9 +35,19 @@ export const deployBLSW = async function ({
   windowSize = constants.WINDOW_SIZE,
   development = false,
 }) {
+  const self = calculateSlidingWindowState({
+    startBlockNumber,
+    blockTime,
+    windowSize,
+  });
   const [deployer, alice, bob, charlie] = await ethers.getSigners();
   const BLSW = await ethers.getContractFactory(BLSWLibrary.name, deployer);
-  const slidingWindow = await BLSW.deploy(startBlockNumber, blockTime, windowSize, development);
+  const slidingWindow = (await BLSW.deploy(
+    self._initialBlockNumber,
+    self._blocksPerEpoch,
+    self._windowSize,
+    development,
+  )) as any as MockBLSW;
   await slidingWindow.waitForDeployment();
 
   return {
