@@ -14,16 +14,16 @@ library TLSW {
         uint256 initialTimestamp;
         uint40 secondsPerEpoch;
         uint40 secondsPerWindow;
-        uint8 windowSize;
+        uint8 epochsPerWindow;
     }
 
     error InvalidDuration();
     error InvalidWindowSize();
 
-    function _computeEpoch(uint256 initialTimestamp, uint256 currentTime, uint256 duration) private pure returns (uint256 current) {
+    function _computeEpoch(uint256 initialTimestamp, uint256 currentTime, uint256 secondsPerEpoch) private pure returns (uint256 current) {
         assembly {
             if and(gt(currentTime, initialTimestamp), gt(initialTimestamp, 0)) {
-                current := div(sub(currentTime, initialTimestamp), duration)
+                current := div(sub(currentTime, initialTimestamp), secondsPerEpoch)
             }
         }
     }
@@ -31,13 +31,13 @@ library TLSW {
     function _computeEpochRange(
         uint256 initialTimestamp,
         uint256 currentTime,
-        uint256 duration,
+        uint256 secondsPerEpoch,
         uint256 windowSize,
         bool safe
     ) private pure returns (uint256 fromEpoch, uint256 toEpoch) {
         assembly {
             if and(gt(currentTime, initialTimestamp), gt(initialTimestamp, 0)) {
-                toEpoch := div(sub(currentTime, initialTimestamp), duration)
+                toEpoch := div(sub(currentTime, initialTimestamp), secondsPerEpoch)
             }
 
             let from := sub(toEpoch, windowSize)
@@ -61,7 +61,7 @@ library TLSW {
     }
 
     function windowSize(Window storage self) internal view returns (uint8) {
-        return self.windowSize;
+        return self.epochsPerWindow;
     }
 
     function epoch(Window storage self, uint256 currentTime) internal view returns (uint256) {
@@ -69,12 +69,12 @@ library TLSW {
     }
 
     function windowRange(Window storage self, uint256 currentTime) internal view returns (uint256, uint256) {
-        return _computeEpochRange(self.initialTimestamp, currentTime, self.secondsPerEpoch, self.windowSize, false);
+        return _computeEpochRange(self.initialTimestamp, currentTime, self.secondsPerEpoch, self.epochsPerWindow, false);
     }
 
     /// @notice buffering 1 `epoch` for ensure
     function safeWindowRange(Window storage self, uint256 currentTime) internal view returns (uint256, uint256) {
-        return _computeEpochRange(self.initialTimestamp, currentTime, self.secondsPerEpoch, self.windowSize, true);
+        return _computeEpochRange(self.initialTimestamp, currentTime, self.secondsPerEpoch, self.epochsPerWindow, true);
     }
 
     /// @custom:truncate https://docs.soliditylang.org/en/latest/types.html#division
@@ -90,7 +90,7 @@ library TLSW {
         unchecked {
             self.secondsPerEpoch = secondsPerEpoch;
             self.secondsPerWindow = secondsPerEpoch * windowSize;
-            self.windowSize = windowSize;
+            self.epochsPerWindow = windowSize;
         }
     }
 
