@@ -12,7 +12,7 @@ library BLSW {
         uint256 initialBlockNumber;
         uint40 blocksPerEpoch;
         uint40 blocksPerWindow;
-        uint8 epochsPerWindow;
+        uint8 windowSize;
     }
 
     error InvalidWindowSize();
@@ -58,7 +58,7 @@ library BLSW {
     }
 
     function windowSize(Window storage self) internal view returns (uint8) {
-        return self.epochsPerWindow;
+        return self.windowSize;
     }
 
     function epoch(Window storage self, uint256 blockNumber) internal view returns (uint256) {
@@ -66,12 +66,12 @@ library BLSW {
     }
 
     function windowRange(Window storage self, uint256 blockNumber) internal view returns (uint256, uint256) {
-        return _computeEpochRange(self.initialBlockNumber, blockNumber, self.blocksPerEpoch, self.epochsPerWindow, false);
+        return _computeEpochRange(self.initialBlockNumber, blockNumber, self.blocksPerEpoch, self.windowSize, false);
     }
 
     /// @notice buffering 1 `epoch` for ensure
     function safeWindowRange(Window storage self, uint256 blockNumber) internal view returns (uint256, uint256) {
-        return _computeEpochRange(self.initialBlockNumber, blockNumber, self.blocksPerEpoch, self.epochsPerWindow, true);
+        return _computeEpochRange(self.initialBlockNumber, blockNumber, self.blocksPerEpoch, self.windowSize, true);
     }
 
     /// @custom:truncate https://docs.soliditylang.org/en/latest/types.html#division
@@ -84,7 +84,7 @@ library BLSW {
         unchecked {
             self.blocksPerEpoch = blocksPerEpoch;
             self.blocksPerWindow = blocksPerEpoch * windowSize;
-            self.epochsPerWindow = windowSize;
+            self.windowSize = windowSize;
         }
     }
 
