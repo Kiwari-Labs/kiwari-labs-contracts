@@ -14,28 +14,6 @@ export const constants = {
   YEAR_IN_MILLISECONDS: 31_556_926_000,
 };
 
-export const AgreementBase = {
-  name: "MockAgreementBase",
-  constructor: {
-    name: "MockAgreement",
-  },
-  errors: {
-    AgreementFailed: "AgreementFailed",
-  },
-  events: {
-    AgreementComplete: "AgreementComplete",
-    BumpMajorVersion: "BumpMajorVersion",
-    BumpMinorVersion: "BumpMinorVersion",
-    BumpPatchVersion: "BumpPatchVersion",
-  },
-};
-
-export const BilateralAgreementBase = {
-  name: "MockBilateralAgreementBase",
-  errors: {},
-  events: {},
-};
-
 export const SlidingWindow = {
   name: "MockSlidingWindow",
   errors: {
@@ -48,12 +26,6 @@ export const SlidingWindow = {
 export const LightWeightSlidingWindow = {
   name: "MockLightWeightSlidingWindow",
   errors: {...SlidingWindow.errors},
-  events: {},
-};
-
-export const AgreementBaseForBilateral = {
-  name: "MockAgreementBaseForBilateral",
-  errors: {},
   events: {},
 };
 
@@ -165,11 +137,8 @@ export const Comparator = {
 
 export const contracts = {
   abstracts: {
-    AgreementBase,
-    BilateralAgreementBase,
     SlidingWindow,
     LightWeightSlidingWindow,
-    AgreementBaseForBilateral,
   },
   tokens: {
     ERC20,
