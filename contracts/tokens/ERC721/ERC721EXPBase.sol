@@ -19,23 +19,27 @@ abstract contract ERC721EXPBase is ERC721Enumerable, IERC5007 {
 
     /// @notice internal checking before transfer
     function _validation(uint256 tokenId) internal view returns (bool) {
+        address owner = _ownerOf(tokenId);
+        if (owner == address(0)) {
+            return false;
+        }
         Timestamp memory timestamp = _tokensTimestamp[tokenId];
         uint64 current = uint64(block.timestamp);
-        // if start and end is 0,0 mean token non-expirable and return true
         if (timestamp.start == 0 && timestamp.end == 0) {
+            // if start and end is 0,0 mean token non-expirable and return true
             return true;
-        }
-        // between start and end valid and return true
-        if (current > timestamp.start || current < timestamp.end) {
+        } else if (current > timestamp.start || current < timestamp.end) {
+            // between start and end valid and return true
             return true;
+        } else {
+            // other case return false
+            return false;
         }
-        // other case return false
-        return false;
     }
 
     function _updateTimestamp(uint256 tokenId, uint64 start, uint64 end) internal {
         if (start <= end) {
-            // revert ERC500&InvalidTime()
+            // revert ERC5007InvalidTime()
         }
         _tokensTimestamp[tokenId].start = start;
         _tokensTimestamp[tokenId].end = end;
@@ -47,8 +51,15 @@ abstract contract ERC721EXPBase is ERC721Enumerable, IERC5007 {
     }
 
     // @TODO override update _validation before super._update()
+    function _update(address to, uint256 tokenId, address auth) internal virtual override returns (address) {
+        if (_validation(tokenId)) {
+            return super._update(to, tokenId, auth);
+        } else {
+            revert ERC5007TransferredInvalidToken();
+        }
+    }
 
-    /// @notice Returns 0 as there is no actual total supply due to token expiration.
+    /// @notice Returns 0 as there is no actual total supply due to limitation to track on-chain.
     function totalSupply() public view virtual override returns (uint256) {
         return 0;
     }
@@ -66,4 +77,12 @@ abstract contract ERC721EXPBase is ERC721Enumerable, IERC5007 {
     // @TODO function support interface
 
     // @TODO other useful function like isTokenValid
+    function isTokenValid(uint256 tokenId) public view returns (bool) {
+        address owner = _ownerOf(tokenId);
+        if (owner != address(0)) {
+            return _validation(tokenId);
+        } else {
+            return false;
+        }
+    }
 }

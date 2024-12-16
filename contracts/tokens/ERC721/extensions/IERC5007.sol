@@ -6,6 +6,9 @@
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 interface IERC5007 is IERC721 {
+
+    error ERC5007TransferredInvalidToken();
+
     /// @param tokenId The id of the token.
     /// @dev Retrieve the start time of the NFT as a UNIX timestamp.
     /// @return uint64 Returns the start time in unix timestamp.
