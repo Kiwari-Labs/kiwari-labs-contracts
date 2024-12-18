@@ -128,7 +128,7 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
     // @TODO
     function _expired(uint256 epoch) internal view returns (bool) {
         unchecked {
-            (uint256 fromEpoch, ) = _safeWindowRange(_blockNumberProvider());
+            (uint256 fromEpoch, ) = _windowRage(_blockNumberProvider());
             if (epoch < fromEpoch) {
                 return true;
             }
@@ -153,7 +153,7 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
             _recipient.list.insert(blockNumber);
         } else {
             uint256 blockLengthCache = _getBlocksInWindow();
-            (uint256 fromEpoch, uint256 toEpoch) = _safeWindowRange(blockNumber);
+            (uint256 fromEpoch, uint256 toEpoch) = _windowRage(blockNumber);
             _refreshBalanceAtEpoch(from, fromEpoch, blockNumber, blockLengthCache);
             uint256 balance = _computeBalanceOverEpochRange(fromEpoch, toEpoch, from);
             if (balance < value) {
@@ -236,7 +236,7 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
     // @TODO
     function _updateAtEpoch(uint256 epoch, address from, address to, uint256 value) internal virtual {
         uint256 blockNumber = _blockNumberProvider();
-        (uint256 fromEpoch, uint256 toEpoch) = _safeWindowRange(blockNumber);
+        (uint256 fromEpoch, uint256 toEpoch) = _windowRage(blockNumber);
         if (epoch == toEpoch) {
             _update(blockNumber, from, to, value);
         } else if (epoch > toEpoch) {
@@ -404,7 +404,7 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
     /// @dev See {IERC20-balanceOf}.
     function balanceOf(address account) public view virtual returns (uint256) {
         uint256 blockNumber = _blockNumberProvider();
-        (uint256 fromEpoch, uint256 toEpoch) = _safeWindowRange(blockNumber);
+        (uint256 fromEpoch, uint256 toEpoch) = _windowRage(blockNumber);
         uint256 balance = _computeBalanceAtEpoch(fromEpoch, account, blockNumber, _getBlocksInWindow());
         if (fromEpoch == toEpoch) {
             return balance;
@@ -446,7 +446,7 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
     /// @inheritdoc IERC7818
     function balanceOfAtEpoch(uint256 epoch, address account) external view returns (uint256) {
         uint256 blockNumber = _blockNumberProvider();
-        (uint256 fromEpoch, uint256 toEpoch) = _safeWindowRange(blockNumber);
+        (uint256 fromEpoch, uint256 toEpoch) = _windowRage(blockNumber);
         if (epoch < fromEpoch || epoch > toEpoch) {
             return 0;
         }
