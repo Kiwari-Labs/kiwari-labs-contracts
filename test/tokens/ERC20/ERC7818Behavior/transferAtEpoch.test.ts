@@ -1,7 +1,14 @@
 import {expect} from "chai";
 import {deployERC20EXPBase} from "../base/deployer.test";
-import {ERC20, constants} from "../../../constant.test";
-import {ethers, hardhat_impersonate, hardhat_reset, hardhat_setBalance, hardhat_stopImpersonating} from "../../../utils.test";
+import {ERC20, ERC7818, constants} from "../../../constant.test";
+import {
+  ethers,
+  hardhat_impersonate,
+  hardhat_mine,
+  hardhat_reset,
+  hardhat_setBalance,
+  hardhat_stopImpersonating,
+} from "../../../utils.test";
 
 export const run = async () => {
   describe("TransferAtEpoch", async function () {
@@ -45,6 +52,27 @@ export const run = async () => {
       await expect(erc20exp.connect(alice).transferAtEpoch(epoch, constants.ZERO_ADDRESS, amount))
         .to.be.revertedWithCustomError(erc20exp, ERC20.errors.ERC20InvalidReceiver)
         .withArgs(constants.ZERO_ADDRESS);
+    });
+
+    it("[FAILED] transferAtEpoch with expired epoch", async function () {
+      const {erc20exp, alice, bob} = await deployERC20EXPBase({});
+      await erc20exp.mint(alice.address, amount);
+
+      const epochLength = await erc20exp.epochLength();
+      const duration = await erc20exp.validityDuration();
+
+      await hardhat_mine(epochLength * duration + epochLength);
+
+      await expect(erc20exp.connect(alice).transferAtEpoch(0, bob.address, amount)).to.be.revertedWithCustomError(
+        erc20exp,
+        ERC7818.errors.ERC7818TransferredExpiredToken,
+      );
+
+      expect(await erc20exp.balanceOf(alice.address)).to.equal(0);
+      expect(await erc20exp.balanceOf(bob.address)).to.equal(0);
+
+      expect(await erc20exp.balanceOfAtEpoch(0, alice.address)).to.equal(0);
+      expect(await erc20exp.balanceOfAtEpoch(0, bob.address)).to.equal(0);
     });
 
     // it("[SUCCESS] transfer single large token correctly", async function () {

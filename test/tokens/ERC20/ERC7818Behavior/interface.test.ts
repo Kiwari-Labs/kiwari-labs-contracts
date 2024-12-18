@@ -42,14 +42,15 @@ export const run = async () => {
       const {erc20exp} = await deployERC20EXPBase({});
       const epochLength = await erc20exp.epochLength();
       const duration = await erc20exp.validityDuration();
-      expect(await erc20exp.isEpochExpired(0)).to.equal(false);
+
       await hardhat_mine(epochLength * duration);
+      expect(await erc20exp.isEpochExpired(0)).to.equal(false);
 
       /* buffer 1 epoch */
-      await hardhat_mine(epochLength);
+      await hardhat_mine(epochLength - 1n);
       expect(await erc20exp.isEpochExpired(0)).to.equal(false);
 
-      await hardhat_mine(epochLength);
+      await hardhat_mine(1n);
       expect(await erc20exp.isEpochExpired(0)).to.equal(true);
     });
 
