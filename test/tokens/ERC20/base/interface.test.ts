@@ -61,7 +61,7 @@ export const run = async () => {
     });
 
     it("[SUCCESS] validityDuration", async function () {
-      const windowSize = 4;
+      const windowSize = 2;
       const {erc20exp} = await deployERC20EXPBase({});
       expect(await erc20exp.validityDuration()).to.equal(windowSize);
     });

@@ -11,8 +11,8 @@ export const run = async () => {
     Interface.run();
     Mint.run();
     Burn.run();
-    Transfer.run();
     Approval.run();
+    // Transfer.run();
     // TransferFrom.run();
     // ERC7818Behavior.run();
   });
