@@ -1,6 +1,5 @@
 import {ethers} from "hardhat";
 import {constants, ERC20EXPBase} from "../../../constant.test";
-import {calculateSlidingWindowState} from "../../../utils/algorithms/BLSW/deployer.test";
 import {MockERC20EXPBase} from "../../../../typechain-types/mocks/contracts/tokens/ERC20";
 
 export const deployERC20EXPBase = async function ({

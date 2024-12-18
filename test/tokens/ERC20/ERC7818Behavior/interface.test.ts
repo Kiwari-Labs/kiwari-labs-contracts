@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {hardhat_latestBlock, hardhat_mine, hardhat_reset} from "../../../utils.test";
-import {deployERC20EXPBase} from "./deployer.test";
+import {deployERC20EXPBase} from "../base/deployer.test";
 import {ERC20EXPBase} from "../../../constant.test";
 import {calculateSlidingWindowState} from "../../../utils/algorithms/BLSW/deployer.test";
 

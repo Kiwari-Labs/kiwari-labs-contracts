@@ -55,6 +55,13 @@ export const AgreementBaseForBilateral = {
   events: {},
 };
 
+export const ERC7818 = {
+  errors: {
+    ERC7818TransferredExpiredToken: "ERC7818TransferredExpiredToken",
+  },
+  events: {},
+};
+
 export const ERC20 = {
   errors: {
     ERC20InsufficientBalance: "ERC20InsufficientBalance",

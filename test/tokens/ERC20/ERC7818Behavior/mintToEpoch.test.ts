@@ -1,23 +1,24 @@
 import {expect} from "chai";
 import {hardhat_latestBlock, hardhat_reset} from "../../../utils.test";
-import {deployERC20EXPBase} from "./deployer.test";
+import {deployERC20EXPBase} from "../base/deployer.test";
 import {ERC20, constants} from "../../../constant.test";
 
 export const run = async () => {
-  describe("Mint", async function () {
+  describe("MintToEpoch", async function () {
     const amount = 1;
 
     afterEach(async function () {
       await hardhat_reset();
     });
 
-    it("[SUCCESS] mint", async function () {
+    it("[SUCCESS] mintToEpoch", async function () {
       const {erc20exp, alice} = await deployERC20EXPBase({});
-      await expect(erc20exp.mint(alice.address, amount))
+      const epoch = await erc20exp.currentEpoch();
+
+      await expect(erc20exp.mintToEpoch(epoch, alice.address, amount))
         .to.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(constants.ZERO_ADDRESS, alice.address, amount);
 
-      const epoch = await erc20exp.currentEpoch();
       const latestBlock = await hardhat_latestBlock();
       expect(await erc20exp.balanceOf(alice.address)).to.equal(amount);
       expect(await erc20exp.balanceOfAtEpoch(epoch, alice.address)).to.equal(amount);
@@ -28,9 +29,10 @@ export const run = async () => {
       expect(list[0]).to.equal(latestBlock);
     });
 
-    it("[FAILED] mint to zero address", async function () {
+    it("[FAILED] mintToEpoch to zero address", async function () {
       const {erc20exp} = await deployERC20EXPBase({});
-      await expect(erc20exp.mint(constants.ZERO_ADDRESS, amount))
+      const epoch = await erc20exp.currentEpoch();
+      await expect(erc20exp.mintToEpoch(epoch, constants.ZERO_ADDRESS, amount))
         .to.be.revertedWithCustomError(erc20exp, ERC20.errors.ERC20InvalidReceiver)
         .withArgs(constants.ZERO_ADDRESS);
     });
