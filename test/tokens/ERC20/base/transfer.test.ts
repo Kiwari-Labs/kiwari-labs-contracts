@@ -1,7 +1,8 @@
 import {expect} from "chai";
 import {deployERC20EXPBase} from "./deployer.test";
 import {ERC20, constants} from "../../../constant.test";
-import {hardhat_reset} from "../../../utils.test";
+import {ethers, hardhat_impersonate, hardhat_reset, hardhat_setBalance, hardhat_stopImpersonating} from "../../../utils.test";
+import {parseEther} from "ethers";
 
 export const run = async () => {
   describe("Transfer", async function () {
@@ -115,6 +116,35 @@ export const run = async () => {
     //   expect(epoch).to.equal(3);
     //   expect(await erc20exp.balanceOf(bob.address)).to.equal(0);
     // });
+
+    it("[FAILED] transfer with invalid sender", async function () {
+      const {erc20exp, alice} = await deployERC20EXPBase({});
+
+      await hardhat_setBalance(constants.ZERO_ADDRESS, parseEther("10000.0").toString());
+      await hardhat_impersonate(constants.ZERO_ADDRESS);
+      const signer = await ethers.getImpersonatedSigner(constants.ZERO_ADDRESS);
+
+      await expect(erc20exp.connect(signer).transfer(alice.address, amount))
+        .to.be.revertedWithCustomError(erc20exp, ERC20.errors.ERC20InvalidSender)
+        .withArgs(constants.ZERO_ADDRESS);
+
+      await hardhat_stopImpersonating(constants.ZERO_ADDRESS);
+    });
+
+    it("[FAILED] transferAtEpoch with invalid sender", async function () {
+      const {erc20exp, alice} = await deployERC20EXPBase({});
+
+      await hardhat_setBalance(constants.ZERO_ADDRESS, parseEther("10000.0").toString());
+      await hardhat_impersonate(constants.ZERO_ADDRESS);
+      const signer = await ethers.getImpersonatedSigner(constants.ZERO_ADDRESS);
+
+      const epoch = await erc20exp.currentEpoch();
+      await expect(erc20exp.connect(signer).transferAtEpoch(epoch, alice.address, amount))
+        .to.be.revertedWithCustomError(erc20exp, ERC20.errors.ERC20InvalidSender)
+        .withArgs(constants.ZERO_ADDRESS);
+
+      await hardhat_stopImpersonating(constants.ZERO_ADDRESS);
+    });
 
     it("[FAILED] transfer with invalid receiver", async function () {
       const {erc20exp, alice} = await deployERC20EXPBase({});
