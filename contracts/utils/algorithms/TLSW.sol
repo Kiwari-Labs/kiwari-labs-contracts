@@ -7,8 +7,8 @@ pragma solidity >=0.8.0 <0.9.0;
 library TLSW {
     uint8 private constant MINIMUM_WINDOW_SIZE = 0x01; // 1 epoch
     uint8 private constant MAXIMUM_WINDOW_SIZE = 0x20; // 32 epoch
-    uint40 private constant MINIMUM_DURATION = 0xE10; // 3_600 sec
-    uint40 private constant MAXIMUM_DURATION = 0x1E1853E; // 31_556_926 sec
+    uint40 private constant MINIMUM_DURATION = 0x0E10; // 3_600 sec
+    uint40 private constant MAXIMUM_DURATION = 0x01E1853E; // 31_556_926 sec
 
     struct Window {
         uint256 initialTimestamp;

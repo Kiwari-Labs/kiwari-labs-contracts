@@ -7,8 +7,8 @@ pragma solidity >=0.8.0 <0.9.0;
 library BLSW {
     uint8 private constant MINIMUM_WINDOW_SIZE = 0x01; // 1 epoch
     uint8 private constant MAXIMUM_WINDOW_SIZE = 0x20; // 32 epoch
-    uint40 private constant MINIMUM_DURATION = 0x64; // 100 blocks
-    uint40 private constant MAXIMUM_DURATION = 0x250A74; // 2_427_508 blocks
+    uint40 private constant MINIMUM_DURATION = 0x012C; // 300 blocks
+    uint40 private constant MAXIMUM_DURATION = 0x282070; // 2_629_744 blocks
 
     struct Window {
         uint256 initialBlockNumber;

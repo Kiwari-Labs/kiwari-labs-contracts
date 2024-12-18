@@ -3,14 +3,12 @@ import {MaxUint256, ZeroAddress} from "ethers";
 export const constants = {
   MAX_UINT256: MaxUint256,
   ZERO_ADDRESS: ZeroAddress,
-  BLOCK_TIME: 250,
-  WINDOW_SIZE: 4,
-  BLOCKS_IN_EPOCH: 0,
-  BLOCKS_IN_WINDOW: 0,
+  DEFAULT_BLOCKS_PER_EPOCH: 300,
+  DEFAULT_WINDOW_SIZE: 4,
   MIN_WINDOW_SIZE: 1,
   MAX_WINDOW_SIZE: 32,
-  MIN_BLOCK_TIME: 100,
-  MAX_BLOCK_TIME: 600_000,
+  MIN_BLOCKS_PER_EPOCH: 300,
+  MAX_BLOCKS_PER_EPOCH: 2_629_744,
   YEAR_IN_MILLISECONDS: 31_556_926_000,
 };
 
@@ -39,7 +37,7 @@ export const BilateralAgreementBase = {
 export const SlidingWindow = {
   name: "MockSlidingWindow",
   errors: {
-    InvalidBlockTime: "InvalidBlockTime",
+    InvalidDuration: "InvalidDuration",
     InvalidWindowSize: "InvalidWindowSize",
   },
   events: {},
