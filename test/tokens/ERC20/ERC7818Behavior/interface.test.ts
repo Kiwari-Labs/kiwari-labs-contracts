@@ -88,5 +88,13 @@ export const run = async () => {
       expect(balance).to.equal(1);
       expect(expiry).to.equal(latestBlock + blocksInWindow);
     });
+
+    /* @notice additional function from ERC7818 */
+    it("[SUCCESS] getNearestExpiryOf with empty epoch", async function () {
+      const {erc20exp, alice} = await deployERC20EXPBase({});
+      const [balance, expiry] = await erc20exp.getNearestExpiryOf(alice.address);
+      expect(balance).to.equal(0);
+      expect(expiry).to.equal(0);
+    });
   });
 };

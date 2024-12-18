@@ -13,7 +13,6 @@ export const hardhat_mine = async function (blocks: NumberLike, options: {interv
 
 export const hardhat_reset = async function () {
   await network.provider.send("hardhat_reset");
-  await hardhat_mine(1); // start at block 1.
 };
 
 export const hardhat_impersonate = async function (address: AddressLike) {
@@ -34,7 +33,7 @@ export const hardhat_stopImpersonating = async function (address: AddressLike) {
   });
 };
 
-export const skipToBlock = async function (target: number) {
+export const hardhat_skipToBlock = async function (target: number) {
   await hardhat_mine(target - (await time.latestBlock()));
 };
 
