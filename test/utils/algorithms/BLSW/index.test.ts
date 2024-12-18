@@ -4,7 +4,7 @@ import * as WindowRange from "./windowRange.test";
 import * as SafeWindowRange from "./safeWindowRange.test";
 
 export const run = async () => {
-  describe.only("Block-based Lazy Sliding Window (BLSW)", async function () {
+  describe("Block-based Lazy Sliding Window (BLSW)", async function () {
     General.run();
     Epoch.run();
     WindowRange.run();
