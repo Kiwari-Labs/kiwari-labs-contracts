@@ -15,15 +15,7 @@ contract MockERC20EXPBase is ERC20EXPBase {
         _mint(to, value);
     }
 
-    function mintToEpoch(uint256 epoch, address account, uint256 value) public {
-        _mintToEpoch(epoch, account, value);
-    }
-
     function burn(address from, uint256 value) public {
         _burn(from, value);
-    }
-
-    function burnFromEpoch(uint256 epoch, address account, uint256 value) public {
-        _burnFromEpoch(epoch, account, value);
     }
 }

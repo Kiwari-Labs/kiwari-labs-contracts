@@ -92,13 +92,12 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
         uint256 duration
     ) private view returns (uint256 element) {
         SCDLL.List storage list = _balances[epoch][account].list;
-        element = list.head();
-        unchecked {
-            while (blockNumber - element >= duration) {
-                if (element == 0) {
-                    break;
+        if (list.size() > 0) {
+            element = list.head();
+            unchecked {
+                while (blockNumber - element >= duration) {
+                    element = list.next(element);
                 }
-                element = list.next(element);
             }
         }
     }
@@ -111,9 +110,6 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
             uint256 balance;
             unchecked {
                 while (blockNumber - element >= duration) {
-                    if (element == 0) {
-                        break;
-                    }
                     balance += _account.balances[element];
                     element = _account.list.next(element);
                 }
@@ -233,19 +229,47 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
         _update(_blockNumberProvider(), from, to, value);
     }
 
-    // @TODO
     function _updateAtEpoch(uint256 epoch, address from, address to, uint256 value) internal virtual {
-        uint256 blockNumber = _blockNumberProvider();
-        (uint256 fromEpoch, uint256 toEpoch) = _windowRage(blockNumber);
-        if (epoch == toEpoch) {
-            _update(blockNumber, from, to, value);
-        } else if (epoch > toEpoch) {
-            // future
-        } else if (epoch < fromEpoch) {
-            // past
-        } else {
-            // between fromEpoch to toEpoch - 1
+        uint256 duration = _getBlocksInWindow();
+        uint256 element = _findValidBalance(from, epoch, _blockNumberProvider(), duration);
+        _refreshBalanceAtEpoch(from, epoch, element, duration);
+
+        Epoch storage _spender = _balances[epoch][from];
+        Epoch storage _recipient = _balances[epoch][to];
+
+        uint256 balance = _spender.totalBalance;
+
+        if (balance < value) {
+            revert ERC20InsufficientBalance(from, balance, value);
         }
+
+        uint256 pendingValue = value;
+
+        while (element > 0 && pendingValue > 0) {
+            balance = _spender.balances[element];
+            if (balance <= pendingValue) {
+                unchecked {
+                    pendingValue -= balance;
+                    _spender.totalBalance -= balance;
+                    _spender.balances[element] -= balance;
+                    _recipient.totalBalance += balance;
+                    _recipient.balances[element] += balance;
+                }
+                _recipient.list.insert(element);
+                element = _spender.list.next(element);
+                _spender.list.remove(_spender.list.previous(element));
+            } else {
+                unchecked {
+                    _spender.totalBalance -= pendingValue;
+                    _spender.balances[element] -= pendingValue;
+                    _recipient.totalBalance += pendingValue;
+                    _recipient.balances[element] += pendingValue;
+                }
+                _recipient.list.insert(element);
+                pendingValue = 0;
+            }
+        }
+
         emit Transfer(from, to, value);
     }
 
@@ -261,14 +285,6 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
         _update(address(0), account, value);
     }
 
-    // @TODO
-    function _mintToEpoch(uint256 epoch, address account, uint256 value) internal {
-        if (account == address(0)) {
-            revert ERC20InvalidReceiver(address(0));
-        }
-        _updateAtEpoch(epoch, address(0), account, value);
-    }
-
     /// @notice Burns a specified amount of tokens from an account.
     /// @dev This function updates the token balance by burning `value` amount of tokens from the `account`.
     /// Reverts if the `account` address is zero.
@@ -279,14 +295,6 @@ abstract contract ERC20EXPBase is BLSW, Context, IERC20Errors, IERC7818, IERC781
             revert ERC20InvalidSender(address(0));
         }
         _update(account, address(0), value);
-    }
-
-    // @TODO
-    function _burnFromEpoch(uint256 epoch, address account, uint256 value) internal {
-        if (account == address(0)) {
-            revert ERC20InvalidSender(address(0));
-        }
-        _updateAtEpoch(epoch, account, address(0), value);
     }
 
     /// @notice Spends the specified allowance by reducing the allowance of the spender.
