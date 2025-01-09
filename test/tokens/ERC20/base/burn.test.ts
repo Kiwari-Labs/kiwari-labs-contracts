@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {hardhat_reset} from "../../../utils.test";
+import {hardhat_mine, hardhat_reset} from "../../../utils.test";
 import {deployERC20EXPBase} from "./deployer.test";
 import {constants, ERC20} from "../../../constant.test";
 
@@ -22,6 +22,36 @@ export const run = async () => {
         .withArgs(alice.address, constants.ZERO_ADDRESS, amount);
       expect(await erc20exp.balanceOf(alice.address)).to.equal(0);
       expect(await erc20exp.balanceOfAtEpoch(epoch, alice.address)).to.equal(0);
+    });
+
+    it("[SUCCESS] burn during epoch nearest expiry", async function () {
+      const {erc20exp, alice, bob} = await deployERC20EXPBase();
+      const blocksPerEpoch = await erc20exp.epochLength();
+
+      let epochs = 2;
+      const amount = 2;
+      const iterate = 10;
+      while (epochs != 0) {
+        for (let i = 0; i < iterate; i++) {
+          await erc20exp.mint(alice.address, amount);
+        }
+        await hardhat_mine(Number(blocksPerEpoch) - iterate - 1);
+        epochs--;
+      }
+
+      let epoch = await erc20exp.currentEpoch();
+      expect(epoch).to.equal(1);
+
+      await hardhat_mine(10);
+
+      epoch = await erc20exp.currentEpoch();
+      expect(epoch).to.equal(2);
+
+      const currentBalance = await erc20exp.balanceOf(alice.address);
+
+      await expect(erc20exp.burn(alice.address, currentBalance - 5n))
+        .to.emit(erc20exp, ERC20.events.Transfer)
+        .withArgs(alice.address, constants.ZERO_ADDRESS, currentBalance - 5n);
     });
 
     it("[FAILED] burn from zero address", async function () {

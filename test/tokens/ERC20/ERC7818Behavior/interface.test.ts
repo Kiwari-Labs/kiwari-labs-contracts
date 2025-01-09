@@ -10,7 +10,7 @@ export const run = async () => {
       await hardhat_reset();
     });
 
-    /* @notice due to the token can expire, there is no actual accumulate value of `totalSupply`.*/
+    // NOTE: due to the token can expire, there is no actual accumulate value of `totalSupply`.
     it("[SUCCESS] IERC20Metadata", async function () {
       const {erc20exp} = await deployERC20EXPBase({});
       expect(await erc20exp.decimals()).to.equal(18);
@@ -46,7 +46,7 @@ export const run = async () => {
       await hardhat_mine(epochLength * duration);
       expect(await erc20exp.isEpochExpired(0)).to.equal(false);
 
-      /* buffer 1 epoch */
+      // NOTE: buffer 1 epoch
       await hardhat_mine(epochLength - 1n);
       expect(await erc20exp.isEpochExpired(0)).to.equal(false);
 
@@ -57,7 +57,7 @@ export const run = async () => {
     it("[SUCCESS] epochType", async function () {
       const {erc20exp} = await deployERC20EXPBase({});
       expect(await erc20exp.epochType()).to.equal(0);
-      /* if implementation use time based */
+      // NOTE: if implementation use time based
       // expect(await erc20exp.epochType()).to.equal(1);
     });
 
@@ -67,7 +67,6 @@ export const run = async () => {
       expect(await erc20exp.validityDuration()).to.equal(windowSize);
     });
 
-    /* @notice additional function from ERC7818 */
     it("[SUCCESS] getWorldStateBalance", async function () {
       const {erc20exp, alice} = await deployERC20EXPBase({});
       const amount = 1;
@@ -77,7 +76,6 @@ export const run = async () => {
       expect(await erc20exp.getWorldStateBalance(latestBlock)).to.equal(1);
     });
 
-    /* @notice additional function from ERC7818 */
     it("[SUCCESS] getNearestExpiryOf", async function () {
       const {erc20exp, alice} = await deployERC20EXPBase({});
       const amount = 1;
@@ -89,7 +87,6 @@ export const run = async () => {
       expect(expiry).to.equal(latestBlock + blocksInWindow);
     });
 
-    /* @notice additional function from ERC7818 */
     it("[SUCCESS] getNearestExpiryOf with empty epoch", async function () {
       const {erc20exp, alice} = await deployERC20EXPBase({});
       const [balance, expiry] = await erc20exp.getNearestExpiryOf(alice.address);

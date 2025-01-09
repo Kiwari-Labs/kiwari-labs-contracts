@@ -21,7 +21,6 @@ export const run = async () => {
       const latestBlock = await hardhat_latestBlock();
       expect(await erc20exp.balanceOf(alice.address)).to.equal(amount);
       expect(await erc20exp.balanceOfAtEpoch(epoch, alice.address)).to.equal(amount);
-      /* additional function */
       expect(await erc20exp.getWorldStateBalance(latestBlock));
       const list = await erc20exp.tokenList(alice.address, epoch);
       expect(list.length).to.equal(1);
