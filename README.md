@@ -1,6 +1,6 @@
 # @kiwarilabs/contracts
 
-`solidity` library for creating expirable token.
+A Solidity library for expirable tokens with time or block-based expiration.
 
 ### Installation
 
