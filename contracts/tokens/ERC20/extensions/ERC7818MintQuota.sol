@@ -64,10 +64,10 @@ abstract contract ERC7818MintQuota is ERC20EXPBase {
 
     /// @notice Set a minter's quota.
     /// @param minter Address of the minter.
-    /// @param quota New quota value.
-    function _setQuota(address minter, uint256 quota) internal virtual {
-        _minters[minter].quota = quota;
-        emit QuotaSet(_msgSender(), minter, quota);
+    /// @param quota_ New quota value.
+    function _setQuota(address minter, uint256 quota_) internal virtual {
+        _minters[minter].quota = quota_;
+        emit QuotaSet(_msgSender(), minter, quota_);
     }
 
     /// @notice Reset a minter's minted amount.

@@ -1,8 +1,7 @@
 import {expect} from "chai";
-import {hardhat_increasePointerTo, hardhat_latestPointer, hardhat_mine, hardhat_reset} from "../../../utils.test";
+import {hardhat_increasePointerTo, hardhat_latestPointer, hardhat_reset} from "../../../utils.test";
 import {deployERC20Selector} from "../base/deployer.test";
-import {constants, ERC20BLSW} from "../../../constant.test";
-import {calculateSlidingWindowState} from "../../../utils/algorithms/BLSW/deployer.test";
+import {constants, ERC20} from "../../../constant.test";
 
 export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
   describe("Interfaces", async function () {
@@ -16,8 +15,8 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
     it("[SUCCESS] IERC20Metadata", async function () {
       const {erc20exp} = await deployERC20Selector({epochType});
       expect(await erc20exp.decimals()).to.equal(18);
-      expect(await erc20exp.name()).to.equal(ERC20BLSW.constructor.name);
-      expect(await erc20exp.symbol()).to.equal(ERC20BLSW.constructor.symbol);
+      expect(await erc20exp.name()).to.equal(ERC20.constructor.name);
+      expect(await erc20exp.symbol()).to.equal(ERC20.constructor.symbol);
       expect(await erc20exp.totalSupply()).to.equal(0);
     });
 
@@ -28,16 +27,17 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
 
     it("[SUCCESS] currentEpoch", async function () {
       const {erc20exp} = await deployERC20Selector({epochType});
-      const self = calculateSlidingWindowState({});
+      const epochLength = await erc20exp.epochLength();
       expect(await erc20exp.currentEpoch()).to.equal(0);
-      await hardhat_mine(self._blocksPerEpoch);
+      await hardhat_increasePointerTo(epochType, epochLength);
       expect(await erc20exp.currentEpoch()).to.equal(1);
     });
 
     it("[SUCCESS] epochLength", async function () {
       const {erc20exp} = await deployERC20Selector({epochType});
-      const self = calculateSlidingWindowState({});
-      expect(await erc20exp.epochLength()).to.equal(self._blocksPerEpoch);
+      expect(await erc20exp.epochLength()).to.equal(
+        epochType === constants.EPOCH_TYPE.BLOCKS_BASED ? constants.DEFAULT_BLOCKS_PER_EPOCH : constants.DEFAULT_SECONDS_PER_EPOCH,
+      );
     });
 
     it("[SUCCESS] isEpochExpired", async function () {

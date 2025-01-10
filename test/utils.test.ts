@@ -21,13 +21,13 @@ export const hardhat_mine = async function (blocks: NumberLike, options: {interv
   await mine(blocks, options);
 };
 
-export const hardhat_setNextBlockTimestamp = async function (timestamp: NumberLike | Date) {
-  await time.setNextBlockTimestamp(timestamp);
+export const hardhat_increase = async function (timestamp: NumberLike) {
+  await time.increase(timestamp);
 };
 
 export const hardhat_increasePointerTo = async function (epochType: number, pointer: NumberLike, options: {interval?: number} = {}) {
   if (epochType === constants.EPOCH_TYPE.BLOCKS_BASED) await mine(pointer, options);
-  else await hardhat_setNextBlockTimestamp(pointer);
+  else await hardhat_increase(pointer);
 };
 
 export const hardhat_reset = async function () {

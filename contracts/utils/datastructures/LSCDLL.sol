@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 /// @title A lightweight version of a Sorted Circular Doubly Linked List.
 /// @author Kiwari Labs
 /// @notice This version reduces gas usage by removing embedded byte data from nodes and incurs less overhead compared to the original version.
+
 library SCDLL {
     /// Sorted Circular Doubly Linked List
     struct List {
@@ -53,8 +54,8 @@ library SCDLL {
                 index = self._nodes[index][direction];
             }
         }
-        /// Resize the array to the actual count of elements using inline assembly.
         assembly {
+            /// @notice Resize the array to the actual count of elements using inline assembly.
             mstore(part, counter) /// Set the array length to the actual count.
         }
     }

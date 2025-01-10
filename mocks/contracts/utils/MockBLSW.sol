@@ -12,8 +12,8 @@ contract MockBLSW {
         window.initializedState(blocksPerEpoch_, windowSize_, safe_);
     }
 
-    function updateWindow(uint40 blocksPerEpoch, uint8 windowSize, bool safe) public {
-        window.initializedState(blocksPerEpoch, windowSize, safe);
+    function updateWindow(uint40 blocksPerEpoch, uint8 windowSize_, bool safe) public {
+        window.initializedState(blocksPerEpoch, windowSize_, safe);
     }
 
     function windowRange(uint256 blockNumber) public view returns (uint256, uint256) {

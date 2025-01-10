@@ -10,4 +10,11 @@ export const run = async () => {
     ERC7818Behavior.run({epochType});
     extensions.run({epochType});
   });
+
+  describe("ERC20TLSW", async function () {
+    const epochType = constants.EPOCH_TYPE.TIME_BASED;
+    ERC20Base.run({epochType});
+    ERC7818Behavior.run({epochType});
+    extensions.run({epochType});
+  });
 };

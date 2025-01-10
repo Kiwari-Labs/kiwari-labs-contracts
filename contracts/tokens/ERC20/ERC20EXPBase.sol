@@ -125,6 +125,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
             if (epoch < fromEpoch) {
                 return true;
             }
+            return false;
         }
     }
 
