@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../../../../contracts/tokens/ERC20/ERC20EXPBase.sol";
+import {ERC20BLSW} from "../../../../contracts/tokens/ERC20/ERC20BLSW.sol";
 
-contract MockERC20EXPBase is ERC20EXPBase {
+contract MockERC20BLSW is ERC20BLSW {
     constructor(
         string memory _name,
         string memory _symbol,
         uint40 blocksPerEpoch_,
         uint8 windowSize_
-    ) ERC20EXPBase(_name, _symbol, block.number, blocksPerEpoch_, windowSize_, false) {}
+    ) ERC20BLSW(_name, _symbol, block.number, blocksPerEpoch_, windowSize_, false) {}
 
     function mint(address to, uint256 value) public {
         _mint(to, value);

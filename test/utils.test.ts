@@ -2,13 +2,32 @@ import {AddressLike, toBeHex} from "ethers";
 import {network, ethers} from "hardhat";
 import {mine, time} from "@nomicfoundation/hardhat-network-helpers";
 import {NumberLike} from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
+import {constants} from "./constant.test";
+
+export const hardhat_latest = async function () {
+  return await time.latest();
+};
 
 export const hardhat_latestBlock = async function () {
   return await time.latestBlock();
 };
 
+export const hardhat_latestPointer = async function (epochType: number) {
+  if (epochType === constants.EPOCH_TYPE.BLOCKS_BASED) return await hardhat_latestBlock();
+  else return await hardhat_latest();
+};
+
 export const hardhat_mine = async function (blocks: NumberLike, options: {interval?: number} = {}) {
   await mine(blocks, options);
+};
+
+export const hardhat_setNextBlockTimestamp = async function (timestamp: NumberLike | Date) {
+  await time.setNextBlockTimestamp(timestamp);
+};
+
+export const hardhat_increasePointerTo = async function (epochType: number, pointer: NumberLike, options: {interval?: number} = {}) {
+  if (epochType === constants.EPOCH_TYPE.BLOCKS_BASED) await mine(pointer, options);
+  else await hardhat_setNextBlockTimestamp(pointer);
 };
 
 export const hardhat_reset = async function () {
@@ -33,9 +52,9 @@ export const hardhat_stopImpersonating = async function (address: AddressLike) {
   });
 };
 
-export const hardhat_skipToBlock = async function (target: number) {
-  await hardhat_mine(target - (await time.latestBlock()));
-};
+// export const hardhat_skipToBlock = async function (target: number) {
+//   await hardhat_mine(target - (await time.latestBlock()));
+// };
 
 export const padIndexToData = function (index: Number) {
   // The padding is applied from the start of this string (output: 0x0001).

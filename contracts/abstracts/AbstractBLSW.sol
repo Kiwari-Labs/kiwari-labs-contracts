@@ -11,8 +11,8 @@ abstract contract AbstractBLSW {
 
     slide.Window private _window;
 
-    constructor(uint256 startBlockNumber_, uint40 blocksPerEpoch_, uint8 windowSize_, bool safe_) {
-        _window.initializedBlock(startBlockNumber_ != 0 ? startBlockNumber_ : _blockNumberProvider());
+    constructor(uint256 initialBlockNumber, uint40 blocksPerEpoch_, uint8 windowSize_, bool safe_) {
+        _window.initializedBlock(initialBlockNumber != 0 ? initialBlockNumber : _blockNumberProvider());
         _updateSlidingWindow(blocksPerEpoch_, windowSize_, safe_);
     }
 
@@ -38,15 +38,15 @@ abstract contract AbstractBLSW {
         return _window.safeWindowRange(blockNumber);
     }
 
-    function _getWindowSize() internal view returns (uint8) {
+    function _windowSize() internal view returns (uint8) {
         return _window.windowSize();
     }
 
-    function _getBlocksPerEpoch() internal view returns (uint40) {
+    function _blocksInEpoch() internal view returns (uint40) {
         return _window.blocksInEpoch();
     }
 
-    function _getBlocksInWindow() internal view returns (uint40) {
+    function _blocksInWindow() internal view returns (uint40) {
         return _window.blocksInWindow();
     }
 }

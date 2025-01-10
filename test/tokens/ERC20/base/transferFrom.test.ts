@@ -1,9 +1,9 @@
 import {expect} from "chai";
-import {deployERC20EXPBase} from "./deployer.test";
+import {deployERC20Selector} from "./deployer.test";
 import {ERC20, constants} from "../../../constant.test";
 import {hardhat_reset} from "../../../utils.test";
 
-export const run = async () => {
+export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
   describe("TransferFrom", async function () {
     const amount = 1;
 
@@ -12,7 +12,7 @@ export const run = async () => {
     });
 
     it("[SUCCESS] transferFrom", async function () {
-      const {erc20exp, alice, bob} = await deployERC20EXPBase({});
+      const {erc20exp, alice, bob} = await deployERC20Selector({epochType});
       await erc20exp.mint(alice.address, amount);
       await erc20exp.connect(alice).approve(bob.address, amount);
       await expect(erc20exp.connect(bob).transferFrom(alice.address, bob.address, amount))
@@ -26,7 +26,7 @@ export const run = async () => {
     });
 
     it("[SUCCESS] transferFrom with approve maximum", async function () {
-      const {erc20exp, alice, bob} = await deployERC20EXPBase({});
+      const {erc20exp, alice, bob} = await deployERC20Selector({epochType});
       await erc20exp.mint(alice.address, amount);
       await erc20exp.connect(alice).approve(bob.address, constants.MAX_UINT256);
       await expect(erc20exp.connect(bob).transferFrom(alice.address, bob.address, amount))
@@ -40,7 +40,7 @@ export const run = async () => {
     });
 
     it("[FAILED] transferFrom with insufficient allowance", async function () {
-      const {erc20exp, alice, bob} = await deployERC20EXPBase({});
+      const {erc20exp, alice, bob} = await deployERC20Selector({epochType});
       await erc20exp.mint(alice.address, amount);
       await erc20exp.connect(alice).approve(bob.address, amount);
       await expect(erc20exp.connect(bob).transferFrom(alice.address, bob.address, amount + amount))

@@ -7,64 +7,67 @@ pragma solidity >=0.8.0 <0.9.0;
 import "../ERC20EXPBase.sol";
 
 abstract contract ERC7818Blacklist is ERC20EXPBase {
-    /// @notice Emitted when an address is added to the blacklist
-    /// @param caller Operate by the address
-    /// @param account The address that was blacklisted
-    event Blacklisted(address indexed caller, address indexed account);
+    /// @notice Emitted when an account is added to the blacklist.
+    /// @dev This event is triggered when an account is successfully added to the blacklist.
+    /// @param caller The address that added the account to the blacklist.
+    /// @param account The address that was added to the blacklist.
+    event AddedToBlacklist(address indexed caller, address indexed account);
 
-    /// @notice Emitted when an address is removed from the blacklist
-    /// @param caller Operate by the address
-    /// @param account The address that was removed from the blacklist
-    event Unblacklisted(address indexed caller, address indexed account);
+    /// @notice Emitted when an account is removed from the blacklist.
+    /// @dev This event is triggered when an account is successfully removed from the blacklist.
+    /// @param caller The address that removed the account from the blacklist.
+    /// @param account The address that was removed from the blacklist.
+    event RemovedFromBlacklist(address indexed caller, address indexed account);
 
-    /// @notice Emitted when a blacklisted address attempts a restricted action
-    /// @param account The address that attempted the action
-    error BlacklistedAddress(address account);
+    /// @notice Thrown when an account is blacklisted.
+    /// @dev This error is thrown if a blacklisted account attempts to perform an operation restricted to non-blacklisted accounts.
+    /// @param account The address of the blacklisted account.
+    error AccountBlacklisted(address account);
 
-    /// @notice Emitted when an invalid address is used
-    /// @param account The address that caused the error
-    error InvalidAddress(address account);
+    /// @notice Thrown when an account is not blacklisted.
+    /// @dev This error is thrown if an operation is attempted on an account that is not blacklisted when it should be.
+    /// @param account The address of the account that is not blacklisted.
+    error AccountNotBlacklisted(address account);
 
-    /// @dev A mapping to store the blacklist status of addresses
     mapping(address => bool) private _blacklist;
 
-    /// @notice Modifier to prevent blacklisted addresses from performing restricted actions
-    /// @dev This modifier should be used in functions that involve token transfers or sensitive actions
-    modifier notBlacklisted(address account) {
-        if (_blacklist[account]) {
-            revert BlacklistedAddress(account);
-        }
+    /// @notice Modifier for functions only callable by blacklisted accounts.
+    modifier onlyBlacklisted(address account) {
+        if (!isBlacklisted(account)) revert AccountNotBlacklisted(account);
         _;
     }
 
-    /// @notice Checks if an address is blacklisted
-    /// @param account The address to check
-    /// @return A boolean indicating whether the address is blacklisted
+    /// @notice Modifier for functions only callable by non-blacklisted accounts.
+    modifier onlyNotBlacklisted(address account) {
+        if (isBlacklisted(account)) revert AccountBlacklisted(account);
+        _;
+    }
+
+    /// @notice Returns if an account is blacklisted.
+    /// @param account The account to check.
     function isBlacklisted(address account) public view returns (bool) {
         return _blacklist[account];
     }
 
-    /// @notice Adds an address to the blacklist
-    /// @param account The address to blacklist
-    function _addToBlacklist(address account) internal {
-        if (account == address(0)) {
-            revert InvalidAddress(account);
-        }
+    /// @notice Adds an account to the blacklist.
+    /// @param account The account to blacklist.
+    function _addToBlacklist(address account) internal onlyNotBlacklisted(account) {
         _blacklist[account] = true;
-        emit Blacklisted(_msgSender(), account);
+        emit AddedToBlacklist(_msgSender(), account);
     }
 
-    /// @notice Removes an address from the blacklist
-    /// @param account The address to unblacklist
-    function _removeFromBlacklist(address account) internal {
-        if (account == address(0)) {
-            revert InvalidAddress(account);
-        }
+    /// @notice Removes an account from the blacklist.
+    /// @param account The account to remove.
+    function _removeFromBlacklist(address account) internal onlyBlacklisted(account) {
         _blacklist[account] = false;
-        emit Unblacklisted(_msgSender(), account);
+        emit RemovedFromBlacklist(_msgSender(), account);
     }
 
-    function _update(address from, address to, uint256 value) internal virtual override notBlacklisted(from) notBlacklisted(to) {
+    /// @notice Overrides _update to allow transfers only between non-blacklisted accounts.
+    /// @param from The sender address.
+    /// @param to The receiver address.
+    /// @param value The transfer amount.
+    function _update(address from, address to, uint256 value) internal virtual override onlyNotBlacklisted(from) onlyNotBlacklisted(to) {
         super._update(from, to, value);
     }
 }

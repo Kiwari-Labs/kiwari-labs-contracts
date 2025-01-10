@@ -1,9 +1,9 @@
 import {expect} from "chai";
-import {ERC7818MintQuota} from "../../../../constant.test";
-import {deployERC7818MintQuota} from "./deployer.test";
+import {constants, ERC7818MintQuota} from "../../../../constant.test";
+import {deployERC7818MintQuotaSelector} from "./deployer.test";
 import {hardhat_reset} from "../../../../utils.test";
 
-export const run = async () => {
+export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
   describe("Mint", async function () {
     const quota = 100;
 
@@ -12,7 +12,7 @@ export const run = async () => {
     });
 
     it("[SUCCESS] mintQuota", async function () {
-      const {erc7818MintQuota, deployer, alice} = await deployERC7818MintQuota();
+      const {erc7818MintQuota, deployer, alice} = await deployERC7818MintQuotaSelector({epochType});
 
       await expect(erc7818MintQuota.setQuota(alice.address, quota))
         .to.emit(erc7818MintQuota, ERC7818MintQuota.events.QuotaSet)
@@ -21,33 +21,32 @@ export const run = async () => {
       expect(await erc7818MintQuota.remainingQuota(alice.address)).to.equal(quota);
       expect(await erc7818MintQuota.minted(alice.address)).to.equal(0);
 
-      await expect(erc7818MintQuota.connect(alice).mintQuota(alice.address, quota))
+      await expect(erc7818MintQuota.connect(alice).mintWithQuota(alice.address, quota))
         .to.emit(erc7818MintQuota, ERC7818MintQuota.events.QuotaMinted)
         .withArgs(alice.address, alice.address, quota);
 
       expect(await erc7818MintQuota.remainingQuota(alice.address)).to.equal(0);
       expect(await erc7818MintQuota.minted(alice.address)).to.equal(quota);
-      expect(await erc7818MintQuota["balanceOf(address)"](alice.address)).to.equal(quota);
+      expect(await erc7818MintQuota.balanceOf(alice.address)).to.equal(quota);
     });
 
-    it("[FAILED] mintQuota with unauthorized minter", async function () {
-      const {erc7818MintQuota, alice} = await deployERC7818MintQuota();
-      await expect(erc7818MintQuota.mintQuota(alice.address, quota)).to.be.revertedWithCustomError(
+    it("[FAILED] minter not set", async function () {
+      const {erc7818MintQuota, alice} = await deployERC7818MintQuotaSelector({epochType});
+      await expect(erc7818MintQuota.mintWithQuota(alice.address, quota)).to.be.revertedWithCustomError(
         erc7818MintQuota,
-        ERC7818MintQuota.errors.UnauthorizedMinter,
+        ERC7818MintQuota.errors.MinterNotSet,
       );
     });
 
-    /* behavior */
-    it("[FAILED] mintQuota with no longer authorized minter", async function () {
-      const {erc7818MintQuota, deployer, alice} = await deployERC7818MintQuota();
+    it("[FAILED] mint quota exceeded", async function () {
+      const {erc7818MintQuota, deployer, alice} = await deployERC7818MintQuotaSelector({epochType});
 
       await expect(erc7818MintQuota.setQuota(alice.address, quota))
         .to.emit(erc7818MintQuota, ERC7818MintQuota.events.QuotaSet)
         .withArgs(deployer.address, alice.address, quota);
       expect(await erc7818MintQuota.remainingQuota(alice.address)).to.equal(quota);
       expect(await erc7818MintQuota.minted(alice.address)).to.equal(0);
-      await expect(erc7818MintQuota.connect(alice).mintQuota(alice.address, quota + quota)).to.be.revertedWithCustomError(
+      await expect(erc7818MintQuota.connect(alice).mintWithQuota(alice.address, quota + quota)).to.be.revertedWithCustomError(
         erc7818MintQuota,
         ERC7818MintQuota.errors.MintQuotaExceeded,
       );

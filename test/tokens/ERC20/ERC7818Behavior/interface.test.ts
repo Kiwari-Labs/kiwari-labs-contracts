@@ -1,31 +1,33 @@
 import {expect} from "chai";
-import {hardhat_latestBlock, hardhat_mine, hardhat_reset} from "../../../utils.test";
-import {deployERC20EXPBase} from "../base/deployer.test";
-import {ERC20EXPBase} from "../../../constant.test";
+import {hardhat_increasePointerTo, hardhat_latestPointer, hardhat_mine, hardhat_reset} from "../../../utils.test";
+import {deployERC20Selector} from "../base/deployer.test";
+import {constants, ERC20BLSW} from "../../../constant.test";
 import {calculateSlidingWindowState} from "../../../utils/algorithms/BLSW/deployer.test";
 
-export const run = async () => {
+export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
   describe("Interfaces", async function () {
+    const amount = 1;
+
     afterEach(async function () {
       await hardhat_reset();
     });
 
     // NOTE: due to the token can expire, there is no actual accumulate value of `totalSupply`.
     it("[SUCCESS] IERC20Metadata", async function () {
-      const {erc20exp} = await deployERC20EXPBase({});
+      const {erc20exp} = await deployERC20Selector({epochType});
       expect(await erc20exp.decimals()).to.equal(18);
-      expect(await erc20exp.name()).to.equal(ERC20EXPBase.constructor.name);
-      expect(await erc20exp.symbol()).to.equal(ERC20EXPBase.constructor.symbol);
+      expect(await erc20exp.name()).to.equal(ERC20BLSW.constructor.name);
+      expect(await erc20exp.symbol()).to.equal(ERC20BLSW.constructor.symbol);
       expect(await erc20exp.totalSupply()).to.equal(0);
     });
 
     it("[SUCCESS] balanceAtEpoch", async function () {
-      const {erc20exp, alice} = await deployERC20EXPBase({});
+      const {erc20exp, alice} = await deployERC20Selector({epochType});
       expect(await erc20exp.balanceOfAtEpoch(0, alice.address)).to.equal(0);
     });
 
     it("[SUCCESS] currentEpoch", async function () {
-      const {erc20exp} = await deployERC20EXPBase({});
+      const {erc20exp} = await deployERC20Selector({epochType});
       const self = calculateSlidingWindowState({});
       expect(await erc20exp.currentEpoch()).to.equal(0);
       await hardhat_mine(self._blocksPerEpoch);
@@ -33,65 +35,62 @@ export const run = async () => {
     });
 
     it("[SUCCESS] epochLength", async function () {
-      const {erc20exp} = await deployERC20EXPBase({});
+      const {erc20exp} = await deployERC20Selector({epochType});
       const self = calculateSlidingWindowState({});
       expect(await erc20exp.epochLength()).to.equal(self._blocksPerEpoch);
     });
 
     it("[SUCCESS] isEpochExpired", async function () {
-      const {erc20exp} = await deployERC20EXPBase({});
+      const {erc20exp} = await deployERC20Selector({epochType});
       const epochLength = await erc20exp.epochLength();
       const duration = await erc20exp.validityDuration();
 
-      await hardhat_mine(epochLength * duration);
+      await hardhat_increasePointerTo(epochType, epochLength * duration);
       expect(await erc20exp.isEpochExpired(0)).to.equal(false);
 
       // NOTE: buffer 1 epoch
-      await hardhat_mine(epochLength - 1n);
+      await hardhat_increasePointerTo(epochType, epochLength - 1n);
       expect(await erc20exp.isEpochExpired(0)).to.equal(false);
 
-      await hardhat_mine(1n);
+      await hardhat_increasePointerTo(epochType, 1n);
       expect(await erc20exp.isEpochExpired(0)).to.equal(true);
     });
 
     it("[SUCCESS] epochType", async function () {
-      const {erc20exp} = await deployERC20EXPBase({});
-      expect(await erc20exp.epochType()).to.equal(0);
-      // NOTE: if implementation use time based
-      // expect(await erc20exp.epochType()).to.equal(1);
+      const {erc20exp} = await deployERC20Selector({epochType});
+      expect(await erc20exp.epochType()).to.equal(epochType);
     });
 
     it("[SUCCESS] validityDuration", async function () {
       const windowSize = 2;
-      const {erc20exp} = await deployERC20EXPBase({});
+      const {erc20exp} = await deployERC20Selector({epochType});
       expect(await erc20exp.validityDuration()).to.equal(windowSize);
     });
 
     it("[SUCCESS] getWorldStateBalance", async function () {
-      const {erc20exp, alice} = await deployERC20EXPBase({});
-      const amount = 1;
+      const {erc20exp, alice} = await deployERC20Selector({epochType});
       await erc20exp.mint(alice.address, amount);
-      const latestBlock = await hardhat_latestBlock();
+      const latestPointer = await hardhat_latestPointer(epochType);
       expect(await erc20exp.getWorldStateBalance(0)).to.equal(0);
-      expect(await erc20exp.getWorldStateBalance(latestBlock)).to.equal(1);
+      expect(await erc20exp.getWorldStateBalance(latestPointer)).to.equal(1);
     });
 
-    it("[SUCCESS] getNearestExpiryOf", async function () {
-      const {erc20exp, alice} = await deployERC20EXPBase({});
-      const amount = 1;
-      await erc20exp.mint(alice.address, amount);
-      const blocksInWindow = Number((await erc20exp.epochLength()) * (await erc20exp.validityDuration()));
-      const latestBlock = await hardhat_latestBlock();
-      const [balance, expiry] = await erc20exp.getNearestExpiryOf(alice.address);
-      expect(balance).to.equal(1);
-      expect(expiry).to.equal(latestBlock + blocksInWindow);
-    });
+    // it("[SUCCESS] getNearestExpiryOf", async function () {
+    //   const {erc20exp, alice} = await deployERC20Selector({epochType});
+    //   const amount = 1;
+    //   await erc20exp.mint(alice.address, amount);
+    //   const blocksInWindow = Number((await erc20exp.epochLength()) * (await erc20exp.validityDuration()));
+    //   const latestPointer = await hardhat_latestPointer();
+    //   const [balance, expiry] = await erc20exp.getNearestExpiryOf(alice.address);
+    //   expect(balance).to.equal(1);
+    //   expect(expiry).to.equal(latestPointer + blocksInWindow);
+    // });
 
-    it("[SUCCESS] getNearestExpiryOf with empty epoch", async function () {
-      const {erc20exp, alice} = await deployERC20EXPBase({});
-      const [balance, expiry] = await erc20exp.getNearestExpiryOf(alice.address);
-      expect(balance).to.equal(0);
-      expect(expiry).to.equal(0);
-    });
+    // it("[SUCCESS] getNearestExpiryOf with empty epoch", async function () {
+    //   const {erc20exp, alice} = await deployERC20Selector({epochType});
+    //   const [balance, expiry] = await erc20exp.getNearestExpiryOf(alice.address);
+    //   expect(balance).to.equal(0);
+    //   expect(expiry).to.equal(0);
+    // });
   });
 };

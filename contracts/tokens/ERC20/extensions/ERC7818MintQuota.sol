@@ -7,77 +7,84 @@ pragma solidity >=0.8.0 <0.9.0;
 import "../ERC20EXPBase.sol";
 
 abstract contract ERC7818MintQuota is ERC20EXPBase {
-    /// @notice Struct to define mint quota for each minter
-    struct Minter {
-        uint256 quota; // Maximum amount the minter is allowed to mint
-        uint256 minted; // Amount of tokens minted by the minter so far
-    }
-
-    /// @notice Mapping from minter address to their quota details
-    mapping(address account => Minter minter) private _minters;
-
-    /// @notice Custom error definitions
-    error UnauthorizedMinter(address caller);
+    /// @notice Thrown when a minter exceeds their minting quota.
+    /// @param minter The address of the minter.
+    /// @param available The remaining available quota.
+    /// @param requested The amount requested to mint.
     error MintQuotaExceeded(address minter, uint256 available, uint256 requested);
-    error InvalidMinterAddress();
 
-    /// @notice Events
+    /// @notice Thrown when an operation is performed for an unregistered minter.
+    /// @param minter The address of the minter.
+    error MinterNotSet(address minter);
+
+    /// @notice Emitted when a minter's quota is set.
+    /// @param caller The address of the caller who set the quota.
+    /// @param minter The address of the minter.
+    /// @param quota The amount of the quota set for the minter.
     event QuotaSet(address indexed caller, address indexed minter, uint256 quota);
-    event QuotaReset(address indexed minter);
+
+    /// @notice Emitted when a minter's quota is reset.
+    /// @param caller The address of the caller who reset the quota.
+    /// @param minter The address of the minter whose quota is reset.
+    event QuotaReset(address indexed caller, address indexed minter);
+
+    /// @notice Emitted when tokens are minted from a minter's quota.
+    /// @param minter The address of the minter who minted the tokens.
+    /// @param to The recipient of the minted tokens.
+    /// @param amount The amount of tokens minted.
     event QuotaMinted(address indexed minter, address indexed to, uint256 amount);
 
-    /// @dev Mints tokens to a specified address if the minter has quota left.
-    /// Only allowed _minters can mint within their quota.
-    /// @param to Address to receive the minted tokens.
-    /// @param amount Number of tokens to mint.
-    function _mintQuota(address to, uint256 amount) internal virtual {
-        Minter storage minter = _minters[_msgSender()];
+    /// @dev Minter structure holds information about a minter's quota and minted amount.
+    struct Minter {
+        uint256 quota; // The minting quota assigned to the minter.
+        uint256 minted; // The amount of tokens minted by the minter.
+    }
 
-        if (minter.quota == 0) {
-            revert UnauthorizedMinter(_msgSender());
+    mapping(address account => Minter minter) private _minters;
+
+    /// @notice Mint tokens within the sender's quota.
+    /// @param to Recipient of the tokens.
+    /// @param amount Amount to mint.
+    function _mintWithQuota(address to, uint256 amount) internal virtual {
+        address minter = _msgSender();
+
+        if (!isMinter(minter)) {
+            revert MinterNotSet(minter);
         }
 
-        if (minter.minted + amount > minter.quota) {
-            revert MintQuotaExceeded(_msgSender(), minter.quota - minter.minted, amount);
+        if (amount > remainingQuota(minter)) {
+            revert MintQuotaExceeded(minter, remainingQuota(minter), amount);
         }
 
-        minter.minted += amount;
+        _minters[minter].minted += amount;
         _mint(to, amount);
 
         emit QuotaMinted(_msgSender(), to, amount);
     }
 
-    /// @dev Set the mint quota for a specific minter.
-    /// @param minter The address of the minter.
-    /// @param quota The amount the minter is allowed to mint.
+    /// @notice Set a minter's quota.
+    /// @param minter Address of the minter.
+    /// @param quota New quota value.
     function _setQuota(address minter, uint256 quota) internal virtual {
-        if (minter == address(0)) {
-            revert InvalidMinterAddress();
-        }
-
         _minters[minter].quota = quota;
-
         emit QuotaSet(_msgSender(), minter, quota);
     }
 
-    /// @dev Reset the mint amount for a specific minter.
-    /// This could be useful to reset or reduce a minter's used quota.
-    /// @param minter The address of the minter.
+    /// @notice Reset a minter's minted amount.
+    /// @param minter Address of the minter.
     function _resetQuota(address minter) internal virtual {
-        if (minter == address(0)) {
-            revert InvalidMinterAddress();
+        if (!isMinter(minter)) {
+            revert MinterNotSet(minter);
         }
-
         _minters[minter].minted = 0;
-
-        emit QuotaReset(minter);
+        emit QuotaReset(_msgSender(), minter);
     }
 
-    /// @dev Get the remaining mint quota for a specific minter.
-    /// @param minter The address of the minter.
+    /// @notice Get a minter's remaining quota.
+    /// @param minter Address of the minter.
     /// @return Remaining quota.
-    function remainingQuota(address minter) external view virtual returns (uint256) {
-        if (_minters[minter].minted < _minters[minter].quota) {
+    function remainingQuota(address minter) public view returns (uint256) {
+        if (minted(minter) < quota(minter) && isMinter(minter)) {
             unchecked {
                 return _minters[minter].quota - _minters[minter].minted;
             }
@@ -85,10 +92,24 @@ abstract contract ERC7818MintQuota is ERC20EXPBase {
         return 0;
     }
 
-    /// @dev Returns the amount of tokens that a specific minter has already minted.
-    /// @param minter The address of the minter.
-    /// @return The minted amount by the given minter.
-    function minted(address minter) external view virtual returns (uint256) {
+    /// @notice Check if an address is a minter.
+    /// @param minter Address to check.
+    /// @return True if the address is a minter.
+    function isMinter(address minter) public view returns (bool) {
+        return _minters[minter].quota > 0;
+    }
+
+    /// @notice Get a minter's quota.
+    /// @param minter Address of the minter.
+    /// @return Minter's quota.
+    function quota(address minter) public view returns (uint256) {
+        return _minters[minter].quota;
+    }
+
+    /// @notice Get the amount minted by a minter.
+    /// @param minter Address of the minter.
+    /// @return Total minted.
+    function minted(address minter) public view returns (uint256) {
         return _minters[minter].minted;
     }
 }

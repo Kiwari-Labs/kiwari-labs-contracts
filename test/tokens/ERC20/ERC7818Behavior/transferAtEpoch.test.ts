@@ -1,18 +1,26 @@
 import {expect} from "chai";
-import {deployERC20EXPBase} from "../base/deployer.test";
+import {deployERC20Selector} from "../base/deployer.test";
 import {ERC20, ERC7818, constants} from "../../../constant.test";
-import {ethers, hardhat_impersonate, hardhat_mine, hardhat_reset, hardhat_setBalance, hardhat_stopImpersonating} from "../../../utils.test";
+import {
+  ethers,
+  hardhat_impersonate,
+  hardhat_increasePointerTo,
+  hardhat_reset,
+  hardhat_setBalance,
+  hardhat_stopImpersonating,
+} from "../../../utils.test";
 
-export const run = async () => {
+export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
   describe("TransferAtEpoch", async function () {
     const amount = 1;
+    const iterate = 10;
 
     afterEach(async function () {
       await hardhat_reset();
     });
 
     it("[SUCCESS] transferAtEpoch", async function () {
-      const {erc20exp, alice, bob} = await deployERC20EXPBase({});
+      const {erc20exp, alice, bob} = await deployERC20Selector({epochType});
       await erc20exp.mint(alice.address, amount);
       const epoch = await erc20exp.currentEpoch();
       await expect(erc20exp.connect(alice).transferAtEpoch(epoch, bob.address, amount))
@@ -25,7 +33,7 @@ export const run = async () => {
     });
 
     it("[FAILED] transferAtEpoch with invalid sender", async function () {
-      const {erc20exp, alice} = await deployERC20EXPBase({});
+      const {erc20exp, alice} = await deployERC20Selector({epochType});
 
       await hardhat_setBalance(constants.ZERO_ADDRESS, ethers.parseEther("10000.0").toString());
       await hardhat_impersonate(constants.ZERO_ADDRESS);
@@ -40,7 +48,7 @@ export const run = async () => {
     });
 
     it("[FAILED] transferAtEpoch with invalid receiver", async function () {
-      const {erc20exp, alice} = await deployERC20EXPBase({});
+      const {erc20exp, alice} = await deployERC20Selector({epochType});
       const epoch = await erc20exp.currentEpoch();
       await expect(erc20exp.connect(alice).transferAtEpoch(epoch, constants.ZERO_ADDRESS, amount))
         .to.be.revertedWithCustomError(erc20exp, ERC20.errors.ERC20InvalidReceiver)
@@ -48,13 +56,13 @@ export const run = async () => {
     });
 
     it("[FAILED] transferAtEpoch with expired epoch", async function () {
-      const {erc20exp, alice, bob} = await deployERC20EXPBase({});
+      const {erc20exp, alice, bob} = await deployERC20Selector({epochType});
       await erc20exp.mint(alice.address, amount);
 
       const epochLength = await erc20exp.epochLength();
       const duration = await erc20exp.validityDuration();
 
-      await hardhat_mine(epochLength * duration + epochLength);
+      await hardhat_increasePointerTo(epochType, epochLength * duration + epochLength);
 
       await expect(erc20exp.connect(alice).transferAtEpoch(0, bob.address, amount)).to.be.revertedWithCustomError(
         erc20exp,
@@ -69,7 +77,7 @@ export const run = async () => {
     });
 
     it("[FAILED] transfer with insufficient balance", async function () {
-      const {erc20exp, alice, bob} = await deployERC20EXPBase({});
+      const {erc20exp, alice, bob} = await deployERC20Selector({epochType});
       const epoch = await erc20exp.currentEpoch();
       await expect(erc20exp.connect(alice).transferAtEpoch(epoch, bob.address, amount))
         .to.be.revertedWithCustomError(erc20exp, ERC20.errors.ERC20InsufficientBalance)
@@ -77,7 +85,7 @@ export const run = async () => {
     });
 
     it("[SUCCESS] transfer single large token correctly", async function () {
-      const {erc20exp, alice, bob} = await deployERC20EXPBase();
+      const {erc20exp, alice, bob} = await deployERC20Selector({epochType});
 
       const amount = 100;
       const expectAmount = 10;
@@ -104,10 +112,8 @@ export const run = async () => {
     });
 
     it("[SUCCESS] transfer multiple small token correctly", async function () {
-      const {erc20exp, alice, bob} = await deployERC20EXPBase();
+      const {erc20exp, alice, bob} = await deployERC20Selector({epochType});
 
-      const amount = 1;
-      const iterate = 10;
       const expectBalance = iterate * amount;
       for (let index = 0; index < iterate; index++) {
         await erc20exp.mint(alice.address, amount);
