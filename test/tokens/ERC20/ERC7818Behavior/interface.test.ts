@@ -74,23 +74,5 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       expect(await erc20exp.getWorldStateBalance(0)).to.equal(0);
       expect(await erc20exp.getWorldStateBalance(latestPointer)).to.equal(1);
     });
-
-    // it("[SUCCESS] getNearestExpiryOf", async function () {
-    //   const {erc20exp, alice} = await deployERC20Selector({epochType});
-    //   const amount = 1;
-    //   await erc20exp.mint(alice.address, amount);
-    //   const blocksInWindow = Number((await erc20exp.epochLength()) * (await erc20exp.validityDuration()));
-    //   const latestPointer = await hardhat_latestPointer();
-    //   const [balance, expiry] = await erc20exp.getNearestExpiryOf(alice.address);
-    //   expect(balance).to.equal(1);
-    //   expect(expiry).to.equal(latestPointer + blocksInWindow);
-    // });
-
-    // it("[SUCCESS] getNearestExpiryOf with empty epoch", async function () {
-    //   const {erc20exp, alice} = await deployERC20Selector({epochType});
-    //   const [balance, expiry] = await erc20exp.getNearestExpiryOf(alice.address);
-    //   expect(balance).to.equal(0);
-    //   expect(expiry).to.equal(0);
-    // });
   });
 };

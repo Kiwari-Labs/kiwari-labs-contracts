@@ -5,7 +5,6 @@
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 interface IERC5007Mod is IERC721 {
-
     error ERC5007TransferredInvalidToken();
 
     /// @param tokenId The id of the token.
