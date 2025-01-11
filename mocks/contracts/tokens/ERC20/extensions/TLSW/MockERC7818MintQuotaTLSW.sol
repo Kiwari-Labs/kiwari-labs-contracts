@@ -51,7 +51,19 @@ contract MockERC7818MintQuotaTLSW is ERC20TLSW, ERC7818MintQuota {
         _setQuota(minter, quota);
     }
 
-    function resetQuota(address minter) public {
-        _resetQuota(minter);
+    function increaseQuota(address minter, uint256 increase) public {
+        _increaseQuota(minter, increase);
+    }
+
+    function decreaseQuota(address minter, uint256 decrease) public {
+        _decreaseQuota(minter, decrease);
+    }
+
+    function addMinter(address minter, uint256 quota_) public {
+        _addMinter(minter, quota_);
+    }
+
+    function removeMinter(address minter) public {
+        _removeMinter(minter);
     }
 }

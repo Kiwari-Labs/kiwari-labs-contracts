@@ -82,16 +82,17 @@ export const ERC7818BlacklistTLSW = {
   events: {},
 };
 
-
 export const ERC7818MintQuota = {
   name: "MockERC7818MintQuota",
   errors: {
     MintQuotaExceeded: "MintQuotaExceeded",
     MinterNotSet: "MinterNotSet",
+    MinterAlreadySet: "MinterAlreadySet",
   },
   events: {
+    MinterAdded: "MinterAdded",
+    MinterRemoved: "MinterRemoved",
     QuotaSet: "QuotaSet",
-    QuotaReset: "QuotaReset",
     QuotaMinted: "QuotaMinted",
   },
 };
