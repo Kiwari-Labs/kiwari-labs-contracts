@@ -1,9 +1,9 @@
 import {expect} from "chai";
-import {deployERC7818Whitelist} from "./deployer.test";
+import {deployERC7818WhitelistSelector} from "./deployer.test";
 import {ERC7818Whitelist, ERC20, constants} from "../../../../constant.test";
 import {hardhat_reset} from "../../../../utils.test";
 
-export const run = async () => {
+export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
   describe("Burn", async function () {
     const amount = 1;
 
@@ -12,7 +12,7 @@ export const run = async () => {
     });
 
     it("[SUCCESS] burnSpendableWhitelist `to` whitelist", async function () {
-      const {erc7818expWhitelist, deployer, alice} = await deployERC7818Whitelist();
+      const {erc7818expWhitelist, deployer, alice} = await deployERC7818WhitelistSelector({epochType});
       await expect(erc7818expWhitelist.addToWhitelist(alice.address))
         .to.emit(erc7818expWhitelist, ERC7818Whitelist.events.Whitelisted)
         .withArgs(deployer.address, alice.address);
@@ -26,7 +26,7 @@ export const run = async () => {
     });
 
     it("[SUCCESS] burnUnspendableWhitelist `to` whitelist", async function () {
-      const {erc7818expWhitelist, deployer, alice} = await deployERC7818Whitelist();
+      const {erc7818expWhitelist, deployer, alice} = await deployERC7818WhitelistSelector({epochType});
       await expect(erc7818expWhitelist.addToWhitelist(alice.address))
         .to.emit(erc7818expWhitelist, ERC7818Whitelist.events.Whitelisted)
         .withArgs(deployer.address, alice.address);
@@ -40,7 +40,7 @@ export const run = async () => {
     });
 
     it("[FAILED] cannot burn cause insufficient balance of whitelist", async function () {
-      const {erc7818expWhitelist, deployer, alice} = await deployERC7818Whitelist();
+      const {erc7818expWhitelist, deployer, alice} = await deployERC7818WhitelistSelector({epochType});
       await expect(erc7818expWhitelist.addToWhitelist(alice.address))
         .to.emit(erc7818expWhitelist, ERC7818Whitelist.events.Whitelisted)
         .withArgs(deployer.address, alice.address);
@@ -51,7 +51,7 @@ export const run = async () => {
     });
 
     it("[FAILED] burnSpendableWhitelist `to` non-whitelist", async function () {
-      const {erc7818expWhitelist, alice} = await deployERC7818Whitelist();
+      const {erc7818expWhitelist, alice} = await deployERC7818WhitelistSelector({epochType});
       await expect(erc7818expWhitelist.burnSpendableWhitelist(alice.address, amount)).to.be.revertedWithCustomError(
         erc7818expWhitelist,
         ERC7818Whitelist.errors.InvalidWhitelistAddress,
@@ -59,7 +59,7 @@ export const run = async () => {
     });
 
     it("[FAILED] burnUnspendableWhitelist `to` non-whitelist", async function () {
-      const {erc7818expWhitelist, alice} = await deployERC7818Whitelist();
+      const {erc7818expWhitelist, alice} = await deployERC7818WhitelistSelector({epochType});
       await expect(erc7818expWhitelist.burnUnspendableWhitelist(alice.address, amount)).to.be.revertedWithCustomError(
         erc7818expWhitelist,
         ERC7818Whitelist.errors.InvalidWhitelistAddress,

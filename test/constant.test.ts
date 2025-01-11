@@ -3,21 +3,24 @@ import {MaxUint256, ZeroAddress} from "ethers";
 export const constants = {
   MAX_UINT256: MaxUint256,
   ZERO_ADDRESS: ZeroAddress,
-  BLOCK_TIME: 250,
-  WINDOW_SIZE: 4,
-  BLOCKS_IN_EPOCH: 0,
-  BLOCKS_IN_WINDOW: 0,
+  EPOCH_TYPE: {
+    BLOCKS_BASED: 0,
+    TIME_BASED: 1,
+  },
+  DEFAULT_SECONDS_PER_EPOCH: 3600,
+  DEFAULT_BLOCKS_PER_EPOCH: 300,
+  DEFAULT_WINDOW_SIZE: 2,
   MIN_WINDOW_SIZE: 1,
   MAX_WINDOW_SIZE: 32,
-  MIN_BLOCK_TIME: 100,
-  MAX_BLOCK_TIME: 600_000,
+  MIN_BLOCKS_PER_EPOCH: 300,
+  MAX_BLOCKS_PER_EPOCH: 2_629_744,
   YEAR_IN_MILLISECONDS: 31_556_926_000,
 };
 
 export const SlidingWindow = {
   name: "MockSlidingWindow",
   errors: {
-    InvalidBlockTime: "InvalidBlockTime",
+    InvalidDuration: "InvalidDuration",
     InvalidWindowSize: "InvalidWindowSize",
   },
   events: {},
@@ -29,7 +32,18 @@ export const LightWeightSlidingWindow = {
   events: {},
 };
 
+export const ERC7818 = {
+  errors: {
+    ERC7818TransferredExpiredToken: "ERC7818TransferredExpiredToken",
+  },
+  events: {},
+};
+
 export const ERC20 = {
+  constructor: {
+    name: "PointToken",
+    symbol: "POINT",
+  },
   errors: {
     ERC20InsufficientBalance: "ERC20InsufficientBalance",
     ERC20InvalidApprover: "ERC20InvalidApprover",
@@ -45,29 +59,53 @@ export const ERC20 = {
 };
 
 export const ERC7818Backlist = {
-  name: "MockERC7818Backlist",
+  name: "MockERC7818Blacklist",
   errors: {
-    BlacklistedAddress: "BlacklistedAddress",
-    InvalidAddress: "InvalidAddress",
+    AccountBlacklisted: "AccountBlacklisted",
+    AccountNotBlacklisted: "AccountNotBlacklisted",
   },
   events: {
-    Blacklisted: "Blacklisted",
-    Unblacklisted: "Unblacklisted",
+    AddedToBlacklist: "AddedToBlacklist",
+    RemovedFromBlacklist: "RemovedFromBlacklist",
   },
 };
+
+export const ERC7818BlacklistBLSW = {
+  name: "MockERC7818BlacklistBLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC7818BlacklistTLSW = {
+  name: "MockERC7818BlacklistTLSW",
+  errors: {},
+  events: {},
+};
+
 
 export const ERC7818MintQuota = {
   name: "MockERC7818MintQuota",
   errors: {
-    UnauthorizedMinter: "UnauthorizedMinter",
     MintQuotaExceeded: "MintQuotaExceeded",
-    InvalidMinterAddress: "InvalidMinterAddress",
+    MinterNotSet: "MinterNotSet",
   },
   events: {
     QuotaSet: "QuotaSet",
     QuotaReset: "QuotaReset",
     QuotaMinted: "QuotaMinted",
   },
+};
+
+export const ERC7818MintQuotaBLSW = {
+  name: "MockERC7818MintQuotaBLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC7818MintQuotaTLSW = {
+  name: "MockERC7818MintQuotaTLSW",
+  errors: {},
+  events: {},
 };
 
 export const ERC7818Whitelist = {
@@ -83,20 +121,28 @@ export const ERC7818Whitelist = {
   },
 };
 
-export const ERC20EXPBase = {
-  name: "MockERC20EXPBase",
-  constructor: {
-    name: "PointToken",
-    symbol: "POINT",
-  },
+export const ERC7818WhitelistBLSW = {
+  name: "MockERC7818WhitelistBLSW",
   errors: {},
   events: {},
-  extensions: {
-    ERC7818Backlist,
-    ERC7818MintQuota,
-    ERC7818Whitelist,
-    // MockLightWeightERC20EXPWhitelist: "MockLightWeightERC20EXPWhitelist",
-  },
+};
+
+export const ERC7818WhitelistTLSW = {
+  name: "MockERC7818WhitelistTLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC20BLSW = {
+  name: "MockERC20BLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC20TLSW = {
+  name: "MockERC20TLSW",
+  errors: {},
+  events: {},
 };
 
 export const SlidingWindowLibrary = {
@@ -142,7 +188,7 @@ export const contracts = {
   },
   tokens: {
     ERC20,
-    ERC20EXPBase,
+    ERC20BLSW,
   },
   utils: {
     SlidingWindowLibrary,
