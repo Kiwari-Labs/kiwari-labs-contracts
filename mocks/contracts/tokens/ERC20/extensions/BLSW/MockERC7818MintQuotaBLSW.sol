@@ -9,9 +9,9 @@ contract MockERC7818MintQuotaBLSW is ERC20BLSW, ERC7818MintQuota {
     constructor(
         string memory _name,
         string memory _symbol,
-        uint40 blockTime_,
+        uint40 blocksPerEpoch_,
         uint8 windowSize_
-    ) ERC20BLSW(_name, _symbol, block.number, blockTime_, windowSize_, false) {}
+    ) ERC20BLSW(_name, _symbol, block.number, blocksPerEpoch_, windowSize_, false) {}
 
     function _epochType() internal pure virtual override(ERC20EXPBase, ERC20BLSW) returns (EPOCH_TYPE) {
         return super._epochType();
