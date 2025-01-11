@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
 
 /// @title ERC-5007 modified to support block-based
 
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
-interface IERC5007Mod is IERC721 {
+interface IERC7858 is IERC721 {
 
     error ERC5007TransferredInvalidToken();
 

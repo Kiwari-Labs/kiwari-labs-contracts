@@ -5,11 +5,11 @@ pragma solidity >=0.8.0 <0.9.0;
 /// @dev ERC721EXP Base contract each token have individual expiration date.
 /// @author Kiwari Labs
 
-import {IERC5007Mod} from "./extensions/IERC5007Mod.sol";
+import {IERC7858} from "./extensions/IERC7858.sol";
 import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
-abstract contract ERC721EXPBase is ERC721Enumerable, IERC5007Mod {
+abstract contract ERC721EXPBase is ERC721Enumerable, IERC7858 {
     struct Timestamp {
         uint256 startBlock;
         uint256 endBlock;
@@ -61,19 +61,19 @@ abstract contract ERC721EXPBase is ERC721Enumerable, IERC5007Mod {
         }
     }
 
-    /// @inheritdoc IERC5007Mod
+    /// @inheritdoc IERC7858
     function startTime(uint256 tokenId) public view virtual override returns (uint256) {
         return _tokensTimestamp[tokenId].startBlock;
     }
 
-    /// @inheritdoc IERC5007Mod
+    /// @inheritdoc IERC7858
     function endTime(uint256 tokenId) public view virtual override returns (uint256) {
         return _tokensTimestamp[tokenId].endBlock;
     }
 
     // @TODO function support interface
     function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, ERC721Enumerable) returns (bool) {
-        return interfaceId == type(IERC5007Mod).interfaceId || super.supportsInterface(interfaceId);
+        return interfaceId == type(IERC7858).interfaceId || super.supportsInterface(interfaceId);
     }
 
     // @TODO other useful function like isTokenValid
