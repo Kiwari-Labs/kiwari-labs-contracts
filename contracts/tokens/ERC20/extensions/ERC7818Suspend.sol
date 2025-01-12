@@ -10,12 +10,12 @@ abstract contract ERC7818Suspend is ERC20EXPBase {
     /// @notice Emitted when an account is added to the suspended list.
     /// @param caller The address that added the account to the suspended list.
     /// @param account The address of the suspended account.
-    event AddedToSuspended(address indexed caller, address indexed account);
+    event AddedToSuspend(address indexed caller, address indexed account);
 
     /// @notice Emitted when an account is removed from the suspended list.
     /// @param caller The address that removed the account from the suspended list.
     /// @param account The address of the reinstated account.
-    event RemovedFromSuspended(address indexed caller, address indexed account);
+    event RemovedFromSuspend(address indexed caller, address indexed account);
 
     /// @notice Reverts if the account is suspended.
     /// @param account The address of the suspended account.
@@ -55,18 +55,18 @@ abstract contract ERC7818Suspend is ERC20EXPBase {
      * @notice Adds an account to the suspended list.
      * @param account The address to suspend.
      */
-    function _addToSuspended(address account) internal onlyNotSuspended(account) {
+    function _addToSuspend(address account) internal onlyNotSuspended(account) {
         _suspended[account] = true;
-        emit AddedToSuspended(_msgSender(), account);
+        emit AddedToSuspend(_msgSender(), account);
     }
 
     /**
      * @notice Removes an account from the suspended list.
      * @param account The address to reinstate.
      */
-    function _removeFromSuspended(address account) internal onlySuspended(account) {
+    function _removeFromSuspend(address account) internal onlySuspended(account) {
         _suspended[account] = false;
-        emit RemovedFromSuspended(_msgSender(), account);
+        emit RemovedFromSuspend(_msgSender(), account);
     }
 
     /**
