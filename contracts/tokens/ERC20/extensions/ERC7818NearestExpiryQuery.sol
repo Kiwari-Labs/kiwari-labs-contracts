@@ -12,6 +12,8 @@ abstract contract ERC7818NearestExpiryQuery is ERC20EXPBase {
         (uint256 fromEpoch, ) = _getWindowRage(pointer);
         uint256 duration = _getPointersInWindow();
         (pointer, value) = _findValidBalance(account, fromEpoch, pointer, duration);
-        estimateExpiry = (pointer + duration);
+        if (pointer != 0) {
+            estimateExpiry = (pointer + duration);
+        }
     }
 }

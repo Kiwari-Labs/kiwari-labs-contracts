@@ -134,6 +134,18 @@ export const ERC7818WhitelistTLSW = {
   events: {},
 };
 
+export const ERC7818NearestExpiryQueryBLSW = {
+  name: "MockERC7818NearestExpiryQueryBLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC7818NearestExpiryQueryTLSW = {
+  name: "MockERC7818NearestExpiryQueryTLSW",
+  errors: {},
+  events: {},
+};
+
 export const ERC20BLSW = {
   name: "MockERC20BLSW",
   errors: {},

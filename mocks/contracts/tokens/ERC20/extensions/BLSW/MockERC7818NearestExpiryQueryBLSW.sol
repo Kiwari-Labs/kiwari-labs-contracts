@@ -5,13 +5,13 @@ import {ERC20EXPBase} from "../../../../../../contracts/tokens/ERC20/ERC20EXPBas
 import {ERC20BLSW} from "../../../../../../contracts/tokens/ERC20/ERC20BLSW.sol";
 import {ERC7818NearestExpiryQuery} from "../../../../../../contracts/tokens/ERC20/extensions/ERC7818NearestExpiryQuery.sol";
 
-contract MockERC7818NearesExpiryQueryBLSW is ERC20BLSW, ERC7818NearestExpiryQuery {
+contract MockERC7818NearestExpiryQueryBLSW is ERC20BLSW, ERC7818NearestExpiryQuery {
     constructor(
         string memory _name,
         string memory _symbol,
-        uint40 secondsPerEpoch_,
+        uint40 blocksPerEpoch_,
         uint8 windowSize_
-    ) ERC20BLSW(_name, _symbol, block.timestamp, secondsPerEpoch_, windowSize_, false) {}
+    ) ERC20BLSW(_name, _symbol, block.number, blocksPerEpoch_, windowSize_, false) {}
 
     function _epochType() internal pure virtual override(ERC20EXPBase, ERC20BLSW) returns (EPOCH_TYPE) {
         return super._epochType();
@@ -41,5 +41,9 @@ contract MockERC7818NearesExpiryQueryBLSW is ERC20BLSW, ERC7818NearestExpiryQuer
 
     function _pointerProvider() internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint256) {
         return super._pointerProvider();
+    }
+
+    function mint(address to, uint256 value) public {
+        _mint(to, value);
     }
 }

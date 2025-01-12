@@ -42,4 +42,8 @@ contract MockERC7818NearestExpiryQueryTLSW is ERC20TLSW, ERC7818NearestExpiryQue
     function _pointerProvider() internal view virtual override(ERC20EXPBase, ERC20TLSW) returns (uint256) {
         return super._pointerProvider();
     }
+
+    function mint(address to, uint256 value) public {
+        _mint(to, value);
+    }
 }
