@@ -58,7 +58,31 @@ export const ERC20 = {
   },
 };
 
-export const ERC7818Backlist = {
+export const ERC7818Suspend = {
+  name: "MockERC7818Suspend",
+  errors: {
+    AccountSuspended: "AccountSuspended",
+    AccountNotSuspended: "AccountNotSuspended",
+  },
+  events: {
+    AddedToSuspend: "AddedToSuspend",
+    RemovedFromSuspend: "RemovedFromSuspend",
+  },
+};
+
+export const ERC7818SuspendBLSW = {
+  name: "MockERC7818SuspendBLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC7818SuspendTLSW = {
+  name: "MockERC7818SuspendTLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC7818Blacklist = {
   name: "MockERC7818Blacklist",
   errors: {
     AccountBlacklisted: "AccountBlacklisted",

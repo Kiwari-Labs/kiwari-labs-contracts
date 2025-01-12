@@ -1,6 +1,6 @@
 import {expect} from "chai";
-import {deployERC7818BacklistSelector} from "./deployer.test";
-import {constants, ERC7818Backlist} from "../../../../constant.test";
+import {deployERC7818BlacklistSelector} from "./deployer.test";
+import {constants, ERC7818Blacklist} from "../../../../constant.test";
 import {hardhat_reset} from "../../../../utils.test";
 
 export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
@@ -12,18 +12,18 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
     });
 
     it("[SUCCESS] mint `to` non-blacklist", async function () {
-      const {erc7818Backlist, alice} = await deployERC7818BacklistSelector({epochType});
+      const {erc7818Backlist, alice} = await deployERC7818BlacklistSelector({epochType});
       expect(await erc7818Backlist.isBlacklisted(alice.address)).to.equal(false);
       await erc7818Backlist.mint(alice.address, amount);
       expect(await erc7818Backlist.balanceOf(alice.address)).to.equal(amount);
     });
 
     it("[FAILED] mint `to` blacklist", async function () {
-      const {erc7818Backlist, alice} = await deployERC7818BacklistSelector({epochType});
+      const {erc7818Backlist, alice} = await deployERC7818BlacklistSelector({epochType});
       await erc7818Backlist.addToBlacklist(alice.address);
       expect(await erc7818Backlist.isBlacklisted(alice.address)).to.equal(true);
       await expect(erc7818Backlist.mint(alice.address, amount))
-        .to.revertedWithCustomError(erc7818Backlist, ERC7818Backlist.errors.AccountBlacklisted)
+        .to.revertedWithCustomError(erc7818Backlist, ERC7818Blacklist.errors.AccountBlacklisted)
         .withArgs(alice.address);
     });
   });

@@ -5,7 +5,7 @@ import * as Mint from "./mint.test";
 import * as Transfer from "./transfer.test";
 
 export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
-  describe("ERC7818Backlist", async function () {
+  describe("ERC7818Blacklist", async function () {
     AddToBlacklist.run({epochType});
     RemoveFromBlacklist.run({epochType});
     Mint.run({epochType});
