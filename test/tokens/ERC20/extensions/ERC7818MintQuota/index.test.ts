@@ -7,7 +7,7 @@ import * as DecreaseQuota from "./decreaseQuota.test";
 import * as Mint from "./mint.test";
 
 export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
-  describe.only("ERC7818MintQuota", async function () {
+  describe("ERC7818MintQuota", async function () {
     AddMinter.run({epochType});
     RemoveMinter.run({epochType});
     SetQuota.run({epochType});
