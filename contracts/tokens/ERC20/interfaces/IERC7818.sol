@@ -8,6 +8,8 @@ pragma solidity >=0.8.0 <0.9.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface IERC7818 is IERC20 {
+    /// @dev This error is triggered when a transfer operation is attempted for a token that is past its validity period.
+    /// @notice Thrown when an attempt is made to transfer a token that has expired.
     error ERC7818TransferredExpiredToken();
 
     /// @dev Enum represents the types of `epoch` that can be used.

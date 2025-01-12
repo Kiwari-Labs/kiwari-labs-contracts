@@ -7,13 +7,13 @@ contract MockBLSW {
     using LSW for LSW.Window;
     LSW.Window public window;
 
-    constructor(uint256 startBlockNumber, uint40 blockTime, uint8 windowSize, bool safe) {
-        window.initializedBlock(startBlockNumber != 0 ? startBlockNumber : block.number);
-        window.initializedState(blockTime, windowSize, safe);
+    constructor(uint256 startBlockNumber_, uint40 blocksPerEpoch_, uint8 windowSize_, bool safe_) {
+        window.initializedBlock(startBlockNumber_ != 0 ? startBlockNumber_ : block.number);
+        window.initializedState(blocksPerEpoch_, windowSize_, safe_);
     }
 
-    function updateWindow(uint40 blockTime, uint8 windowSize, bool safe) public {
-        window.initializedState(blockTime, windowSize, safe);
+    function updateWindow(uint40 blocksPerEpoch, uint8 windowSize_, bool safe) public {
+        window.initializedState(blocksPerEpoch, windowSize_, safe);
     }
 
     function windowRange(uint256 blockNumber) public view returns (uint256, uint256) {

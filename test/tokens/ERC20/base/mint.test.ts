@@ -1,9 +1,9 @@
 import {expect} from "chai";
-import {hardhat_latestBlock, hardhat_reset} from "../../../utils.test";
-import {deployERC20EXPBase} from "./deployer.test";
+import {hardhat_reset, hardhat_latestPointer} from "../../../utils.test";
+import {deployERC20Selector} from "./deployer.test";
 import {ERC20, constants} from "../../../constant.test";
 
-export const run = async () => {
+export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
   describe("Mint", async function () {
     const amount = 1;
 
@@ -12,24 +12,23 @@ export const run = async () => {
     });
 
     it("[SUCCESS] mint", async function () {
-      const {erc20exp, alice} = await deployERC20EXPBase({});
+      const {erc20exp, alice} = await deployERC20Selector({epochType});
       await expect(erc20exp.mint(alice.address, amount))
         .to.emit(erc20exp, ERC20.events.Transfer)
         .withArgs(constants.ZERO_ADDRESS, alice.address, amount);
 
       const epoch = await erc20exp.currentEpoch();
-      const latestBlock = await hardhat_latestBlock();
+      const latestPointer = await hardhat_latestPointer(epochType);
       expect(await erc20exp.balanceOf(alice.address)).to.equal(amount);
       expect(await erc20exp.balanceOfAtEpoch(epoch, alice.address)).to.equal(amount);
-      /* additional function */
-      expect(await erc20exp.getWorldStateBalance(latestBlock));
+      expect(await erc20exp.getWorldStateBalance(latestPointer));
       const list = await erc20exp.tokenList(alice.address, epoch);
       expect(list.length).to.equal(1);
-      expect(list[0]).to.equal(latestBlock);
+      expect(list[0]).to.equal(latestPointer);
     });
 
     it("[FAILED] mint to zero address", async function () {
-      const {erc20exp} = await deployERC20EXPBase({});
+      const {erc20exp} = await deployERC20Selector({epochType});
       await expect(erc20exp.mint(constants.ZERO_ADDRESS, amount))
         .to.be.revertedWithCustomError(erc20exp, ERC20.errors.ERC20InvalidReceiver)
         .withArgs(constants.ZERO_ADDRESS);

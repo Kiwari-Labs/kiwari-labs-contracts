@@ -204,8 +204,15 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
         }
     }
 
+    /// @dev Checks if the given address is a whitelist account.
+    /// @param account The address to check.
+    /// @return bool Returns true if the address is a whitelist account, false otherwise.
+    function isWhitelist(address account) external view returns (bool) {
+        return _whitelist[account];
+    }
+
     /// @dev See {IERC20-balanceOf}
-    function balanceOf(address account) public view override returns (uint256) {
+    function balanceOf(address account) public view virtual override returns (uint256) {
         if (_whitelist[account]) {
             return _unSafeBalanceOf(account, true);
         } else {
@@ -221,17 +228,10 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
     }
 
     /// @dev See {IERC20-transferFrom}
-    function transferFrom(address from, address to, uint256 value) public override returns (bool) {
+    function transferFrom(address from, address to, uint256 value) public virtual override returns (bool) {
         address spender = _msgSender();
         _spendAllowance(from, spender, value);
         _transferHandler(from, to, value);
         return true;
-    }
-
-    /// @dev Checks if the given address is a whitelist account.
-    /// @param account The address to check.
-    /// @return bool Returns true if the address is a whitelist account, false otherwise.
-    function isWhitelist(address account) external view returns (bool) {
-        return _whitelist[account];
     }
 }

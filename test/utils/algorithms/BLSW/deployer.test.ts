@@ -1,18 +1,18 @@
 import {ethers} from "hardhat";
 import {BLSWLibrary, constants} from "../../../constant.test";
-import {NumberLike} from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
+import {MockBLSW} from "../../../../typechain-types/mocks/contracts/utils";
 
 export interface Window {
-  _blocksPerEpoch: NumberLike;
-  _blocksPerWindow: NumberLike;
-  _windowSize: NumberLike;
-  _initialBlockNumber: NumberLike;
+  _blocksPerEpoch: number;
+  _blocksPerWindow: number;
+  _windowSize: number;
+  _initialBlockNumber: number;
 }
 
 export const calculateSlidingWindowState = function ({
   startBlockNumber = 1,
-  blockTime = constants.BLOCK_TIME,
-  windowSize = constants.WINDOW_SIZE,
+  blocksPerEpoch = constants.DEFAULT_BLOCKS_PER_EPOCH,
+  windowSize = constants.DEFAULT_WINDOW_SIZE,
 }): Window {
   const self: Window = {
     _blocksPerEpoch: 0,
@@ -21,8 +21,6 @@ export const calculateSlidingWindowState = function ({
     _initialBlockNumber: 0,
   };
   self._initialBlockNumber = startBlockNumber;
-  // Why 'Math.floor', Since Solidity always rounds down.
-  const blocksPerEpoch = Math.floor(Math.floor(constants.YEAR_IN_MILLISECONDS / blockTime) / 4);
   self._blocksPerEpoch = blocksPerEpoch;
   self._blocksPerWindow = blocksPerEpoch * windowSize;
   self._windowSize = windowSize;
@@ -31,13 +29,19 @@ export const calculateSlidingWindowState = function ({
 
 export const deployBLSW = async function ({
   startBlockNumber = 1,
-  blockTime = constants.BLOCK_TIME,
-  windowSize = constants.WINDOW_SIZE,
+  blocksPerEpoch = constants.DEFAULT_BLOCKS_PER_EPOCH,
+  windowSize = constants.DEFAULT_WINDOW_SIZE,
   development = false,
 }) {
+
   const [deployer, alice, bob, charlie] = await ethers.getSigners();
   const BLSW = await ethers.getContractFactory(BLSWLibrary.name, deployer);
-  const slidingWindow = await BLSW.deploy(startBlockNumber, blockTime, windowSize, development);
+  const slidingWindow = (await BLSW.deploy(
+    startBlockNumber,
+    blocksPerEpoch,
+    windowSize,
+    development,
+  )) as any as MockBLSW;
   await slidingWindow.waitForDeployment();
 
   return {

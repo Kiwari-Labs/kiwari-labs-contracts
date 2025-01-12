@@ -4,14 +4,15 @@ import * as Mint from "./mint.test";
 import * as Burn from "./burn.test";
 import * as Transfer from "./transfer.test";
 import * as TransferFrom from "./transferFrom.test";
+import { constants } from "../../../../constant.test";
 
-export const run = async () => {
+export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
   describe("ERC7818Whitelist", async function () {
-    AddToWhitelist.run();
-    RemoveFromWhitelist.run();
-    Mint.run();
-    Burn.run();
-    Transfer.run();
-    TransferFrom.run();
+    AddToWhitelist.run({epochType});
+    RemoveFromWhitelist.run({epochType});
+    Mint.run({epochType});
+    Burn.run({epochType});
+    Transfer.run({epochType});
+    TransferFrom.run({epochType});
   });
 };

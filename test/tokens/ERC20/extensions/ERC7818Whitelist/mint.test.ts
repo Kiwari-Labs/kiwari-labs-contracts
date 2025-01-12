@@ -1,9 +1,9 @@
 import {expect} from "chai";
-import {deployERC7818Whitelist} from "./deployer.test";
+import {deployERC7818WhitelistSelector} from "./deployer.test";
 import {ERC7818Whitelist, ERC20, constants} from "../../../../constant.test";
 import {hardhat_reset} from "../../../../utils.test";
 
-export const run = async () => {
+export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
   describe("Mint", async function () {
     const amount = 1;
 
@@ -12,7 +12,7 @@ export const run = async () => {
     });
 
     it("[SUCCESS] mintSpendableWhitelist `to` whitelist", async function () {
-      const {erc7818expWhitelist, deployer, alice} = await deployERC7818Whitelist();
+      const {erc7818expWhitelist, deployer, alice} = await deployERC7818WhitelistSelector({epochType});
       await erc7818expWhitelist.addToWhitelist(alice.address);
       await expect(erc7818expWhitelist.mintSpendableWhitelist(alice.address, amount))
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
@@ -22,7 +22,7 @@ export const run = async () => {
     });
 
     it("[SUCCESS] mintUnspendableWhitelist `to` whitelist", async function () {
-      const {erc7818expWhitelist, deployer, alice} = await deployERC7818Whitelist();
+      const {erc7818expWhitelist, deployer, alice} = await deployERC7818WhitelistSelector({epochType});
       await erc7818expWhitelist.addToWhitelist(alice.address);
       await expect(erc7818expWhitelist.mintUnspendableWhitelist(alice.address, amount))
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
@@ -32,7 +32,7 @@ export const run = async () => {
     });
 
     it("[FAILED] mintSpendableWhitelist `to` non-whitelist", async function () {
-      const {erc7818expWhitelist, alice} = await deployERC7818Whitelist();
+      const {erc7818expWhitelist, alice} = await deployERC7818WhitelistSelector({epochType});
       await expect(erc7818expWhitelist.mintSpendableWhitelist(alice.address, 1)).to.be.revertedWithCustomError(
         erc7818expWhitelist,
         ERC7818Whitelist.errors.InvalidWhitelistAddress,
@@ -41,7 +41,7 @@ export const run = async () => {
     });
 
     it("[FAILED] mintUnspendableWhitelist `to` non-whitelist", async function () {
-      const {erc7818expWhitelist, alice} = await deployERC7818Whitelist();
+      const {erc7818expWhitelist, alice} = await deployERC7818WhitelistSelector({epochType});
       await expect(erc7818expWhitelist.mintUnspendableWhitelist(alice.address, 1)).to.be.revertedWithCustomError(
         erc7818expWhitelist,
         ERC7818Whitelist.errors.InvalidWhitelistAddress,

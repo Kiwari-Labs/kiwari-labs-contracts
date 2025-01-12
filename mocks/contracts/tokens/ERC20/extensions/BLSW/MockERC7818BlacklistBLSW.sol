@@ -1,34 +1,12 @@
-# @kiwarilabs/contracts
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity >=0.8.0 <0.9.0;
 
-A Solidity library for expirable tokens with time or block-based expiration.
+import {ERC20EXPBase} from "../../../../../../contracts/tokens/ERC20/ERC20EXPBase.sol";
+import {ERC20BLSW} from "../../../../../../contracts/tokens/ERC20/ERC20BLSW.sol";
+import {ERC7818Blacklist} from "../../../../../../contracts/tokens/ERC20/extensions/ERC7818Blacklist.sol";
 
-- [ERC-7818]()
-- [ERC-7858]()
-
-## Installation
-
-Install via `npm`
-``` shell
-npm install --dev @kiwarilabs/contracts@stable
-```
-Install via `yarn`
-``` shell
-yarn add --dev @kiwarilabs/contracts@stable
-```
-
-## Usage
-
-### ERC-7818
-
-```solidity
-// SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
-
-import {ERC20EXPBase} from "@kiwarilabs/contracts/tokens/ERC20/ERC20EXPBase.sol";
-import {ERC20BLSW} from "../../../../../../contracts/tokens/ERC20/BLSW/ERC20BLSW.sol";
-
-contract ExpirableERC20 is ERC20EXPBase, ERC20BLSW {
-  constructor(
+contract MockERC7818BlacklistBLSW is ERC20BLSW, ERC7818Blacklist {
+    constructor(
         string memory _name,
         string memory _symbol,
         uint40 blocksPerEpoch_,
@@ -61,24 +39,23 @@ contract ExpirableERC20 is ERC20EXPBase, ERC20BLSW {
         return super._getPointersInWindow();
     }
 
-    /// @notice In some Layer 2 (L2) use pre-compiled/system-contract to get block height instead of block.number.
-    /// @dev Retrieve block.number as pointer in block-based lazy sliding window.
-    /// @return uint256 return the current block height.
     function _pointerProvider() internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint256) {
         return super._pointerProvider();
     }
+
+    function _update(address from, address to, uint256 value) internal virtual override(ERC20EXPBase, ERC7818Blacklist) {
+        super._update(from, to, value);
+    }
+
+    function addToBlacklist(address account) public {
+        _addToBlacklist(account);
+    }
+
+    function removeFromBlacklist(address account) public {
+        _removeFromBlacklist(account);
+    }
+
+    function mint(address to, uint256 value) public {
+        _mint(to, value);
+    }
 }
-```
-
-## Contribute
-
-Check out the contribution [guide](CONTRIBUTING.md)
-
-## Support and Issue
-
-For support or any inquiries, feel free to reach out to us at [github-issue](https://github.com/Kiwari-Labs/kiwari-labs-contracts/issues) or kiwarilabs@protonmail.com
-
-## License
-
-This repository is released under the [Apache-2.0](LICENSE).  
-Copyright (C) Kiwari Labs. 
