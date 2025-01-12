@@ -2,7 +2,10 @@
 
 A Solidity library for expirable tokens with time or block-based expiration.
 
-### Installation
+- [ERC-7818]()
+- [ERC-7858]()
+
+## Installation
 
 Install via `npm`
 ``` shell
@@ -13,25 +16,61 @@ Install via `yarn`
 yarn add --dev @kiwarilabs/contracts@stable
 ```
 
-### Usage
+## Usage
+
+### ERC-7818
+
 ```solidity
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "@kiwarilabs/contracts/tokens/ERC20/ERC20EXPBase.sol";
+import {ERC20EXPBase} from "@kiwarilabs/contracts/tokens/ERC20/ERC20EXPBase.sol";
+import {ERC20BLSW} from "../../../../../../contracts/tokens/ERC20/BLSW/ERC20BLSW.sol";
 
-contract MyToken is ERC20EXPBase {
-  /// @param blockTim The average block time of the network, measured in milliseconds.
-  /// @param windowSize represents the total number of epochs that form one full expiration cycle.  
-  /// For example, Sliding Window make 4 epochs/year could imply each epoch lasts 3 months.
+contract ExpirableERC20 is ERC20EXPBase, ERC20BLSW {
   constructor(
-    uint16 blockTime,  // block time of the network (in milliseconds)
-    uint8 windowSize,   // Number of slots in one expiration cycle (e.g., 4 for annual expiration)
-  ) ERC20EXPBase("MyToken", "MYT", block.number, blockTime, windowSize) {}
+        string memory _name,
+        string memory _symbol,
+        uint40 blocksPerEpoch_,
+        uint8 windowSize_
+    ) ERC20BLSW(_name, _symbol, block.number, blocksPerEpoch_, windowSize_, false) {}
+
+    function _epochType() internal pure virtual override(ERC20EXPBase, ERC20BLSW) returns (EPOCH_TYPE) {
+        return super._epochType();
+    }
+
+    function _getEpoch(uint256 pointer) internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint256) {
+        return super._getEpoch(pointer);
+    }
+
+    function _getWindowRage(
+        uint256 pointer
+    ) internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint256 fromEpoch, uint256 toEpoch) {
+        return super._getWindowRage(pointer);
+    }
+
+    function _getWindowSize() internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint8) {
+        return super._getWindowSize();
+    }
+
+    function _getPointersInEpoch() internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint40) {
+        return super._getPointersInEpoch();
+    }
+
+    function _getPointersInWindow() internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint40) {
+        return super._getPointersInWindow();
+    }
+
+    // @notice In some Layer 2 (L2) use pre-compiled/system-contract to get block height instead of block.number.
+    /// @dev Retrieve block.number as pointer in block-based lazy sliding window.
+    /// @return uint256 return the current block height.
+    function _pointerProvider() internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint256) {
+        return super._pointerProvider();
+    }
 }
 ```
 
-### Contribute
+## Contribute
 
 Check out the contribution [guide](CONTRIBUTING.md)
 
@@ -39,7 +78,7 @@ Check out the contribution [guide](CONTRIBUTING.md)
 
 For support or any inquiries, feel free to reach out to us at [github-issue](https://github.com/Kiwari-Labs/kiwari-labs-contracts/issues) or kiwarilabs@protonmail.com
 
-### License
+## License
 
-All code within the `contracts` directory is released under the [Apache-2.0](LICENSE).  
+This repository is released under the [Apache-2.0](LICENSE).  
 Copyright (C) Kiwari Labs. 
