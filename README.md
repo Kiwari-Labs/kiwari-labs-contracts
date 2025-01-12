@@ -61,7 +61,7 @@ contract ExpirableERC20 is ERC20EXPBase, ERC20BLSW {
         return super._getPointersInWindow();
     }
 
-    // @notice In some Layer 2 (L2) use pre-compiled/system-contract to get block height instead of block.number.
+    /// @notice In some Layer 2 (L2) use pre-compiled/system-contract to get block height instead of block.number.
     /// @dev Retrieve block.number as pointer in block-based lazy sliding window.
     /// @return uint256 return the current block height.
     function _pointerProvider() internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint256) {
