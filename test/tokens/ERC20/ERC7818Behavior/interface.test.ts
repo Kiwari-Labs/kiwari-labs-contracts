@@ -20,9 +20,18 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       expect(await erc20exp.totalSupply()).to.equal(0);
     });
 
+    it("[SUCCESS] balance", async function () {
+      const {erc20exp, alice} = await deployERC20Selector({epochType});
+      const epoch = await erc20exp.currentEpoch();
+      expect(await erc20exp.balanceOfAtEpoch(epoch, alice.address)).to.equal(0);
+      expect(await erc20exp.balanceOfAtEpoch(epoch + 1n, alice.address)).to.equal(0);
+    });
+
     it("[SUCCESS] balanceAtEpoch", async function () {
       const {erc20exp, alice} = await deployERC20Selector({epochType});
-      expect(await erc20exp.balanceOfAtEpoch(0, alice.address)).to.equal(0);
+      const epoch = await erc20exp.currentEpoch();
+      expect(await erc20exp.balanceOfAtEpoch(epoch, alice.address)).to.equal(0);
+      expect(await erc20exp.balanceOfAtEpoch(epoch + 1n, alice.address)).to.equal(0);
     });
 
     it("[SUCCESS] currentEpoch", async function () {

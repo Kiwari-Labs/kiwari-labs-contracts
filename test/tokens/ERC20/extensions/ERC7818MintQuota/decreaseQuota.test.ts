@@ -32,7 +32,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
     it("[FAILED] mint quota exceeded", async function () {
       const {erc7818MintQuota, alice} = await deployERC7818MintQuotaSelector({epochType});
 
-      await expect(erc7818MintQuota.addMinter(alice.address, quota));
+      await erc7818MintQuota.addMinter(alice.address, quota);
       await expect(erc7818MintQuota.decreaseQuota(alice.address, quota + quota)).to.be.revertedWithCustomError(
         erc7818MintQuota,
         ERC7818MintQuota.errors.MintQuotaExceeded,
