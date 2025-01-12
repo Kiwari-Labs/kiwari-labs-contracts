@@ -1,6 +1,6 @@
 ## Prerequisites
 
-Before you begin developing or contributing to kiwari-labs-contracts, ensure that the following software is installed.
+Before you begin developing or contributing to kiwari-labs-contracts, ensure that the following software is installed. And please follow the code pattern.
 
 - node [Download](https://nodejs.org/en/)
 - nvm [Download](https://github.com/nvm-sh/nvm#installing-and-updating)
@@ -46,4 +46,4 @@ yarn coverage
 ```
 
 > [!IMPORTANT]
-> require at least 4GB of RAM, to run all the test coverage.
+> require more than 4GB of RAM, to run all the test coverage.
