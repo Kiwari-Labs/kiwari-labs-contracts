@@ -9,7 +9,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       await hardhat_reset();
     });
 
-    it("[SUCCESS] transfer `to` non-blacklist", async function () {
+    it("[SUCCESS] transfer `to` non-blacklisted", async function () {
       const {erc7818Blacklist, alice, bob} = await deployERC7818BlacklistSelector({epochType});
       await erc7818Blacklist.mint(alice.address, 100);
       expect(await erc7818Blacklist.isBlacklisted(alice.address)).to.equal(false);
@@ -18,7 +18,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       expect(await erc7818Blacklist.balanceOf(bob.address)).to.equal(100);
     });
 
-    it("[SUCCESS] transfer `from` non-blacklist", async function () {
+    it("[SUCCESS] transfer `from` non-blacklisted", async function () {
       const {erc7818Blacklist, alice, bob} = await deployERC7818BlacklistSelector({epochType});
       await erc7818Blacklist.mint(alice.address, 100);
       await erc7818Blacklist.connect(alice).approve(bob.address, 100);
@@ -28,7 +28,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       expect(await erc7818Blacklist.balanceOf(bob.address)).to.equal(100);
     });
 
-    it("[FAILED] transfer `to` blacklist", async function () {
+    it("[FAILED] transfer `to` blacklisted", async function () {
       const {erc7818Blacklist, alice, bob} = await deployERC7818BlacklistSelector({epochType});
       await erc7818Blacklist.addToBlacklist(bob.address);
       expect(await erc7818Blacklist.isBlacklisted(alice.address)).to.equal(false);
@@ -38,7 +38,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
         .withArgs(bob.address);
     });
 
-    it("[FAILED] transfer `from` blacklist", async function () {
+    it("[FAILED] transfer `from` blacklisted", async function () {
       const {erc7818Blacklist, alice, bob} = await deployERC7818BlacklistSelector({epochType});
       await erc7818Blacklist.mint(alice.address, 100);
       await erc7818Blacklist.connect(alice).approve(bob.address, 100);

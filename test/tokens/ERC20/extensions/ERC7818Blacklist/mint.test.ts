@@ -11,14 +11,14 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       await hardhat_reset();
     });
 
-    it("[SUCCESS] mint `to` non-blacklist", async function () {
+    it("[SUCCESS] mint `to` non-blacklisted", async function () {
       const {erc7818Blacklist, alice} = await deployERC7818BlacklistSelector({epochType});
       expect(await erc7818Blacklist.isBlacklisted(alice.address)).to.equal(false);
       await erc7818Blacklist.mint(alice.address, amount);
       expect(await erc7818Blacklist.balanceOf(alice.address)).to.equal(amount);
     });
 
-    it("[FAILED] mint `to` blacklist", async function () {
+    it("[FAILED] mint `to` blacklisted", async function () {
       const {erc7818Blacklist, alice} = await deployERC7818BlacklistSelector({epochType});
       await erc7818Blacklist.addToBlacklist(alice.address);
       expect(await erc7818Blacklist.isBlacklisted(alice.address)).to.equal(true);
