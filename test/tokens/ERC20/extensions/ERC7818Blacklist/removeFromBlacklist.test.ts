@@ -10,18 +10,18 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
     });
 
     it("[SUCCESS] removeFromBlacklist", async function () {
-      const {erc7818Backlist, deployer, alice} = await deployERC7818BlacklistSelector({epochType});
-      await erc7818Backlist.addToBlacklist(alice.address);
-      await expect(erc7818Backlist.removeFromBlacklist(alice.address))
-        .to.emit(erc7818Backlist, ERC7818Blacklist.events.RemovedFromBlacklist)
+      const {erc7818Blacklist, deployer, alice} = await deployERC7818BlacklistSelector({epochType});
+      await erc7818Blacklist.addToBlacklist(alice.address);
+      await expect(erc7818Blacklist.removeFromBlacklist(alice.address))
+        .to.emit(erc7818Blacklist, ERC7818Blacklist.events.RemovedFromBlacklist)
         .withArgs(deployer.address, alice.address);
-      expect(await erc7818Backlist.isBlacklisted(alice.address)).to.equal(false);
+      expect(await erc7818Blacklist.isBlacklisted(alice.address)).to.equal(false);
     });
 
     it("[FAILED] account not blacklisted", async function () {
-      const {erc7818Backlist, alice} = await deployERC7818BlacklistSelector({epochType});
-      await expect(erc7818Backlist.removeFromBlacklist(alice.address)).to.be.revertedWithCustomError(
-        erc7818Backlist,
+      const {erc7818Blacklist, alice} = await deployERC7818BlacklistSelector({epochType});
+      await expect(erc7818Blacklist.removeFromBlacklist(alice.address)).to.be.revertedWithCustomError(
+        erc7818Blacklist,
         ERC7818Blacklist.errors.AccountNotBlacklisted,
       );
     });

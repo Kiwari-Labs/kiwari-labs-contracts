@@ -22,15 +22,15 @@ export const deployERC7818BlacklistTLSW = async function ({
 } = {}) {
   const [deployer, alice, bob, charlie] = await ethers.getSigners();
   const ERC7818_BACKLIST = await ethers.getContractFactory(ERC7818BlacklistTLSW.name, deployer);
-  const erc7818Backlist = (await ERC7818_BACKLIST.deploy(
+  const erc7818Blacklist = (await ERC7818_BACKLIST.deploy(
     ERC20.constructor.name,
     ERC20.constructor.symbol,
     secondsPerEpoch,
     windowSize,
   )) as any as MockERC7818BlacklistTLSW;
-  await erc7818Backlist.waitForDeployment();
+  await erc7818Blacklist.waitForDeployment();
   return {
-    erc7818Backlist,
+    erc7818Blacklist,
     deployer,
     alice,
     bob,
@@ -44,15 +44,15 @@ export const deployERC7818BlacklistBLSW = async function ({
 } = {}) {
   const [deployer, alice, bob, charlie] = await ethers.getSigners();
   const ERC7818_BACKLIST = await ethers.getContractFactory(ERC7818BlacklistBLSW.name, deployer);
-  const erc7818Backlist = (await ERC7818_BACKLIST.deploy(
+  const erc7818Blacklist = (await ERC7818_BACKLIST.deploy(
     ERC20.constructor.name,
     ERC20.constructor.symbol,
     blocksPerEpoch,
     windowSize,
   )) as any as MockERC7818BlacklistBLSW;
-  await erc7818Backlist.waitForDeployment();
+  await erc7818Blacklist.waitForDeployment();
   return {
-    erc7818Backlist,
+    erc7818Blacklist,
     deployer,
     alice,
     bob,
