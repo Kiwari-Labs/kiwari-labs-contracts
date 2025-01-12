@@ -14,7 +14,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
     it("[SUCCESS] increaseQuota", async function () {
       const {erc7818MintQuota, deployer, alice} = await deployERC7818MintQuotaSelector({epochType});
 
-      await expect(erc7818MintQuota.addMinter(alice.address, quota));
+      await erc7818MintQuota.addMinter(alice.address, quota);
       await expect(erc7818MintQuota.increaseQuota(alice.address, 10))
         .to.emit(erc7818MintQuota, ERC7818MintQuota.events.QuotaSet)
         .withArgs(deployer.address, alice.address, quota + 10);
