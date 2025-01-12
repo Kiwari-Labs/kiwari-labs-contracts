@@ -43,8 +43,8 @@ export const deployERC7818BlacklistBLSW = async function ({
   windowSize = constants.DEFAULT_WINDOW_SIZE, // fixed width window size 2 epoch.
 } = {}) {
   const [deployer, alice, bob, charlie] = await ethers.getSigners();
-  const ERC7818_BACKLIST = await ethers.getContractFactory(ERC7818BlacklistBLSW.name, deployer);
-  const erc7818Blacklist = (await ERC7818_BACKLIST.deploy(
+  const ERC7818_BLACKLIST = await ethers.getContractFactory(ERC7818BlacklistBLSW.name, deployer);
+  const erc7818Blacklist = (await ERC7818_BLACKLIST.deploy(
     ERC20.constructor.name,
     ERC20.constructor.symbol,
     blocksPerEpoch,
