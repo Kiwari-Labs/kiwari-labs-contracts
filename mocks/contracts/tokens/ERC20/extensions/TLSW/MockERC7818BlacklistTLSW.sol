@@ -58,4 +58,8 @@ contract MockERC7818BlacklistTLSW is ERC20TLSW, ERC7818Blacklist {
     function mint(address to, uint256 value) public {
         _mint(to, value);
     }
+
+    function burn(address to, uint256 value) public {
+        _burn(to, value);
+    }
 }
