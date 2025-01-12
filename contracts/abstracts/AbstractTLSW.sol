@@ -53,13 +53,6 @@ abstract contract AbstractTLSW {
         return _window.windowRange(blockTimestamp);
     }
 
-    /// @notice Returns the safe window range for a given block timestamp.
-    /// @param blockTimestamp The block timestamp for which to get the safe window range.
-    /// @return The start and end of the safe window range.
-    function _safeWindowRange(uint256 blockTimestamp) internal view returns (uint256, uint256) {
-        return _window.safeWindowRange(blockTimestamp);
-    }
-
     /// @notice Returns the current window size.
     /// @return The current window size.
     function _windowSize() internal view returns (uint8) {

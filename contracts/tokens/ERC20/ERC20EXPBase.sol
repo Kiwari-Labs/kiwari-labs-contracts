@@ -438,8 +438,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
         uint256 balance = _computeBalanceAtEpoch(fromEpoch, account, pointer, _getPointersInWindow());
         if (fromEpoch == toEpoch) {
             return balance;
-        }
-        if (fromEpoch < toEpoch) {
+        } else {
             fromEpoch += 1;
         }
         balance += _computeBalanceOverEpochRange(fromEpoch, toEpoch, account);

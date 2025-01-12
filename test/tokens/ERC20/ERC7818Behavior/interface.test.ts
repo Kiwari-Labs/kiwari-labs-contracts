@@ -57,11 +57,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       await hardhat_increasePointerTo(epochType, epochLength * duration);
       expect(await erc20exp.isEpochExpired(0)).to.equal(false);
 
-      // NOTE: buffer 1 epoch
-      await hardhat_increasePointerTo(epochType, epochLength - 1n);
-      expect(await erc20exp.isEpochExpired(0)).to.equal(false);
-
-      await hardhat_increasePointerTo(epochType, 1n);
+      await hardhat_increasePointerTo(epochType, epochLength + 1n);
       expect(await erc20exp.isEpochExpired(0)).to.equal(true);
     });
 

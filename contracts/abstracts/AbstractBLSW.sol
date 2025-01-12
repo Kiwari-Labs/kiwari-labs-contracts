@@ -53,13 +53,6 @@ abstract contract AbstractBLSW {
         return _window.windowRange(blockNumber);
     }
 
-    /// @notice Returns the safe window range for a given block number.
-    /// @param blockNumber The block number for which to get the safe window range.
-    /// @return The start and end of the safe window range.
-    function _safeWindowRange(uint256 blockNumber) internal view returns (uint256, uint256) {
-        return _window.safeWindowRange(blockNumber);
-    }
-
     /// @notice Returns the current window size.
     /// @return The current window size.
     function _windowSize() internal view returns (uint8) {
