@@ -1,6 +1,6 @@
 # @kiwarilabs/contracts
 
-A Solidity library for create expirable tokens with time or block-based expiration.
+A Solidity library for creating expirable tokens with time or block-based expiration.
 
 - [ERC-7818](https://eips.ethereum.org/EIPS/eip-7818): Expirable ERC20
 - [ERC-7858](https://eips.ethereum.org/EIPS/eip-7858): Expirable NFTs and SBTs
@@ -69,6 +69,10 @@ contract ExpirableERC20 is ERC20EXPBase, ERC20BLSW {
     }
 }
 ```
+
+ERC-7858
+
+> [!IMPORTANT] This ERC still underdevelopment.
 
 ## Contribute
 
