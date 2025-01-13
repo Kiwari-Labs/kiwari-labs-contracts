@@ -33,15 +33,9 @@ export const deployBLSW = async function ({
   windowSize = constants.DEFAULT_WINDOW_SIZE,
   development = false,
 }) {
-
   const [deployer, alice, bob, charlie] = await ethers.getSigners();
   const BLSW = await ethers.getContractFactory(BLSWLibrary.name, deployer);
-  const slidingWindow = (await BLSW.deploy(
-    startBlockNumber,
-    blocksPerEpoch,
-    windowSize,
-    development,
-  )) as any as MockBLSW;
+  const slidingWindow = (await BLSW.deploy(startBlockNumber, blocksPerEpoch, windowSize, development)) as any as MockBLSW;
   await slidingWindow.waitForDeployment();
 
   return {

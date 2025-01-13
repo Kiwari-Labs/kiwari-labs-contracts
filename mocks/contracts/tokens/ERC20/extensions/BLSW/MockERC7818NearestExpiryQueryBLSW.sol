@@ -3,9 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {ERC20EXPBase} from "../../../../../../contracts/tokens/ERC20/ERC20EXPBase.sol";
 import {ERC20BLSW} from "../../../../../../contracts/tokens/ERC20/ERC20BLSW.sol";
-import {ERC7818Blacklist} from "../../../../../../contracts/tokens/ERC20/extensions/ERC7818Blacklist.sol";
+import {ERC7818NearestExpiryQuery} from "../../../../../../contracts/tokens/ERC20/extensions/ERC7818NearestExpiryQuery.sol";
 
-contract MockERC7818BlacklistBLSW is ERC20BLSW, ERC7818Blacklist {
+contract MockERC7818NearestExpiryQueryBLSW is ERC20BLSW, ERC7818NearestExpiryQuery {
     constructor(
         string memory _name,
         string memory _symbol,
@@ -43,23 +43,7 @@ contract MockERC7818BlacklistBLSW is ERC20BLSW, ERC7818Blacklist {
         return super._pointerProvider();
     }
 
-    function _update(address from, address to, uint256 value) internal virtual override(ERC20EXPBase, ERC7818Blacklist) {
-        super._update(from, to, value);
-    }
-
-    function addToBlacklist(address account) public {
-        _addToBlacklist(account);
-    }
-
-    function removeFromBlacklist(address account) public {
-        _removeFromBlacklist(account);
-    }
-
     function mint(address to, uint256 value) public {
         _mint(to, value);
-    }
-
-    function burn(address to, uint256 value) public {
-        _burn(to, value);
     }
 }

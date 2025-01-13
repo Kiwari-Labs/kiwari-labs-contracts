@@ -38,20 +38,18 @@ library TLSW {
         }
     }
 
-    /// @notice Computes the range of epochs based on the initial timestamp, current time, seconds per epoch, window size, and a safe flag.
+    /// @notice Computes the range of epochs based on the initial timestamp, current time, seconds per epoch, and window size.
     /// @param initialTimestamp The timestamp where the sliding window starts.
     /// @param currentTime The current timestamp in seconds.
     /// @param secondsPerEpoch The number of seconds per epoch.
     /// @param windowSize_ The number of epochs in the window.
-    /// @param safe Whether to apply a safety buffer.
     /// @return fromEpoch The starting epoch of the range.
     /// @return toEpoch The ending epoch of the range.
     function _computeEpochRange(
         uint256 initialTimestamp,
         uint256 currentTime,
         uint256 secondsPerEpoch,
-        uint256 windowSize_,
-        bool safe
+        uint256 windowSize_
     ) private pure returns (uint256 fromEpoch, uint256 toEpoch) {
         assembly {
             if and(gt(currentTime, initialTimestamp), gt(initialTimestamp, 0)) {
@@ -61,11 +59,6 @@ library TLSW {
             let from := sub(toEpoch, windowSize_)
             if iszero(lt(toEpoch, windowSize_)) {
                 fromEpoch := from
-            }
-            if safe {
-                if gt(toEpoch, windowSize_) {
-                    fromEpoch := sub(from, 0x1)
-                }
             }
         }
     }
@@ -105,16 +98,7 @@ library TLSW {
     /// @return fromEpoch The start of the epoch range.
     /// @return toEpoch The end of the epoch range.
     function windowRange(Window storage self, uint256 currentTime) internal view returns (uint256, uint256) {
-        return _computeEpochRange(self.initialTimestamp, currentTime, self.secondsPerEpoch, self.epochsPerWindow, false);
-    }
-
-    /// @notice Returns the safe range of epochs for a given timestamp, with an additional buffer to ensure safety.
-    /// @param self The sliding window structure.
-    /// @param currentTime The current timestamp in seconds for which the safe epoch range is calculated.
-    /// @return fromEpoch The safe start of the epoch range.
-    /// @return toEpoch The safe end of the epoch range.
-    function safeWindowRange(Window storage self, uint256 currentTime) internal view returns (uint256, uint256) {
-        return _computeEpochRange(self.initialTimestamp, currentTime, self.secondsPerEpoch, self.epochsPerWindow, true);
+        return _computeEpochRange(self.initialTimestamp, currentTime, self.secondsPerEpoch, self.epochsPerWindow);
     }
 
     /// @notice Initializes the sliding window's state with the number of seconds per epoch, the window size, and whether to apply safe mode.

@@ -1,0 +1,30 @@
+import {expect} from "chai";
+import {deployERC7818BlacklistSelector} from "./deployer.test";
+import {constants, ERC7818Blacklist} from "../../../../constant.test";
+import {hardhat_reset} from "../../../../utils.test";
+
+export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
+  describe("Mint", async function () {
+    const amount = 1;
+
+    afterEach(async function () {
+      await hardhat_reset();
+    });
+
+    it("[SUCCESS] mint `to` non-blacklisted", async function () {
+      const {erc7818Blacklist, alice} = await deployERC7818BlacklistSelector({epochType});
+      expect(await erc7818Blacklist.isBlacklisted(alice.address)).to.equal(false);
+      await erc7818Blacklist.mint(alice.address, amount);
+      expect(await erc7818Blacklist.balanceOf(alice.address)).to.equal(amount);
+    });
+
+    it("[FAILED] mint `to` blacklisted", async function () {
+      const {erc7818Blacklist, alice} = await deployERC7818BlacklistSelector({epochType});
+      await erc7818Blacklist.addToBlacklist(alice.address);
+      expect(await erc7818Blacklist.isBlacklisted(alice.address)).to.equal(true);
+      await expect(erc7818Blacklist.mint(alice.address, amount))
+        .to.revertedWithCustomError(erc7818Blacklist, ERC7818Blacklist.errors.AccountBlacklisted)
+        .withArgs(alice.address);
+    });
+  });
+};

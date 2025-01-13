@@ -58,7 +58,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
         uint256 pointer,
         uint256 duration
     ) private view returns (uint256 balance) {
-        uint256 element = _findValidBalance(account, epoch, pointer, duration);
+        (uint256 element, ) = _findValidBalance(account, epoch, pointer, duration);
         Epoch storage _account = _balances[epoch][account];
         unchecked {
             while (element > 0) {
@@ -67,28 +67,6 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
             }
         }
         return balance;
-    }
-
-    /// @notice Finds the index of the first valid block balance in a sorted list of block numbers.
-    /// A block balance index is considered valid if the difference between the current pointer
-    /// and the block number at the index (key) is less than the duration.
-    /// @dev This function is used to determine the first valid block balance index within a sorted circular doubly linked list.
-    /// It iterates through the list starting from the head and stops when it finds a valid index or reaches the end of the list.
-    /// @param account The account address.
-    /// @param epoch The epoch number.
-    /// @param pointer The current block number.
-    /// @param duration The maximum allowed difference between pointer and the key.
-    /// @return element The index of the first valid block balance.
-    function _findValidBalance(address account, uint256 epoch, uint256 pointer, uint256 duration) private view returns (uint256 element) {
-        SortedList.List storage list = _balances[epoch][account].list;
-        if (!list.isEmpty()) {
-            element = list.front();
-            unchecked {
-                while (pointer - element >= duration) {
-                    element = list.next(element);
-                }
-            }
-        }
     }
 
     /// @notice Refreshes the balance of an account for a specific epoch.
@@ -223,6 +201,34 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
         emit Transfer(from, to, value);
     }
 
+    /// @notice Finds the index of the first valid block balance in a sorted list of block numbers.
+    /// A block balance index is considered valid if the difference between the current pointer
+    /// and the block number at the index (key) is less than the duration.
+    /// @dev This function is used to determine the first valid block balance index within a sorted circular doubly linked list.
+    /// It iterates through the list starting from the head and stops when it finds a valid index or reaches the end of the list.
+    /// @param account The account address.
+    /// @param epoch The epoch number.
+    /// @param pointer The current block number.
+    /// @param duration The maximum allowed difference between pointer and the key.
+    /// @return element The index of the first valid block balance.
+    function _findValidBalance(
+        address account,
+        uint256 epoch,
+        uint256 pointer,
+        uint256 duration
+    ) internal view returns (uint256 element, uint256 value) {
+        SortedList.List storage list = _balances[epoch][account].list;
+        if (!list.isEmpty()) {
+            element = list.front();
+            unchecked {
+                while (pointer - element >= duration) {
+                    element = list.next(element);
+                }
+            }
+            value = _balances[epoch][account].balances[element];
+        }
+    }
+
     /// @notice Updates balances and handles token minting, burning, or transferring.
     /// @dev This function delegates to the private `_update` function with the current pointer value.
     /// @param from The address initiating the action (sender or zero address for minting).
@@ -241,7 +247,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     /// @param value The amount to transfer.
     function _updateAtEpoch(uint256 epoch, address from, address to, uint256 value) internal virtual {
         uint256 duration = _getPointersInWindow();
-        uint256 element = _findValidBalance(from, epoch, _pointerProvider(), duration);
+        (uint256 element, ) = _findValidBalance(from, epoch, _pointerProvider(), duration);
         _refreshBalanceAtEpoch(from, epoch, element, duration);
 
         Epoch storage _spender = _balances[epoch][from];
@@ -437,8 +443,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
         uint256 balance = _computeBalanceAtEpoch(fromEpoch, account, pointer, _getPointersInWindow());
         if (fromEpoch == toEpoch) {
             return balance;
-        }
-        if (fromEpoch < toEpoch) {
+        } else {
             fromEpoch += 1;
         }
         balance += _computeBalanceOverEpochRange(fromEpoch, toEpoch, account);
