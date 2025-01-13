@@ -1,13 +1,13 @@
 import {ethers} from "hardhat";
-import {SortedCircularDoublyLinkedListLibrary} from "../../../constant.test";
+import {SortedListLibrary} from "../../../constant.test";
 
 export const deploySortedList = async function (contract: string) {
   // @TODO selector
-  if (contract === SortedCircularDoublyLinkedListLibrary.name) {
+  if (contract === SortedListLibrary.name) {
     // contract = Xort128.name;
   } else {
     // default
-    contract = SortedCircularDoublyLinkedListLibrary.name;
+    contract = SortedListLibrary.name;
   }
   const [deployer, alice, bob, charlie] = await ethers.getSigners();
   const SORTED_LIST = await ethers.getContractFactory(contract, deployer);

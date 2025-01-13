@@ -4,7 +4,7 @@ import * as Remove from "./remove.test";
 import * as Shrink from "./shrink.test";
 
 export const run = async () => {
-  describe("Sorted Circular Linked List (SCDLL)", async function () {
+  describe("SortedList", async function () {
     General.run();
     Insert.run();
     Remove.run();

@@ -18,7 +18,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
 
     it("[FAILED] account blacklisted", async function () {
       const {erc7818Backlist, alice} = await deployERC7818BacklistSelector({epochType});
-      await expect(erc7818Backlist.addToBlacklist(alice.address));
+      await erc7818Backlist.addToBlacklist(alice.address);
       await expect(erc7818Backlist.addToBlacklist(alice.address)).to.be.revertedWithCustomError(
         erc7818Backlist,
         ERC7818Backlist.errors.AccountBlacklisted,

@@ -157,26 +157,14 @@ export const BLSWLibrary = {
   events: {},
 };
 
-export const SortedCircularDoublyLinkedListLibrary = {
+export const SortedListLibrary = {
   name: "MockSortedList",
   errors: {},
   events: {},
 };
 
-export const LightWeightSortedCircularDoublyLinkedListLibrary = {
+export const XortedListLibrary = {
   name: "MockXort128",
-  errors: {},
-  events: {},
-};
-
-export const Xort128 = {
-  name: "MockLightWeightSortedCircularDoublyLinkedListLibraryV2",
-  errors: {},
-  events: {},
-};
-
-export const Comparator = {
-  name: "MockComparator",
   errors: {},
   events: {},
 };
@@ -192,12 +180,7 @@ export const contracts = {
   },
   utils: {
     SlidingWindowLibrary,
-    SortedCircularDoublyLinkedListLibrary,
-    // LightWeightSlidingWindowLibrary,
-    // LightWeightSortedCircularDoublyLinkedListLibrary,
-    // PU128SCDLL,
-    comparators: {
-      Comparator,
-    },
+    SortedListLibrary,
+    XortedListLibrary
   },
 };

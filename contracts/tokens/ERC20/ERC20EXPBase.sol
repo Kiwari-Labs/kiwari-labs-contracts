@@ -4,14 +4,14 @@ pragma solidity >=0.8.0 <0.9.0;
 /// @title ERC20EXP Base
 /// @author Kiwari Labs
 
-import {SortedList as SCDLL} from "../../utils/datastructures/SortedList.sol";
+import {SortedList} from "../../utils/datastructures/SortedList.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {IERC7818} from "./interfaces/IERC7818.sol";
 
 abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC7818 {
-    using SCDLL for SCDLL.List;
+    using SortedList for SortedList.List;
 
     string private _name;
     string private _symbol;
@@ -19,7 +19,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     struct Epoch {
         uint256 totalBalance;
         mapping(uint256 => uint256) balances;
-        SCDLL.List list;
+        SortedList.List list;
     }
 
     mapping(uint256 => mapping(address => Epoch)) private _balances;
@@ -80,7 +80,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     /// @param duration The maximum allowed difference between pointer and the key.
     /// @return element The index of the first valid block balance.
     function _findValidBalance(address account, uint256 epoch, uint256 pointer, uint256 duration) private view returns (uint256 element) {
-        SCDLL.List storage list = _balances[epoch][account].list;
+        SortedList.List storage list = _balances[epoch][account].list;
         if (!list.isEmpty()) {
             element = list.front();
             unchecked {

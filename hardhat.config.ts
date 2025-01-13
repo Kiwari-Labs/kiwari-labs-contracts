@@ -69,7 +69,7 @@ const config: HardhatUserConfig = {
     outputDir: "./docs",
   },
   mocha: {
-    slow: 20,
+    slow: 50,
   },
 };
 
