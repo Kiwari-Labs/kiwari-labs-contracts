@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 /// @title ERC20EXP Base
 /// @author Kiwari Labs
 
-import {SCDLL} from "../../utils/datastructures/LSCDLL.sol";
+import {SortedList as SCDLL} from "../../utils/datastructures/SortedList.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
@@ -81,8 +81,8 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     /// @return element The index of the first valid block balance.
     function _findValidBalance(address account, uint256 epoch, uint256 pointer, uint256 duration) private view returns (uint256 element) {
         SCDLL.List storage list = _balances[epoch][account].list;
-        if (list.size() > 0) {
-            element = list.head();
+        if (!list.isEmpty()) {
+            element = list.front();
             unchecked {
                 while (pointer - element >= duration) {
                     element = list.next(element);
@@ -100,8 +100,8 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     /// @param duration The duration to determine outdated elements.
     function _refreshBalanceAtEpoch(address account, uint256 epoch, uint256 pointer, uint256 duration) private {
         Epoch storage _account = _balances[epoch][account];
-        if (_account.list.size() > 0) {
-            uint256 element = _account.list.head();
+        if (!_account.list.isEmpty()) {
+            uint256 element = _account.list.front();
             uint256 balance;
             unchecked {
                 while (pointer - element >= duration) {
@@ -110,7 +110,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                 }
             }
             if (balance > 0) {
-                _account.list.lazyShrink(element);
+                _account.list.shrink(element);
                 _account.totalBalance -= balance;
             }
         }
@@ -144,7 +144,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                 _recipient.balances[pointer] += value;
                 _worldStateBalances[pointer] += value;
             }
-            _recipient.list.insert(pointer);
+            _recipient.list.insert(pointer, false);
         } else {
             uint256 blockLengthCache = _getPointersInWindow();
             (uint256 fromEpoch, uint256 toEpoch) = _getWindowRage(pointer);
@@ -158,7 +158,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                 // burn token from
                 while (fromEpoch <= toEpoch && pendingValue > 0) {
                     Epoch storage _spender = _balances[fromEpoch][from];
-                    uint256 element = _spender.list.head();
+                    uint256 element = _spender.list.front();
                     while (element > 0 && pendingValue > 0) {
                         balance = _spender.balances[element];
                         if (balance <= pendingValue) {
@@ -188,7 +188,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                 while (fromEpoch <= toEpoch && pendingValue > 0) {
                     Epoch storage _spender = _balances[fromEpoch][from];
                     Epoch storage _recipient = _balances[fromEpoch][to];
-                    uint256 element = _spender.list.head();
+                    uint256 element = _spender.list.front();
                     while (element > 0 && pendingValue > 0) {
                         balance = _spender.balances[element];
                         if (balance <= pendingValue) {
@@ -199,7 +199,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                                 _recipient.totalBalance += balance;
                                 _recipient.balances[element] += balance;
                             }
-                            _recipient.list.insert(element);
+                            _recipient.list.insert(element, false);
                             element = _spender.list.next(element);
                             _spender.list.remove(_spender.list.previous(element));
                         } else {
@@ -209,7 +209,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                                 _recipient.totalBalance += pendingValue;
                                 _recipient.balances[element] += pendingValue;
                             }
-                            _recipient.list.insert(element);
+                            _recipient.list.insert(element, false);
                             pendingValue = 0;
                         }
                     }
@@ -265,7 +265,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                     _recipient.totalBalance += balance;
                     _recipient.balances[element] += balance;
                 }
-                _recipient.list.insert(element);
+                _recipient.list.insert(element, false);
                 element = _spender.list.next(element);
                 _spender.list.remove(_spender.list.previous(element));
             } else {
@@ -275,7 +275,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                     _recipient.totalBalance += pendingValue;
                     _recipient.balances[element] += pendingValue;
                 }
-                _recipient.list.insert(element);
+                _recipient.list.insert(element, false);
                 pendingValue = 0;
             }
         }
@@ -398,7 +398,12 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
 
     /// @custom:gas-inefficiency if not limit the size of array
     function tokenList(address account, uint256 epoch) external view virtual returns (uint256[] memory list) {
-        list = _balances[epoch][account].list.ascending();
+        list = _balances[epoch][account].list.toArray();
+    }
+
+    /// @custom:gas-inefficiency if not limit the size of array
+    function tokenList(address account, uint256 epoch, uint256 start) external view virtual returns (uint256[] memory list) {
+        list = _balances[epoch][account].list.toArray(start);
     }
 
     /// @dev See {IERC20Metadata-name}.

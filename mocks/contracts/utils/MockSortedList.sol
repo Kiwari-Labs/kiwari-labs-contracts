@@ -28,10 +28,6 @@ contract MockSortedList {
         list.insert(index, true);
     }
 
-    // function updateNodeData(uint256 index, bytes memory data) public {
-    //     list.updateNodeData(index, data);
-    // }
-
     function shrink(uint256 index) public {
         list.shrink(index);
     }
@@ -40,8 +36,8 @@ contract MockSortedList {
         list.remove(index);
     }
 
-    function size() public view returns (uint256) {
-        return list.size();
+    function size() public pure returns (uint256) {
+        return SortedList.size();
     }
 
     function front() public view returns (uint256) {
@@ -54,5 +50,9 @@ contract MockSortedList {
 
     function array() public view returns (uint256[] memory) {
         return list.toArray();
+    }
+
+    function arrayWithStart(uint256 start) public view returns (uint256[] memory) {
+        return list.toArray(start);
     }
 }
