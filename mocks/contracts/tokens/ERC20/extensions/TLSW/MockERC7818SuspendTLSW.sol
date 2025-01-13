@@ -3,9 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {ERC20EXPBase} from "../../../../../../contracts/tokens/ERC20/ERC20EXPBase.sol";
 import {ERC20TLSW} from "../../../../../../contracts/tokens/ERC20/ERC20TLSW.sol";
-import {ERC7818MintQuota} from "../../../../../../contracts/tokens/ERC20/extensions/ERC7818MintQuota.sol";
+import {ERC7818Suspend} from "../../../../../../contracts/tokens/ERC20/extensions/ERC7818Suspend.sol";
 
-contract MockERC7818MintQuotaTLSW is ERC20TLSW, ERC7818MintQuota {
+contract MockERC7818SuspendTLSW is ERC20TLSW, ERC7818Suspend {
     constructor(
         string memory _name,
         string memory _symbol,
@@ -43,27 +43,23 @@ contract MockERC7818MintQuotaTLSW is ERC20TLSW, ERC7818MintQuota {
         return super._pointerProvider();
     }
 
-    function mintWithQuota(address to, uint256 amount) public {
-        _mintWithQuota(to, amount);
+    function _update(address from, address to, uint256 value) internal virtual override(ERC20EXPBase, ERC7818Suspend) {
+        super._update(from, to, value);
     }
 
-    function setQuota(address minter, uint256 quota) public {
-        _setQuota(minter, quota);
+    function addToSuspend(address account) public {
+        _addToSuspend(account);
     }
 
-    function increaseQuota(address minter, uint256 increase) public {
-        _increaseQuota(minter, increase);
+    function removeFromSuspend(address account) public {
+        _removeFromSuspend(account);
     }
 
-    function decreaseQuota(address minter, uint256 decrease) public {
-        _decreaseQuota(minter, decrease);
+    function mint(address to, uint256 value) public {
+        _mint(to, value);
     }
 
-    function addMinter(address minter, uint256 quota_) public {
-        _addMinter(minter, quota_);
-    }
-
-    function removeMinter(address minter) public {
-        _removeMinter(minter);
+    function burn(address to, uint256 value) public {
+        _burn(to, value);
     }
 }

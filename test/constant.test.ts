@@ -58,7 +58,31 @@ export const ERC20 = {
   },
 };
 
-export const ERC7818Backlist = {
+export const ERC7818Suspend = {
+  name: "MockERC7818Suspend",
+  errors: {
+    AccountSuspended: "AccountSuspended",
+    AccountNotSuspended: "AccountNotSuspended",
+  },
+  events: {
+    AddedToSuspend: "AddedToSuspend",
+    RemovedFromSuspend: "RemovedFromSuspend",
+  },
+};
+
+export const ERC7818SuspendBLSW = {
+  name: "MockERC7818SuspendBLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC7818SuspendTLSW = {
+  name: "MockERC7818SuspendTLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC7818Blacklist = {
   name: "MockERC7818Blacklist",
   errors: {
     AccountBlacklisted: "AccountBlacklisted",
@@ -82,16 +106,17 @@ export const ERC7818BlacklistTLSW = {
   events: {},
 };
 
-
 export const ERC7818MintQuota = {
   name: "MockERC7818MintQuota",
   errors: {
     MintQuotaExceeded: "MintQuotaExceeded",
     MinterNotSet: "MinterNotSet",
+    MinterAlreadySet: "MinterAlreadySet",
   },
   events: {
+    MinterAdded: "MinterAdded",
+    MinterRemoved: "MinterRemoved",
     QuotaSet: "QuotaSet",
-    QuotaReset: "QuotaReset",
     QuotaMinted: "QuotaMinted",
   },
 };
@@ -129,6 +154,18 @@ export const ERC7818WhitelistBLSW = {
 
 export const ERC7818WhitelistTLSW = {
   name: "MockERC7818WhitelistTLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC7818NearestExpiryQueryBLSW = {
+  name: "MockERC7818NearestExpiryQueryBLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC7818NearestExpiryQueryTLSW = {
+  name: "MockERC7818NearestExpiryQueryTLSW",
   errors: {},
   events: {},
 };

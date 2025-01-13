@@ -50,9 +50,10 @@ export const run = async () => {
     it("[FAILED] updateWindow with duration less than minimum", async function () {
       const invalidBlocksPerEpoch = 0;
       const {slidingWindow} = await deployBLSW({});
-      await expect(
-        slidingWindow.updateWindow(invalidBlocksPerEpoch, constants.DEFAULT_WINDOW_SIZE, true),
-      ).to.be.revertedWithCustomError(slidingWindow, SlidingWindow.errors.InvalidDuration);
+      await expect(slidingWindow.updateWindow(invalidBlocksPerEpoch, constants.DEFAULT_WINDOW_SIZE, true)).to.be.revertedWithCustomError(
+        slidingWindow,
+        SlidingWindow.errors.InvalidDuration,
+      );
     });
 
     it("[FAILED] updateWindow with windowSize greater than maximum", async function () {

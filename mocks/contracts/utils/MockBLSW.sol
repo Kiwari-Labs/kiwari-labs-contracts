@@ -24,10 +24,6 @@ contract MockBLSW {
         return window.windowSize();
     }
 
-    function safeWindowRange(uint256 blockNumber) public view returns (uint256, uint256) {
-        return window.safeWindowRange(blockNumber);
-    }
-
     function epoch(uint256 blockNumber) public view returns (uint256) {
         return window.epoch(blockNumber);
     }
