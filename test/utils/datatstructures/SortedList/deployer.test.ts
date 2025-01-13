@@ -1,6 +1,5 @@
 import {ethers} from "hardhat";
-import {BLSWLibrary, SortedCircularDoublyLinkedListLibrary} from "../../../constant.test";
-import {NumberLike} from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
+import {SortedCircularDoublyLinkedListLibrary} from "../../../constant.test";
 
 export const deploySortedList = async function (contract: string) {
   // @TODO selector
@@ -11,9 +10,9 @@ export const deploySortedList = async function (contract: string) {
     contract = SortedCircularDoublyLinkedListLibrary.name;
   }
   const [deployer, alice, bob, charlie] = await ethers.getSigners();
-  const SortedList = await ethers.getContractFactory(contract, deployer);
-  const sortedlist = await SortedList.deploy();
-  await sortedlist.deployed();
+  const SORTED_LIST = await ethers.getContractFactory(contract, deployer);
+  const sortedlist = await SORTED_LIST.deploy();
+  await sortedlist.waitForDeployment();
   return {
     sortedlist,
     deployer,

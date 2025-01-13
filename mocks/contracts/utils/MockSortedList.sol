@@ -20,6 +20,10 @@ contract MockSortedList {
         return list.previous(index);
     }
 
+    function isEmpty() public view returns (bool) {
+        return list.isEmpty();
+    }
+
     function insert(uint256 index) public {
         list.insert(index, false);
     }

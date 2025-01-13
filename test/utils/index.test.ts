@@ -7,7 +7,7 @@ import * as SortedList from "./datatstructures/SortedList/index.test";
 export const run = async () => {
   describe("utils", async function () {
     BLSW.run();
-    // SortedList.run();
+    SortedList.run();
     // XortedList.run();
   });
 };

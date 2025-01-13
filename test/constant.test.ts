@@ -158,7 +158,7 @@ export const BLSWLibrary = {
 };
 
 export const SortedCircularDoublyLinkedListLibrary = {
-  name: "MockSortedCircularDoublyLinkedListLibrary",
+  name: "MockSortedList",
   errors: {},
   events: {},
 };

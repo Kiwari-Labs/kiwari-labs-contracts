@@ -12,7 +12,7 @@ library SortedList {
     }
 
     uint8 private constant SENTINEL = 0x00;
-     private constant PREVIOUS = false;
+    bool private constant PREVIOUS = false;
     bool private constant NEXT = true;
 
     /**
@@ -46,7 +46,7 @@ library SortedList {
      */
     function insert(List storage self, uint256 index, bool check) internal {
         if (check) {
-            if (contains(self, index)) return;
+            if (!contains(self, index)) return;
         }
         uint256 last = self._nodes[SENTINEL][PREVIOUS];
         uint256 first = self._nodes[SENTINEL][NEXT];
