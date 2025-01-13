@@ -52,15 +52,6 @@ abstract contract ERC721EXPBase is ERC721Enumerable, IERC7858 {
         _updateTimestamp(tokenId, start, end);
     }
 
-    // @TODO override update _validation before super._update()
-    function _update(address to, uint256 tokenId, address auth) internal virtual override returns (address) {
-        if (_validation(tokenId)) {
-            return super._update(to, tokenId, auth);
-        } else {
-            revert ERC5007TransferredInvalidToken();
-        }
-    }
-
     /// @inheritdoc IERC7858
     function startTime(uint256 tokenId) public view virtual override returns (uint256) {
         return _tokensTimestamp[tokenId].startBlock;
