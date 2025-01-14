@@ -55,7 +55,7 @@ export const run = async () => {
     it("[FAILED] shrink the ignore element", async function () {
       const {sortedlist} = await deploySortedList("");
       await sortedlist.insert(front);
-      await sortedlist.insert(element)
+      await sortedlist.insert(element);
       await sortedlist.insert(back);
       expect(await sortedlist.front()).to.equal(front);
       expect(await sortedlist.contains(element)).to.equal(true);

@@ -25,7 +25,7 @@ abstract contract ERC721EXPBase is ERC721Enumerable, IERC7858 {
             return false;
         }
         // if start and end is {0, 0} mean token non-expirable and return true.
-         return true;
+        return true;
     }
 
     function _updateStamp(uint256 tokenId, uint64 start, uint64 end) internal {

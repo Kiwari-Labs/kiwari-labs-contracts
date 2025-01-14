@@ -35,7 +35,7 @@ export const run = async () => {
     it("[SUCCESS] remove between front and back", async function () {
       const {sortedlist} = await deploySortedList("");
       await sortedlist.insert(front);
-      await sortedlist.insert(element)
+      await sortedlist.insert(element);
       await sortedlist.insert(back);
       expect(await sortedlist.contains(element)).to.equal(true);
       await sortedlist.remove(element);

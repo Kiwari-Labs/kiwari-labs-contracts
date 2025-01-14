@@ -8,7 +8,7 @@ interface IERC7858 {
         BLOCKS_BASED, // block.number
         TIME_BASED // block.timestamp
     }
-    
+
     /**
      * @dev Returns the type of the expiry.
      * @return EXPIRY_TYPE  Enum value indicating the unit of an expiry.

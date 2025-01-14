@@ -218,6 +218,6 @@ export const contracts = {
   utils: {
     SlidingWindowLibrary,
     SortedListLibrary,
-    XortedListLibrary
+    XortedListLibrary,
   },
 };

@@ -8,7 +8,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import {ERC721EXPBase} from "./ERC721EXPBase.sol";
 
 abstract contract ERC721T is ERC721EXPBase {
-
     function _blockTimestampProvider() internal view virtual returns (uint256) {
         return block.timestamp;
     }
