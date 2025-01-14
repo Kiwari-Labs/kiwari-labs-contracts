@@ -5,7 +5,7 @@ pragma solidity >=0.8.0 <0.9.0;
 /// @dev ERC721EXP Base contract each token have individual expiration date.
 /// @author Kiwari Labs
 
-import {IERC7858} from "./extensions/IERC7858.sol";
+import {IERC7858} from "./interfaces/IERC7858.sol";
 import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
