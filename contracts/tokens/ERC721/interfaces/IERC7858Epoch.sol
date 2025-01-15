@@ -28,19 +28,19 @@ interface IERC7858Epoch is IERC7858 {
      * @notice The unit of the epoch length is determined by the `validityPeriodType` function.
      */
     function epochLength() external view returns (uint256);
-    
+
     /**
      * @dev Returns the type of the epoch.
-     * @return EPOCH_TYPE  Enum value indicating the unit of an epoch.
+     * @return EXPIRY_TYPE  Enum value indicating the unit of an epoch.
      */
-    function epochType() external view returns (EPOCH_TYPE);
+    function epochType() external view returns (EXPIRY_TYPE);
 
     /**
      * @dev Retrieves the validity duration of each token.
      * @return uint256 The validity duration of each token in `epoch` unit.
      */
     function validityDuration() external view returns (uint256);
-    
+
     /**
      * @dev Checks whether a specific `epoch` is expired.
      * @param epoch The `epoch` to check.
