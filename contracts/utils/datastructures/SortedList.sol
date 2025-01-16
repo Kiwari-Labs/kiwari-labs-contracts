@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/*
+/**
  * @title Lightweight Sorted List
  * @author Kiwari Labs
  */
 
 library SortedList {
+    /**
+     * Sorted Circular Doubly Linked List
+     */
     struct List {
-        mapping(uint256 => mapping(bool => uint256)) _nodes;
+        mapping(uint256 node => mapping(bool direction => uint256 value)) _nodes;
     }
 
     uint8 private constant SENTINEL = 0x00;
@@ -38,7 +41,7 @@ library SortedList {
         }
     }
 
-    /*
+    /**
      * @notice Insert data into the linked list at the specified element.
      * @dev This function inserts data into the linked list at the specified element.
      * @param self The linked list.
@@ -83,7 +86,7 @@ library SortedList {
         self._nodes[index][NEXT] = cursor;
     }
 
-    /*
+    /**
      * @notice Remove a node from the linked list at the specified element.
      * @dev This function removes a node from the linked list at the specified element.
      * @param self The linked list.
@@ -106,7 +109,7 @@ library SortedList {
         }
     }
 
-    /*
+    /**
      * @notice Shrinks is the 'lazy' approach to setting a new front without cleaning up previous nodes.
      * @dev updates the front pointer to the specified `element` without traversing and cleaning up the previous nodes.
      * @param self The list to modify.
@@ -119,7 +122,7 @@ library SortedList {
         }
     }
 
-    /*
+    /**
      * @notice Check if a node exists in the linked list.
      * @dev This function checks if a node exists in the linked list by the specified element.
      * @param self The linked list.
@@ -134,7 +137,7 @@ library SortedList {
         }
     }
 
-    /*
+    /**
      * @notice Get the element of the next node in the list.
      * @dev Accesses the `_nodes` mapping in the `List` structure to get the element of the next node.
      * @param self The list.
@@ -145,7 +148,7 @@ library SortedList {
         return self._nodes[element][NEXT];
     }
 
-    /*
+    /**
      * @notice Get the element of the previous node in the list.
      * @dev Accesses the `_nodes` mapping in the `List` structure to get the element of the previous node.
      * @param self The list.
@@ -156,7 +159,7 @@ library SortedList {
         return self._nodes[element][PREVIOUS];
     }
 
-    /*
+    /**
      * @notice Get the element of the front node in the linked list.
      * @dev This function returns the element of the front node in the linked list.
      * @param self The linked list.
@@ -166,7 +169,7 @@ library SortedList {
         return self._nodes[SENTINEL][NEXT];
     }
 
-    /*
+    /**
      * @notice Get the element of the back node in the linked list.
      * @dev This function returns the element of the back node in the linked list.
      * @param self The linked list.
@@ -176,10 +179,9 @@ library SortedList {
         return self._nodes[SENTINEL][PREVIOUS];
     }
 
-    /*
+    /**
      * @notice Get the _size of the linked list.
      * @dev This function returns the _size of the linked list.
-     * @param self The linked list.
      * @return The _size of the linked list.
      */
     function size() internal pure returns (uint256) {
@@ -193,7 +195,7 @@ library SortedList {
         return (front(self) == SENTINEL);
     }
 
-    /*
+    /**
      * @notice Get the indices of nodes in ascending order.
      * @dev This function returns an array containing the indices of nodes in ascending order.
      * @param self The linked list.

@@ -20,7 +20,9 @@
     "run:node": "npx hardhat node",
     "test": "npx hardhat test",
     "test:clean": "npm run clean && npx hardhat test",
-    "test:parallel": "npx hardhat test --parallel"
+    "test:parallel": "npx hardhat test --parallel",
+    "commit": "npx git-cz",
+    "prepare": "husky"
   },
   "dependencies": {},
   "devDependencies": {
@@ -41,10 +43,12 @@
     "chai": "^4.3.4",
     "dotenv": "^16.3.1",
     "ethers": "^6.13.4",
+    "git-cz": "^4.9.0",
     "hardhat": "^2.22.15",
     "hardhat-gas-reporter": "^2.2.0",
     "hardhat-ignore-warnings": "^0.2.11",
     "hardhat-storage-layout": "^0.1.7",
+    "husky": "^9.1.7",
     "lodash": "^4.17.21",
     "prettier": "^3.1.0",
     "prettier-package-json": "^2.8.0",

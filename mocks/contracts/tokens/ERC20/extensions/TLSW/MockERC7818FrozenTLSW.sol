@@ -3,9 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {ERC20EXPBase} from "../../../../../../contracts/tokens/ERC20/ERC20EXPBase.sol";
 import {ERC20TLSW} from "../../../../../../contracts/tokens/ERC20/ERC20TLSW.sol";
-import {ERC7818Suspend} from "../../../../../../contracts/tokens/ERC20/extensions/ERC7818Suspend.sol";
+import {ERC7818Frozen} from "../../../../../../contracts/tokens/ERC20/extensions/ERC7818Frozen.sol";
 
-contract MockERC7818SuspendTLSW is ERC20TLSW, ERC7818Suspend {
+contract MockERC7818FrozenTLSW is ERC20TLSW, ERC7818Frozen {
     constructor(
         string memory _name,
         string memory _symbol,
@@ -43,16 +43,16 @@ contract MockERC7818SuspendTLSW is ERC20TLSW, ERC7818Suspend {
         return super._pointerProvider();
     }
 
-    function _update(address from, address to, uint256 value) internal virtual override(ERC20EXPBase, ERC7818Suspend) {
+    function _update(address from, address to, uint256 value) internal virtual override(ERC20EXPBase, ERC7818Frozen) {
         super._update(from, to, value);
     }
 
-    function addToSuspend(address account) public {
-        _addToSuspend(account);
+    function freeze(address account) public {
+        _freeze(account);
     }
 
-    function removeFromSuspend(address account) public {
-        _removeFromSuspend(account);
+    function unfreeze(address account) public {
+        _unfreeze(account);
     }
 
     function mint(address to, uint256 value) public {
