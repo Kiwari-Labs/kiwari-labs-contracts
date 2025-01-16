@@ -58,26 +58,26 @@ export const ERC20 = {
   },
 };
 
-export const ERC7818Suspend = {
-  name: "MockERC7818Suspend",
-  errors: {
-    AccountSuspended: "AccountSuspended",
-    AccountNotSuspended: "AccountNotSuspended",
-  },
+export const ERC7818Frozen = {
+  name: "MockERC7818Frozen",
   events: {
-    AddedToSuspend: "AddedToSuspend",
-    RemovedFromSuspend: "RemovedFromSuspend",
+    Freeze: "Freeze",
+    Unfreeze: "Unfreeze",
+  },
+  errors: {
+    AccountFrozen: "AccountFrozen",
+    AccountNotFrozen: "AccountNotFrozen",
   },
 };
 
-export const ERC7818SuspendBLSW = {
-  name: "MockERC7818SuspendBLSW",
+export const ERC7818FrozenBLSW = {
+  name: "MockERC7818FrozenBLSW",
   errors: {},
   events: {},
 };
 
-export const ERC7818SuspendTLSW = {
-  name: "MockERC7818SuspendTLSW",
+export const ERC7818FrozenTLSW = {
+  name: "MockERC7818FrozenTLSW",
   errors: {},
   events: {},
 };
