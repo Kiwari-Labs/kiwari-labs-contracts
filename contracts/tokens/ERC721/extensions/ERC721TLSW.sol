@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title ERC721EXP using Timestamp-Based Lazy Sliding Window (TLSW) Algorithm.
-/// @author Kiwari Labs
+/**
+ * @title ERC721EXP using Timestamp-Based Lazy Sliding Window (TLSW) Algorithm.
+ * @author Kiwari Labs
+ */
 
 import {AbstractTLSW as TLSW} from "../../../abstracts/AbstractTLSW.sol";
 import {ERC721EpochBase} from "./ERC721EpochBase.sol";

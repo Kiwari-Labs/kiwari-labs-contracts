@@ -18,14 +18,14 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
         (await erc7818NearestExpiryQuery.epochLength()) * (await erc7818NearestExpiryQuery.validityDuration()),
       );
       const latestPointer = await hardhat_latestPointer(epochType);
-      const [balance, expiry] = await erc7818NearestExpiryQuery.nearestExpiryOf(alice.address);
+      const [balance, expiry] = await erc7818NearestExpiryQuery.getNearestExpiryOf(alice.address);
       expect(balance).to.equal(amount);
       expect(expiry).to.equal(latestPointer + pointerInWindow);
     });
 
     it("[SUCCESS] nearest expiry query empty", async function () {
       const {erc7818NearestExpiryQuery, alice} = await deployERC7818NearestExpiryQuerySelector({epochType});
-      const [balance, expiry] = await erc7818NearestExpiryQuery.nearestExpiryOf(alice.address);
+      const [balance, expiry] = await erc7818NearestExpiryQuery.getNearestExpiryOf(alice.address);
       expect(balance).to.equal(0);
       expect(expiry).to.equal(0);
     });

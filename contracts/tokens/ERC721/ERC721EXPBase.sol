@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title ERC721EXP Base
-/// @dev ERC721EXP Base contract each token have individual expiration date.
-/// @author Kiwari Labs
+/**
+ * @title ERC721EXP Base
+ * @dev ERC721EXP Base contract each token have individual expiration date.
+ * @author Kiwari Labs
+ */
 
 import {IERC7858} from "./interfaces/IERC7858.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
