@@ -1,45 +1,61 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title ERC7818 Whitelist extension
-/// @author Kiwari Labs
+import {ERC20EXPBase} from "../ERC20EXPBase.sol";
 
-import "../ERC20EXPBase.sol";
-
+/**
+ * @title ERC7818 Whitelist extension
+ * @author Kiwari Labs
+ */
 abstract contract ERC7818Whitelist is ERC20EXPBase {
-    /// @notice Emitted when an address is added to the whitelist
-    /// @param caller Operate by the address
-    /// @param account The address that was whitelist
+    /**
+     * @notice Emitted when an address is added to the whitelist
+     * @param caller Operate by the address
+     * @param account The address that was whitelist
+     */
     event Whitelisted(address indexed caller, address indexed account);
 
-    /// @notice Emitted when an address is removed from the whitelist
-    /// @param caller Operate by the address
-    /// @param account The address that was removed from the whitelist
+    /**
+     * @notice Emitted when an address is removed from the whitelist
+     * @param caller Operate by the address
+     * @param account The address that was removed from the whitelist
+     */
     event Unwhitelisted(address indexed caller, address indexed account);
 
-    /// @notice Custom error definitions
+    /**
+     * @notice Custom error definitions
+     */
     error InvalidWhitelistAddress();
     error NotExistInWhitelist();
     error ExistInWhitelist();
 
-    /// @notice Struct to define balance infomation for each minter
+    /**
+     * @notice Struct to define balance infomation for each minter
+     */
     struct Whitelist {
         uint256 _spendableBalances;
         uint256 _unspendableBalances;
     }
 
-    /// @notice Mapping whitelist address
+    /**
+     * @notice Mapping whitelist address
+     */
     mapping(address => bool) private _whitelist;
-    /// @notice Mapping from whitelist address to their whitelist balance details
+
+    /**
+     * @notice Mapping from whitelist address to their whitelist balance details
+     */
     mapping(address => Whitelist) private _balances;
 
-    /// @notice Updates the spendable balance by either minting or burning non-expirable tokens.
-    /// @dev This function handles the minting of tokens to the `to` address if `from` is the zero address,
-    /// and burning of tokens from the `from` address if `from` is not the zero address. It also updates
-    /// the spendable balance for both the `from` and `to` addresses accordingly.
-    /// @param from The address of the account from which tokens are being transferred or burned. If `from` is the zero address, tokens are minted to the `to` address.
-    /// @param to The address of the account to which tokens are being transferred or minted.
-    /// @param value The amount of tokens to be transferred, minted, or burned.
+    /**
+     * @notice Updates the spendable balance by either minting or burning non-expirable tokens.
+     * @dev This function handles the minting of tokens to the `to` address if `from` is the zero address,
+     * and burning of tokens from the `from` address if `from` is not the zero address. It also updates
+     * the spendable balance for both the `from` and `to` addresses accordingly.
+     * @param from The address of the account from which tokens are being transferred or burned. If `from` is the zero address, tokens are minted to the `to` address.
+     * @param to The address of the account to which tokens are being transferred or minted.
+     * @param value The amount of tokens to be transferred, minted, or burned.
+     */
     function _updateSpendableBalance(address from, address to, uint256 value) internal {
         unchecked {
             uint256 balanceFrom = _balances[from]._spendableBalances;
@@ -64,13 +80,15 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
         emit Transfer(from, to, value);
     }
 
-    /// @notice Updates the unspendable balance by either minting or burning non-expirable tokens.
-    /// @dev This function handles the minting of tokens to the `to` address if `from` is the zero address,
-    /// and burning of tokens from the `from` address if `from` is not the zero address. It also updates
-    /// the unspendable balance for both the `from` and `to` addresses accordingly.
-    /// @param from The address of the account from which tokens are being transferred or burned. If `from` is the zero address, tokens are minted to the `to` address.
-    /// @param to The address of the account to which tokens are being transferred or minted.
-    /// @param value The amount of tokens to be transferred, minted, or burned.
+    /**
+     * @notice Updates the unspendable balance by either minting or burning non-expirable tokens.
+     * @dev This function handles the minting of tokens to the `to` address if `from` is the zero address,
+     * and burning of tokens from the `from` address if `from` is not the zero address. It also updates
+     * the unspendable balance for both the `from` and `to` addresses accordingly.
+     * @param from The address of the account from which tokens are being transferred or burned. If `from` is the zero address, tokens are minted to the `to` address.
+     * @param to The address of the account to which tokens are being transferred or minted.
+     * @param value The amount of tokens to be transferred, minted, or burned.
+     */
     function _updateUnspendableBalance(address from, address to, uint256 value) internal {
         unchecked {
             uint256 balanceFrom = _balances[from]._unspendableBalances;
@@ -95,13 +113,15 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
         emit Transfer(from, to, value);
     }
 
-    /// @notice Always returns 0 for non-wholesale accounts.
-    /// @dev Returns the available balance for the given account.
-    /// @param account The address of the account for which the balance is being queried.
-    /// @param unsafe Flag to select the balance type:
-    /// - `false`: Returns the spendable balance only.
-    /// - `true`: Includes the unspendable balance token balance.
-    /// @return balance The available balance based on the selected type.
+    /**
+     * @notice Always returns 0 for non-wholesale accounts.
+     * @dev Returns the available balance for the given account.
+     * @param account The address of the account for which the balance is being queried.
+     * @param unsafe Flag to select the balance type:
+     * - `false`: Returns the spendable balance only.
+     * - `true`: Includes the unspendable balance token balance.
+     * @return balance The available balance based on the selected type.
+     */
     function _unSafeBalanceOf(address account, bool unsafe) internal view returns (uint256 balance) {
         unchecked {
             Whitelist memory balanceInfo = _balances[account];
@@ -114,11 +134,13 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
         }
     }
 
-    /// @notice Only allows burning non-expirable tokens from whitelist accounts.
-    /// @dev Directly burns tokens from a whitelist account.
-    /// @param to The address of the whitelist account from which tokens will be burned.
-    /// @param value The amount of tokens to burn.
-    /// @param spendable Set to true to burn tokens from spendable balance, false to burn from unspendable balance.
+    /**
+     * @notice Only allows burning non-expirable tokens from whitelist accounts.
+     * @dev Directly burns tokens from a whitelist account.
+     * @param to The address of the whitelist account from which tokens will be burned.
+     * @param value The amount of tokens to burn.
+     * @param spendable Set to true to burn tokens from spendable balance, false to burn from unspendable balance.
+     */
     function _burnFromWhitelist(address to, uint256 value, bool spendable) internal virtual {
         if (_whitelist[to]) {
             if (spendable) {
@@ -131,11 +153,13 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
         }
     }
 
-    /// @notice Cannot mint expirable tokens to whitelist accounts.
-    /// @dev Mints new tokens directly to a retail account.
-    /// @param to The address of the retail account receiving the minted tokens.
-    /// @param value The amount of tokens to mint.
-    /// @param spendable Set to true to mint tokens to spendable balance, false to mint to unspendable balance.
+    /**
+     * @notice Cannot mint expirable tokens to whitelist accounts.
+     * @dev Mints new tokens directly to a retail account.
+     * @param to The address of the retail account receiving the minted tokens.
+     * @param value The amount of tokens to mint.
+     * @param spendable Set to true to mint tokens to spendable balance, false to mint to unspendable balance.
+     */
     function _mintToWhitelist(address to, uint256 value, bool spendable) internal virtual {
         if (_whitelist[to]) {
             if (spendable) {
@@ -148,9 +172,11 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
         }
     }
 
-    /// @notice Adds an address to the whitelist.
-    /// @dev Grants whitelist status to the specified address.
-    /// @param account The address to whitelist.
+    /**
+     * @notice Adds an address to the whitelist.
+     * @dev Grants whitelist status to the specified address.
+     * @param account The address to whitelist.
+     */
     function _addToWhitelist(address account) internal virtual {
         if (_whitelist[account]) {
             revert ExistInWhitelist();
@@ -161,9 +187,11 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
         }
     }
 
-    /// @notice Revokes whitelist status from an account and burns any associated tokens.
-    /// @dev Removes the account from the whitelist and burns its spendable and unspendable balances.
-    /// @param account The address of the account to revoke whitelist status from.
+    /**
+     * @notice Revokes whitelist status from an account and burns any associated tokens.
+     * @dev Removes the account from the whitelist and burns its spendable and unspendable balances.
+     * @param account The address of the account to revoke whitelist status from.
+     */
     function _removeFromWhitelist(address account) internal virtual {
         if (_whitelist[account]) {
             address caller = _msgSender();
@@ -181,11 +209,13 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
         }
     }
 
-    /// @notice Performs a custom token transfer operation using safe balanceOf for calculating available balances.
-    /// @custom:gas-inefficiency Emits 2 transfer events which may result in inefficient gas usage.
-    /// @param from The address from which tokens are being transferred.
-    /// @param to The address to which tokens are being transferred.
-    /// @param value The amount of tokens being transferred.
+    /**
+     * @notice Performs a custom token transfer operation using safe balanceOf for calculating available balances.
+     * @custom:gas-inefficiency Emits 2 transfer events which may result in inefficient gas usage.
+     * @param from The address from which tokens are being transferred.
+     * @param to The address to which tokens are being transferred.
+     * @param value The amount of tokens being transferred.
+     */
     function _transferHandler(address from, address to, uint256 value) internal {
         uint256 selector = (_whitelist[from] ? 2 : 0) | (_whitelist[to] ? 1 : 0);
         if (selector == 0) {
@@ -204,14 +234,18 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
         }
     }
 
-    /// @dev Checks if the given address is a whitelist account.
-    /// @param account The address to check.
-    /// @return bool Returns true if the address is a whitelist account, false otherwise.
+    /**
+     * @dev Checks if the given address is a whitelist account.
+     * @param account The address to check.
+     * @return bool Returns true if the address is a whitelist account, false otherwise.
+     */
     function isWhitelist(address account) external view returns (bool) {
         return _whitelist[account];
     }
 
-    /// @dev See {IERC20-balanceOf}
+    /**
+     * @dev See {IERC20-balanceOf}
+     */
     function balanceOf(address account) public view virtual override returns (uint256) {
         if (_whitelist[account]) {
             return _unSafeBalanceOf(account, true);
@@ -220,14 +254,18 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
         }
     }
 
-    /// @dev See {IERC20-transfer}
+    /**
+     * @dev See {IERC20-transfer}
+     */
     function transfer(address to, uint256 value) public virtual override returns (bool) {
         address from = _msgSender();
         _transferHandler(from, to, value);
         return true;
     }
 
-    /// @dev See {IERC20-transferFrom}
+    /**
+     * @dev See {IERC20-transferFrom}
+     */
     function transferFrom(address from, address to, uint256 value) public virtual override returns (bool) {
         address spender = _msgSender();
         _spendAllowance(from, spender, value);

@@ -1,56 +1,75 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title ERC7818 Mint Quota extension
-/// @author Kiwari Labs
+import {ERC20EXPBase} from "../ERC20EXPBase.sol";
 
-import "../ERC20EXPBase.sol";
-
+/**
+ * @title ERC7818 Mint Quota extension
+ * @author Kiwari Labs
+ */
 abstract contract ERC7818MintQuota is ERC20EXPBase {
-    /// @notice Emitted when the requested mint amount exceeds the available quota.
-    /// @param minter The address of the minter.
-    /// @param available The available quota for the minter.
-    /// @param requested The requested amount to mint.
+    /**
+     * @notice Emitted when the requested mint amount exceeds the available quota.
+     * @param minter The address of the minter.
+     * @param available The available quota for the minter.
+     * @param requested The requested amount to mint.
+     */
     error MintQuotaExceeded(address minter, uint256 available, uint256 requested);
 
-    /// @notice Emitted when the minter is not set.
-    /// @param minter The address of the minter.
+    /**
+     * @notice Emitted when the minter is not set.
+     * @param minter The address of the minter.
+     */
     error MinterNotSet(address minter);
 
-    /// @notice Emitted when the minter is already set.
-    /// @param minter The address of the minter.
+    /**
+     * @notice Emitted when the minter is already set.
+     * @param minter The address of the minter.
+     */
     error MinterAlreadySet(address minter);
 
-    /// @notice Emitted when a new minter is added.
-    /// @param caller The address of the caller adding the minter.
-    /// @param minter The address of the new minter.
+    /**
+     * @notice Emitted when a new minter is added.
+     * @param caller The address of the caller adding the minter.
+     * @param minter The address of the new minter.
+     */
     event MinterAdded(address indexed caller, address indexed minter);
 
-    /// @notice Emitted when a minter is removed.
-    /// @param caller The address of the caller removing the minter.
-    /// @param minter The address of the minter being removed.
+    /**
+     * @notice Emitted when a minter is removed.
+     * @param caller The address of the caller removing the minter.
+     * @param minter The address of the minter being removed.
+     */
     event MinterRemoved(address indexed caller, address indexed minter);
 
-    /// @notice Emitted when a minter's quota is updated.
-    /// @param caller The address of the caller setting the quota.
-    /// @param minter The address of the minter whose quota is updated.
-    /// @param quota The updated quota value.
+    /**
+     * @notice Emitted when a minter's quota is updated.
+     * @param caller The address of the caller setting the quota.
+     * @param minter The address of the minter whose quota is updated.
+     * @param quota The updated quota value.
+     */
     event QuotaSet(address indexed caller, address indexed minter, uint256 quota);
 
-    /// @notice Emitted when tokens are minted under the quota system.
-    /// @param minter The address of the minter.
-    /// @param to The address receiving the minted tokens.
-    /// @param amount The amount of tokens minted.
+    /**
+     * @notice Emitted when tokens are minted under the quota system.
+     * @param minter The address of the minter.
+     * @param to The address receiving the minted tokens.
+     * @param amount The amount of tokens minted.
+     */
     event QuotaMinted(address indexed minter, address indexed to, uint256 amount);
 
-    /// @dev Represents a minter, their quota, minted amount, and active status.
+    /**
+     * @dev Represents a minter, their quota, minted amount, and active status.
+     */
     struct Minter {
         uint256 quota; // The total quota available for the minter.
         uint256 minted; // The amount of tokens minted by the minter.
         bool active; // Whether the minter is active or not.
     }
 
-    /// @dev Mapping from the minter address to their respective `Minter` struct.
+    /**
+     * @dev Mapping from the minter address to their respective `Minter` struct.
+     */
     mapping(address => Minter) private _minters;
 
     /**
