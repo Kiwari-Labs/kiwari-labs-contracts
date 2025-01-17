@@ -1,3 +1,8 @@
+// Copyright Kiwari Labs and @kiwarilabs/contracts contributors 2024,2025. All Rights Reserved.
+// Node module: kiwari-labs-contracts
+// This file is licensed under the Apache License 2.0.
+// License text available at https://www.apache.org/licenses/LICENSE-2.0
+
 export const data = [
   133, 119, 238, 14, 147, 10, 6, 62, 158, 154, 27, 273, 73, 22, 267, 165, 71, 60, 107, 207, 39, 65, 61, 41, 21, 99, 246, 198, 196, 12, 236,
   183, 96, 233, 197, 18, 270, 20, 53, 244, 118, 224, 217, 159, 259, 63, 46, 126, 28, 95, 139, 254, 79, 145, 89, 64, 156, 148, 109, 157, 19,
