@@ -52,7 +52,7 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
         unchecked {
             uint256 balanceFrom = _balances[from];
             if (from == address(0)) {
-                // mint non-expirable token to spendable balance.
+                // mint non-expirable token `to` balance.
                 _balances[to] += value;
             } else if (to == address(0)) {
                 if (balanceFrom < value) {
@@ -63,9 +63,9 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
                 if (balanceFrom < value) {
                     revert ERC20InsufficientBalance(from, balanceFrom, value);
                 }
-                // burn non-expirable token from spendable balance.
+                // burn non-expirable token `from`balance.
                 _balances[from] -= value;
-                // update non-expirable token from and to spendable balance.
+                // update non-expirable token `from` and `to` balance.
                 _balances[to] += value;
             }
         }
@@ -147,15 +147,15 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
         if (selector == 0) {
             _transfer(from, to, value);
         } else if (selector == 1) {
-            // consolidate by burning non whitelist balance and mint non-expirable to whitelist unspendable balance.
+            // consolidate by burning non whitelist balance and mint non-expirable to whitelist balance.
             _burn(from, value);
             _mintToWhitelist(to, value);
         } else if (selector == 2) {
-            // consolidate by burning whitelist spendable balance and mint expirable to retail balance.
+            // consolidate by burning whitelist balance and mint expirable to retail balance.
             _burnFromWhitelist(from, value);
             _mint(to, value);
         } else {
-            // wholesale to wholesale transfer only use spendable balance.
+            // wholesale to wholesale transfer only use whitelist balance.
             _updateBalance(from, to, value);
         }
     }
