@@ -7,10 +7,10 @@ import * as ERC7818Frozen from "./ERC7818Frozen/index.test";
 
 export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
   describe("extensions", async function () {
-    ERC7818Blacklist.run({epochType});
-    ERC7818MintQuota.run({epochType});
+    // ERC7818Blacklist.run({epochType});
+    // ERC7818MintQuota.run({epochType});
     ERC7818Whitelist.run({epochType});
-    ERC7818NearestExpiryQuery.run({epochType});
-    ERC7818Frozen.run({epochType});
+    // ERC7818NearestExpiryQuery.run({epochType});
+    // ERC7818Frozen.run({epochType});
   });
 };

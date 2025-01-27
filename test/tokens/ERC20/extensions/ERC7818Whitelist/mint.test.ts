@@ -11,38 +11,18 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       await hardhat_reset();
     });
 
-    it("[SUCCESS] mintSpendableWhitelist `to` whitelist", async function () {
+    it("[SUCCESS] mint token to `to` whitelist", async function () {
       const {erc7818expWhitelist, deployer, alice} = await deployERC7818WhitelistSelector({epochType});
       await erc7818expWhitelist.addToWhitelist(alice.address);
-      await expect(erc7818expWhitelist.mintSpendableWhitelist(alice.address, amount))
+      await expect(erc7818expWhitelist.mintToWhitelist(alice.address, amount))
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
         .withArgs(constants.ZERO_ADDRESS, alice.address, 1);
       expect(await erc7818expWhitelist.balanceOf(alice.address)).to.equal(amount);
-      expect(await erc7818expWhitelist.safeBalanceOf(alice.address)).to.equal(amount);
     });
 
-    it("[SUCCESS] mintUnspendableWhitelist `to` whitelist", async function () {
-      const {erc7818expWhitelist, deployer, alice} = await deployERC7818WhitelistSelector({epochType});
-      await erc7818expWhitelist.addToWhitelist(alice.address);
-      await expect(erc7818expWhitelist.mintUnspendableWhitelist(alice.address, amount))
-        .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
-        .withArgs(constants.ZERO_ADDRESS, alice.address, 1);
-      expect(await erc7818expWhitelist.balanceOf(alice.address)).to.equal(amount);
-      expect(await erc7818expWhitelist.safeBalanceOf(alice.address)).to.equal(0);
-    });
-
-    it("[FAILED] mintSpendableWhitelist `to` non-whitelist", async function () {
+    it("[FAILED] mint token to `to` non-whitelist", async function () {
       const {erc7818expWhitelist, alice} = await deployERC7818WhitelistSelector({epochType});
-      await expect(erc7818expWhitelist.mintSpendableWhitelist(alice.address, 1)).to.be.revertedWithCustomError(
-        erc7818expWhitelist,
-        ERC7818Whitelist.errors.InvalidWhitelistAddress,
-      );
-      expect(await erc7818expWhitelist.isWhitelist(alice.address)).to.equal(false);
-    });
-
-    it("[FAILED] mintUnspendableWhitelist `to` non-whitelist", async function () {
-      const {erc7818expWhitelist, alice} = await deployERC7818WhitelistSelector({epochType});
-      await expect(erc7818expWhitelist.mintUnspendableWhitelist(alice.address, 1)).to.be.revertedWithCustomError(
+      await expect(erc7818expWhitelist.mintToWhitelist(alice.address, 1)).to.be.revertedWithCustomError(
         erc7818expWhitelist,
         ERC7818Whitelist.errors.InvalidWhitelistAddress,
       );

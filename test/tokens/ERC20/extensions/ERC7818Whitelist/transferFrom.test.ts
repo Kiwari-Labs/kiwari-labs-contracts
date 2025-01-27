@@ -15,7 +15,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       await expect(erc7818expWhitelist.addToWhitelist(alice.address))
         .to.emit(erc7818expWhitelist, ERC7818Whitelist.events.Whitelisted)
         .withArgs(deployer.address, alice.address);
-      await expect(erc7818expWhitelist.mintSpendableWhitelist(alice.address, amount))
+      await expect(erc7818expWhitelist.mintToWhitelist(alice.address, amount))
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
         .withArgs(constants.ZERO_ADDRESS, alice.address, amount);
       await expect(erc7818expWhitelist.connect(alice).approve(bob.address, amount))

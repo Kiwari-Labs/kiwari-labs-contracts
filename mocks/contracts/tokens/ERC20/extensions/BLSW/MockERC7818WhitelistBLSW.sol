@@ -68,28 +68,16 @@ contract MockERC7818WhitelistBLSW is ERC20BLSW, ERC7818Whitelist {
         _removeFromWhitelist(account);
     }
 
-    function transferUnspendable(address to, uint256 value) public {
+    function whitelistTokenTransfer(address to, uint256 value) public {
         address sender = _msgSender();
-        _updateUnspendableBalance(sender, to, value);
+        _updateBalance(sender, to, value);
     }
 
-    function safeBalanceOf(address account) public view returns (uint256) {
-        return _unSafeBalanceOf(account, false);
+    function mintToWhitelist(address to, uint256 value) public {
+        _mintToWhitelist(to, value);
     }
 
-    function mintSpendableWhitelist(address to, uint256 value) public {
-        _mintToWhitelist(to, value, true);
-    }
-
-    function mintUnspendableWhitelist(address to, uint256 value) public {
-        _mintToWhitelist(to, value, false);
-    }
-
-    function burnSpendableWhitelist(address to, uint256 value) public {
-        _burnFromWhitelist(to, value, true);
-    }
-
-    function burnUnspendableWhitelist(address to, uint256 value) public {
-        _burnFromWhitelist(to, value, false);
+    function burnFromWhitelist(address to, uint256 value) public {
+        _burnFromWhitelist(to, value);
     }
 }
