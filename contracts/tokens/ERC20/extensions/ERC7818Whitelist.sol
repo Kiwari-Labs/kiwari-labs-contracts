@@ -163,16 +163,11 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
     }
 
     function _transferAtEpochHandler(address from, address to, uint256 value, uint256 epoch) internal virtual {
-        uint256 selector = _whitelist[to] ? 1 : 0;
-        if (selector == 0) {
-            _transferAtEpoch(epoch, from, to, value);
-        } else if (selector == 1) {
-            // consolidate by burning non whitelist balance and mint non-expirable to whitelist balance.
+        if (_whitelist[to]) {
             _updateAtEpoch(epoch, from, address(0), value);
             _mintToWhitelist(to, value);
         } else {
-            // wholesale to wholesale transfer only use whitelist balance.
-            _updateBalance(from, to, value);
+            _transferAtEpoch(epoch, from, to, value);
         }
     }
 
