@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import {ERC20EXPBase} from "../ERC20EXPBase.sol";
 
 /**
- * @title ERC20EXP Blacklist extension
+ * @title ERC7818 Blacklist extension
  * @author Kiwari Labs
  */
 abstract contract ERC7818Blacklist is ERC20EXPBase {
