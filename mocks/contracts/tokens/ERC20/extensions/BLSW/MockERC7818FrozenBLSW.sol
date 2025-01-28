@@ -47,6 +47,10 @@ contract MockERC7818FrozenBLSW is ERC20BLSW, ERC7818Frozen {
         super._update(from, to, value);
     }
 
+    function _updateAtEpoch(uint256 epoch, address from, address to, uint256 value) internal virtual override(ERC20EXPBase, ERC7818Frozen) {
+        super._updateAtEpoch(epoch, from, to, value);
+    }
+
     function freeze(address account) public {
         _freeze(account);
     }

@@ -56,7 +56,7 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
      * @param to The address of the account to which tokens are being transferred or minted.
      * @param value The amount of tokens to be transferred, minted, or burned.
      */
-    function _updateSpendableBalance(address from, address to, uint256 value) internal {
+    function _updateSpendableBalance(address from, address to, uint256 value) internal virtual {
         unchecked {
             uint256 balanceFrom = _balances[from]._spendableBalances;
             if (from == address(0)) {
@@ -89,7 +89,7 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
      * @param to The address of the account to which tokens are being transferred or minted.
      * @param value The amount of tokens to be transferred, minted, or burned.
      */
-    function _updateUnspendableBalance(address from, address to, uint256 value) internal {
+    function _updateUnspendableBalance(address from, address to, uint256 value) internal virtual {
         unchecked {
             uint256 balanceFrom = _balances[from]._unspendableBalances;
             if (from == address(0)) {
@@ -216,7 +216,7 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
      * @param to The address to which tokens are being transferred.
      * @param value The amount of tokens being transferred.
      */
-    function _transferHandler(address from, address to, uint256 value) internal {
+    function _transferHandler(address from, address to, uint256 value) internal virtual {
         uint256 selector = (_whitelist[from] ? 2 : 0) | (_whitelist[to] ? 1 : 0);
         if (selector == 0) {
             _transfer(from, to, value);

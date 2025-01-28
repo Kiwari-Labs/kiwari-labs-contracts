@@ -47,6 +47,15 @@ contract MockERC7818BlacklistBLSW is ERC20BLSW, ERC7818Blacklist {
         super._update(from, to, value);
     }
 
+    function _updateAtEpoch(
+        uint256 epoch,
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual override(ERC20EXPBase, ERC7818Blacklist) {
+        super._updateAtEpoch(epoch, from, to, value);
+    }
+
     function addToBlacklist(address account) public {
         _addToBlacklist(account);
     }
