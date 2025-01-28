@@ -58,6 +58,27 @@ export const ERC20 = {
   },
 };
 
+export const ERC7818Permit = {
+  name: "MockERC7818Permit",
+  events: {},
+  errors: {
+    ERC2612ExpiredSignature: "ERC2612ExpiredSignature",
+    ERC2612InvalidSigner: "ERC2612InvalidSigner",
+  },
+};
+
+export const ERC7818PermitBLSW = {
+  name: "MockERC7818PermitBLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC7818PermitTLSW = {
+  name: "MockERC7818PermitTLSW",
+  errors: {},
+  events: {},
+};
+
 export const ERC7818Frozen = {
   name: "MockERC7818Frozen",
   events: {
