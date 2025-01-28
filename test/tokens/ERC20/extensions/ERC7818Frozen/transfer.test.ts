@@ -33,6 +33,27 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       expect(await erc7818Frozen.balanceOf(bob.address)).to.equal(100);
     });
 
+    it("[SUCCESS] transfer at epoch `to` non-frozen", async function () {
+      const {erc7818Frozen, alice, bob} = await deployERC7818FrozenSelector({epochType});
+      await erc7818Frozen.mint(alice.address, 100);
+      expect(await erc7818Frozen.isFrozen(alice.address)).to.equal(false);
+      expect(await erc7818Frozen.isFrozen(bob.address)).to.equal(false);
+      const epoch = await erc7818Frozen.currentEpoch();
+      await erc7818Frozen.connect(alice).transferAtEpoch(epoch, bob.address, 100);
+      expect(await erc7818Frozen.balanceOf(bob.address)).to.equal(100);
+    });
+
+    it("[SUCCESS] transfer at epoch `from` non-frozen", async function () {
+      const {erc7818Frozen, alice, bob} = await deployERC7818FrozenSelector({epochType});
+      await erc7818Frozen.mint(alice.address, 100);
+      await erc7818Frozen.connect(alice).approve(bob.address, 100);
+      expect(await erc7818Frozen.isFrozen(alice.address)).to.equal(false);
+      expect(await erc7818Frozen.isFrozen(bob.address)).to.equal(false);
+      const epoch = await erc7818Frozen.currentEpoch();
+      await erc7818Frozen.connect(bob).transferFromAtEpoch(epoch, alice.address, bob.address, 100);
+      expect(await erc7818Frozen.balanceOf(bob.address)).to.equal(100);
+    });
+
     it("[FAILED] transfer `to` frozen", async function () {
       const {erc7818Frozen, alice, bob} = await deployERC7818FrozenSelector({epochType});
       await erc7818Frozen.mint(alice.address, 100);
@@ -51,6 +72,30 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       expect(await erc7818Frozen.isFrozen(alice.address)).to.equal(true);
       expect(await erc7818Frozen.isFrozen(bob.address)).to.equal(false);
       await expect(erc7818Frozen.connect(bob).transferFrom(alice.address, bob.address, 100))
+        .to.revertedWithCustomError(erc7818Frozen, ERC7818Frozen.errors.AccountFrozen)
+        .withArgs(alice.address);
+    });
+
+    it("[FAILED] transfer at epoch `to` frozen", async function () {
+      const {erc7818Frozen, alice, bob} = await deployERC7818FrozenSelector({epochType});
+      await erc7818Frozen.mint(alice.address, 100);
+      await erc7818Frozen.freeze(bob.address);
+      expect(await erc7818Frozen.isFrozen(alice.address)).to.equal(false);
+      expect(await erc7818Frozen.isFrozen(bob.address)).to.equal(true);
+      const epoch = await erc7818Frozen.currentEpoch();
+      await erc7818Frozen.connect(alice).transferAtEpoch(epoch, bob.address, 100);
+      expect(await erc7818Frozen.balanceOf(bob.address)).to.equal(100);
+    });
+
+    it("[FAILED] transfer at epoch `from` frozen", async function () {
+      const {erc7818Frozen, alice, bob} = await deployERC7818FrozenSelector({epochType});
+      await erc7818Frozen.mint(alice.address, 100);
+      await erc7818Frozen.connect(alice).approve(bob.address, 100);
+      await erc7818Frozen.freeze(alice.address);
+      expect(await erc7818Frozen.isFrozen(alice.address)).to.equal(true);
+      expect(await erc7818Frozen.isFrozen(bob.address)).to.equal(false);
+      const epoch = await erc7818Frozen.currentEpoch();
+      await expect(erc7818Frozen.connect(bob).transferFromAtEpoch(epoch, alice.address, bob.address, 100))
         .to.revertedWithCustomError(erc7818Frozen, ERC7818Frozen.errors.AccountFrozen)
         .withArgs(alice.address);
     });

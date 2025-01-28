@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import {ERC20EXPBase} from "../ERC20EXPBase.sol";
 
 /**
- * @title ERC20EXP Frozen extension
+ * @title ERC7818 Frozen extension
  * @author Kiwari Labs
  */
 abstract contract ERC7818Frozen is ERC20EXPBase {
@@ -62,7 +62,7 @@ abstract contract ERC7818Frozen is ERC20EXPBase {
      * @param account The address to check.
      * @return True if the account is frozen, false otherwise.
      */
-    function isFrozen(address account) public view virtual returns (bool) {
+    function isFrozen(address account) public view returns (bool) {
         return _frozen[account];
     }
 
@@ -92,5 +92,16 @@ abstract contract ERC7818Frozen is ERC20EXPBase {
      */
     function _update(address from, address to, uint256 value) internal virtual override onlyNotFrozen(from) {
         super._update(from, to, value);
+    }
+
+    /**
+     * @notice Overrides the `_updateAtEpoch` function to include frozen checks.
+     * @param epoch The epoch for the transfer.
+     * @param from The sender's address.
+     * @param to The receiver's address.
+     * @param value The amount to transfer.
+     */
+    function _updateAtEpoch(uint256 epoch, address from, address to, uint256 value) internal virtual override onlyNotFrozen(from) {
+        super._updateAtEpoch(epoch, from, to, value);
     }
 }
