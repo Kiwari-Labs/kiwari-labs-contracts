@@ -28,5 +28,24 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
         .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
         .withArgs(constants.ZERO_ADDRESS, bob.address, amount);
     });
+
+    it("[FAILED] whitelist transfer at epoch `to` non-whitelist", async function () {
+      const {erc7818expWhitelist, deployer, alice, bob} = await deployERC7818WhitelistSelector({epochType});
+      const amount = 100;
+      await expect(erc7818expWhitelist.addToWhitelist(alice.address))
+        .to.emit(erc7818expWhitelist, ERC7818Whitelist.events.Whitelisted)
+        .withArgs(deployer.address, alice.address);
+      await expect(erc7818expWhitelist.mintToWhitelist(alice.address, amount))
+        .to.emit(erc7818expWhitelist, ERC20.events.Transfer)
+        .withArgs(constants.ZERO_ADDRESS, alice.address, amount);
+      const epoch = await erc7818expWhitelist.currentEpoch();
+      await expect(erc7818expWhitelist.connect(alice).approve(bob.address, amount))
+        .to.emit(erc7818expWhitelist, ERC20.events.Approval)
+        .withArgs(alice.address, bob.address, amount);
+      expect(await erc7818expWhitelist.allowance(alice.address, bob.address)).to.equal(amount);
+      await expect(
+        erc7818expWhitelist.connect(bob).transferFromAtEpoch(epoch, alice.address, bob.address, amount),
+      ).to.be.revertedWithCustomError(erc7818expWhitelist, ERC7818Whitelist.errors.WhitelistNotSupportTransferFromAtEpoch);
+    });
   });
 };

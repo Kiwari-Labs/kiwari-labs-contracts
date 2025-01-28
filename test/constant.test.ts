@@ -139,6 +139,8 @@ export const ERC7818Whitelist = {
     InvalidWhitelistAddress: "InvalidWhitelistAddress",
     ExistInWhitelist: "ExistInWhitelist",
     NotExistInWhitelist: "NotExistInWhitelist",
+    WhitelistNotSupportTransferAtEpoch: "WhitelistNotSupportTransferAtEpoch",
+    WhitelistNotSupportTransferFromAtEpoch: "WhitelistNotSupportTransferFromAtEpoch",
   },
   events: {
     Whitelisted: "Whitelisted",

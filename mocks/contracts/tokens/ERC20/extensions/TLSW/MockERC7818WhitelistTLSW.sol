@@ -5,6 +5,7 @@ import {ERC20EXPBase} from "../../../../../../contracts/tokens/ERC20/ERC20EXPBas
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC20TLSW} from "../../../../../../contracts/tokens/ERC20/ERC20TLSW.sol";
 import {ERC7818Whitelist} from "../../../../../../contracts/tokens/ERC20/extensions/ERC7818Whitelist.sol";
+import {IERC7818} from "../../../../../../contracts/tokens/ERC20/interfaces/IERC7818.sol";
 
 contract MockERC7818WhitelistTLSW is ERC20TLSW, ERC7818Whitelist {
     constructor(
@@ -58,6 +59,23 @@ contract MockERC7818WhitelistTLSW is ERC20TLSW, ERC7818Whitelist {
         uint256 value
     ) public virtual override(IERC20, ERC20EXPBase, ERC7818Whitelist) returns (bool) {
         return super.transferFrom(from, to, value);
+    }
+
+    function transferAtEpoch(
+        uint256 epoch,
+        address to,
+        uint256 value
+    ) public virtual override(IERC7818, ERC20EXPBase, ERC7818Whitelist) returns (bool) {
+        return super.transferAtEpoch(epoch, to, value);
+    }
+
+    function transferFromAtEpoch(
+        uint256 epoch,
+        address from,
+        address to,
+        uint256 value
+    ) public virtual override(IERC7818, ERC20EXPBase, ERC7818Whitelist) returns (bool) {
+        return super.transferFromAtEpoch(epoch, from, to, value);
     }
 
     function addToWhitelist(address account) public {

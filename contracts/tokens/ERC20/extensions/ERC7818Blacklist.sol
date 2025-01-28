@@ -68,7 +68,7 @@ abstract contract ERC7818Blacklist is ERC20EXPBase {
      * @notice Adds an account to the blacklist.
      * @param account The account to blacklist.
      */
-    function _addToBlacklist(address account) internal onlyNotBlacklisted(account) {
+    function _addToBlacklist(address account) internal virtual onlyNotBlacklisted(account) {
         _blacklist[account] = true;
         emit AddedToBlacklist(_msgSender(), account);
     }
@@ -77,7 +77,7 @@ abstract contract ERC7818Blacklist is ERC20EXPBase {
      * @notice Removes an account from the blacklist.
      * @param account The account to remove.
      */
-    function _removeFromBlacklist(address account) internal onlyBlacklisted(account) {
+    function _removeFromBlacklist(address account) internal virtual onlyBlacklisted(account) {
         _blacklist[account] = false;
         emit RemovedFromBlacklist(_msgSender(), account);
     }
@@ -90,5 +90,21 @@ abstract contract ERC7818Blacklist is ERC20EXPBase {
      */
     function _update(address from, address to, uint256 value) internal virtual override onlyNotBlacklisted(from) onlyNotBlacklisted(to) {
         super._update(from, to, value);
+    }
+
+    /**
+     * @notice Overrides _updateAtEpoch to allow transfers only between non-blacklisted accounts.
+     * @param epoch The epoch for the transfer.
+     * @param from The sender's address.
+     * @param to The receiver's address.
+     * @param value The amount to transfer.
+     */
+    function _updateAtEpoch(
+        uint256 epoch,
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual override onlyNotBlacklisted(from) onlyNotBlacklisted(to) {
+        super._updateAtEpoch(epoch, from, to, value);
     }
 }

@@ -28,6 +28,8 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
     error InvalidWhitelistAddress();
     error NotExistInWhitelist();
     error ExistInWhitelist();
+    error WhitelistNotSupportTransferAtEpoch();
+    error WhitelistNotSupportTransferFromAtEpoch();
 
     /**
      * @notice Mapping whitelist address
@@ -142,7 +144,7 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
      * @param to The address to which tokens are being transferred.
      * @param value The amount of tokens being transferred.
      */
-    function _transferHandler(address from, address to, uint256 value) internal {
+    function _transferHandler(address from, address to, uint256 value) internal virtual {
         uint256 selector = (_whitelist[from] ? 2 : 0) | (_whitelist[to] ? 1 : 0);
         if (selector == 0) {
             _transfer(from, to, value);
@@ -154,6 +156,20 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
             // consolidate by burning whitelist balance and mint expirable to retail balance.
             _burnFromWhitelist(from, value);
             _mint(to, value);
+        } else {
+            // wholesale to wholesale transfer only use whitelist balance.
+            _updateBalance(from, to, value);
+        }
+    }
+
+    function _transferAtEpochHandler(address from, address to, uint256 value, uint256 epoch) internal virtual {
+        uint256 selector = _whitelist[to] ? 1 : 0;
+        if (selector == 0) {
+            _transferAtEpoch(epoch, from, to, value);
+        } else if (selector == 1) {
+            // consolidate by burning non whitelist balance and mint non-expirable to whitelist balance.
+            _updateAtEpoch(epoch, from, address(0), value);
+            _mintToWhitelist(to, value);
         } else {
             // wholesale to wholesale transfer only use whitelist balance.
             _updateBalance(from, to, value);
@@ -178,6 +194,44 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
         } else {
             return super.balanceOf(account);
         }
+    }
+
+    /**
+     * @dev See {IERC7818-transferAtEpoch}.
+     */
+    function transferAtEpoch(uint256 epoch, address to, uint256 value) public virtual override returns (bool) {
+        address owner = _msgSender();
+
+        if (_whitelist[owner]) {
+            revert WhitelistNotSupportTransferAtEpoch();
+        }
+
+        if (_expired(epoch)) {
+            revert ERC7818TransferredExpiredToken();
+        }
+
+        _transferAtEpochHandler(owner, to, value, epoch);
+        return true;
+    }
+
+    /**
+     * @dev See {IERC7818-transferFromAtEpoch}.
+     */
+    function transferFromAtEpoch(uint256 epoch, address from, address to, uint256 value) public virtual override returns (bool) {
+        if (_whitelist[from]) {
+            revert WhitelistNotSupportTransferAtEpoch();
+        }
+
+        if (_expired(epoch)) {
+            revert ERC7818TransferredExpiredToken();
+        }
+
+        address spender = _msgSender();
+
+        _spendAllowance(from, spender, value);
+        _transferAtEpochHandler(from, to, value, epoch);
+
+        return true;
     }
 
     /**

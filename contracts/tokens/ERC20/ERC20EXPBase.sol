@@ -40,7 +40,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
      * @param account The address of the account.
      * @return balance The total balance of the account over the specified epoch range.
      */
-    function _computeBalanceOverEpochRange(uint256 fromEpoch, uint256 toEpoch, address account) private view returns (uint256 balance) {
+    function _computeBalanceOverEpochRange(uint256 fromEpoch, uint256 toEpoch, address account) internal view returns (uint256 balance) {
         unchecked {
             for (; fromEpoch <= toEpoch; fromEpoch++) {
                 balance += _balances[fromEpoch][account].totalBalance;
@@ -62,7 +62,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
         address account,
         uint256 pointer,
         uint256 duration
-    ) private view returns (uint256 balance) {
+    ) internal view returns (uint256 balance) {
         (uint256 element, ) = _findValidBalance(account, epoch, pointer, duration);
         Epoch storage _account = _balances[epoch][account];
         unchecked {
@@ -278,28 +278,56 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
 
         uint256 pendingValue = value;
 
-        while (element > 0 && pendingValue > 0) {
-            balance = _spender.balances[element];
-            if (balance <= pendingValue) {
-                unchecked {
-                    pendingValue -= balance;
-                    _spender.totalBalance -= balance;
-                    _spender.balances[element] -= balance;
-                    _recipient.totalBalance += balance;
-                    _recipient.balances[element] += balance;
+        if (to == address(0)) {
+            while (element > 0 && pendingValue > 0) {
+                Epoch storage _spender = _balances[epoch][from];
+                uint256 element = _spender.list.head();
+
+                while (element > 0 && pendingValue > 0) {
+                    balance = _spender.balances[element];
+                    if (balance <= pendingValue) {
+                        unchecked {
+                            pendingValue -= balance;
+                            _spender.totalBalance -= balance;
+                            _spender.balances[element] -= balance;
+                            _worldStateBalances[element] -= balance;
+                        }
+                        element = _spender.list.next(element);
+                        _spender.list.remove(_spender.list.previous(element));
+                    } else {
+                        unchecked {
+                            _spender.totalBalance -= pendingValue;
+                            _spender.balances[element] -= pendingValue;
+                            _worldStateBalances[element] -= pendingValue;
+                        }
+                        pendingValue = 0;
+                    }
                 }
-                _recipient.list.insert(element);
-                element = _spender.list.next(element);
-                _spender.list.remove(_spender.list.previous(element));
-            } else {
-                unchecked {
-                    _spender.totalBalance -= pendingValue;
-                    _spender.balances[element] -= pendingValue;
-                    _recipient.totalBalance += pendingValue;
-                    _recipient.balances[element] += pendingValue;
+            }
+        } else {
+            while (element > 0 && pendingValue > 0) {
+                balance = _spender.balances[element];
+                if (balance <= pendingValue) {
+                    unchecked {
+                        pendingValue -= balance;
+                        _spender.totalBalance -= balance;
+                        _spender.balances[element] -= balance;
+                        _recipient.totalBalance += balance;
+                        _recipient.balances[element] += balance;
+                    }
+                    _recipient.list.insert(element);
+                    element = _spender.list.next(element);
+                    _spender.list.remove(_spender.list.previous(element));
+                } else {
+                    unchecked {
+                        _spender.totalBalance -= pendingValue;
+                        _spender.balances[element] -= pendingValue;
+                        _recipient.totalBalance += pendingValue;
+                        _recipient.balances[element] += pendingValue;
+                    }
+                    _recipient.list.insert(element);
+                    pendingValue = 0;
                 }
-                _recipient.list.insert(element);
-                pendingValue = 0;
             }
         }
 
@@ -343,7 +371,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
      * @param spender The address of the spender.
      * @param value The amount of tokens to spend from the allowance.
      */
-    function _spendAllowance(address owner, address spender, uint256 value) internal {
+    function _spendAllowance(address owner, address spender, uint256 value) internal virtual {
         uint256 currentAllowance = _allowances[owner][spender];
         if (currentAllowance != type(uint256).max) {
             if (currentAllowance < value) {
@@ -376,7 +404,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
      * @param value The amount of tokens to allow.
      * @param emitEvent Boolean flag indicating whether to emit the `Approval` event.
      */
-    function _approve(address owner, address spender, uint256 value, bool emitEvent) internal {
+    function _approve(address owner, address spender, uint256 value, bool emitEvent) internal virtual {
         if (owner == address(0)) {
             revert ERC20InvalidApprover(address(0));
         }
@@ -528,7 +556,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     /**
      * @dev See {IERC7818-balanceOfAtEpoch}.
      */
-    function balanceOfAtEpoch(uint256 epoch, address account) external view returns (uint256) {
+    function balanceOfAtEpoch(uint256 epoch, address account) external view virtual returns (uint256) {
         uint256 pointer = _pointerProvider();
         (uint256 fromEpoch, uint256 toEpoch) = _getWindowRage(pointer);
         if (epoch < fromEpoch || epoch > toEpoch) {
@@ -557,7 +585,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     /**
      * @dev See {IERC7818-epochType}.
      */
-    function epochType() public pure returns (EPOCH_TYPE) {
+    function epochType() public pure virtual returns (EPOCH_TYPE) {
         return _epochType();
     }
 
