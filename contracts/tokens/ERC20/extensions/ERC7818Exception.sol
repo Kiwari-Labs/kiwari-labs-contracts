@@ -4,40 +4,40 @@ pragma solidity >=0.8.0 <0.9.0;
 import {ERC20EXPBase} from "../ERC20EXPBase.sol";
 
 /**
- * @title ERC7818 Whitelist extension
+ * @title ERC7818 Exception extension
  * @author Kiwari Labs
  */
-abstract contract ERC7818Whitelist is ERC20EXPBase {
+abstract contract ERC7818Exception is ERC20EXPBase {
     /**
-     * @notice Emitted when an address is added to the whitelist
+     * @notice Emitted when an address is added to the exception
      * @param caller Operate by the address
-     * @param account The address that was whitelist
+     * @param account The address that was exception
      */
-    event Whitelisted(address indexed caller, address indexed account);
+    event AddedToExceptionList(address indexed caller, address indexed account);
 
     /**
-     * @notice Emitted when an address is removed from the whitelist
+     * @notice Emitted when an address is removed from the exception
      * @param caller Operate by the address
-     * @param account The address that was removed from the whitelist
+     * @param account The address that was removed from the exception
      */
-    event Unwhitelisted(address indexed caller, address indexed account);
+    event RemovedFromExceptionList(address indexed caller, address indexed account);
 
     /**
      * @notice Custom error definitions
      */
-    error InvalidWhitelistAddress();
-    error NotExistInWhitelist();
-    error ExistInWhitelist();
-    error WhitelistNotSupportTransferAtEpoch();
-    error WhitelistNotSupportTransferFromAtEpoch();
+    error InvalidExceptionAddress();
+    error NotExistInExceptionList();
+    error ExistInExceptionList();
+    error ExceptionAddressNotSupportTransferAtEpoch();
+    error ExceptionAddressNotSupportTransferFromAtEpoch();
 
     /**
-     * @notice Mapping whitelist address
+     * @notice Mapping exception address
      */
-    mapping(address => bool) private _whitelist;
+    mapping(address => bool) private _exceptionList;
 
     /**
-     * @notice Mapping from whitelist address to their balance
+     * @notice Mapping from exception address to their balance
      */
     mapping(address => uint256) private _balances;
 
@@ -50,7 +50,7 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
      * @param to The address of the account to which tokens are being transferred or minted.
      * @param value The amount of tokens to be transferred, minted, or burned.
      */
-    function _updateBalance(address from, address to, uint256 value) internal {
+    function _updateExceptionBalance(address from, address to, uint256 value) internal {
         unchecked {
             uint256 balanceFrom = _balances[from];
             if (from == address(0)) {
@@ -75,65 +75,65 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
     }
 
     /**
-     * @notice Only allows burning non-expirable tokens from whitelist accounts.
-     * @dev Directly burns tokens from a whitelist account.
-     * @param to The address of the whitelist account from which tokens will be burned.
+     * @notice Only allows burning non-expirable tokens from exception accounts.
+     * @dev Directly burns tokens from a exception account.
+     * @param to The address of the exception account from which tokens will be burned.
      * @param value The amount of tokens to burn.
      */
-    function _burnFromWhitelist(address to, uint256 value) internal virtual {
-        if (_whitelist[to]) {
-            _updateBalance(to, address(0), value);
+    function _burnFromException(address to, uint256 value) internal virtual {
+        if (_exceptionList[to]) {
+            _updateExceptionBalance(to, address(0), value);
         } else {
-            revert InvalidWhitelistAddress();
+            revert InvalidExceptionAddress();
         }
     }
 
     /**
-     * @notice Cannot mint expirable tokens to whitelist accounts.
+     * @notice Cannot mint expirable tokens to exception accounts.
      * @dev Mints new tokens directly to a retail account.
      * @param to The address of the retail account receiving the minted tokens.
      * @param value The amount of tokens to mint.
      */
-    function _mintToWhitelist(address to, uint256 value) internal virtual {
-        if (_whitelist[to]) {
-            _updateBalance(address(0), to, value);
+    function _mintToException(address to, uint256 value) internal virtual {
+        if (_exceptionList[to]) {
+            _updateExceptionBalance(address(0), to, value);
         } else {
-            revert InvalidWhitelistAddress();
+            revert InvalidExceptionAddress();
         }
     }
 
     /**
-     * @notice Adds an address to the whitelist.
-     * @dev Grants whitelist status to the specified address.
-     * @param account The address to whitelist.
+     * @notice Adds an address to the exception.
+     * @dev Grants exception status to the specified address.
+     * @param account The address to exception.
      */
-    function _addToWhitelist(address account) internal virtual {
-        if (_whitelist[account]) {
-            revert ExistInWhitelist();
+    function _addToExceptionList(address account) internal virtual {
+        if (_exceptionList[account]) {
+            revert ExistInExceptionList();
         } else {
             address caller = _msgSender();
-            _whitelist[account] = true;
-            emit Whitelisted(caller, account);
+            _exceptionList[account] = true;
+            emit AddedToExceptionList(caller, account);
         }
     }
 
     /**
-     * @notice Revokes whitelist status from an account and burns any associated tokens.
-     * @dev Removes the account from the whitelist and burns its balances.
-     * @param account The address of the account to revoke whitelist status from.
+     * @notice Revokes exception status from an account and burns any associated tokens.
+     * @dev Removes the account from the exception and burns its balances.
+     * @param account The address of the account to revoke exception status from.
      */
-    function _removeFromWhitelist(address account) internal virtual {
-        if (_whitelist[account]) {
+    function _removeFromExceptionList(address account) internal virtual {
+        if (_exceptionList[account]) {
             address caller = _msgSender();
             uint256 accountBalance = _balances[account];
 
             if (accountBalance > 0) {
-                _burnFromWhitelist(account, accountBalance);
+                _burnFromException(account, accountBalance);
             }
-            _whitelist[account] = false;
-            emit Unwhitelisted(caller, account);
+            _exceptionList[account] = false;
+            emit RemovedFromExceptionList(caller, account);
         } else {
-            revert NotExistInWhitelist();
+            revert NotExistInExceptionList();
         }
     }
 
@@ -145,46 +145,46 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
      * @param value The amount of tokens being transferred.
      */
     function _transferHandler(address from, address to, uint256 value) internal virtual {
-        uint256 selector = (_whitelist[from] ? 2 : 0) | (_whitelist[to] ? 1 : 0);
+        uint256 selector = (_exceptionList[from] ? 2 : 0) | (_exceptionList[to] ? 1 : 0);
         if (selector == 0) {
             _transfer(from, to, value);
         } else if (selector == 1) {
-            // consolidate by burning non whitelist balance and mint non-expirable to whitelist balance.
+            // consolidate by burning non exception balance and mint non-expirable to exception balance.
             _burn(from, value);
-            _mintToWhitelist(to, value);
+            _mintToException(to, value);
         } else if (selector == 2) {
-            // consolidate by burning whitelist balance and mint expirable to retail balance.
-            _burnFromWhitelist(from, value);
+            // consolidate by burning exception balance and mint expirable to retail balance.
+            _burnFromException(from, value);
             _mint(to, value);
         } else {
-            // wholesale to wholesale transfer only use whitelist balance.
-            _updateBalance(from, to, value);
+            // wholesale to wholesale transfer only use exception balance.
+            _updateExceptionBalance(from, to, value);
         }
     }
 
     function _transferAtEpochHandler(address from, address to, uint256 value, uint256 epoch) internal virtual {
-        if (_whitelist[to]) {
+        if (_exceptionList[to]) {
             _updateAtEpoch(epoch, from, address(0), value);
-            _mintToWhitelist(to, value);
+            _mintToException(to, value);
         } else {
             _transferAtEpoch(epoch, from, to, value);
         }
     }
 
     /**
-     * @dev Checks if the given address is a whitelist account.
+     * @dev Checks if the given address is a exception account.
      * @param account The address to check.
-     * @return bool Returns true if the address is a whitelist account, false otherwise.
+     * @return bool Returns true if the address is a exception account, false otherwise.
      */
-    function isWhitelist(address account) external view returns (bool) {
-        return _whitelist[account];
+    function isExceptionAddress(address account) external view returns (bool) {
+        return _exceptionList[account];
     }
 
     /**
      * @dev See {IERC20-balanceOf}
      */
     function balanceOf(address account) public view virtual override returns (uint256) {
-        if (_whitelist[account]) {
+        if (_exceptionList[account]) {
             return _balances[account];
         } else {
             return super.balanceOf(account);
@@ -197,8 +197,8 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
     function transferAtEpoch(uint256 epoch, address to, uint256 value) public virtual override returns (bool) {
         address owner = _msgSender();
 
-        if (_whitelist[owner]) {
-            revert WhitelistNotSupportTransferAtEpoch();
+        if (_exceptionList[owner]) {
+            revert ExceptionAddressNotSupportTransferAtEpoch();
         }
 
         if (_expired(epoch)) {
@@ -213,8 +213,8 @@ abstract contract ERC7818Whitelist is ERC20EXPBase {
      * @dev See {IERC7818-transferFromAtEpoch}.
      */
     function transferFromAtEpoch(uint256 epoch, address from, address to, uint256 value) public virtual override returns (bool) {
-        if (_whitelist[from]) {
-            revert WhitelistNotSupportTransferAtEpoch();
+        if (_exceptionList[from]) {
+            revert ExceptionAddressNotSupportTransferFromAtEpoch();
         }
 
         if (_expired(epoch)) {
