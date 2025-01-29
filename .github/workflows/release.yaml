@@ -73,10 +73,10 @@ jobs:
       - name: Publish
         run: |
           if [[ "${RELEASE_TYPE}" == "rc" || "${RELEASE_TYPE}" == "beta" || "${RELEASE_TYPE}" == "alpha" ]]; then
-            cd dist
+            cd contracts
             yarn publish --tag next --access public
           else
-            cd dist
+            cd contracts
             yarn publish --access public
           fi
         env:
