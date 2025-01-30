@@ -4,9 +4,10 @@ pragma solidity >=0.8.0 <0.9.0;
 import {ERC20EXPBase} from "../../../../../../contracts/tokens/ERC20/ERC20EXPBase.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC20TLSW} from "../../../../../../contracts/tokens/ERC20/ERC20TLSW.sol";
-import {ERC7818Whitelist} from "../../../../../../contracts/tokens/ERC20/extensions/ERC7818Whitelist.sol";
+import {ERC7818Exception} from "../../../../../../contracts/tokens/ERC20/extensions/ERC7818Exception.sol";
+import {IERC7818} from "../../../../../../contracts/tokens/ERC20/interfaces/IERC7818.sol";
 
-contract MockERC7818WhitelistTLSW is ERC20TLSW, ERC7818Whitelist {
+contract MockERC7818ExceptionTLSW is ERC20TLSW, ERC7818Exception {
     constructor(
         string memory _name,
         string memory _symbol,
@@ -44,11 +45,11 @@ contract MockERC7818WhitelistTLSW is ERC20TLSW, ERC7818Whitelist {
         return super._pointerProvider();
     }
 
-    function balanceOf(address account) public view virtual override(IERC20, ERC20EXPBase, ERC7818Whitelist) returns (uint256) {
+    function balanceOf(address account) public view virtual override(IERC20, ERC20EXPBase, ERC7818Exception) returns (uint256) {
         return super.balanceOf(account);
     }
 
-    function transfer(address to, uint256 value) public virtual override(IERC20, ERC20EXPBase, ERC7818Whitelist) returns (bool) {
+    function transfer(address to, uint256 value) public virtual override(IERC20, ERC20EXPBase, ERC7818Exception) returns (bool) {
         return super.transfer(to, value);
     }
 
@@ -56,40 +57,49 @@ contract MockERC7818WhitelistTLSW is ERC20TLSW, ERC7818Whitelist {
         address from,
         address to,
         uint256 value
-    ) public virtual override(IERC20, ERC20EXPBase, ERC7818Whitelist) returns (bool) {
+    ) public virtual override(IERC20, ERC20EXPBase, ERC7818Exception) returns (bool) {
         return super.transferFrom(from, to, value);
     }
 
-    function addToWhitelist(address account) public {
-        _addToWhitelist(account);
+    function transferAtEpoch(
+        uint256 epoch,
+        address to,
+        uint256 value
+    ) public virtual override(IERC7818, ERC20EXPBase, ERC7818Exception) returns (bool) {
+        return super.transferAtEpoch(epoch, to, value);
     }
 
-    function removeFromWhitelist(address account) public {
-        _removeFromWhitelist(account);
+    function transferFromAtEpoch(
+        uint256 epoch,
+        address from,
+        address to,
+        uint256 value
+    ) public virtual override(IERC7818, ERC20EXPBase, ERC7818Exception) returns (bool) {
+        return super.transferFromAtEpoch(epoch, from, to, value);
     }
 
-    function transferUnspendable(address to, uint256 value) public {
+    function addToException(address account) public {
+        _addToExceptionList(account);
+    }
+
+    function removeFromException(address account) public {
+        _removeFromExceptionList(account);
+    }
+
+    function exceptionTokenTransfer(address to, uint256 value) public {
         address sender = _msgSender();
-        _updateUnspendableBalance(sender, to, value);
+        _updateExceptionBalance(sender, to, value);
     }
 
-    function safeBalanceOf(address account) public view returns (uint256) {
-        return _unSafeBalanceOf(account, false);
+    function mintToException(address to, uint256 value) public {
+        _mintToException(to, value);
     }
 
-    function mintSpendableWhitelist(address to, uint256 value) public {
-        _mintToWhitelist(to, value, true);
+    function burnFromException(address to, uint256 value) public {
+        _burnFromException(to, value);
     }
 
-    function mintUnspendableWhitelist(address to, uint256 value) public {
-        _mintToWhitelist(to, value, false);
-    }
-
-    function burnSpendableWhitelist(address to, uint256 value) public {
-        _burnFromWhitelist(to, value, true);
-    }
-
-    function burnUnspendableWhitelist(address to, uint256 value) public {
-        _burnFromWhitelist(to, value, false);
+    function mint(address to, uint256 value) public {
+        _mint(to, value);
     }
 }

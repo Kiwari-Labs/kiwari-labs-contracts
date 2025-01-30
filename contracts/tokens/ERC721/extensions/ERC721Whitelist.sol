@@ -10,21 +10,21 @@ abstract contract ERC721EXPWhitelist is ERC721EXPBase {
     /// @notice Emitted when an address is added to the whitelist
     /// @param caller Operate by the address
     /// @param account The address that was whitelist
-    event Whitelisted(address indexed caller, address indexed account);
+    event AddedToExceptionList(address indexed caller, address indexed account);
 
     /// @notice Emitted when an address is removed from the whitelist
     /// @param caller Operate by the address
     /// @param account The address that was removed from the whitelist
-    event Unwhitelisted(address indexed caller, address indexed account);
+    event RemovedFromExceptionList(address indexed caller, address indexed account);
 
     /// @notice Custom error definitions
-    error InvalidWhitelistAddress();
-    error NotExistInWhitelist();
-    error ExistInWhitelist();
+    error InvalidExceptionAddress();
+    error NotExistInExceptionList();
+    error ExistInExceptionList();
 
     function _update(address to, uint256 tokenId, address auth) internal override returns (address) {
         // override ERC721Base
-        // if (_whitelist(auth) || _validation(tokenId)) {
+        // if (_exceptionList(auth) || _validation(tokenId)) {
         //     super._update(to, tokenId, auth);
         // } else {
         //     revert

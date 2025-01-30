@@ -278,28 +278,56 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
 
         uint256 pendingValue = value;
 
-        while (element > 0 && pendingValue > 0) {
-            balance = _spender.balances[element];
-            if (balance <= pendingValue) {
-                unchecked {
-                    pendingValue -= balance;
-                    _spender.totalBalance -= balance;
-                    _spender.balances[element] -= balance;
-                    _recipient.totalBalance += balance;
-                    _recipient.balances[element] += balance;
+        if (to == address(0)) {
+            while (element > 0 && pendingValue > 0) {
+                Epoch storage _spender = _balances[epoch][from];
+                uint256 element = _spender.list.head();
+
+                while (element > 0 && pendingValue > 0) {
+                    balance = _spender.balances[element];
+                    if (balance <= pendingValue) {
+                        unchecked {
+                            pendingValue -= balance;
+                            _spender.totalBalance -= balance;
+                            _spender.balances[element] -= balance;
+                            _worldStateBalances[element] -= balance;
+                        }
+                        element = _spender.list.next(element);
+                        _spender.list.remove(_spender.list.previous(element));
+                    } else {
+                        unchecked {
+                            _spender.totalBalance -= pendingValue;
+                            _spender.balances[element] -= pendingValue;
+                            _worldStateBalances[element] -= pendingValue;
+                        }
+                        pendingValue = 0;
+                    }
                 }
-                _recipient.list.insert(element);
-                element = _spender.list.next(element);
-                _spender.list.remove(_spender.list.previous(element));
-            } else {
-                unchecked {
-                    _spender.totalBalance -= pendingValue;
-                    _spender.balances[element] -= pendingValue;
-                    _recipient.totalBalance += pendingValue;
-                    _recipient.balances[element] += pendingValue;
+            }
+        } else {
+            while (element > 0 && pendingValue > 0) {
+                balance = _spender.balances[element];
+                if (balance <= pendingValue) {
+                    unchecked {
+                        pendingValue -= balance;
+                        _spender.totalBalance -= balance;
+                        _spender.balances[element] -= balance;
+                        _recipient.totalBalance += balance;
+                        _recipient.balances[element] += balance;
+                    }
+                    _recipient.list.insert(element);
+                    element = _spender.list.next(element);
+                    _spender.list.remove(_spender.list.previous(element));
+                } else {
+                    unchecked {
+                        _spender.totalBalance -= pendingValue;
+                        _spender.balances[element] -= pendingValue;
+                        _recipient.totalBalance += pendingValue;
+                        _recipient.balances[element] += pendingValue;
+                    }
+                    _recipient.list.insert(element);
+                    pendingValue = 0;
                 }
-                _recipient.list.insert(element);
-                pendingValue = 0;
             }
         }
 
