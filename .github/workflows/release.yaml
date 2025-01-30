@@ -10,7 +10,7 @@ permissions:
 jobs:
   release:
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
-    name: Release Kiwali Labs Contract
+    name: Release Kiwari Labs Contracts Library
     runs-on: ubuntu-latest
     steps:
       - name: Determine Release Type
@@ -64,16 +64,19 @@ jobs:
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build the Project
+      - name: Testing Contracts
+        run: yarn test
+
+      - name: Build the Contracts
         run: yarn build
 
       - name: Publish
         run: |
           if [[ "${RELEASE_TYPE}" == "rc" || "${RELEASE_TYPE}" == "beta" || "${RELEASE_TYPE}" == "alpha" ]]; then
-            cd dist
+            cd contracts
             yarn publish --tag next --access public
           else
-            cd dist
+            cd contracts
             yarn publish --access public
           fi
         env:

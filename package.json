@@ -22,7 +22,8 @@
     "test:clean": "npm run clean && npx hardhat test",
     "test:parallel": "npx hardhat test --parallel",
     "commit": "npx git-cz",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build": "cd ./contracts/ && yarn prepare"
   },
   "dependencies": {},
   "devDependencies": {
