@@ -46,4 +46,4 @@ yarn coverage
 ```
 
 > [!IMPORTANT]
-> require more than 4GB of RAM, to run all the test coverage.
+> require 8GB of RAM, to run all the test coverage.

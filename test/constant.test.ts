@@ -159,27 +159,29 @@ export const ERC7818MintQuotaTLSW = {
   events: {},
 };
 
-export const ERC7818Whitelist = {
-  name: "MockERC7818Whitelist",
+export const ERC7818Exception = {
+  name: "MockERC7818Exception",
   errors: {
-    InvalidWhitelistAddress: "InvalidWhitelistAddress",
-    ExistInWhitelist: "ExistInWhitelist",
-    NotExistInWhitelist: "NotExistInWhitelist",
+    InvalidExceptionAddress: "InvalidExceptionAddress",
+    ExistInExceptionList: "ExistInExceptionList",
+    NotExistInExceptionList: "NotExistInExceptionList",
+    ExceptionAddressNotSupportTransferAtEpoch: "ExceptionAddressNotSupportTransferAtEpoch",
+    ExceptionAddressNotSupportTransferFromAtEpoch: "ExceptionAddressNotSupportTransferFromAtEpoch",
   },
   events: {
-    Whitelisted: "Whitelisted",
-    Unwhitelisted: "Unwhitelisted",
+    AddedToExceptionList: "AddedToExceptionList",
+    RemovedFromExceptionList: "RemovedFromExceptionList",
   },
 };
 
-export const ERC7818WhitelistBLSW = {
-  name: "MockERC7818WhitelistBLSW",
+export const ERC7818ExceptionBLSW = {
+  name: "MockERC7818ExceptionBLSW",
   errors: {},
   events: {},
 };
 
-export const ERC7818WhitelistTLSW = {
-  name: "MockERC7818WhitelistTLSW",
+export const ERC7818ExceptionTLSW = {
+  name: "MockERC7818ExceptionTLSW",
   errors: {},
   events: {},
 };
