@@ -25,7 +25,7 @@ yarn add --dev @kiwarilabs/contracts@stable
 pragma solidity ^0.8.0;
 
 import {ERC20EXPBase} from "@kiwarilabs/contracts/tokens/ERC20/ERC20EXPBase.sol";
-import {ERC20BLSW} from "@kiwarilabs/contracts/tokens/ERC20/BLSW/ERC20BLSW.sol";
+import {ERC20BLSW} from "@kiwarilabs/contracts/tokens/ERC20/ERC20BLSW.sol";
 
 contract ExpirableERC20 is ERC20EXPBase, ERC20BLSW {
   constructor(
