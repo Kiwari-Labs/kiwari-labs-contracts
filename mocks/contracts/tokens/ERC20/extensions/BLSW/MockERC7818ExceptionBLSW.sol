@@ -98,4 +98,8 @@ contract MockERC7818ExceptionBLSW is ERC20BLSW, ERC7818Exception {
     function burnFromException(address to, uint256 value) public {
         _burnFromException(to, value);
     }
+
+    function mint(address to, uint256 value) public {
+        _mint(to, value);
+    }
 }

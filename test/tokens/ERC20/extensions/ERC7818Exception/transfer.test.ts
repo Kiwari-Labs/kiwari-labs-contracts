@@ -48,7 +48,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
     });
 
     it("[SUCCESS] exception transfer `to` exception", async function () {
-      const {erc7818expException, deployer, alice, bob} = await deployERC7818ExceptionSelector({epochType});
+      const {erc7818expException, alice, bob} = await deployERC7818ExceptionSelector({epochType});
       await erc7818expException.addToException(alice.address);
       await erc7818expException.addToException(bob.address);
       await erc7818expException.mintToException(alice.address, amount);
@@ -78,8 +78,15 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       expect(await erc7818expException.balanceOf(bob.address)).to.equal(0);
     });
 
+    it("[SUCCESS] non-exception transfer at epoch `to` non-exception", async function () {
+      const {erc7818expException, alice, bob} = await deployERC7818ExceptionSelector({epochType});
+      await erc7818expException.mint(alice.address, amount);
+      await erc7818expException.connect(alice).transferAtEpoch(0, bob.address, amount);
+      expect(await erc7818expException.balanceOf(bob.address)).to.equal(amount);
+    });
+
     it("[FAILED] exception transfer at epoch `to` non-exception ", async function () {
-      const {erc7818expException, alice, bob, charlie} = await deployERC7818ExceptionSelector({epochType});
+      const {erc7818expException, alice, bob} = await deployERC7818ExceptionSelector({epochType});
       await erc7818expException.addToException(alice.address);
       await erc7818expException.mintToException(alice.address, amount);
       expect(await erc7818expException.balanceOf(alice.address)).to.equal(amount);
@@ -90,11 +97,10 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
     });
 
     it("[FAILED] exception transfer at epoch `to` exception", async function () {
-      const {erc7818expException, deployer, alice, bob} = await deployERC7818ExceptionSelector({epochType});
+      const {erc7818expException, alice, bob} = await deployERC7818ExceptionSelector({epochType});
       await erc7818expException.addToException(alice.address);
       await erc7818expException.addToException(bob.address);
       await erc7818expException.mintToException(alice.address, amount);
-      const epoch = await erc7818expException.currentEpoch();
 
       expect(await erc7818expException.balanceOf(alice.address)).to.equal(amount);
       await expect(erc7818expException.connect(alice).transferAtEpoch(0, bob.address, amount)).to.be.revertedWithCustomError(

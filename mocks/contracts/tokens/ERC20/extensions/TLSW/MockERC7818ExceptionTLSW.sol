@@ -98,4 +98,8 @@ contract MockERC7818ExceptionTLSW is ERC20TLSW, ERC7818Exception {
     function burnFromException(address to, uint256 value) public {
         _burnFromException(to, value);
     }
+
+    function mint(address to, uint256 value) public {
+        _mint(to, value);
+    }
 }
