@@ -1,0 +1,33 @@
+name: checks
+
+on:
+  push:
+    branches:
+    - main
+  pull_request: {}
+
+jobs:
+  format-code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up environment
+        uses: ./.github/setup
+      - run: yarn format
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up environment
+        uses: ./.github/setup
+      - name: Run tests
+        run: yarn test
+
+  slither:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up environment
+        uses: ./.github/setup
+      - uses: crytic/slither-action@v0.4.0  
