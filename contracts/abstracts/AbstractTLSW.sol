@@ -23,6 +23,10 @@ abstract contract AbstractTLSW {
         _updateSlidingWindow(secondsPerEpoch_, windowSize_, safe_);
     }
 
+    function _initialTimestamp() internal view virtual returns (uint256) {
+        return _window.initialTimestamp;
+    }
+
     /// @notice For support both Layer 1 (L1) and Layer 2 (L2) networks.
     /// @dev Returns the current timestamp in seconds.
     /// @return The current timestamp in seconds.

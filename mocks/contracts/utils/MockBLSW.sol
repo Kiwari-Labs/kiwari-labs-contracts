@@ -8,7 +8,7 @@ contract MockBLSW {
     LSW.Window public window;
 
     constructor(uint256 startBlockNumber_, uint40 blocksPerEpoch_, uint8 windowSize_, bool safe_) {
-        window.initializedBlock(startBlockNumber_ != 0 ? startBlockNumber_ : block.number);
+        window.initializedBlockNumber(startBlockNumber_ != 0 ? startBlockNumber_ : block.number);
         window.initializedState(blocksPerEpoch_, windowSize_, safe_);
     }
 

@@ -149,7 +149,7 @@ library BLSW {
      * @param self The sliding window structure.
      * @param blockNumber The initial block number for the window.
      */
-    function initializedBlock(Window storage self, uint256 blockNumber) internal {
+    function initializedBlockNumber(Window storage self, uint256 blockNumber) internal {
         self.initialBlockNumber = blockNumber;
     }
 }
