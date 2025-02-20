@@ -315,7 +315,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                         _recipient.totalBalance += balance;
                         _recipient.balances[element] += balance;
                     }
-                    _recipient.list.insert(element);
+                    _recipient.list.insert(element, false);
                     element = _spender.list.next(element);
                     _spender.list.remove(_spender.list.previous(element));
                 } else {
@@ -325,7 +325,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                         _recipient.totalBalance += pendingValue;
                         _recipient.balances[element] += pendingValue;
                     }
-                    _recipient.list.insert(element);
+                    _recipient.list.insert(element, false);
                     pendingValue = 0;
                 }
             }
