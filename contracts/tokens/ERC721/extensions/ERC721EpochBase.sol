@@ -18,7 +18,7 @@ import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.s
 
 // @TODO following https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.1.0/contracts/token/ERC721/ERC721.sol
 
-abstract contract ERC721EpochBase is ERC165, IERC721, IERC721Errors, IERC721Metadata, IERC7858Epoch {
+abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IERC721Metadata, IERC7858Epoch {
     using SortedList for SortedList.List;
     using Strings for uint256;
 
@@ -27,10 +27,12 @@ abstract contract ERC721EpochBase is ERC165, IERC721, IERC721Errors, IERC721Meta
 
     struct Epoch {
         uint256 totalBalance;
-        mapping(uint256 => uint256[]) tokens; // it's possible to contains more than one tokenId.
+        mapping(uint256 pointer => uint256[]) tokens; // it's possible to contains more than one tokenId.
+        mapping(uint256 pointer => mapping(uint256 tokenId => uint256)) tokenIndex;
         SortedList.List list;
     }
 
+    mapping(uint256 tokenId => uint256) private _tokenPointers;
     mapping(uint256 tokenId => address) private _owners;
     mapping(uint256 => mapping(address => Epoch)) private _balances;
     mapping(uint256 tokenId => address) private _tokenApprovals;
@@ -51,6 +53,10 @@ abstract contract ERC721EpochBase is ERC165, IERC721, IERC721Errors, IERC721Meta
      */
     function _ownerOf(uint256 tokenId) internal view virtual returns (address) {
         return _owners[tokenId];
+    }
+
+    function _getApproved(uint256 tokenId) internal view virtual returns (address) {
+        return _tokenApprovals[tokenId];
     }
 
     function _computeBalanceOverEpochRange(uint256 fromEpoch, uint256 toEpoch, address account) private view returns (uint256 balance) {
@@ -109,16 +115,16 @@ abstract contract ERC721EpochBase is ERC165, IERC721, IERC721Errors, IERC721Meta
         if (owner == address(0)) {
             revert ERC721InvalidOwner(address(0));
         }
-        // uint256 pointer = _pointerProvider();
-        // (uint256 fromEpoch, uint256 toEpoch) = _getWindowRage(pointer);
-        // uint256 balance = _computeBalanceAtEpoch(fromEpoch, account, pointer, _getPointersInWindow());
-        // if (fromEpoch == toEpoch) {
-        // return balance;
-        // } else {
-        // fromEpoch += 1;
-        // }
-        // balance += _computeBalanceOverEpochRange(fromEpoch, toEpoch, account);
-        // return balance;
+        uint256 pointer = _pointerProvider();
+        (uint256 fromEpoch, uint256 toEpoch) = _getWindowRage(pointer);
+        uint256 balance = _computeBalanceAtEpoch(fromEpoch, owner, pointer, _getPointersInWindow());
+        if (fromEpoch == toEpoch) {
+            return balance;
+        } else {
+            fromEpoch += 1;
+        }
+        balance += _computeBalanceOverEpochRange(fromEpoch, toEpoch, owner);
+        return balance;
     }
 
     /**
@@ -166,6 +172,36 @@ abstract contract ERC721EpochBase is ERC165, IERC721, IERC721Errors, IERC721Meta
         return owner;
     }
 
+     /**
+     * @dev See {IERC721-approve}.
+     */
+    function approve(address to, uint256 tokenId) public virtual {
+        _approve(to, tokenId, _msgSender());
+    }
+
+    /**
+     * @dev See {IERC721-getApproved}.
+     */
+    function getApproved(uint256 tokenId) public view virtual returns (address) {
+        _requireOwned(tokenId);
+
+        return _getApproved(tokenId);
+    }
+
+    /**
+     * @dev See {IERC721-setApprovalForAll}.
+     */
+    function setApprovalForAll(address operator, bool approved) public virtual {
+        _setApprovalForAll(_msgSender(), operator, approved);
+    }
+
+    /**
+     * @dev See {IERC721-isApprovedForAll}.
+     */
+    function isApprovedForAll(address owner, address operator) public view virtual returns (bool) {
+        return _operatorApprovals[owner][operator];
+    }
+
     function _expired(uint256 epoch) internal view returns (bool) {
         unchecked {
             (uint256 fromEpoch, ) = _getWindowRage(_pointerProvider());
@@ -183,6 +219,141 @@ abstract contract ERC721EpochBase is ERC165, IERC721, IERC721Errors, IERC721Meta
      */
     function _baseURI() internal view virtual returns (string memory) {
         return "";
+    }
+
+    function _update(address to, uint256 tokenId, address auth) internal virtual returns (address) {
+        uint256 pointer = _pointerProvider();
+        uint256 epoch = _getEpoch(pointer);
+        address from = _ownerOf(tokenId);
+        uint256 tokenPointer = _tokenPointers[tokenId];
+        if (tokenPointer == 0) {
+            tokenPointer = pointer;
+            _tokenPointers[tokenId] = pointer;
+        }
+
+        // Perform (optional) operator check
+        if (auth != address(0)) {
+            // _checkAuthorized(from, auth, tokenId);
+        }
+
+        Epoch storage _sender = _balances[epoch][from];
+        Epoch storage _recipient = _balances[epoch][to];
+
+        // Execute the update
+        if (from != address(0)) {
+            // Clear approval. No need to re-authorize or emit the Approval event
+            // _approve(address(0), tokenId, address(0), false);
+
+            unchecked {
+                _sender.totalBalance -= 1;
+                _sender.tokenIndex[tokenPointer][_sender.tokens[tokenPointer].length - 1] = _sender.tokenIndex[tokenPointer][tokenId];
+                _sender.tokens[tokenPointer].pop();
+                delete _sender.tokenIndex[tokenPointer][tokenId];
+                _sender.list.remove(tokenPointer);
+            }
+        }
+
+        if (to != address(0)) {
+            unchecked {
+                _recipient.totalBalance += 1;
+                _recipient.tokens[tokenPointer].push(tokenId);
+                _recipient.tokenIndex[tokenPointer][tokenId] = _recipient.tokens[tokenPointer].length - 1;
+                _recipient.list.insert(tokenPointer, false);
+            }
+        }
+
+        if (to == address(0)) {
+            delete _tokenPointers[tokenId];
+        }
+
+        _owners[tokenId] = to;
+
+        emit Transfer(from, to, tokenId);
+
+        return from;
+    }
+
+    function _isAuthorized(address owner, address spender, uint256 tokenId) internal view virtual returns (bool) {
+        return
+            spender != address(0) &&
+            (owner == spender || isApprovedForAll(owner, spender) || _getApproved(tokenId) == spender);
+    }
+
+
+    function _checkAuthorized(address owner, address spender, uint256 tokenId) internal view virtual {
+        if (!_isAuthorized(owner, spender, tokenId)) {
+            if (owner == address(0)) {
+                revert ERC721NonexistentToken(tokenId);
+            } else {
+                revert ERC721InsufficientApproval(spender, tokenId);
+            }
+        }
+    }
+
+    function _mint(address account, uint256 tokenId) internal {
+        if (account == address(0)) {
+            revert ERC721InvalidReceiver(address(0));
+        }
+        address previousOwner = _update(account, tokenId, address(0));
+        if (previousOwner != address(0)) {
+            revert ERC721InvalidSender(address(0));
+        }
+    }
+
+    function _safeMint(address account, uint256 tokenId) internal {
+        _safeMint(account, tokenId, "");
+    }
+
+    function _safeMint(address account, uint256 tokenId, bytes memory data) internal virtual {
+        _mint(account, tokenId);
+        ERC721Utils.checkOnERC721Received(_msgSender(), address(0), account, tokenId, data);
+    }
+
+    function _burn(uint256 tokenId) internal {
+        address previousOwner = _update(address(0), tokenId, address(0));
+        if (previousOwner == address(0)) {
+            revert ERC721NonexistentToken(tokenId);
+        }
+    }
+
+    /**
+     * @dev Approve `to` to operate on `tokenId`
+     *
+     * The `auth` argument is optional. If the value passed is non 0, then this function will check that `auth` is
+     * either the owner of the token, or approved to operate on all tokens held by this owner.
+     *
+     * Emits an {Approval} event.
+     *
+     * Overrides to this logic should be done to the variant with an additional `bool emitEvent` argument.
+     */
+    function _approve(address to, uint256 tokenId, address auth) internal {
+        _approve(to, tokenId, auth, true);
+    }
+
+    function _approve(address to, uint256 tokenId, address auth, bool emitEvent) internal virtual {
+        // Avoid reading the owner unless necessary
+        if (emitEvent || auth != address(0)) {
+            address owner = _requireOwned(tokenId);
+
+            // We do not use _isAuthorized because single-token approvals should not be able to call approve
+            if (auth != address(0) && owner != auth && !isApprovedForAll(owner, auth)) {
+                revert ERC721InvalidApprover(auth);
+            }
+
+            if (emitEvent) {
+                emit Approval(owner, to, tokenId);
+            }
+        }
+
+        _tokenApprovals[tokenId] = to;
+    }
+
+    function _setApprovalForAll(address owner, address operator, bool approved) internal virtual {
+        if (operator == address(0)) {
+            revert ERC721InvalidOperator(operator);
+        }
+        _operatorApprovals[owner][operator] = approved;
+        emit ApprovalForAll(owner, operator, approved);
     }
 
     /// @dev See {IERC7858Epoch-currentEpoch}.
