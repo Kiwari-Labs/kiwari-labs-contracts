@@ -172,7 +172,7 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
         return owner;
     }
 
-     /**
+    /**
      * @dev See {IERC721-approve}.
      */
     function approve(address to, uint256 tokenId) public virtual {
@@ -222,6 +222,7 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
     }
 
     function _update(address to, uint256 tokenId, address auth) internal virtual returns (address) {
+        // @TODO adding refresh list to remove expired token from list.
         uint256 pointer = _pointerProvider();
         uint256 epoch = _getEpoch(pointer);
         address from = _ownerOf(tokenId);
@@ -233,7 +234,7 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
 
         // Perform (optional) operator check
         if (auth != address(0)) {
-            // _checkAuthorized(from, auth, tokenId);
+            _checkAuthorized(from, auth, tokenId);
         }
 
         Epoch storage _sender = _balances[epoch][from];
@@ -242,7 +243,7 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
         // Execute the update
         if (from != address(0)) {
             // Clear approval. No need to re-authorize or emit the Approval event
-            // _approve(address(0), tokenId, address(0), false);
+            _approve(address(0), tokenId, address(0), false);
 
             unchecked {
                 _sender.totalBalance -= 1;
@@ -262,10 +263,6 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
             }
         }
 
-        if (to == address(0)) {
-            delete _tokenPointers[tokenId];
-        }
-
         _owners[tokenId] = to;
 
         emit Transfer(from, to, tokenId);
@@ -274,11 +271,8 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
     }
 
     function _isAuthorized(address owner, address spender, uint256 tokenId) internal view virtual returns (bool) {
-        return
-            spender != address(0) &&
-            (owner == spender || isApprovedForAll(owner, spender) || _getApproved(tokenId) == spender);
+        return spender != address(0) && (owner == spender || isApprovedForAll(owner, spender) || _getApproved(tokenId) == spender);
     }
-
 
     function _checkAuthorized(address owner, address spender, uint256 tokenId) internal view virtual {
         if (!_isAuthorized(owner, spender, tokenId)) {
@@ -356,6 +350,16 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
         emit ApprovalForAll(owner, operator, approved);
     }
 
+    /// @dev See {IERC7858-startTime}.
+    function startTime(uint256 tokenId) external view returns (uint256) {
+        return _tokenPointers[tokenId];
+    }
+
+    /// @dev See {IERC7858-endTime}.
+    function endTime(uint256 tokenId) external view returns (uint256) {
+        return _tokenPointers[tokenId] + _getPointersInWindow();
+    }
+
     /// @dev See {IERC7858Epoch-currentEpoch}.
     function currentEpoch() public view virtual returns (uint256) {
         return _getEpoch(_pointerProvider());
@@ -379,6 +383,16 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
     /// @dev See {IERC7858Epoch-isEpochExpired}.
     function isEpochExpired(uint256 id) public view virtual returns (bool) {
         return _expired(id);
+    }
+
+    /// @dev See {IERC7858Epoch-isTokenValid}.
+    function isTokenValid(uint256 tokenId) external view returns (bool) {
+        uint256 pointer = _tokenPointers[tokenId];
+        if (pointer != 0) {
+            if (_pointerProvider() - pointer < _getPointersInWindow()) {
+                return true;
+            }
+        }
     }
 
     function _epochType() internal pure virtual returns (EXPIRY_TYPE) {}

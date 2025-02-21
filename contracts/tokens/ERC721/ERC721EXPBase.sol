@@ -52,7 +52,6 @@ abstract contract ERC721EXPBase is ERC721, ERC721Enumerable, IERC7858 {
         }
         _tokensTimestamp[tokenId].start = start;
         _tokensTimestamp[tokenId].end = end;
-
         // @TODO emit tokenTimeSet(tokenId, start, end);
     }
 

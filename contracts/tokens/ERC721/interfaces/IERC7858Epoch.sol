@@ -50,4 +50,11 @@ interface IERC7858Epoch is IERC7858 {
      * based on the `EPOCH_TYPE` measurement (e.g., block count or time duration).
      */
     function isEpochExpired(uint256 epoch) external view returns (bool);
+
+    /**
+     * @dev Checks whether a specific token is expired.
+     * @param tokenId The identifier representing the `tokenId` (ERC721).
+     * @return bool True if the token is expired, false otherwise.
+     */
+    function isTokenValid(uint256 tokenId) external view returns (bool);
 }
