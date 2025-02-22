@@ -82,6 +82,10 @@ Check out the contribution [guide](CONTRIBUTING.md)
 
 For support or any inquiries, feel free to reach out to us at [github-issue](https://github.com/Kiwari-Labs/kiwari-labs-contracts/issues) or kiwarilabs@protonmail.com
 
+## Funding
+
+If you value our work and would like to support Kiwari Labs, please visit our [Open Collective](https://opencollective.com/kiwari-labs) page to make a donation. Thank you!
+
 ## License
 
 This repository is released under the [Apache-2.0](LICENSE).  

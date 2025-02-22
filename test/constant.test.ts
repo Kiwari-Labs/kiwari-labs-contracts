@@ -1,3 +1,8 @@
+// Copyright Kiwari Labs and @kiwarilabs/contracts contributors 2024,2025. All Rights Reserved.
+// Node module: kiwari-labs-contracts
+// This file is licensed under the Apache License 2.0.
+// License text available at https://www.apache.org/licenses/LICENSE-2.0
+
 import {MaxUint256, ZeroAddress} from "ethers";
 
 export const constants = {
@@ -217,26 +222,14 @@ export const BLSWLibrary = {
   events: {},
 };
 
-export const SortedCircularDoublyLinkedListLibrary = {
-  name: "MockSortedCircularDoublyLinkedListLibrary",
+export const SortedListLibrary = {
+  name: "MockSortedList",
   errors: {},
   events: {},
 };
 
-export const LightWeightSortedCircularDoublyLinkedListLibrary = {
+export const XortedListLibrary = {
   name: "MockXort128",
-  errors: {},
-  events: {},
-};
-
-export const Xort128 = {
-  name: "MockLightWeightSortedCircularDoublyLinkedListLibraryV2",
-  errors: {},
-  events: {},
-};
-
-export const Comparator = {
-  name: "MockComparator",
   errors: {},
   events: {},
 };
@@ -252,12 +245,7 @@ export const contracts = {
   },
   utils: {
     SlidingWindowLibrary,
-    SortedCircularDoublyLinkedListLibrary,
-    // LightWeightSlidingWindowLibrary,
-    // LightWeightSortedCircularDoublyLinkedListLibrary,
-    // PU128SCDLL,
-    comparators: {
-      Comparator,
-    },
+    SortedListLibrary,
+    XortedListLibrary,
   },
 };
