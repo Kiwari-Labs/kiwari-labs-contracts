@@ -34,7 +34,8 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
 
     mapping(uint256 tokenId => uint256) private _tokenPointers;
     mapping(uint256 tokenId => address) private _owners;
-    mapping(uint256 => mapping(address => Epoch)) private _balances;
+    mapping(uint256 => mapping(address => Epoch)) private _epochBalances;
+    mapping(address => uint256) _balances;
     mapping(uint256 tokenId => address) private _tokenApprovals;
     mapping(address owner => mapping(address operator => bool)) private _operatorApprovals;
 
@@ -62,7 +63,7 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
     function _computeBalanceOverEpochRange(uint256 fromEpoch, uint256 toEpoch, address account) private view returns (uint256 balance) {
         unchecked {
             for (; fromEpoch <= toEpoch; fromEpoch++) {
-                balance += _balances[fromEpoch][account].totalBalance;
+                balance += _epochBalances[fromEpoch][account].totalBalance;
             }
         }
     }
@@ -74,7 +75,7 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
         uint256 duration
     ) private view returns (uint256 balance) {
         (uint256 element, uint256 value) = _findValidBalance(account, epoch, pointer, duration);
-        Epoch storage _account = _balances[epoch][account];
+        Epoch storage _account = _epochBalances[epoch][account];
         unchecked {
             balance = value;
             while (element > 0) {
@@ -91,7 +92,7 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
         uint256 pointer,
         uint256 duration
     ) internal view returns (uint256 element, uint256 value) {
-        SortedList.List storage list = _balances[epoch][account].list;
+        SortedList.List storage list = _epochBalances[epoch][account].list;
         if (!list.isEmpty()) {
             element = list.front();
             unchecked {
@@ -99,7 +100,7 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
                     element = list.next(element);
                 }
             }
-            value = _balances[epoch][account].tokens[element].length;
+            value = _epochBalances[epoch][account].tokens[element].length;
         }
     }
 
@@ -112,6 +113,13 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
     }
 
     function balanceOf(address owner) public view virtual returns (uint256) {
+        if (owner == address(0)) {
+            revert ERC721InvalidOwner(address(0));
+        }
+        return _balances[owner];
+    }
+
+    function validBalanceOf(address owner) public view virtual returns (uint256) {
         if (owner == address(0)) {
             revert ERC721InvalidOwner(address(0));
         }
@@ -222,7 +230,6 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
     }
 
     function _update(address to, uint256 tokenId, address auth) internal virtual returns (address) {
-        // @TODO adding refresh list to remove expired token from list.
         uint256 pointer = _pointerProvider();
         uint256 epoch = _getEpoch(pointer);
         address from = _ownerOf(tokenId);
@@ -237,8 +244,8 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
             _checkAuthorized(from, auth, tokenId);
         }
 
-        Epoch storage _sender = _balances[epoch][from];
-        Epoch storage _recipient = _balances[epoch][to];
+        Epoch storage _sender = _epochBalances[epoch][from];
+        Epoch storage _recipient = _epochBalances[epoch][to];
 
         // Execute the update
         if (from != address(0)) {
@@ -246,16 +253,18 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
             _approve(address(0), tokenId, address(0), false);
 
             unchecked {
+                _balances[from] -= 1;
                 _sender.totalBalance -= 1;
                 _sender.tokenIndex[tokenPointer][_sender.tokens[tokenPointer].length - 1] = _sender.tokenIndex[tokenPointer][tokenId];
                 _sender.tokens[tokenPointer].pop();
-                delete _sender.tokenIndex[tokenPointer][tokenId];
                 _sender.list.remove(tokenPointer);
+                delete _sender.tokenIndex[tokenPointer][tokenId];
             }
         }
 
         if (to != address(0)) {
             unchecked {
+                _balances[from] += 1;
                 _recipient.totalBalance += 1;
                 _recipient.tokens[tokenPointer].push(tokenId);
                 _recipient.tokenIndex[tokenPointer][tokenId] = _recipient.tokens[tokenPointer].length - 1;
