@@ -101,11 +101,6 @@ library SortedList {
             self._nodes[element][PREVIOUS] = SENTINEL;
             self._nodes[tmpPREVIOUS][NEXT] = tmpNext;
             self._nodes[tmpNext][PREVIOUS] = tmpPREVIOUS;
-
-            assembly {
-                let slot := self.slot
-                sstore(slot, sub(sload(slot), 0x01))
-            }
         }
     }
 
