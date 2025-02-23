@@ -59,6 +59,14 @@ abstract contract AbstractTLSW {
         return _window.windowSize();
     }
 
+    /**
+     * @notice Returns the initial timestamp of the sliding window.
+     * @return The initial timestamp.
+     */
+    function _getInitialTimestamp() internal view returns (uint256) {
+        return _window.getInitialTimestamp();
+    }
+
     /// @notice Returns the number of seconds in an epoch.
     /// @return The number of seconds in an epoch.
     function _secondsInEpoch() internal view returns (uint40) {
