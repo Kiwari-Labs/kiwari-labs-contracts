@@ -218,16 +218,17 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     }
 
     /**
-     * @notice Finds the index of the first valid block balance in a sorted list of block numbers.
-     * A block balance index is considered valid if the difference between the current pointer
-     * and the block number at the index (key) is less than the duration.
-     * @dev This function is used to determine the first valid block balance index within a sorted circular doubly linked list.
-     * It iterates through the list starting from the head and stops when it finds a valid index or reaches the end of the list.
-     * @param account The account address.
+     * @notice Finds the index of the first valid balance in a sorted list based on a given pointer.
+     * @dev Determines the first valid balance index in a sorted circular doubly linked list.
+     *      A balance index is considered valid if the difference between the current pointer
+     *      and the index (key) is less than the specified duration.
+     *      Iterates through the list starting from the front until it finds a valid index or reaches the end.
+     * @param account The address of the account.
      * @param epoch The epoch number.
-     * @param pointer The current block number.
-     * @param duration The maximum allowed difference between pointer and the key.
-     * @return element The index of the first valid block balance.
+     * @param pointer The reference point used for validation.
+     * @param duration The maximum allowed difference between the pointer and the key.
+     * @return element The index of the first valid balance.
+     * @return value The balance associated with the valid index.
      */
     function _findValidBalance(
         address account,
