@@ -59,6 +59,14 @@ abstract contract AbstractBLSW {
         return _window.windowSize();
     }
 
+    /**
+     * @notice Returns the initial block number of the sliding window.
+     * @return The initial block number.
+     */
+    function _getInitialBlockNumber() internal view returns (uint256) {
+        return _window.getInitialBlockNumber();
+    }
+
     /// @notice Returns the number of blocks in each epoch.
     /// @return The number of blocks in an epoch.
     function _blocksInEpoch() internal view returns (uint40) {

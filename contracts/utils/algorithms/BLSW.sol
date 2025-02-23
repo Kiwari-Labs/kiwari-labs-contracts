@@ -73,6 +73,15 @@ library BLSW {
     }
 
     /**
+     * @notice Returns the initial block number of the sliding window.
+     * @param self The sliding window structure.
+     * @return The initial block number.
+     */
+    function getInitialBlockNumber(Window storage self) internal view returns (uint256) {
+        return self.initialBlockNumber;
+    }
+
+    /**
      * @notice Returns the number of blocks in each epoch for a given window.
      * @param self The sliding window structure.
      * @return The number of blocks in each epoch.
