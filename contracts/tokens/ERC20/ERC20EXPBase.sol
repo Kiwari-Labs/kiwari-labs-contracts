@@ -140,9 +140,9 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
             }
             _recipient.list.insert(pointer, false);
         } else {
-            uint256 blockLengthCache = _getPointersInWindow();
+            uint256 pointerLengthCache = _getPointersInWindow();
             (uint256 fromEpoch, uint256 toEpoch) = _getWindowRage(pointer);
-            _refreshBalanceAtEpoch(from, fromEpoch, pointer, blockLengthCache);
+            _refreshBalanceAtEpoch(from, fromEpoch, pointer, pointerLengthCache);
             uint256 balance = _computeBalanceOverEpochRange(fromEpoch, toEpoch, from);
             if (balance < value) {
                 revert ERC20InsufficientBalance(from, balance, value);
