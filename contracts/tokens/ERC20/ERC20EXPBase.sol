@@ -524,6 +524,14 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     }
 
     /**
+     * @notice Returns the initial pointer of the token.
+     * @return The initial pointer value.
+     */
+    function getInitialPointer() public view virtual returns (uint256) {
+        return _getInitialPointer();
+    }
+
+    /**
      * @dev See {IERC20-allowance}.
      */
     function allowance(address owner, address spender) public view virtual returns (uint256) {
@@ -632,6 +640,8 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
         _transferAtEpoch(epoch, from, to, value);
         return true;
     }
+
+    function _getInitialPointer() internal view virtual returns (uint256) {}
 
     function _epochType() internal pure virtual returns (EPOCH_TYPE) {}
 

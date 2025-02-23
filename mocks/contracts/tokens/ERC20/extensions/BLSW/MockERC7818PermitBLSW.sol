@@ -13,6 +13,10 @@ contract MockERC7818PermitBLSW is ERC20BLSW, ERC7818Permit {
         uint8 windowSize_
     ) ERC20BLSW(_name, _symbol, block.timestamp, secondsPerEpoch_, windowSize_, false) ERC7818Permit(_name) {}
 
+    function _getInitialPointer() internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint256) {
+        return super._getInitialPointer();
+    }
+
     function _epochType() internal pure virtual override(ERC20EXPBase, ERC20BLSW) returns (EPOCH_TYPE) {
         return super._epochType();
     }
