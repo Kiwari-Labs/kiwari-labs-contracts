@@ -455,10 +455,10 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     }
 
     /**
-     * @notice Retrieves the total balance stored at a specific block.
-     * @dev This function returns the balance of the given block from the internal `_worldStateBalances` mapping.
-     * @param pointer The block number for which the balance is being queried.
-     * @return balance The total balance stored at the given block number.
+     * @notice Retrieves the total balance stored at a specific pointer.
+     * @dev This function returns the balance of the given pointer from the internal `_worldStateBalances` mapping.
+     * @param pointer The reference point for which the balance is being queried.
+     * @return balance The total balance stored at the given pointer.
      */
     function getWorldStateBalance(uint256 pointer) external view virtual returns (uint256) {
         return _worldStateBalances[pointer];
