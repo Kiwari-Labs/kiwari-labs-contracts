@@ -46,6 +46,7 @@ library SortedList {
      * @dev This function inserts data into the linked list at the specified element.
      * @param self The linked list.
      * @param index The element at which to insert the data.
+     * @param check A flag to validate the index before insertion.
      */
     function insert(List storage self, uint256 index, bool check) internal {
         if (check) {
