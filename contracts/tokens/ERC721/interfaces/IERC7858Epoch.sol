@@ -36,12 +36,6 @@ interface IERC7858Epoch is IERC7858 {
     function epochType() external view returns (EXPIRY_TYPE);
 
     /**
-     * @dev Retrieves the validity duration of each token.
-     * @return uint256 The validity duration of each token in `epoch` unit.
-     */
-    function validityDuration() external view returns (uint256);
-
-    /**
      * @dev Checks whether a specific `epoch` is expired.
      * @param epoch The `epoch` to check.
      * @return bool True if the token is expired, false otherwise.
@@ -52,9 +46,15 @@ interface IERC7858Epoch is IERC7858 {
     function isEpochExpired(uint256 epoch) external view returns (bool);
 
     /**
-     * @dev Checks whether a specific token is expired.
-     * @param tokenId The identifier representing the `tokenId` (ERC721).
-     * @return bool True if the token is expired, false otherwise.
+     * @dev Retrieves the balance of unexpired tokens owned by an account.
+     * @param account The address of the account.
+     * @return uint256 The amount of unexpired tokens owned by an account.
      */
-    function isTokenValid(uint256 tokenId) external view returns (bool);
+    function unexpiredBalanceOf(address account) external view returns (uint256);
+
+    /**
+     * @dev Retrieves the validity duration of each token.
+     * @return uint256 The validity duration of each token in `epoch` unit.
+     */
+    function validityDuration() external view returns (uint256);
 }

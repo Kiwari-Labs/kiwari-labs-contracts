@@ -17,10 +17,10 @@ interface IERC7858 {
 
     /**
      * @dev Checks whether a specific token is expired.
-     * @param Id The identifier representing the `tokenId` (ERC721).
+     * @param Id The identifier representing the tokenId.
      * @return bool True if the token is expired, false otherwise.
      */
-    function isTokenValid(uint256 Id) external view returns (bool);
+    function isTokenExpired(uint256 tokenId) external view returns (bool);
 
     // inherit from ERC-5007 return depends on the type `block.timestamp` or `block.number`
     // {ERC-5007} return in uint64 MAY not suitable for `block.number` based.

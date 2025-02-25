@@ -30,7 +30,6 @@ abstract contract ERC721EXPBase is ERC721, ERC721Enumerable, IERC7858 {
         super._increaseBalance(account, value);
     }
 
-    // @TODO function support interface
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, ERC721Enumerable) returns (bool) {
         return interfaceId == type(IERC7858).interfaceId || super.supportsInterface(interfaceId);
     }
@@ -71,7 +70,7 @@ abstract contract ERC721EXPBase is ERC721, ERC721Enumerable, IERC7858 {
     }
 
     /// @inheritdoc IERC7858
-    function isTokenValid(uint256 tokenId) public view returns (bool) {
+    function isTokenExpired(uint256 tokenId) public view returns (bool) {
         return _validation(tokenId);
     }
 

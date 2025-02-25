@@ -9,7 +9,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import {AbstractTLSW as TLSW} from "../../../abstracts/AbstractTLSW.sol";
 import {ERC721EpochBase} from "./ERC721EpochBase.sol";
 
-abstract contract ERC721TLSW is ERC721EpochBase, TLSW {
+abstract contract ERC721EpochTLSW is ERC721EpochBase, TLSW {
     constructor(
         string memory name_,
         string memory symbol_,

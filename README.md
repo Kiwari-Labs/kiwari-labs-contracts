@@ -72,23 +72,23 @@ contract ExpirableERC20 is ERC20BLSW {
 
 ### ERC-7858
 
-> [!IMPORTANT] This ERC still underdevelopment.
-
 #### Individual Expiration
 
 ``` Solidity
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import {ERC721B} from "@kiwarilabs/contracts/tokens/ERC721/ERC721B.sol";
+import {ERC721BLSW} from "@kiwarilabs/contracts/tokens/ERC721/ERC721B.sol";
 import {ERC721EXPBase} from "@kiwarilabs/contracts/tokens/ERC721/ERC721EXPBase.sol";
 
 // Expirable ERC721 with individual expiration
-contract ExpirableERC721 is ERC721B {
+contract ExpirableERC721 is ERC721BLSW {
 
-    constructor ERC721B() {}
+    constructor (string memory name_, string memory symbol_) ERC721BLSW(name_, symbol) {}
+
 }
 ```
+
 #### Epoch Expiration
 
 ``` Solidity
@@ -101,8 +101,23 @@ import {ERC721EXPEpochBase} from "@kiwarilabs/contracts/tokens/ERC721/extensions
 // Expirable ERC721 with epoch expiration
 contract ExpirableERC721 is ERC721BLSW {
     
-    constructor ERC721BLSW() {}
+    constructor (
+        string memory name_, 
+        string memory symbol_, 
+        uint256 initialBlockNumber_,
+        uint40 blocksPerEpoch_,
+        uint8 windowSize_,
+        bool development_) 
+        ERC721BLSW(
+            name_, 
+            symbol_, 
+            initialBlockNumber_,
+            blocksPerEpoch_,
+            windowSize_,
+            development) {}
+
 }
+
 ```
 
 ## Contribute

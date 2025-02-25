@@ -119,7 +119,7 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
         return _balances[owner];
     }
 
-    function validBalanceOf(address owner) public view virtual returns (uint256) {
+    function unexpiredBalanceOf(address owner) public view virtual returns (uint256) {
         if (owner == address(0)) {
             revert ERC721InvalidOwner(address(0));
         }

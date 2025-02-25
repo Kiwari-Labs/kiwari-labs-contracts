@@ -9,7 +9,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import {AbstractBLSW as BLSW} from "../../../abstracts/AbstractBLSW.sol";
 import {ERC721EpochBase} from "./ERC721EpochBase.sol";
 
-abstract contract ERC721BLSW is ERC721EpochBase, BLSW {
+abstract contract ERC721EpochBLSW is ERC721EpochBase, BLSW {
     constructor(
         string memory name_,
         string memory symbol_,
