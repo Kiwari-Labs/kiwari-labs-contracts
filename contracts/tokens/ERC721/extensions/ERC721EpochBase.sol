@@ -234,11 +234,15 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
         uint256 tokenPointer = _tokenPointers[tokenId];
         address from = _ownerOf(tokenId);
         // if the tokenId is not exist before minting it
-        if (tokenPointer == 0) {
-            tokenPointer = pointer;
-            _tokenPointers[tokenId] = pointer;
+        if (to == address(0)) {
+            _tokenPointers[tokenId] = 0;
         } else {
-            pointer = tokenPointer;
+            if (tokenPointer == 0) {
+                tokenPointer = pointer;
+                _tokenPointers[tokenId] = pointer;
+            } else {
+                pointer = tokenPointer;
+            }
         }
         uint256 epoch = _getEpoch(pointer);
 
