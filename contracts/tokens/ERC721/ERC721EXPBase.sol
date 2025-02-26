@@ -13,12 +13,12 @@ import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 abstract contract ERC721EXPBase is ERC721, ERC721Enumerable, IERC7858 {
-    struct AssetStamp {
+    struct AssetTimeStamp {
         uint256 start;
         uint256 end;
     }
 
-    mapping(uint256 => AssetStamp) private _tokensTimestamp;
+    mapping(uint256 => AssetTimeStamp) private _tokensTimeStamp;
 
     constructor(string memory name_, string memory symbol_) ERC721(name_, symbol_) {}
 
@@ -35,41 +35,54 @@ abstract contract ERC721EXPBase is ERC721, ERC721Enumerable, IERC7858 {
     }
 
     function _validation(uint256 tokenId) internal view returns (bool) {
-        if (_ownerOf(tokenId) == address(0)) return false;
-        AssetStamp memory timestamp = _tokensTimestamp[tokenId];
+        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
+        AssetTimeStamp memory timestamp = _tokensTimeStamp[tokenId];
         uint256 current = _pointerProvider();
-        if (current < timestamp.start || current >= timestamp.end) {
+        // if start and end is {0, 0} mean token non-expirable and return false.
+        if (timestamp.start == 0 && timestamp.end == 0) {
             return false;
+        } else {
+            return current >= timestamp.end;
         }
-        // if start and end is {0, 0} mean token non-expirable and return true.
-        return true;
     }
 
-    function _updateStamp(uint256 tokenId, uint64 start, uint64 end) internal {
-        if (start >= end) {
-            // @TODO revert ERC5007InvalidTime()
+    function _updateTimeStamp(uint256 tokenId, uint64 start, uint64 end) internal {
+        if ((start <= end) && (start != 0) && (end != 0)) {
+            revert ERC7858InvalidTimeStamp(start, end);
         }
-        _tokensTimestamp[tokenId].start = start;
-        _tokensTimestamp[tokenId].end = end;
-        // @TODO emit tokenTimeSet(tokenId, start, end);
+        _tokensTimeStamp[tokenId].start = start;
+        _tokensTimeStamp[tokenId].end = end;
+
+        emit TokenExpiryUpdated(tokenId, start, end);
     }
 
-    function _mintWithStamp(address to, uint256 tokenId, uint64 start, uint64 end) internal {
+    function _mintWithTimeStamp(address to, uint256 tokenId, uint64 start, uint64 end) internal {
         _mint(to, tokenId);
-        _updateStamp(tokenId, start, end);
+        _updateTimeStamp(tokenId, start, end);
     }
 
-    /// @inheritdoc IERC7858
+    function _burnAndClearTimeStamp(uint256 tokenId) internal {
+        _burn(tokenId);
+        delete _tokensTimeStamp[tokenId];
+    }
+
+    /**
+     * @dev See {IERC7858-startTime}.
+     */
     function startTime(uint256 tokenId) public view virtual override returns (uint256) {
-        return _tokensTimestamp[tokenId].start;
+        return _tokensTimeStamp[tokenId].start;
     }
 
-    /// @inheritdoc IERC7858
+    /**
+     * @dev See {IERC7858-endTime}.
+     */
     function endTime(uint256 tokenId) public view virtual override returns (uint256) {
-        return _tokensTimestamp[tokenId].end;
+        return _tokensTimeStamp[tokenId].end;
     }
 
-    /// @inheritdoc IERC7858
+    /**
+     * @dev See {IERC7858-isTokenExpired}.
+     */
     function isTokenExpired(uint256 tokenId) public view returns (bool) {
         return _validation(tokenId);
     }

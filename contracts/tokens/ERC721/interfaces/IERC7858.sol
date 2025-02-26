@@ -10,6 +10,20 @@ interface IERC7858 {
     }
 
     /**
+     * @dev Emitted when the expiration date of a token is set or updated.
+     * @param tokenId The identifier of the token ERC721 `tokenId`.
+     * @param startTime The start time of the token (block number or timestamp based on `expiryType`).
+     * @param endTime The end time of the token (block number or timestamp based on `expiryType`).
+     */
+    event TokenExpiryUpdated(
+        uint256 indexed tokenId,
+        uint256 indexed startTime,
+        uint256 indexed endTime
+    );
+
+    error ERC7858InvalidTimeStamp(uint256 start, uint256 end);
+
+    /**
      * @dev Returns the type of the expiry.
      * @return EXPIRY_TYPE  Enum value indicating the unit of an expiry.
      */
@@ -17,7 +31,7 @@ interface IERC7858 {
 
     /**
      * @dev Checks whether a specific token is expired.
-     * @param Id The identifier representing the tokenId.
+     * @param tokenId The identifier representing the tokenId.
      * @return bool True if the token is expired, false otherwise.
      */
     function isTokenExpired(uint256 tokenId) external view returns (bool);

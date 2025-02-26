@@ -236,13 +236,14 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
         // if the tokenId is not exist before minting it
         if (to == address(0)) {
             _tokenPointers[tokenId] = 0;
+        }
+        if (tokenPointer == 0) {
+            tokenPointer = pointer;
+            _tokenPointers[tokenId] = pointer;
+
+            emit TokenExpiryUpdated(tokenId, pointer, pointer + _getPointersInWindow());
         } else {
-            if (tokenPointer == 0) {
-                tokenPointer = pointer;
-                _tokenPointers[tokenId] = pointer;
-            } else {
-                pointer = tokenPointer;
-            }
+            pointer = tokenPointer;
         }
         uint256 epoch = _getEpoch(pointer);
 
@@ -373,7 +374,10 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
 
     /// @dev See {IERC7858-endTime}.
     function endTime(uint256 tokenId) external view returns (uint256) {
-        return _tokenPointers[tokenId] + _getPointersInWindow();
+        uint256 startTimeCache = _tokenPointers[tokenId];
+        if (startTimeCache != 0) {
+            return startTimeCache + _getPointersInWindow();
+        }
     }
 
     /// @dev See {IERC7858Epoch-currentEpoch}.
