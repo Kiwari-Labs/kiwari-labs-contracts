@@ -70,6 +70,7 @@ abstract contract ERC721EXPBase is ERC721, ERC721Enumerable, IERC7858 {
      * @dev See {IERC7858-startTime}.
      */
     function startTime(uint256 tokenId) public view virtual override returns (uint256) {
+        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
         return _tokensTimeStamp[tokenId].start;
     }
 
@@ -77,6 +78,7 @@ abstract contract ERC721EXPBase is ERC721, ERC721Enumerable, IERC7858 {
      * @dev See {IERC7858-endTime}.
      */
     function endTime(uint256 tokenId) public view virtual override returns (uint256) {
+        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
         return _tokensTimeStamp[tokenId].end;
     }
 
