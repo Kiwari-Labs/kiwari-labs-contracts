@@ -15,11 +15,7 @@ interface IERC7858 {
      * @param startTime The start time of the token (block number or timestamp based on `expiryType`).
      * @param endTime The end time of the token (block number or timestamp based on `expiryType`).
      */
-    event TokenExpiryUpdated(
-        uint256 indexed tokenId,
-        uint256 indexed startTime,
-        uint256 indexed endTime
-    );
+    event TokenExpiryUpdated(uint256 indexed tokenId, uint256 indexed startTime, uint256 indexed endTime);
 
     error ERC7858InvalidTimeStamp(uint256 start, uint256 end);
 

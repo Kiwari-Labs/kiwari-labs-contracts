@@ -47,7 +47,7 @@ abstract contract ERC721EXPBase is ERC721, ERC721Enumerable, IERC7858 {
     }
 
     function _updateTimeStamp(uint256 tokenId, uint64 start, uint64 end) internal {
-        if ((start <= end) && (start != 0) && (end != 0)) {
+        if (start >= end) {
             revert ERC7858InvalidTimeStamp(start, end);
         }
         _tokensTimeStamp[tokenId].start = start;
