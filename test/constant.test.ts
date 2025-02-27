@@ -44,6 +44,13 @@ export const ERC7818 = {
   events: {},
 };
 
+export const ERC7858 = {
+  errors: {
+    ERC7858InvalidTimeStamp: "ERC7858InvalidTimeStamp",
+  },
+  events: {},
+};
+
 export const ERC20 = {
   constructor: {
     name: "PointToken",
@@ -61,6 +68,15 @@ export const ERC20 = {
     Transfer: "Transfer",
     Approval: "Approval",
   },
+};
+
+export const ERC721 = {
+  constructor: {
+    name: "VoucherToken",
+    symbol: "VOUCHER",
+  },
+  errors: {},
+  events: {},
 };
 
 export const ERC7818Permit = {
@@ -206,6 +222,18 @@ export const ERC20BLSW = {
 
 export const ERC20TLSW = {
   name: "MockERC20TLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC721TLSW = {
+  name: "MockERC721TLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC721BLSW = {
+  name: "MockERC721BLSW",
   errors: {},
   events: {},
 };
