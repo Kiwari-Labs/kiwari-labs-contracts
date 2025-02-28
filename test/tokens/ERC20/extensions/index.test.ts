@@ -12,7 +12,7 @@ import * as ERC7818Frozen from "./ERC7818Frozen/index.test";
 import * as ERC7818Permit from "./ERC7818Permit/index.test";
 
 export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
-  describe("extensions", async function () {
+  describe("ERC7818:Extensions", async function () {
     ERC7818Blacklist.run({epochType});
     ERC7818MintQuota.run({epochType});
     ERC7818Exception.run({epochType});

@@ -75,8 +75,21 @@ export const ERC721 = {
     name: "VoucherToken",
     symbol: "VOUCHER",
   },
-  errors: {},
-  events: {},
+  errors: {
+    ERC721InvalidOwner: "ERC721InvalidOwner",
+    ERC721NonexistentToken: "ERC721NonexistentToken",
+    ERC721IncorrectOwner: "ERC721IncorrectOwner",
+    ERC721InvalidSender: "ERC721InvalidSender",
+    ERC721InvalidReceiver: "ERC721InvalidReceiver",
+    ERC721InsufficientApproval: "ERC721InsufficientApproval",
+    ERC721InvalidApprover: "ERC721InvalidApprover",
+    ERC721InvalidOperator: "ERC721InvalidOperator",
+  },
+  events: {
+    Transfer: "Transfer",
+    Approval: "Approval",
+    ApprovalForAll: "ApprovalForAll",
+  },
 };
 
 export const ERC7818Permit = {

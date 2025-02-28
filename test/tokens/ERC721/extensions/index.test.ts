@@ -4,14 +4,10 @@
 // License text available at https://www.apache.org/licenses/LICENSE-2.0
 
 import {constants} from "../../../constant.test";
-// import * as Interface from "./interface.test";
-// import * as Burn from "./burn.test";
-// import * as Transfer from "./transfer.test";
+// import * as ERC7858Epoch from "./ERC7858Epoch/index.test";
 
 export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
-  //   describe("ERC7858:Behavior", async function () {
-  //     Interface.run({epochType});
-  //     Burn.run({epochType});
-  //     Transfer.run({epochType});
-  //   });
+  describe("extensions", async function () {
+    //  ERC7858Epoch.run({epochType});
+  });
 };

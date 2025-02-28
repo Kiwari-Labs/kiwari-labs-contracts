@@ -11,7 +11,7 @@ import * as Approval from "./approve.test";
 import * as TransferFrom from "./transferFrom.test";
 
 export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
-  describe("ERC7818:Base", async function () {
+  describe("ERC7858:Base", async function () {
     Mint.run({epochType});
     Burn.run({epochType});
     Approval.run({epochType});
