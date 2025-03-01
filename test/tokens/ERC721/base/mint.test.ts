@@ -11,6 +11,7 @@ import {ERC721, ERC7858, constants} from "../../../constant.test";
 export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
   describe("Mint", async function () {
     const tokenId = 1;
+    const expectBalance = 1;
     let startTime = 0;
     let endTime = 0;
 
@@ -26,7 +27,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       await expect(erc721exp.mint(alice.address, tokenId))
         .to.emit(erc721exp, ERC721.events.Transfer)
         .withArgs(constants.ZERO_ADDRESS, alice.address, tokenId);
-      expect(await erc721exp.balanceOf(alice.address)).to.equal(1);
+      expect(await erc721exp.balanceOf(alice.address)).to.equal(expectBalance);
       expect(await erc721exp.startTime(tokenId)).to.equal(startTime);
       expect(await erc721exp.endTime(tokenId)).to.equal(endTime);
       expect(await erc721exp.isTokenExpired(tokenId)).to.equal(false);
@@ -38,7 +39,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
         .to.emit(erc721exp, ERC721.events.Transfer)
         .withArgs(constants.ZERO_ADDRESS, alice.address, tokenId);
 
-      expect(await erc721exp.balanceOf(alice.address)).to.equal(1);
+      expect(await erc721exp.balanceOf(alice.address)).to.equal(expectBalance);
       if (epochType == constants.EPOCH_TYPE.BLOCKS_BASED) {
         startTime = await hardhat_latestBlock();
       } else {
@@ -57,7 +58,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
         .to.emit(erc721exp, ERC721.events.Transfer)
         .withArgs(constants.ZERO_ADDRESS, alice.address, tokenId);
 
-      expect(await erc721exp.balanceOf(alice.address)).to.equal(1);
+      expect(await erc721exp.balanceOf(alice.address)).to.equal(expectBalance);
       startTime = 1000;
       await expect(erc721exp.updateTimeStamp(tokenId, startTime, endTime))
         .to.be.revertedWithCustomError(erc721exp, ERC7858.errors.ERC7858InvalidTimeStamp)

@@ -26,7 +26,6 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       expect(await erc721exp.supportsInterface("0x80ac58cd")).to.equal(true);
     });
 
-
     it("[SUCCESS] supportsInterface ERC-7858", async function () {
       const {erc721exp} = await deployERC721Selector({epochType});
       expect(await erc721exp.supportsInterface("0x3ebdfa31")).to.equal(true);
