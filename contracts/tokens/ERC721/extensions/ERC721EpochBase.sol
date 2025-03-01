@@ -367,6 +367,12 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
         emit ApprovalForAll(owner, operator, approved);
     }
 
+    /// @dev See {IERC7858-balanceOFAtEpoch}.
+    function balanceOfAtEpoch(uint256 epoch, address owner) external view returns (uint256) {
+        if (isEpochExpired(epoch)) return 0;
+        return _computeBalanceAtEpoch(epoch, owner, _pointerProvider(), _getPointersInWindow());
+    }
+
     /// @dev See {IERC7858-startTime}.
     function startTime(uint256 tokenId) external view returns (uint256) {
         return _tokenPointers[tokenId];
@@ -380,6 +386,12 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
         }
     }
 
+    /// @dev See {IERC7858-isTokenExpired}.
+    function isTokenExpired(uint256 tokenId) external view returns (bool) {
+        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
+        return _pointerProvider() >= _tokenPointers[tokenId] + _getPointersInWindow();
+    }
+
     /// @dev See {IERC7858Epoch-currentEpoch}.
     function currentEpoch() public view virtual returns (uint256) {
         return _getEpoch(_pointerProvider());
@@ -391,9 +403,7 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
     }
 
     /// @dev See {IERC7858Epoch-epochType}.
-    function epochType() public pure returns (EXPIRY_TYPE) {
-        return _epochType();
-    }
+    function epochType() public pure virtual returns (EXPIRY_TYPE) {}
 
     /// @dev See {IERC7858Epoch-validityDuration}.
     function validityDuration() public view virtual returns (uint256) {
@@ -414,8 +424,6 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
             }
         }
     }
-
-    function _epochType() internal pure virtual returns (EXPIRY_TYPE) {}
 
     function _getEpoch(uint256 pointer) internal view virtual returns (uint256) {}
 

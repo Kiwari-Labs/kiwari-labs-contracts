@@ -19,7 +19,11 @@ abstract contract ERC721EpochBLSW is ERC721EpochBase, BLSW {
         bool development_
     ) ERC721EpochBase(name_, symbol_) BLSW(initialBlockNumber_, blocksPerEpoch_, windowSize_, development_) {}
 
-    function _epochType() internal pure virtual override returns (EXPIRY_TYPE) {
+    function expiryType() public pure override returns (EXPIRY_TYPE) {
+        return EXPIRY_TYPE.BLOCKS_BASED;
+    }
+    
+    function epochType() public pure override returns (EXPIRY_TYPE) {
         return EXPIRY_TYPE.BLOCKS_BASED;
     }
 
