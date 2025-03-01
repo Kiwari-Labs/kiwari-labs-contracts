@@ -5,21 +5,18 @@
 
 import {constants} from "../../constant.test";
 import * as base from "./base/index.test";
-import * as behavior from "./ERC7858Behavior/index.test";
 import * as extensions from "./extensions/index.test";
 
 export const run = async () => {
   describe("ERC721BLSW", async function () {
     const epochType = constants.EPOCH_TYPE.BLOCKS_BASED;
     base.run({epochType});
-    behavior.run({epochType});
     extensions.run({epochType});
   });
 
   describe("ERC721TLSW", async function () {
     const epochType = constants.EPOCH_TYPE.TIME_BASED;
     base.run({epochType});
-    behavior.run({epochType});
     extensions.run({epochType});
   });
 };

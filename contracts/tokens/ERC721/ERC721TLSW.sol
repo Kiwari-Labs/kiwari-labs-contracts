@@ -12,15 +12,11 @@ import {ERC721EXPBase} from "./ERC721EXPBase.sol";
 abstract contract ERC721TLSW is ERC721EXPBase {
     constructor(string memory name_, string memory symbol_) ERC721EXPBase(name_, symbol_) {}
 
-    function _blockTimestampProvider() internal view virtual returns (uint256) {
-        return block.timestamp;
-    }
-
-    function _expiryType() internal pure virtual override returns (EXPIRY_TYPE) {
+    function expiryType() public pure override returns (EXPIRY_TYPE) {
         return EXPIRY_TYPE.TIME_BASED;
     }
 
     function _pointerProvider() internal view virtual override returns (uint256) {
-        return _blockTimestampProvider();
+        return block.timestamp;
     }
 }

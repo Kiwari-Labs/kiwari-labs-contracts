@@ -57,13 +57,8 @@ abstract contract ERC721EXPBase is ERC721, ERC721Enumerable, IERC7858 {
         emit TokenExpiryUpdated(tokenId, start, end);
     }
 
-    function _mintWithTimeStamp(address to, uint256 tokenId, uint64 start, uint64 end) internal {
-        _mint(to, tokenId);
-        _updateTimeStamp(tokenId, start, end);
-    }
-
-    function _burnAndClearTimeStamp(uint256 tokenId) internal {
-        _burn(tokenId);
+    function _clearTimeStamp(uint256 tokenId) internal {
+        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
         delete _tokensTimeStamp[tokenId];
     }
 
@@ -90,7 +85,7 @@ abstract contract ERC721EXPBase is ERC721, ERC721Enumerable, IERC7858 {
         return _validation(tokenId);
     }
 
-    function _expiryType() internal pure virtual returns (EXPIRY_TYPE) {}
+    function expiryType() public view virtual returns (EXPIRY_TYPE) {}
 
     function _pointerProvider() internal view virtual returns (uint256) {}
 }
