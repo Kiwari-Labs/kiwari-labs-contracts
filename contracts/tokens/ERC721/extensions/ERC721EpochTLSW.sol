@@ -22,7 +22,7 @@ abstract contract ERC721EpochTLSW is ERC721EpochBase, TLSW {
     function expiryType() public pure override returns (EXPIRY_TYPE) {
         return EXPIRY_TYPE.TIME_BASED;
     }
-    
+
     function epochType() public pure override returns (EXPIRY_TYPE) {
         return EXPIRY_TYPE.TIME_BASED;
     }

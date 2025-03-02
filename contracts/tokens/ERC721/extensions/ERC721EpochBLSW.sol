@@ -22,7 +22,7 @@ abstract contract ERC721EpochBLSW is ERC721EpochBase, BLSW {
     function expiryType() public pure override returns (EXPIRY_TYPE) {
         return EXPIRY_TYPE.BLOCKS_BASED;
     }
-    
+
     function epochType() public pure override returns (EXPIRY_TYPE) {
         return EXPIRY_TYPE.BLOCKS_BASED;
     }

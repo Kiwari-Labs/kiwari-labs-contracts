@@ -112,6 +112,39 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
             super.supportsInterface(interfaceId);
     }
 
+    /**
+     * @dev See {IERC721-transferFrom}.
+     */
+    function transferFrom(address from, address to, uint256 tokenId) public virtual {
+        if (to == address(0)) {
+            revert ERC721InvalidReceiver(address(0));
+        }
+        // Setting an "auth" arguments enables the `_isAuthorized` check which verifies that the token exists
+        // (from != 0). Therefore, it is not needed to verify that the return value is not 0 here.
+        address previousOwner = _update(to, tokenId, _msgSender());
+        if (previousOwner != from) {
+            revert ERC721IncorrectOwner(from, tokenId, previousOwner);
+        }
+    }
+
+    /**
+     * @dev See {IERC721-safeTransferFrom}.
+     */
+    function safeTransferFrom(address from, address to, uint256 tokenId) public {
+        safeTransferFrom(from, to, tokenId, "");
+    }
+
+    /**
+     * @dev See {IERC721-safeTransferFrom}.
+     */
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public virtual {
+        transferFrom(from, to, tokenId);
+        ERC721Utils.checkOnERC721Received(_msgSender(), from, to, tokenId, data);
+    }
+
+    /**
+     * @dev See {IERC721-balanceOf}.
+     */
     function balanceOf(address owner) public view virtual returns (uint256) {
         if (owner == address(0)) {
             revert ERC721InvalidOwner(address(0));
