@@ -41,6 +41,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       expect(await erc7858Epoch.startTime(tokenId)).to.equal(startTime);
       expect(await erc7858Epoch.endTime(tokenId)).to.equal(endTime);
       expect(await erc7858Epoch.isTokenExpired(tokenId)).to.equal(false);
+      expect(await erc7858Epoch.ownerOf(tokenId)).to.equal(alice.address);
     });
 
     it("[SUCCESS] mint multiple expirable token", async function () {

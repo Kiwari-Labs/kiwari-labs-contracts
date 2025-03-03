@@ -6,7 +6,7 @@
 import {expect} from "chai";
 import {hardhat_reset, hardhat_latestBlock, hardhat_latest} from "../../../../utils.test";
 import {deployERC7858EpochSelector} from "./deployer.test";
-import {ERC721, ERC7858, constants} from "../../../../constant.test";
+import {ERC721, constants} from "../../../../constant.test";
 
 export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
   describe("Approve", async function () {
@@ -22,6 +22,32 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       endTime = 0;
     });
 
-    // @TODO
+    it("[SUCCESS] approve token", async function () {
+      const {erc7858Epoch, alice, bob} = await deployERC7858EpochSelector({epochType});
+      await expect(erc7858Epoch.mint(alice.address, tokenId))
+        .to.emit(erc7858Epoch, ERC721.events.Transfer)
+        .withArgs(constants.ZERO_ADDRESS, alice.address, tokenId);
+      await expect(erc7858Epoch.connect(alice).approve(bob.address, tokenId))
+        .to.emit(erc7858Epoch, ERC721.events.Approval)
+        .withArgs(alice.address, bob.address, tokenId);
+      expect(await erc7858Epoch.getApproved(tokenId)).to.equal(bob.address);
+    });
+
+    it("[FAILED] invalid approved", async function () {
+      const {erc7858Epoch, alice, bob} = await deployERC7858EpochSelector({epochType});
+      await expect(erc7858Epoch.mint(alice.address, tokenId))
+        .to.emit(erc7858Epoch, ERC721.events.Transfer)
+        .withArgs(constants.ZERO_ADDRESS, alice.address, tokenId);
+      await expect(erc7858Epoch.connect(bob).approve(alice.address, tokenId))
+        .to.revertedWithCustomError(erc7858Epoch, ERC721.errors.ERC721InvalidApprover)
+        .withArgs(bob.address);
+    });
+
+    it("[FAILED] approve nonexistence token", async function () {
+      const {erc7858Epoch, alice, bob} = await deployERC7858EpochSelector({epochType});
+      await expect(erc7858Epoch.connect(alice).approve(bob.address, tokenId))
+        .to.revertedWithCustomError(erc7858Epoch, ERC721.errors.ERC721NonexistentToken)
+        .withArgs(tokenId);
+    });
   });
 };

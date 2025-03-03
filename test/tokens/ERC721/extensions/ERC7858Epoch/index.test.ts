@@ -6,7 +6,7 @@
 import {constants} from "../../../../constant.test";
 import * as Mint from "./mint.test";
 import * as Burn from "./burn.test";
-import * as Approve from "./burn.test";
+import * as Approve from "./approve.test";
 import * as Interface from "./Interface.test";
 import * as Transfer from "./transfer.test";
 import * as TransferFrom from "./transferFrom.test";

@@ -78,13 +78,13 @@ contract ExpirableERC20 is ERC20BLSW {
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import {ERC721BLSW} from "@kiwarilabs/contracts/tokens/ERC721/ERC721B.sol";
-import {ERC721EXPBase} from "@kiwarilabs/contracts/tokens/ERC721/ERC721EXPBase.sol";
+import {ERC7858BLSW} from "@kiwarilabs/contracts/tokens/ERC721/ERC7858BLSW.sol";
+import {ERC7858EXPBase} from "@kiwarilabs/contracts/tokens/ERC721/ERC7858EXPBase.sol";
 
 // Expirable ERC721 with individual expiration
-contract ExpirableERC721 is ERC721BLSW {
+contract ExpirableERC721 is ERC7858BLSW {
 
-    constructor (string memory name_, string memory symbol_) ERC721BLSW(name_, symbol) {}
+    constructor (string memory name_, string memory symbol_) ERC7858BLSW(name_, symbol) {}
 
 }
 ```
@@ -95,11 +95,11 @@ contract ExpirableERC721 is ERC721BLSW {
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import {ERC721BLSW} from "@kiwarilabs/contracts/tokens/ERC721/extensions/ERC721BLSW.sol";
-import {ERC721EXPEpochBase} from "@kiwarilabs/contracts/tokens/ERC721/extensions/ERC721EpochBase.sol";
+import {ERC7858EpochBLSW} from "@kiwarilabs/contracts/tokens/ERC721/extensions/ERC7858EpochBLSW.sol";
+import {ERC7858EXPEpochBase} from "@kiwarilabs/contracts/tokens/ERC721/extensions/ERC7858EXPEpochBase.sol";
 
 // Expirable ERC721 with epoch expiration
-contract ExpirableERC721 is ERC721BLSW {
+contract ExpirableERC7858 is ERC7858EpochBLSW {
     
     constructor (
         string memory name_, 
@@ -108,7 +108,7 @@ contract ExpirableERC721 is ERC721BLSW {
         uint40 blocksPerEpoch_,
         uint8 windowSize_,
         bool development_) 
-        ERC721BLSW(
+        ERC7858EpochBLSW(
             name_, 
             symbol_, 
             initialBlockNumber_,
