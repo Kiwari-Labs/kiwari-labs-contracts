@@ -2,21 +2,21 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 /**
- * @title ERC721EXP using Block-Height-Based
+ * @title ERC721EXP using Timestamp-Based-Based
  * @dev ERC721EXP Base contract each token have individual expiration date.
  * @author Kiwari Labs
  */
 
-import {ERC721EXPBase} from "./ERC721EXPBase.sol";
+import {ERC7858EXPBase} from "./ERC7858EXPBase.sol";
 
-abstract contract ERC721BLSW is ERC721EXPBase {
-    constructor(string memory name_, string memory symbol_) ERC721EXPBase(name_, symbol_) {}
+abstract contract ERC7858TLSW is ERC7858EXPBase {
+    constructor(string memory name_, string memory symbol_) ERC7858EXPBase(name_, symbol_) {}
 
     function expiryType() public pure override returns (EXPIRY_TYPE) {
-        return EXPIRY_TYPE.BLOCKS_BASED;
+        return EXPIRY_TYPE.TIME_BASED;
     }
 
     function _pointerProvider() internal view virtual override returns (uint256) {
-        return block.number;
+        return block.timestamp;
     }
 }

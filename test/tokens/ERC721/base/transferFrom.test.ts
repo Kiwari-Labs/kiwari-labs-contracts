@@ -4,7 +4,7 @@
 // License text available at https://www.apache.org/licenses/LICENSE-2.0
 
 import {expect} from "chai";
-import {deployERC721Selector} from "./deployer.test";
+import {deployERC7858Selector} from "./deployer.test";
 import {ERC721, constants} from "../../../constant.test";
 import {hardhat_reset} from "../../../utils.test";
 

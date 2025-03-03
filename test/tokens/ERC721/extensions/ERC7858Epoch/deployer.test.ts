@@ -4,7 +4,7 @@
 // License text available at https://www.apache.org/licenses/LICENSE-2.0
 
 import {ethers} from "hardhat";
-import {constants, deployERC7858EpochBLSW, ERC7818BlacklistTLSW, ERC721} from "../../../../constant.test";
+import {constants, ERC721, ERC7858EpochBLSW, ERC7858EpochTLSW} from "../../../../constant.test";
 import {MockERC7858EpochBLSW} from "../../../../../typechain-types/mocks/contracts/tokens/ERC721/extensions/BLSW";
 import {MockERC7858EpochTLSW} from "../../../../../typechain-types/mocks/contracts/tokens/ERC721/extensions/TLSW";
 
@@ -26,7 +26,7 @@ export const deployERC7858EpochTLSW = async function ({
   windowSize = constants.DEFAULT_WINDOW_SIZE, // fixed width window size 2 epoch.
 } = {}) {
   const [deployer, alice, bob, charlie] = await ethers.getSigners();
-  const ERC7858_EPOCH = await ethers.getContractFactory(MockERC7858EpochTLSW.name, deployer);
+  const ERC7858_EPOCH = await ethers.getContractFactory(ERC7858EpochTLSW.name, deployer);
   const erc7858Epoch = (await ERC7858_EPOCH.deploy(
     ERC721.constructor.name,
     ERC721.constructor.symbol,
@@ -48,7 +48,7 @@ export const deployERC7858EpochBLSW = async function ({
   windowSize = constants.DEFAULT_WINDOW_SIZE, // fixed width window size 2 epoch.
 } = {}) {
   const [deployer, alice, bob, charlie] = await ethers.getSigners();
-  const ERC7858_EPOCH = await ethers.getContractFactory(MockERC7858EpochBLSW.name, deployer);
+  const ERC7858_EPOCH = await ethers.getContractFactory(ERC7858EpochBLSW.name, deployer);
   const erc7858Epoch = (await ERC7858_EPOCH.deploy(
     ERC721.constructor.name,
     ERC721.constructor.symbol,

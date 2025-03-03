@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0 <0.9.0;
 
-import {ERC721TLSW} from "../../../../contracts/tokens/ERC721/ERC721TLSW.sol";
+import {ERC7858BLSW} from "../../../../contracts/tokens/ERC721/ERC7858BLSW.sol";
 
-contract MockERC721TLSW is ERC721TLSW {
-    constructor(string memory _name, string memory _symbol) ERC721TLSW(_name, _symbol) {}
+contract MockERC7858BLSW is ERC7858BLSW {
+    constructor(string memory _name, string memory _symbol) ERC7858BLSW(_name, _symbol) {}
 
     function mint(address to, uint256 tokenId) public {
         _mint(to, tokenId);

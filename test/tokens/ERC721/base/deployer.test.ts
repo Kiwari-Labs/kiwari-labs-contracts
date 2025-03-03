@@ -4,20 +4,20 @@
 // License text available at https://www.apache.org/licenses/LICENSE-2.0
 
 import {ethers} from "hardhat";
-import {constants, ERC721, ERC721BLSW, ERC721TLSW} from "../../../constant.test";
-import {MockERC721BLSW, MockERC721TLSW} from "../../../../typechain-types/mocks/contracts/tokens/ERC721";
+import {constants, ERC721, ERC7858BLSW, ERC7858TLSW} from "../../../constant.test";
+import {MockERC7858BLSW, MockERC7858TLSW} from "../../../../typechain-types/mocks/contracts/tokens/ERC721";
 
-export const deployERC721Selector = async function ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED} = {}) {
+export const deployERC7858Selector = async function ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED} = {}) {
   if (epochType === constants.EPOCH_TYPE.BLOCKS_BASED) {
-    return await deployERC721BLSW({});
+    return await deployERC7858BLSW({});
   }
-  return await deployERC721TLSW({});
+  return await deployERC7858TLSW({});
 };
 
-export const deployERC721TLSW = async function ({} = {}) {
+export const deployERC7858TLSW = async function ({} = {}) {
   const [deployer, alice, bob, charlie, dave] = await ethers.getSigners();
-  const ERC721TLSWContract = await ethers.getContractFactory(ERC721TLSW.name, deployer);
-  const erc721exp = (await ERC721TLSWContract.deploy(ERC721.constructor.name, ERC721.constructor.symbol)) as any as MockERC721TLSW;
+  const ERC721TLSWContract = await ethers.getContractFactory(ERC7858TLSW.name, deployer);
+  const erc721exp = (await ERC721TLSWContract.deploy(ERC721.constructor.name, ERC721.constructor.symbol)) as any as MockERC7858TLSW;
   await erc721exp.waitForDeployment();
   return {
     erc721exp,
@@ -29,10 +29,10 @@ export const deployERC721TLSW = async function ({} = {}) {
   };
 };
 
-export const deployERC721BLSW = async function ({} = {}) {
+export const deployERC7858BLSW = async function ({} = {}) {
   const [deployer, alice, bob, charlie, dave] = await ethers.getSigners();
-  const ERC20BLSWContract = await ethers.getContractFactory(ERC721BLSW.name, deployer);
-  const erc721exp = (await ERC20BLSWContract.deploy(ERC721.constructor.name, ERC721.constructor.symbol)) as any as MockERC721BLSW;
+  const ERC20BLSWContract = await ethers.getContractFactory(ERC7858BLSW.name, deployer);
+  const erc721exp = (await ERC20BLSWContract.deploy(ERC721.constructor.name, ERC721.constructor.symbol)) as any as MockERC7858BLSW;
   await erc721exp.waitForDeployment();
   return {
     erc721exp,

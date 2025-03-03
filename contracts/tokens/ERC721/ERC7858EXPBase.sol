@@ -12,7 +12,7 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
-abstract contract ERC721EXPBase is ERC721, ERC721Enumerable, IERC7858 {
+abstract contract ERC7858EXPBase is ERC721, ERC721Enumerable, IERC7858 {
     struct AssetTimeStamp {
         uint256 start;
         uint256 end;

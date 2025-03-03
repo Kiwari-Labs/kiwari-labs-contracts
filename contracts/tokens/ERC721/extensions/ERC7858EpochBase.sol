@@ -18,7 +18,7 @@ import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.s
 
 // @TODO following https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.1.0/contracts/token/ERC721/ERC721.sol
 
-abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IERC721Metadata, IERC7858Epoch {
+abstract contract ERC7858EpochBase is Context, ERC165, IERC721, IERC721Errors, IERC721Metadata, IERC7858Epoch {
     using SortedList for SortedList.List;
     using Strings for uint256;
 
@@ -305,7 +305,7 @@ abstract contract ERC721EpochBase is Context, ERC165, IERC721, IERC721Errors, IE
 
         if (to != address(0)) {
             unchecked {
-                _balances[from] += 1;
+                _balances[to] += 1;
                 _recipient.totalBalance += 1;
                 _recipient.tokens[tokenPointer].push(tokenId);
                 _recipient.tokenIndex[tokenPointer][tokenId] = _recipient.tokens[tokenPointer].length - 1;

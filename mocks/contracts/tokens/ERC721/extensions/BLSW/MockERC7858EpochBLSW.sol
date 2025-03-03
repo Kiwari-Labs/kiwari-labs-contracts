@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0 <0.9.0;
 
-import {ERC721EpochBLSW as ERC7858} from "../../../../../../contracts/tokens/ERC721/extensions/ERC721EpochBLSW.sol";
+import {ERC7858EpochBLSW as ERC7858} from "../../../../../../contracts/tokens/ERC721/extensions/ERC7858EpochBLSW.sol";
 
-contract MockERC721BLSW is ERC7858 {
+contract MockERC7858EpochBLSW is ERC7858 {
     constructor(
         string memory name_,
         string memory symbol_,

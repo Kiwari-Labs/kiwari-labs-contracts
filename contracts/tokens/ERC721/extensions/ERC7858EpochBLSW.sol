@@ -2,29 +2,29 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 /**
- * @title ERC721EXP using Timestamp-Based Lazy Sliding Window (TLSW) Algorithm.
+ * @title ERC721EXP using Block-Height-Based Lazy Sliding Window (BLSW) Algorithm.
  * @author Kiwari Labs
  */
 
-import {AbstractTLSW as TLSW} from "../../../abstracts/AbstractTLSW.sol";
-import {ERC721EpochBase} from "./ERC721EpochBase.sol";
+import {AbstractBLSW as BLSW} from "../../../abstracts/AbstractBLSW.sol";
+import {ERC7858EpochBase} from "./ERC7858EpochBase.sol";
 
-abstract contract ERC721EpochTLSW is ERC721EpochBase, TLSW {
+abstract contract ERC7858EpochBLSW is ERC7858EpochBase, BLSW {
     constructor(
         string memory name_,
         string memory symbol_,
-        uint256 initialBlockTimestamp_,
-        uint40 secondsPerEpoch_,
+        uint256 initialBlockNumber_,
+        uint40 blocksPerEpoch_,
         uint8 windowSize_,
         bool development_
-    ) ERC721EpochBase(name_, symbol_) TLSW(initialBlockTimestamp_, secondsPerEpoch_, windowSize_, development_) {}
+    ) ERC7858EpochBase(name_, symbol_) BLSW(initialBlockNumber_, blocksPerEpoch_, windowSize_, development_) {}
 
     function expiryType() public pure override returns (EXPIRY_TYPE) {
-        return EXPIRY_TYPE.TIME_BASED;
+        return EXPIRY_TYPE.BLOCKS_BASED;
     }
 
     function epochType() public pure override returns (EXPIRY_TYPE) {
-        return EXPIRY_TYPE.TIME_BASED;
+        return EXPIRY_TYPE.BLOCKS_BASED;
     }
 
     function _getEpoch(uint256 pointer) internal view virtual override returns (uint256) {
@@ -40,14 +40,14 @@ abstract contract ERC721EpochTLSW is ERC721EpochBase, TLSW {
     }
 
     function _getPointersInEpoch() internal view virtual override returns (uint40) {
-        return _secondsInEpoch();
+        return _blocksInEpoch();
     }
 
     function _getPointersInWindow() internal view virtual override returns (uint40) {
-        return _secondsInWindow();
+        return _blocksInWindow();
     }
 
     function _pointerProvider() internal view virtual override returns (uint256) {
-        return _blockTimestampProvider();
+        return _blockNumberProvider();
     }
 }

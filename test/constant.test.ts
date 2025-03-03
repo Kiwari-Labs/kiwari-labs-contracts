@@ -239,14 +239,26 @@ export const ERC20TLSW = {
   events: {},
 };
 
-export const ERC721TLSW = {
-  name: "MockERC721TLSW",
+export const ERC7858TLSW = {
+  name: "MockERC7858TLSW",
   errors: {},
   events: {},
 };
 
-export const ERC721BLSW = {
-  name: "MockERC721BLSW",
+export const ERC7858BLSW = {
+  name: "MockERC7858BLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC7858EpochBLSW = {
+  name: "MockERC7858EpochBLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC7858EpochTLSW = {
+  name: "MockERC7858EpochTLSW",
   errors: {},
   events: {},
 };

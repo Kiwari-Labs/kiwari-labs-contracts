@@ -5,7 +5,7 @@
 
 import {expect} from "chai";
 import {hardhat_reset, hardhat_latestBlock, hardhat_latest} from "../../../utils.test";
-import {deployERC721Selector} from "./deployer.test";
+import {deployERC7858Selector} from "./deployer.test";
 import {ERC721, ERC7858, constants} from "../../../constant.test";
 
 export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
@@ -23,7 +23,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
     });
 
     it("[SUCCESS] mint unexpirable token", async function () {
-      const {erc721exp, alice} = await deployERC721Selector({epochType});
+      const {erc721exp, alice} = await deployERC7858Selector({epochType});
       await expect(erc721exp.mint(alice.address, tokenId))
         .to.emit(erc721exp, ERC721.events.Transfer)
         .withArgs(constants.ZERO_ADDRESS, alice.address, tokenId);
@@ -34,7 +34,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
     });
 
     it("[SUCCESS] mint expirable token", async function () {
-      const {erc721exp, alice} = await deployERC721Selector({epochType});
+      const {erc721exp, alice} = await deployERC7858Selector({epochType});
       await expect(erc721exp.mint(alice.address, tokenId))
         .to.emit(erc721exp, ERC721.events.Transfer)
         .withArgs(constants.ZERO_ADDRESS, alice.address, tokenId);
@@ -53,7 +53,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
     });
 
     it("[FAILED] mint expirable token with invalid timestamp", async function () {
-      const {erc721exp, alice} = await deployERC721Selector({epochType});
+      const {erc721exp, alice} = await deployERC7858Selector({epochType});
       await expect(erc721exp.mint(alice.address, tokenId))
         .to.emit(erc721exp, ERC721.events.Transfer)
         .withArgs(constants.ZERO_ADDRESS, alice.address, tokenId);
