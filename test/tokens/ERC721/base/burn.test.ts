@@ -7,7 +7,6 @@ import {expect} from "chai";
 import {hardhat_latest, hardhat_latestBlock, hardhat_reset} from "../../../utils.test";
 import {deployERC7858Selector} from "./deployer.test";
 import {constants, ERC721} from "../../../constant.test";
-import {ZeroAddress} from "ethers";
 
 export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
   describe("Burn", async function () {
@@ -30,7 +29,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       expect(await erc721exp.balanceOf(alice.address)).to.equal(1);
       expect(await erc721exp.startTime(tokenId)).to.equal(startTime);
       expect(await erc721exp.endTime(tokenId)).to.equal(endTime);
-      await expect(erc721exp.burn(tokenId)).to.emit(erc721exp, ERC721.events.Transfer).withArgs(alice, ZeroAddress, tokenId);
+      await expect(erc721exp.burn(tokenId)).to.emit(erc721exp, ERC721.events.Transfer).withArgs(alice, constants.ZERO_ADDRESS, tokenId);
       await expect(erc721exp.isTokenExpired(tokenId)).to.be.revertedWithCustomError(erc721exp, ERC721.errors.ERC721NonexistentToken);
     });
 
@@ -42,7 +41,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       expect(await erc721exp.balanceOf(alice.address)).to.equal(1);
       expect(await erc721exp.startTime(tokenId)).to.equal(startTime);
       expect(await erc721exp.endTime(tokenId)).to.equal(endTime);
-      await expect(erc721exp.burn(tokenId)).to.emit(erc721exp, ERC721.events.Transfer).withArgs(alice, ZeroAddress, tokenId);
+      await expect(erc721exp.burn(tokenId)).to.emit(erc721exp, ERC721.events.Transfer).withArgs(alice, constants.ZERO_ADDRESS, tokenId);
       await expect(erc721exp.isTokenExpired(tokenId)).to.be.revertedWithCustomError(erc721exp, ERC721.errors.ERC721NonexistentToken);
     });
 
@@ -61,7 +60,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       await erc721exp.updateTimeStamp(tokenId, startTime, endTime);
       expect(await erc721exp.startTime(tokenId)).to.equal(startTime);
       expect(await erc721exp.endTime(tokenId)).to.equal(endTime);
-      await expect(erc721exp.burn(tokenId)).to.emit(erc721exp, ERC721.events.Transfer).withArgs(alice, ZeroAddress, tokenId);
+      await expect(erc721exp.burn(tokenId)).to.emit(erc721exp, ERC721.events.Transfer).withArgs(alice, constants.ZERO_ADDRESS, tokenId);
       await expect(erc721exp.isTokenExpired(tokenId)).to.be.revertedWithCustomError(erc721exp, ERC721.errors.ERC721NonexistentToken);
       await expect(erc721exp.mint(alice.address, tokenId))
         .to.emit(erc721exp, ERC721.events.Transfer)

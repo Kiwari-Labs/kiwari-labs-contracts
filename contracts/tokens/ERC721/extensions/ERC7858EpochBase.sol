@@ -7,6 +7,7 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 
 import {SortedList} from "../../../utils/datastructures/SortedList.sol";
+import {IERC7858} from "../interfaces/IERC7858.sol";
 import {IERC7858Epoch} from "../interfaces/IERC7858Epoch.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
@@ -74,19 +75,19 @@ abstract contract ERC7858EpochBase is Context, ERC165, IERC721, IERC721Errors, I
         uint256 pointer,
         uint256 duration
     ) private view returns (uint256 balance) {
-        (uint256 element, uint256 value) = _findValidBalance(account, epoch, pointer, duration);
+        (uint256 element, uint256 value) = _findUnexpiredBalance(account, epoch, pointer, duration);
         Epoch storage _account = _epochBalances[epoch][account];
         unchecked {
             balance = value;
             while (element > 0) {
-                balance += _account.tokens[element].length;
                 element = _account.list.next(element);
+                balance += _account.tokens[element].length;
             }
         }
         return balance;
     }
 
-    function _findValidBalance(
+    function _findUnexpiredBalance(
         address account,
         uint256 epoch,
         uint256 pointer,
@@ -108,6 +109,7 @@ abstract contract ERC7858EpochBase is Context, ERC165, IERC721, IERC721Errors, I
         return
             interfaceId == type(IERC721).interfaceId ||
             interfaceId == type(IERC721Metadata).interfaceId ||
+            interfaceId == type(IERC7858).interfaceId ||
             interfaceId == type(IERC7858Epoch).interfaceId ||
             super.supportsInterface(interfaceId);
     }
@@ -157,15 +159,8 @@ abstract contract ERC7858EpochBase is Context, ERC165, IERC721, IERC721Errors, I
             revert ERC721InvalidOwner(address(0));
         }
         uint256 pointer = _pointerProvider();
-        (uint256 fromEpoch, uint256 toEpoch) = _getWindowRage(pointer);
-        uint256 balance = _computeBalanceAtEpoch(fromEpoch, owner, pointer, _getPointersInWindow());
-        if (fromEpoch == toEpoch) {
-            return balance;
-        } else {
-            fromEpoch += 1;
-        }
-        balance += _computeBalanceOverEpochRange(fromEpoch, toEpoch, owner);
-        return balance;
+        (uint256 fromEpoch, ) = _getWindowRage(pointer);
+        return _computeBalanceAtEpoch(fromEpoch, owner, pointer, _getPointersInWindow());
     }
 
     /**
@@ -408,15 +403,14 @@ abstract contract ERC7858EpochBase is Context, ERC165, IERC721, IERC721Errors, I
 
     /// @dev See {IERC7858-startTime}.
     function startTime(uint256 tokenId) external view returns (uint256) {
+        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
         return _tokenPointers[tokenId];
     }
 
     /// @dev See {IERC7858-endTime}.
     function endTime(uint256 tokenId) external view returns (uint256) {
-        uint256 startTimeCache = _tokenPointers[tokenId];
-        if (startTimeCache != 0) {
-            return startTimeCache + _getPointersInWindow();
-        }
+        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
+        return _tokenPointers[tokenId] + _getPointersInWindow();
     }
 
     /// @dev See {IERC7858-isTokenExpired}.
