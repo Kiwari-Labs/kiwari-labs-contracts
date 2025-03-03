@@ -159,8 +159,15 @@ abstract contract ERC7858EpochBase is Context, ERC165, IERC721, IERC721Errors, I
             revert ERC721InvalidOwner(address(0));
         }
         uint256 pointer = _pointerProvider();
-        (uint256 fromEpoch, ) = _getWindowRage(pointer);
-        return _computeBalanceAtEpoch(fromEpoch, owner, pointer, _getPointersInWindow());
+        (uint256 fromEpoch, uint256 toEpoch) = _getWindowRage(pointer);
+        uint256 balance = _computeBalanceAtEpoch(fromEpoch, owner, pointer, _getPointersInWindow());
+        if (fromEpoch == toEpoch) {
+            return balance;
+        } else {
+            fromEpoch += 1;
+        }
+        balance += _computeBalanceOverEpochRange(fromEpoch, toEpoch, owner);
+        return balance;
     }
 
     /**

@@ -8,8 +8,8 @@ import * as Mint from "./mint.test";
 import * as Burn from "./burn.test";
 import * as Approve from "./approve.test";
 import * as Interface from "./Interface.test";
-import * as Transfer from "./transfer.test";
 import * as TransferFrom from "./transferFrom.test";
+import * as SafeTransferFrom from "./safeTransferFrom.test";
 
 export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
   describe("ERC7858Epoch", async function () {
@@ -17,7 +17,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
     Burn.run({epochType});
     Approve.run({epochType});
     Interface.run({epochType});
-    Transfer.run({epochType});
     TransferFrom.run({epochType});
+    SafeTransferFrom.run({epochType});
   });
 };

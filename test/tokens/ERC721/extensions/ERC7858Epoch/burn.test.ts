@@ -14,14 +14,9 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
     const expectBalanceAfterMint = 1;
     const expectBalanceMultiAfterMint = 10;
     const expectBalanceAfterBurn = 0;
-    let startTime = 0;
-    let endTime = 0;
 
     afterEach(async function () {
       await hardhat_reset();
-      /** ensure safety reset starTime and endTime to zero */
-      startTime = 0;
-      endTime = 0;
     });
 
     it("[SUCCESS] burn expirable token", async function () {
@@ -41,7 +36,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       await expect(erc7858Epoch.isTokenExpired(tokenId)).to.revertedWithCustomError(erc7858Epoch, ERC721.errors.ERC721NonexistentToken);
     });
 
-    it("[SUCCESS] mint multiple expirable token", async function () {
+    it("[SUCCESS] burn multiple expirable token", async function () {
       const {erc7858Epoch, alice} = await deployERC7858EpochSelector({epochType});
       for (let index = tokenId; index <= 10; index++) {
         await expect(erc7858Epoch.mint(alice.address, index))

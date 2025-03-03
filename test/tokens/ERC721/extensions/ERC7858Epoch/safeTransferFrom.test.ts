@@ -9,7 +9,7 @@ import {deployERC7858EpochSelector} from "./deployer.test";
 import {ERC721, ERC7858, constants} from "../../../../constant.test";
 
 export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
-  describe("Transfer", async function () {
+  describe("SafeTransferFrom", async function () {
     const tokenId = 1;
     const expectBalance = 1;
     let startTime = 0;

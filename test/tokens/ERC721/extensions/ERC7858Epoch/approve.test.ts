@@ -12,14 +12,9 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
   describe("Approve", async function () {
     const tokenId = 1;
     const expectBalance = 1;
-    let startTime = 0;
-    let endTime = 0;
 
     afterEach(async function () {
       await hardhat_reset();
-      /** ensure safety reset starTime and endTime to zero */
-      startTime = 0;
-      endTime = 0;
     });
 
     it("[SUCCESS] approve token", async function () {
@@ -31,6 +26,39 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
         .to.emit(erc7858Epoch, ERC721.events.Approval)
         .withArgs(alice.address, bob.address, tokenId);
       expect(await erc7858Epoch.getApproved(tokenId)).to.equal(bob.address);
+    });
+
+    it("[SUCCESS] approve token for all", async function () {
+      const {erc7858Epoch, alice, bob} = await deployERC7858EpochSelector({epochType});
+      await expect(erc7858Epoch.mint(alice.address, tokenId))
+        .to.emit(erc7858Epoch, ERC721.events.Transfer)
+        .withArgs(constants.ZERO_ADDRESS, alice.address, tokenId);
+      await expect(erc7858Epoch.connect(alice).setApprovalForAll(bob.address, true))
+        .to.emit(erc7858Epoch, ERC721.events.ApprovalForAll)
+        .withArgs(alice.address, bob.address, true);
+      expect(await erc7858Epoch.isApprovedForAll(alice.address, bob.address)).to.equal(true);
+    });
+
+    it("[SUCCESS] approve and transferFrom", async function () {
+      const {erc7858Epoch, alice, bob} = await deployERC7858EpochSelector({epochType});
+      await expect(erc7858Epoch.mint(alice.address, tokenId))
+        .to.emit(erc7858Epoch, ERC721.events.Transfer)
+        .withArgs(constants.ZERO_ADDRESS, alice.address, tokenId);
+      await expect(erc7858Epoch.connect(alice).approve(bob.address, tokenId))
+        .to.emit(erc7858Epoch, ERC721.events.Approval)
+        .withArgs(alice.address, bob.address, tokenId);
+      expect(await erc7858Epoch.getApproved(tokenId)).to.equal(bob.address);
+      expect(await erc7858Epoch.balanceOf(alice.address)).to.equal(expectBalance);
+      expect(await erc7858Epoch.unexpiredBalanceOf(alice.address)).to.equal(expectBalance);
+      await expect(erc7858Epoch.connect(bob).transferFrom(alice.address, bob.address, tokenId))
+        .to.emit(erc7858Epoch, ERC721.events.Transfer)
+        .withArgs(alice.address, bob.address, tokenId);
+      expect(await erc7858Epoch.balanceOf(alice.address)).to.equal(0);
+      expect(await erc7858Epoch.unexpiredBalanceOf(alice.address)).to.equal(0);
+      expect(await erc7858Epoch.isTokenExpired(tokenId)).to.equal(false);
+      expect(await erc7858Epoch.balanceOf(bob.address)).to.equal(expectBalance);
+      expect(await erc7858Epoch.unexpiredBalanceOf(bob.address)).to.equal(expectBalance);
+      expect(await erc7858Epoch.ownerOf(tokenId)).to.equal(bob.address);
     });
 
     it("[FAILED] invalid approved", async function () {
