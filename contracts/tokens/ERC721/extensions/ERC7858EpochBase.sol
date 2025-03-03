@@ -442,16 +442,6 @@ abstract contract ERC7858EpochBase is Context, ERC165, IERC721, IERC721Errors, I
         return _expired(id);
     }
 
-    /// @dev See {IERC7858Epoch-isTokenValid}.
-    function isTokenValid(uint256 tokenId) external view returns (bool) {
-        uint256 pointer = _tokenPointers[tokenId];
-        if (pointer != 0) {
-            if (_pointerProvider() - pointer < _getPointersInWindow()) {
-                return true;
-            }
-        }
-    }
-
     function _getEpoch(uint256 pointer) internal view virtual returns (uint256) {}
 
     function _getWindowRage(uint256 pointer) internal view virtual returns (uint256 fromEpoch, uint256 toEpoch) {}
