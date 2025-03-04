@@ -18,4 +18,12 @@ contract MockERC7858EpochTLSW is ERC7858 {
     function burn(uint256 tokenId) public {
         _burn(tokenId);
     }
+
+    function safeMint(address to, uint256 tokenId) public {
+        _safeMint(to, tokenId);
+    }
+
+    function safeMint(address to, uint256 tokenId, bytes memory data) public {
+        _safeMint(to, tokenId, data);
+    }
 }

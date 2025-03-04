@@ -9,7 +9,7 @@ import {deployERC7858EpochSelector} from "./deployer.test";
 import {ERC721, constants} from "../../../../constant.test";
 
 export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
-  describe("Mint", async function () {
+  describe("SafeMint", async function () {
     const tokenId = 1;
     const expectBalance = 1;
     const expectBalanceMulti = 10;
@@ -23,11 +23,11 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       endTime = 0;
     });
 
-    it("[SUCCESS] mint expirable token", async function () {
+    it("[SUCCESS] safeMint expirable token", async function () {
       const {erc7858Epoch, alice} = await deployERC7858EpochSelector({epochType});
       const validityDuration = Number(await erc7858Epoch.validityDuration());
       const epochLength = Number(await erc7858Epoch.epochLength());
-      await expect(erc7858Epoch.mint(alice.address, tokenId))
+      await expect(erc7858Epoch["safeMint(address,uint256)"](alice.address, tokenId))
         .to.emit(erc7858Epoch, ERC721.events.Transfer)
         .withArgs(constants.ZERO_ADDRESS, alice.address, tokenId);
       expect(await erc7858Epoch.balanceOf(alice.address)).to.equal(expectBalance);
@@ -44,10 +44,10 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       expect(await erc7858Epoch.ownerOf(tokenId)).to.equal(alice.address);
     });
 
-    it("[SUCCESS] mint multiple expirable token", async function () {
+    it("[SUCCESS] safeMint multiple expirable token", async function () {
       const {erc7858Epoch, alice} = await deployERC7858EpochSelector({epochType});
       for (let index = tokenId; index <= 10; index++) {
-        await expect(erc7858Epoch.mint(alice.address, index))
+        await expect(erc7858Epoch["safeMint(address,uint256)"](alice.address, index))
           .to.emit(erc7858Epoch, ERC721.events.Transfer)
           .withArgs(constants.ZERO_ADDRESS, alice.address, index);
       }
@@ -55,7 +55,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       expect(await erc7858Epoch.unexpiredBalanceOf(alice.address)).to.equal(expectBalanceMulti);
     });
 
-    it("[FAILED] mint expirable token to zeroAddress", async function () {
+    it("[FAILED] safeMint expirable token to zeroAddress", async function () {
       const {erc7858Epoch} = await deployERC7858EpochSelector({epochType});
       await expect(erc7858Epoch.mint(constants.ZERO_ADDRESS, tokenId))
         .to.revertedWithCustomError(erc7858Epoch, ERC721.errors.ERC721InvalidReceiver)

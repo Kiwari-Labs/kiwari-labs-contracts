@@ -61,7 +61,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       expect(await erc7858Epoch.ownerOf(tokenId)).to.equal(bob.address);
     });
 
-    it("[FAILED] invalid approved", async function () {
+    it("[FAILED] invalid approver", async function () {
       const {erc7858Epoch, alice, bob} = await deployERC7858EpochSelector({epochType});
       await expect(erc7858Epoch.mint(alice.address, tokenId))
         .to.emit(erc7858Epoch, ERC721.events.Transfer)
@@ -69,6 +69,16 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       await expect(erc7858Epoch.connect(bob).approve(alice.address, tokenId))
         .to.revertedWithCustomError(erc7858Epoch, ERC721.errors.ERC721InvalidApprover)
         .withArgs(bob.address);
+    });
+
+    it("[FAILED] invalid approved for all", async function () {
+      const {erc7858Epoch, alice, bob} = await deployERC7858EpochSelector({epochType});
+      await expect(erc7858Epoch.mint(alice.address, tokenId))
+        .to.emit(erc7858Epoch, ERC721.events.Transfer)
+        .withArgs(constants.ZERO_ADDRESS, alice.address, tokenId);
+      await expect(erc7858Epoch.connect(alice).setApprovalForAll(constants.ZERO_ADDRESS, true))
+        .to.revertedWithCustomError(erc7858Epoch, ERC721.errors.ERC721InvalidOperator)
+        .withArgs(constants.ZERO_ADDRESS);
     });
 
     it("[FAILED] approve nonexistence token", async function () {
