@@ -36,7 +36,11 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       const {erc20exp, alice} = await deployERC20Selector({epochType});
       const epoch = await erc20exp.currentEpoch();
       expect(await erc20exp.balanceOfAtEpoch(epoch, alice.address)).to.equal(0);
-      expect(await erc20exp.balanceOfAtEpoch(epoch + 1n, alice.address)).to.equal(0);
+      await erc20exp.mint(alice.address, 1);
+      await erc20exp.mint(alice.address, 1);
+      expect(await erc20exp.balanceOfAtEpoch(epoch, alice.address)).to.equal(2);
+      await hardhat_increasePointerTo(epochType, (await erc20exp.epochLength()) * (await erc20exp.validityDuration()) - 1n);
+      expect(await erc20exp.balanceOfAtEpoch(epoch, alice.address)).to.equal(1);
     });
 
     it("[SUCCESS] currentEpoch", async function () {

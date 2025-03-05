@@ -27,7 +27,7 @@ library SortedList {
      * @return array containing the indices of nodes in the linked list, ordered according to the specified direction.
      */
     function _toArray(List storage self, uint256 start, uint256 length) private view returns (uint256[] memory array) {
-        if (start == SENTINEL) return array;
+        if (!contains(self, start)) return array;
         array = new uint256[](length);
         uint128 index;
         unchecked {
@@ -129,7 +129,7 @@ library SortedList {
         uint256 beforeElement = self._nodes[element][PREVIOUS];
         uint256 afterSentinel = self._nodes[SENTINEL][NEXT];
         assembly {
-            result := or(eq(afterSentinel, element), gt(beforeElement, 0x00))
+            result := or(eq(afterSentinel, element), gt(beforeElement, SENTINEL))
         }
     }
 
@@ -198,13 +198,13 @@ library SortedList {
      * @return array containing the indices of nodes in ascending order.
      */
     function toArray(List storage self) internal view returns (uint256[] memory array) {
-        return _toArray(self, front(self), 0x200);
+        return _toArray(self, front(self), size());
     }
 
     /*
      * @dev pagination like with static length set to 512.
      */
     function toArray(List storage self, uint256 start) internal view returns (uint256[] memory array) {
-        return _toArray(self, start, 0x200);
+        return _toArray(self, start, size());
     }
 }
