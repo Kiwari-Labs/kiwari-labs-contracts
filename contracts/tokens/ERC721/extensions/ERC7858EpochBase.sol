@@ -263,20 +263,19 @@ abstract contract ERC7858EpochBase is Context, ERC165, IERC721, IERC721Errors, I
     }
 
     function _update(address to, uint256 tokenId, address auth) internal virtual returns (address) {
-        uint256 pointer = _pointerProvider(); // current block or timestamp
         uint256 tokenPointer = _tokenPointers[tokenId];
+        uint256 pointer = tokenPointer;
         address from = _ownerOf(tokenId);
         // if the tokenId is not exist before minting it
         if (to == address(0)) {
             _tokenPointers[tokenId] = 0;
         }
         if (tokenPointer == 0) {
+            pointer = _pointerProvider(); // current block or timestamp
             tokenPointer = pointer;
             _tokenPointers[tokenId] = pointer;
 
             emit TokenExpiryUpdated(tokenId, pointer, pointer + _getPointersInWindow());
-        } else {
-            pointer = tokenPointer;
         }
         uint256 epoch = _getEpoch(pointer);
 
