@@ -68,9 +68,9 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       expect(await erc7858Epoch.isEpochExpired(0)).to.equal(true);
     });
 
-    it("[SUCCESS] balanceOfAtEpoch", async function () {
+    it("[SUCCESS] unexpiredBalanceOfAtEpoch", async function () {
       const {erc7858Epoch, alice} = await deployERC7858EpochSelector({epochType});
-      expect(await erc7858Epoch.balanceOfAtEpoch(0, alice.address)).to.equal(0);
+      expect(await erc7858Epoch.unexpiredBalanceOfAtEpoch(0, alice.address)).to.equal(0);
     });
 
     it("[SUCCESS] unexpiredBalanceOf", async function () {
@@ -107,16 +107,16 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
 
     it("[SUCCESS] supportsInterface ERC-7858Epoch", async function () {
       const {erc7858Epoch} = await deployERC7858EpochSelector({epochType});
-      expect(await erc7858Epoch.supportsInterface("0xaaf87b24")).to.equal(true);
+      expect(await erc7858Epoch.supportsInterface("0x8f55b98a")).to.equal(true);
     });
 
-    it("[FAILED] balanceOfAtEpoch expiredEpoch", async function () {
+    it("[FAILED] unexpiredBalanceOfAtEpoch expiredEpoch", async function () {
       const {erc7858Epoch, alice} = await deployERC7858EpochSelector({epochType});
       const epochLength = await erc7858Epoch.epochLength();
       const duration = await erc7858Epoch.validityDuration();
       await hardhat_increasePointerTo(epochType, epochLength * duration);
       await hardhat_increasePointerTo(epochType, epochLength + 1n);
-      expect(await erc7858Epoch.balanceOfAtEpoch(0, alice.address)).to.equal(0);
+      expect(await erc7858Epoch.unexpiredBalanceOfAtEpoch(0, alice.address)).to.equal(0);
     });
 
     it("[FAILED] supportsInterface unknown", async function () {

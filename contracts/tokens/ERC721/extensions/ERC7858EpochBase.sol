@@ -400,8 +400,8 @@ abstract contract ERC7858EpochBase is Context, ERC165, IERC721, IERC721Errors, I
         emit ApprovalForAll(owner, operator, approved);
     }
 
-    /// @dev See {IERC7858-balanceOFAtEpoch}.
-    function balanceOfAtEpoch(uint256 epoch, address owner) external view returns (uint256) {
+    /// @dev See {IERC7858-unexpiredBalanceOfAtEpoch}.
+    function unexpiredBalanceOfAtEpoch(uint256 epoch, address owner) external view override returns (uint256) {
         if (isEpochExpired(epoch)) return 0;
         return _computeBalanceAtEpoch(epoch, owner, _pointerProvider(), _getPointersInWindow());
     }

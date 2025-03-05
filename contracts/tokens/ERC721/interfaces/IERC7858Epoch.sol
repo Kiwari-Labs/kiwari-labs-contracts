@@ -7,15 +7,6 @@ import {IERC7858} from "./IERC7858.sol";
 
 interface IERC7858Epoch is IERC7858 {
     /**
-     * @dev Retrieves the balance of a specific `epoch` owned by an account.
-     * @param epoch The `epoch for which the balance is checked.
-     * @param account The address of the account.
-     * @return uint256 The balance of the specified `epoch`.
-     * @notice "MUST" return 0 if the specified `epoch` is expired.
-     */
-    function balanceOfAtEpoch(uint256 epoch, address account) external view returns (uint256);
-
-    /**
      * @dev Retrieves the current epoch of the contract.
      * @return uint256 The current epoch of the token contract,
      * often used for determining active/expired states.
@@ -51,6 +42,15 @@ interface IERC7858Epoch is IERC7858 {
      * @return uint256 The amount of unexpired tokens owned by an account.
      */
     function unexpiredBalanceOf(address account) external view returns (uint256);
+
+    /**
+     * @dev Retrieves the balance of a specific `epoch` owned by an account.
+     * @param epoch The `epoch for which the balance is checked.
+     * @param account The address of the account.
+     * @return uint256 The balance of the specified `epoch`.
+     * @notice "MUST" return 0 if the specified `epoch` is expired.
+     */
+    function unexpiredBalanceOfAtEpoch(uint256 epoch, address account) external view returns (uint256);
 
     /**
      * @dev Retrieves the validity duration of each token.
