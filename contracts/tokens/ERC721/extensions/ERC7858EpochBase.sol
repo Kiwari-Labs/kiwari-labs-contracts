@@ -408,19 +408,19 @@ abstract contract ERC7858EpochBase is Context, ERC165, IERC721, IERC721Errors, I
 
     /// @dev See {IERC7858-startTime}.
     function startTime(uint256 tokenId) external view returns (uint256) {
-        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
+        _requireOwned(tokenId);
         return _tokenPointers[tokenId];
     }
 
     /// @dev See {IERC7858-endTime}.
     function endTime(uint256 tokenId) external view returns (uint256) {
-        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
+        _requireOwned(tokenId);
         return _tokenPointers[tokenId] + _getPointersInWindow();
     }
 
     /// @dev See {IERC7858-isTokenExpired}.
     function isTokenExpired(uint256 tokenId) external view returns (bool) {
-        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
+        _requireOwned(tokenId);
         return _pointerProvider() >= _tokenPointers[tokenId] + _getPointersInWindow();
     }
 

@@ -35,7 +35,7 @@ abstract contract ERC7858EXPBase is ERC721, ERC721Enumerable, IERC7858 {
     }
 
     function _validation(uint256 tokenId) internal view returns (bool) {
-        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
+        _requireOwned(tokenId);
         AssetTimeStamp memory timestamp = _tokensTimeStamp[tokenId];
         uint256 current = _pointerProvider();
         // if start and end is {0, 0} mean token non-expirable and return false.
@@ -47,7 +47,7 @@ abstract contract ERC7858EXPBase is ERC721, ERC721Enumerable, IERC7858 {
     }
 
     function _updateTimeStamp(uint256 tokenId, uint256 start, uint256 end) internal {
-        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
+        _requireOwned(tokenId);
         if (start >= end) {
             revert ERC7858InvalidTimeStamp(start, end);
         }
@@ -58,7 +58,7 @@ abstract contract ERC7858EXPBase is ERC721, ERC721Enumerable, IERC7858 {
     }
 
     function _clearTimeStamp(uint256 tokenId) internal {
-        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
+        _requireOwned(tokenId);
         delete _tokensTimeStamp[tokenId];
     }
 
@@ -66,7 +66,7 @@ abstract contract ERC7858EXPBase is ERC721, ERC721Enumerable, IERC7858 {
      * @dev See {IERC7858-startTime}.
      */
     function startTime(uint256 tokenId) public view virtual override returns (uint256) {
-        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
+        _requireOwned(tokenId);
         return _tokensTimeStamp[tokenId].start;
     }
 
@@ -74,7 +74,7 @@ abstract contract ERC7858EXPBase is ERC721, ERC721Enumerable, IERC7858 {
      * @dev See {IERC7858-endTime}.
      */
     function endTime(uint256 tokenId) public view virtual override returns (uint256) {
-        if (_ownerOf(tokenId) == address(0)) revert ERC721NonexistentToken(tokenId);
+        _requireOwned(tokenId);
         return _tokensTimeStamp[tokenId].end;
     }
 
