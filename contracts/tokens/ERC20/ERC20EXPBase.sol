@@ -241,6 +241,9 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
             element = list.front();
             unchecked {
                 while (pointer - element >= duration) {
+                    if (element == 0) {
+                        break;
+                    }
                     element = list.next(element);
                 }
             }

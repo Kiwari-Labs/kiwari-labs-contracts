@@ -37,10 +37,10 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       const epoch = await erc20exp.currentEpoch();
       expect(await erc20exp.balanceOfAtEpoch(epoch, alice.address)).to.equal(0);
       await erc20exp.mint(alice.address, 1);
-      await erc20exp.mint(alice.address, 1);
-      expect(await erc20exp.balanceOfAtEpoch(epoch, alice.address)).to.equal(2);
-      await hardhat_increasePointerTo(epochType, (await erc20exp.epochLength()) * (await erc20exp.validityDuration()) - 1n);
+      // await erc20exp.mint(alice.address, 1);
       expect(await erc20exp.balanceOfAtEpoch(epoch, alice.address)).to.equal(1);
+      await hardhat_increasePointerTo(epochType, (await erc20exp.epochLength()) * (await erc20exp.validityDuration()));
+      expect(await erc20exp.balanceOfAtEpoch(epoch, alice.address)).to.equal(0);
     });
 
     it("[SUCCESS] currentEpoch", async function () {

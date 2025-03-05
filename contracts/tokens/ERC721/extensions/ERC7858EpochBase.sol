@@ -96,6 +96,9 @@ abstract contract ERC7858EpochBase is Context, ERC165, IERC721, IERC721Errors, I
             element = list.front();
             unchecked {
                 while (pointer - element >= duration) {
+                    if (element == 0) {
+                        break;
+                    }
                     element = list.next(element);
                 }
             }
