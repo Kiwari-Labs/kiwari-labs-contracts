@@ -1,3 +1,8 @@
+// Copyright Kiwari Labs and @kiwarilabs/contracts contributors 2025. All Rights Reserved.
+// Node module: kiwari-labs-contracts
+// This file is licensed under the Apache License 2.0.
+// License text available at https://www.apache.org/licenses/LICENSE-2.0
+
 import {ethers} from "hardhat";
 import {constants, ERC7818BlacklistBLSW, ERC20, ERC7818BlacklistTLSW} from "../../../../constant.test";
 import {MockERC7818BlacklistBLSW} from "../../../../../typechain-types/mocks/contracts/tokens/ERC20/extensions/BLSW";

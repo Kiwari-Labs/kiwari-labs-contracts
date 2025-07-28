@@ -73,6 +73,15 @@ library TLSW {
     }
 
     /**
+     * @notice Returns the initial timestamp of the sliding window.
+     * @param self The sliding window structure.
+     * @return The initial timestamp.
+     */
+    function getInitialTimestamp(Window storage self) internal view returns (uint256) {
+        return self.initialTimestamp;
+    }
+
+    /**
      * @notice Returns the number of seconds in each epoch for a given window.
      * @param self The sliding window structure.
      * @return The number of seconds in each epoch.

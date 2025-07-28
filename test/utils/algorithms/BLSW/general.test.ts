@@ -1,12 +1,23 @@
+// Copyright Kiwari Labs and @kiwarilabs/contracts contributors 2024,2025. All Rights Reserved.
+// Node module: kiwari-labs-contracts
+// This file is licensed under the Apache License 2.0.
+// License text available at https://www.apache.org/licenses/LICENSE-2.0
+
 import {expect} from "chai";
 import {constants, SlidingWindow} from "../../../constant.test";
 import {calculateSlidingWindowState, deployBLSW} from "./deployer.test";
-import {hardhat_reset} from "../../../utils.test";
+import {hardhat_latestBlock, hardhat_reset} from "../../../utils.test";
 
 export const run = async () => {
   describe("General", async function () {
     beforeEach(async function () {
       await hardhat_reset();
+    });
+
+    it("[SUCCESS] getInitialBlockNumber", async function () {
+      const {slidingWindow} = await deployBLSW({});
+      const blockNumber = await hardhat_latestBlock();
+      expect(await slidingWindow.getInitialBlockNumber()).to.equal(blockNumber);
     });
 
     it("[SUCCESS] blocksInEpoch", async function () {

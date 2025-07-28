@@ -1,3 +1,8 @@
+// Copyright Kiwari Labs and @kiwarilabs/contracts contributors 2024,2025. All Rights Reserved.
+// Node module: kiwari-labs-contracts
+// This file is licensed under the Apache License 2.0.
+// License text available at https://www.apache.org/licenses/LICENSE-2.0
+
 import {MaxUint256, ZeroAddress} from "ethers";
 
 export const constants = {
@@ -39,6 +44,13 @@ export const ERC7818 = {
   events: {},
 };
 
+export const ERC7858 = {
+  errors: {
+    ERC7858InvalidTimeStamp: "ERC7858InvalidTimeStamp",
+  },
+  events: {},
+};
+
 export const ERC20 = {
   constructor: {
     name: "PointToken",
@@ -55,6 +67,28 @@ export const ERC20 = {
   events: {
     Transfer: "Transfer",
     Approval: "Approval",
+  },
+};
+
+export const ERC721 = {
+  constructor: {
+    name: "VoucherToken",
+    symbol: "VOUCHER",
+  },
+  errors: {
+    ERC721InvalidOwner: "ERC721InvalidOwner",
+    ERC721NonexistentToken: "ERC721NonexistentToken",
+    ERC721IncorrectOwner: "ERC721IncorrectOwner",
+    ERC721InvalidSender: "ERC721InvalidSender",
+    ERC721InvalidReceiver: "ERC721InvalidReceiver",
+    ERC721InsufficientApproval: "ERC721InsufficientApproval",
+    ERC721InvalidApprover: "ERC721InvalidApprover",
+    ERC721InvalidOperator: "ERC721InvalidOperator",
+  },
+  events: {
+    Transfer: "Transfer",
+    Approval: "Approval",
+    ApprovalForAll: "ApprovalForAll",
   },
 };
 
@@ -205,6 +239,30 @@ export const ERC20TLSW = {
   events: {},
 };
 
+export const ERC7858TLSW = {
+  name: "MockERC7858TLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC7858BLSW = {
+  name: "MockERC7858BLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC7858EpochBLSW = {
+  name: "MockERC7858EpochBLSW",
+  errors: {},
+  events: {},
+};
+
+export const ERC7858EpochTLSW = {
+  name: "MockERC7858EpochTLSW",
+  errors: {},
+  events: {},
+};
+
 export const SlidingWindowLibrary = {
   name: "MockSlidingWindowLibrary",
   errors: {},
@@ -217,26 +275,14 @@ export const BLSWLibrary = {
   events: {},
 };
 
-export const SortedCircularDoublyLinkedListLibrary = {
-  name: "MockSortedCircularDoublyLinkedListLibrary",
+export const SortedListLibrary = {
+  name: "MockSortedList",
   errors: {},
   events: {},
 };
 
-export const LightWeightSortedCircularDoublyLinkedListLibrary = {
+export const XortedListLibrary = {
   name: "MockXort128",
-  errors: {},
-  events: {},
-};
-
-export const Xort128 = {
-  name: "MockLightWeightSortedCircularDoublyLinkedListLibraryV2",
-  errors: {},
-  events: {},
-};
-
-export const Comparator = {
-  name: "MockComparator",
   errors: {},
   events: {},
 };
@@ -252,12 +298,7 @@ export const contracts = {
   },
   utils: {
     SlidingWindowLibrary,
-    SortedCircularDoublyLinkedListLibrary,
-    // LightWeightSlidingWindowLibrary,
-    // LightWeightSortedCircularDoublyLinkedListLibrary,
-    // PU128SCDLL,
-    comparators: {
-      Comparator,
-    },
+    SortedListLibrary,
+    XortedListLibrary,
   },
 };

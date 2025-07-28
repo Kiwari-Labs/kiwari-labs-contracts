@@ -29,6 +29,10 @@ abstract contract ERC20BLSW is IERC7818, ERC20EXPBase, BLSW {
         bool development_
     ) ERC20EXPBase(name_, symbol_) BLSW(initialBlockNumber_, blocksPerEpoch_, windowSize_, development_) {}
 
+    function _getInitialPointer() internal view virtual override returns (uint256) {
+        return _getInitialBlockNumber();
+    }
+
     function _epochType() internal pure virtual override returns (EPOCH_TYPE) {
         return EPOCH_TYPE.BLOCKS_BASED;
     }

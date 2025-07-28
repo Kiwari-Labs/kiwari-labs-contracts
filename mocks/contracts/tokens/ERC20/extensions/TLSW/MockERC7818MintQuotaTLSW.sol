@@ -13,6 +13,10 @@ contract MockERC7818MintQuotaTLSW is ERC20TLSW, ERC7818MintQuota {
         uint8 windowSize_
     ) ERC20TLSW(_name, _symbol, block.timestamp, secondsPerEpoch_, windowSize_, false) {}
 
+    function _getInitialPointer() internal view virtual override(ERC20EXPBase, ERC20TLSW) returns (uint256) {
+        return super._getInitialPointer();
+    }
+
     function _epochType() internal pure virtual override(ERC20EXPBase, ERC20TLSW) returns (EPOCH_TYPE) {
         return super._epochType();
     }

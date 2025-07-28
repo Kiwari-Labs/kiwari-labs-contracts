@@ -2,9 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 /**
- * @title Sorted List
+ * @title Lightweight Sorted List
  * @author Kiwari Labs
  */
+
 library SortedList {
     /**
      * Sorted Circular Doubly Linked List
@@ -13,10 +14,7 @@ library SortedList {
         mapping(uint256 node => mapping(bool direction => uint256 value)) _nodes;
     }
 
-    /**
-     * Constants for managing a doubly linked list.
-     */
-    uint8 private constant SENTINEL = 0;
+    uint8 private constant SENTINEL = 0x00;
     bool private constant PREVIOUS = false;
     bool private constant NEXT = true;
 
@@ -28,16 +26,14 @@ library SortedList {
      * @param length The size of array
      * @return array containing the indices of nodes in the linked list, ordered according to the specified direction.
      */
-    function _toArray(List storage self, uint256 length) private view returns (uint256[] memory array) {
-        // return early pattern
-        uint256 element = front(self);
+    function _toArray(List storage self, uint256 start, uint256 length) private view returns (uint256[] memory array) {
+        if (!contains(self, start)) return array;
         array = new uint256[](length);
-        if (element == SENTINEL) return array;
         uint128 index;
         unchecked {
-            for (; element != SENTINEL; index++) {
-                array[index] = element;
-                element = next(self, element);
+            for (; start != SENTINEL; index++) {
+                array[index] = start;
+                start = next(self, start);
             }
         }
         assembly {
@@ -50,10 +46,14 @@ library SortedList {
      * @dev This function inserts data into the linked list at the specified element.
      * @param self The linked list.
      * @param index The element at which to insert the data.
+     * @param flag A flag 'lazy' to validate the index is lazy removed before insertion.
      */
-    function insert(List storage self, uint256 index, bool lazy) internal {
-        if (!lazy) {
-            if (contains(self, index)) return;
+    function insert(List storage self, uint256 index, bool flag) internal {
+        bool exists = contains(self, index);
+        if (flag) {
+            if (!exists) return; // 'lazy' only insert if already exists
+        } else {
+            if (exists) return; // default avoid duplicate insert even, lazy index still existing.
         }
         uint256 last = self._nodes[SENTINEL][PREVIOUS];
         uint256 first = self._nodes[SENTINEL][NEXT];
@@ -77,17 +77,18 @@ library SortedList {
             self._nodes[index][PREVIOUS] = last;
             self._nodes[index][NEXT] = SENTINEL;
             return;
+        } else {
+            uint256 cursor = first;
+            // O(n)
+            while (index > cursor) {
+                cursor = self._nodes[cursor][NEXT];
+            }
+            uint256 before = self._nodes[cursor][PREVIOUS];
+            self._nodes[before][NEXT] = index;
+            self._nodes[cursor][PREVIOUS] = index;
+            self._nodes[index][PREVIOUS] = before;
+            self._nodes[index][NEXT] = cursor;
         }
-        uint256 cursor = first;
-        // O(n)
-        while (index > cursor) {
-            cursor = self._nodes[cursor][NEXT];
-        }
-        uint256 tmpPrev = self._nodes[cursor][PREVIOUS];
-        self._nodes[tmpPrev][NEXT] = index;
-        self._nodes[cursor][PREVIOUS] = index;
-        self._nodes[index][PREVIOUS] = tmpPrev;
-        self._nodes[index][NEXT] = cursor;
     }
 
     /**
@@ -105,11 +106,6 @@ library SortedList {
             self._nodes[element][PREVIOUS] = SENTINEL;
             self._nodes[tmpPREVIOUS][NEXT] = tmpNext;
             self._nodes[tmpNext][PREVIOUS] = tmpPREVIOUS;
-
-            assembly {
-                let slot := self.slot
-                sstore(slot, sub(sload(slot), 1))
-            }
         }
     }
 
@@ -120,10 +116,12 @@ library SortedList {
      * @param element The element to set as the new front of the list.
      */
     function shrink(List storage self, uint256 element) internal {
-        if (contains(self, element)) {
-            self._nodes[SENTINEL][NEXT] = element; // forced link sentinel to new front
-            self._nodes[element][PREVIOUS] = SENTINEL; // forced link previous of element to sentinel
-        }
+        uint256 tmpFront = front(self);
+
+        if (!contains(self, element)) return; // block not exist shrink
+        if (element < tmpFront) return; // block backward shrink
+        self._nodes[SENTINEL][NEXT] = element; // forced link sentinel to new front
+        self._nodes[element][PREVIOUS] = SENTINEL; // forced link previous of element to sentinel
     }
 
     /**
@@ -137,7 +135,7 @@ library SortedList {
         uint256 beforeElement = self._nodes[element][PREVIOUS];
         uint256 afterSentinel = self._nodes[SENTINEL][NEXT];
         assembly {
-            result := or(eq(afterSentinel, element), gt(beforeElement, 0))
+            result := or(eq(afterSentinel, element), gt(beforeElement, SENTINEL))
         }
     }
 
@@ -186,11 +184,17 @@ library SortedList {
     /**
      * @notice Get the _size of the linked list.
      * @dev This function returns the _size of the linked list.
-     * @param self The linked list.
      * @return The _size of the linked list.
      */
-    function size(List storage self) internal view returns (uint256) {
-        return _toArray(self, 512).length;
+    function size() internal pure returns (uint256) {
+        return 0x200;
+    }
+
+    /*
+     * @dev check is the list empty or not.
+     */
+    function isEmpty(List storage self) internal view returns (bool) {
+        return (front(self) == SENTINEL);
     }
 
     /**
@@ -200,6 +204,13 @@ library SortedList {
      * @return array containing the indices of nodes in ascending order.
      */
     function toArray(List storage self) internal view returns (uint256[] memory array) {
-        return _toArray(self, 512);
+        return _toArray(self, front(self), size());
+    }
+
+    /*
+     * @dev pagination like with static length set to 512.
+     */
+    function toArray(List storage self, uint256 start) internal view returns (uint256[] memory array) {
+        return _toArray(self, start, size());
     }
 }

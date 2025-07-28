@@ -27,7 +27,7 @@ pragma solidity ^0.8.0;
 import {ERC20EXPBase} from "@kiwarilabs/contracts/tokens/ERC20/ERC20EXPBase.sol";
 import {ERC20BLSW} from "@kiwarilabs/contracts/tokens/ERC20/ERC20BLSW.sol";
 
-contract ExpirableERC20 is ERC20EXPBase, ERC20BLSW {
+contract ExpirableERC20 is ERC20BLSW {
   constructor(
         string memory _name,
         string memory _symbol,
@@ -70,9 +70,55 @@ contract ExpirableERC20 is ERC20EXPBase, ERC20BLSW {
 }
 ```
 
-ERC-7858
+### ERC-7858
 
-> [!IMPORTANT] This ERC still underdevelopment.
+#### Individual Expiration
+
+``` Solidity
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.0;
+
+import {ERC7858BLSW} from "@kiwarilabs/contracts/tokens/ERC721/ERC7858BLSW.sol";
+import {ERC7858EXPBase} from "@kiwarilabs/contracts/tokens/ERC721/ERC7858EXPBase.sol";
+
+// Expirable ERC721 with individual expiration
+contract ExpirableERC721 is ERC7858BLSW {
+
+    constructor (string memory name_, string memory symbol_) ERC7858BLSW(name_, symbol) {}
+
+}
+```
+
+#### Epoch Expiration
+
+``` Solidity
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.0;
+
+import {ERC7858EpochBLSW} from "@kiwarilabs/contracts/tokens/ERC721/extensions/ERC7858EpochBLSW.sol";
+import {ERC7858EXPEpochBase} from "@kiwarilabs/contracts/tokens/ERC721/extensions/ERC7858EXPEpochBase.sol";
+
+// Expirable ERC721 with epoch expiration
+contract ExpirableERC7858 is ERC7858EpochBLSW {
+    
+    constructor (
+        string memory name_, 
+        string memory symbol_, 
+        uint256 initialBlockNumber_,
+        uint40 blocksPerEpoch_,
+        uint8 windowSize_,
+        bool development_) 
+        ERC7858EpochBLSW(
+            name_, 
+            symbol_, 
+            initialBlockNumber_,
+            blocksPerEpoch_,
+            windowSize_,
+            development) {}
+
+}
+
+```
 
 ## Contribute
 
@@ -81,6 +127,10 @@ Check out the contribution [guide](CONTRIBUTING.md)
 ## Support and Issue
 
 For support or any inquiries, feel free to reach out to us at [github-issue](https://github.com/Kiwari-Labs/kiwari-labs-contracts/issues) or kiwarilabs@protonmail.com
+
+## Funding
+
+If you value our work and would like to support Kiwari Labs, please visit our [Open Collective](https://opencollective.com/kiwari-labs) page to make a donation. Thank you!
 
 ## License
 

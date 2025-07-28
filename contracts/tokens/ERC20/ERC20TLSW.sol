@@ -29,6 +29,10 @@ abstract contract ERC20TLSW is IERC7818, ERC20EXPBase, TLSW {
         bool development_
     ) ERC20EXPBase(name_, symbol_) TLSW(initialBlockTimestamp_, secondsPerEpoch_, windowSize_, development_) {}
 
+    function _getInitialPointer() internal view virtual override returns (uint256) {
+        return _getInitialTimestamp();
+    }
+
     function _epochType() internal pure virtual override returns (EPOCH_TYPE) {
         return EPOCH_TYPE.TIME_BASED;
     }

@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {SCDLL} from "../../utils/datastructures/LSCDLL.sol";
+/*
+ * @title ERC20EXP Base
+ * @author Kiwari Labs
+ */
+
+import {SortedList} from "../../utils/datastructures/SortedList.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
@@ -12,15 +17,15 @@ import {IERC7818} from "./interfaces/IERC7818.sol";
  * @author Kiwari Labs
  */
 abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC7818 {
-    using SCDLL for SCDLL.List;
+    using SortedList for SortedList.List;
 
     string private _name;
     string private _symbol;
 
     struct Epoch {
         uint256 totalBalance;
-        mapping(uint256 account => uint256 balance) balances;
-        SCDLL.List list;
+        mapping(uint256 => uint256) balances;
+        SortedList.List list;
     }
 
     mapping(uint256 epoch => mapping(address account => Epoch)) private _balances;
@@ -85,8 +90,8 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
      */
     function _refreshBalanceAtEpoch(address account, uint256 epoch, uint256 pointer, uint256 duration) private {
         Epoch storage _account = _balances[epoch][account];
-        if (_account.list.size() > 0) {
-            uint256 element = _account.list.head();
+        if (!_account.list.isEmpty()) {
+            uint256 element = _account.list.front();
             uint256 balance;
             unchecked {
                 while (pointer - element >= duration) {
@@ -95,7 +100,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                 }
             }
             if (balance > 0) {
-                _account.list.lazyShrink(element);
+                _account.list.shrink(element);
                 _account.totalBalance -= balance;
             }
         }
@@ -133,11 +138,11 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                 _recipient.balances[pointer] += value;
                 _worldStateBalances[pointer] += value;
             }
-            _recipient.list.insert(pointer);
+            _recipient.list.insert(pointer, false);
         } else {
-            uint256 blockLengthCache = _getPointersInWindow();
+            uint256 pointerLengthCache = _getPointersInWindow();
             (uint256 fromEpoch, uint256 toEpoch) = _getWindowRage(pointer);
-            _refreshBalanceAtEpoch(from, fromEpoch, pointer, blockLengthCache);
+            _refreshBalanceAtEpoch(from, fromEpoch, pointer, pointerLengthCache);
             uint256 balance = _computeBalanceOverEpochRange(fromEpoch, toEpoch, from);
             if (balance < value) {
                 revert ERC20InsufficientBalance(from, balance, value);
@@ -147,7 +152,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                 // burn token from
                 while (fromEpoch <= toEpoch && pendingValue > 0) {
                     Epoch storage _spender = _balances[fromEpoch][from];
-                    uint256 element = _spender.list.head();
+                    uint256 element = _spender.list.front();
                     while (element > 0 && pendingValue > 0) {
                         balance = _spender.balances[element];
                         if (balance <= pendingValue) {
@@ -177,7 +182,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                 while (fromEpoch <= toEpoch && pendingValue > 0) {
                     Epoch storage _spender = _balances[fromEpoch][from];
                     Epoch storage _recipient = _balances[fromEpoch][to];
-                    uint256 element = _spender.list.head();
+                    uint256 element = _spender.list.front();
                     while (element > 0 && pendingValue > 0) {
                         balance = _spender.balances[element];
                         if (balance <= pendingValue) {
@@ -188,7 +193,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                                 _recipient.totalBalance += balance;
                                 _recipient.balances[element] += balance;
                             }
-                            _recipient.list.insert(element);
+                            _recipient.list.insert(element, false);
                             element = _spender.list.next(element);
                             _spender.list.remove(_spender.list.previous(element));
                         } else {
@@ -198,7 +203,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                                 _recipient.totalBalance += pendingValue;
                                 _recipient.balances[element] += pendingValue;
                             }
-                            _recipient.list.insert(element);
+                            _recipient.list.insert(element, false);
                             pendingValue = 0;
                         }
                     }
@@ -213,16 +218,17 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     }
 
     /**
-     * @notice Finds the index of the first valid block balance in a sorted list of block numbers.
-     * A block balance index is considered valid if the difference between the current pointer
-     * and the block number at the index (key) is less than the duration.
-     * @dev This function is used to determine the first valid block balance index within a sorted circular doubly linked list.
-     * It iterates through the list starting from the head and stops when it finds a valid index or reaches the end of the list.
-     * @param account The account address.
+     * @notice Finds the index of the first valid balance in a sorted list based on a given pointer.
+     * @dev Determines the first valid balance index in a sorted circular doubly linked list.
+     *      A balance index is considered valid if the difference between the current pointer
+     *      and the index (key) is less than the specified duration.
+     *      Iterates through the list starting from the front until it finds a valid index or reaches the end.
+     * @param account The address of the account.
      * @param epoch The epoch number.
-     * @param pointer The current block number.
-     * @param duration The maximum allowed difference between pointer and the key.
-     * @return element The index of the first valid block balance.
+     * @param pointer The reference point used for validation.
+     * @param duration The maximum allowed difference between the pointer and the key.
+     * @return element The index of the first valid balance.
+     * @return value The balance associated with the valid index.
      */
     function _findValidBalance(
         address account,
@@ -230,11 +236,14 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
         uint256 pointer,
         uint256 duration
     ) internal view returns (uint256 element, uint256 value) {
-        SCDLL.List storage list = _balances[epoch][account].list;
-        if (list.size() > 0) {
-            element = list.head();
+        SortedList.List storage list = _balances[epoch][account].list;
+        if (!list.isEmpty()) {
+            element = list.front();
             unchecked {
                 while (pointer - element >= duration) {
+                    if (element == 0) {
+                        break;
+                    }
                     element = list.next(element);
                 }
             }
@@ -310,7 +319,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                         _recipient.totalBalance += balance;
                         _recipient.balances[element] += balance;
                     }
-                    _recipient.list.insert(element);
+                    _recipient.list.insert(element, false);
                     element = _spender.list.next(element);
                     _spender.list.remove(_spender.list.previous(element));
                 } else {
@@ -320,7 +329,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
                         _recipient.totalBalance += pendingValue;
                         _recipient.balances[element] += pendingValue;
                     }
-                    _recipient.list.insert(element);
+                    _recipient.list.insert(element, false);
                     pendingValue = 0;
                 }
             }
@@ -449,10 +458,10 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     }
 
     /**
-     * @notice Retrieves the total balance stored at a specific block.
-     * @dev This function returns the balance of the given block from the internal `_worldStateBalances` mapping.
-     * @param pointer The block number for which the balance is being queried.
-     * @return balance The total balance stored at the given block number.
+     * @notice Retrieves the total balance stored at a specific pointer.
+     * @dev This function returns the balance of the given pointer from the internal `_worldStateBalances` mapping.
+     * @param pointer The reference point for which the balance is being queried.
+     * @return balance The total balance stored at the given pointer.
      */
     function getWorldStateBalance(uint256 pointer) external view virtual returns (uint256) {
         return _worldStateBalances[pointer];
@@ -462,7 +471,12 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
      * @custom:gas-inefficiency if not limit the size of array
      */
     function tokenList(address account, uint256 epoch) external view virtual returns (uint256[] memory list) {
-        list = _balances[epoch][account].list.ascending();
+        list = _balances[epoch][account].list.toArray();
+    }
+
+    /// @custom:gas-inefficiency if not limit the size of array
+    function tokenList(address account, uint256 epoch, uint256 start) external view virtual returns (uint256[] memory list) {
+        list = _balances[epoch][account].list.toArray(start);
     }
 
     /**
@@ -511,6 +525,14 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
         }
         balance += _computeBalanceOverEpochRange(fromEpoch, toEpoch, account);
         return balance;
+    }
+
+    /**
+     * @notice Returns the initial pointer of the token.
+     * @return The initial pointer value.
+     */
+    function getInitialPointer() public view virtual returns (uint256) {
+        return _getInitialPointer();
     }
 
     /**
@@ -622,6 +644,8 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
         _transferAtEpoch(epoch, from, to, value);
         return true;
     }
+
+    function _getInitialPointer() internal view virtual returns (uint256) {}
 
     function _epochType() internal pure virtual returns (EPOCH_TYPE) {}
 

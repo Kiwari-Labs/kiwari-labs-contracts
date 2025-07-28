@@ -1,3 +1,8 @@
+// Copyright Kiwari Labs and @kiwarilabs/contracts contributors 2024,2025. All Rights Reserved.
+// Node module: kiwari-labs-contracts
+// This file is licensed under the Apache License 2.0.
+// License text available at https://www.apache.org/licenses/LICENSE-2.0
+
 import {expect} from "chai";
 import {hardhat_increasePointerTo, hardhat_latestPointer, hardhat_reset} from "../../../utils.test";
 import {deployERC20Selector} from "../base/deployer.test";
@@ -31,7 +36,11 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       const {erc20exp, alice} = await deployERC20Selector({epochType});
       const epoch = await erc20exp.currentEpoch();
       expect(await erc20exp.balanceOfAtEpoch(epoch, alice.address)).to.equal(0);
-      expect(await erc20exp.balanceOfAtEpoch(epoch + 1n, alice.address)).to.equal(0);
+      await erc20exp.mint(alice.address, 1);
+      // await erc20exp.mint(alice.address, 1);
+      expect(await erc20exp.balanceOfAtEpoch(epoch, alice.address)).to.equal(1);
+      await hardhat_increasePointerTo(epochType, (await erc20exp.epochLength()) * (await erc20exp.validityDuration()));
+      expect(await erc20exp.balanceOfAtEpoch(epoch, alice.address)).to.equal(0);
     });
 
     it("[SUCCESS] currentEpoch", async function () {
