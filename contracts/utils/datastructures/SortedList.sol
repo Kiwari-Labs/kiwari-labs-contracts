@@ -46,11 +46,14 @@ library SortedList {
      * @dev This function inserts data into the linked list at the specified element.
      * @param self The linked list.
      * @param index The element at which to insert the data.
-     * @param check A flag to validate the index before insertion.
+     * @param flag A flag 'lazy' to validate the index is lazy removed before insertion.
      */
-    function insert(List storage self, uint256 index, bool check) internal {
-        if (check) {
-            if (!contains(self, index)) return;
+    function insert(List storage self, uint256 index, bool flag) internal {
+        bool exists = contains(self, index);
+        if (flag) {
+            if (!exists) return; // 'lazy' only insert if already exists
+        } else {
+            if (exists) return; // default avoid duplicate insert even, lazy index still existing.
         }
         uint256 last = self._nodes[SENTINEL][PREVIOUS];
         uint256 first = self._nodes[SENTINEL][NEXT];
@@ -74,17 +77,18 @@ library SortedList {
             self._nodes[index][PREVIOUS] = last;
             self._nodes[index][NEXT] = SENTINEL;
             return;
+        } else {
+            uint256 cursor = first;
+            // O(n)
+            while (index > cursor) {
+                cursor = self._nodes[cursor][NEXT];
+            }
+            uint256 before = self._nodes[cursor][PREVIOUS];
+            self._nodes[before][NEXT] = index;
+            self._nodes[cursor][PREVIOUS] = index;
+            self._nodes[index][PREVIOUS] = before;
+            self._nodes[index][NEXT] = cursor;
         }
-        uint256 cursor = first;
-        // O(n)
-        while (index > cursor) {
-            cursor = self._nodes[cursor][NEXT];
-        }
-        uint256 before = self._nodes[cursor][PREVIOUS];
-        self._nodes[before][NEXT] = index;
-        self._nodes[cursor][PREVIOUS] = index;
-        self._nodes[index][PREVIOUS] = before;
-        self._nodes[index][NEXT] = cursor;
     }
 
     /**
@@ -112,10 +116,12 @@ library SortedList {
      * @param element The element to set as the new front of the list.
      */
     function shrink(List storage self, uint256 element) internal {
-        if (contains(self, element)) {
-            self._nodes[SENTINEL][NEXT] = element; // forced link sentinel to new front
-            self._nodes[element][PREVIOUS] = SENTINEL; // forced link previous of element to sentinel
-        }
+        uint256 tmpFront = front(self);
+
+        if (!contains(self, element)) return; // block not exist shrink
+        if (element < tmpFront) return; // block backward shrink
+        self._nodes[SENTINEL][NEXT] = element; // forced link sentinel to new front
+        self._nodes[element][PREVIOUS] = SENTINEL; // forced link previous of element to sentinel
     }
 
     /**

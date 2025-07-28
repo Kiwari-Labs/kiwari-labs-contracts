@@ -32,12 +32,12 @@ export const run = async () => {
       expect(await sortedlist.next(element)).to.equal(sentinel);
     });
 
-    it("[FAILED] toArray", async function () {
+    it("[SUCCESS] toArray", async function () {
       const {sortedlist} = await deploySortedList("");
       expect(await sortedlist.array()).to.deep.equal([]);
     });
 
-    it("[FAILED] toArray with start point", async function () {
+    it("[SUCCESS] toArray with start point", async function () {
       const {sortedlist} = await deploySortedList("");
       for (let index = 1; index <= 10; index++) {
         await sortedlist.insert(index);
@@ -45,7 +45,15 @@ export const run = async () => {
       expect(await sortedlist.arrayWithStart(5)).to.deep.equal([5, 6, 7, 8, 9, 10]);
     });
 
-    it("[FAILED] size", async function () {
+    it("[SUCCESS] toArray return empty when start point not exist", async function () {
+      const {sortedlist} = await deploySortedList("");
+      for (let index = 1; index <= 10; index++) {
+        await sortedlist.insert(index);
+      }
+      expect(await sortedlist.arrayWithStart(20)).to.deep.equal([]);
+    });
+
+    it("[SUCCESS] size", async function () {
       const {sortedlist} = await deploySortedList("");
       expect(await sortedlist.size()).to.deep.equal(512);
     });

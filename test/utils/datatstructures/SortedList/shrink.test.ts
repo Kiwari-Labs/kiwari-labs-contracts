@@ -71,5 +71,35 @@ export const run = async () => {
       await sortedlist.shrink(front);
       expect(await sortedlist.contains(front)).to.equal(false);
     });
+
+    it("[FAILED] shrink the rewind element", async function () {
+      const {sortedlist} = await deploySortedList("");
+      await sortedlist.insert(front);
+      await sortedlist.insert(element);
+      await sortedlist.insert(elementSecond);
+      await sortedlist.insert(elementThird);
+      await sortedlist.insert(back);
+      expect(await sortedlist.front()).to.equal(front);
+      expect(await sortedlist.contains(element)).to.equal(true);
+      expect(await sortedlist.back()).to.equal(back);
+      await sortedlist.shrink(elementThird);
+      expect(await sortedlist.front()).to.equal(elementThird);
+      await sortedlist.shrink(elementSecond);
+      expect(await sortedlist.front()).to.equal(elementThird);
+      expect(await sortedlist.contains(element)).to.equal(true);
+      expect(await sortedlist.contains(elementSecond)).to.equal(true);
+    });
+
+    it("[FAILED] shrink the not exist element", async function () {
+      const {sortedlist} = await deploySortedList("");
+      await sortedlist.insert(front);
+      await sortedlist.insert(element);
+      await sortedlist.insert(back);
+      expect(await sortedlist.front()).to.equal(front);
+      expect(await sortedlist.contains(element)).to.equal(true);
+      expect(await sortedlist.back()).to.equal(back);
+      await sortedlist.shrink(elementThird);
+      expect(await sortedlist.front()).to.equal(front);
+    });
   });
 };
