@@ -11,6 +11,7 @@ import {IERC7818} from "./interfaces/IERC7818.sol";
  * @title ERC20EXP Base
  * @author Kiwari Labs
  */
+
 abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC7818 {
     using SortedList for SortedList.List;
 

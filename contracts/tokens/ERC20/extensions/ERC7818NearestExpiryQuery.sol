@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {ERC20EXPBase} from "../ERC20EXPBase.sol";
-
 /**
  * @title ERC7818 Nearest Expiry Query
  * @author Kiwari Labs
  */
+
+import {ERC20EXPBase} from "../ERC20EXPBase.sol";
+
 abstract contract ERC7818NearestExpiryQuery is ERC20EXPBase {
     /**
      * @notice Retrieves the nearest expiry token for the specified account.

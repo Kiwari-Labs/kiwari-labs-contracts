@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-/// @title Sorted List Library
-/// @dev stores two 128-bit pointers `next` and `previous` in a single 256-bit storage slot to reduce storage accesses costs.
-/// @author sirawt (@MASDXI)
-/// @notice This library is still under development and is not suitable for production.
-/// It requires fuzz testing to ensure that the storage slot usage is diversified and avoids collisions.
+/**
+ * @title Sorted List Library
+ * @dev stores two 128-bit pointers `next` and `previous` in a single 256-bit storage slot to reduce storage accesses costs.
+ * @author sirawt (@MASDXI)
+ * @notice This library is still under development and is not suitable for production.
+ * It requires fuzz testing to ensure that the storage slot usage is diversified and avoids collisions.
+ */
 
 library xort128 {
     struct List {

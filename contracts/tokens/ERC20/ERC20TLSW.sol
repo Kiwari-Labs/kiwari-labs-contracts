@@ -9,6 +9,7 @@ import {IERC7818} from "./interfaces/IERC7818.sol";
  * @title ERC20EXP using Timestamp-Based Lazy Sliding Window (TLSW) Algorithm.
  * @author Kiwari Labs
  */
+
 abstract contract ERC20TLSW is IERC7818, ERC20EXPBase, TLSW {
     /**
      * @notice Constructor function to initialize the token contract with specified parameters.

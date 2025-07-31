@@ -9,6 +9,7 @@ import {IERC7818} from "./interfaces/IERC7818.sol";
  * @title ERC20EXP using Block-Height-Based Lazy Sliding Window (BLSW) Algorithm.
  * @author Kiwari Labs
  */
+
 abstract contract ERC20BLSW is IERC7818, ERC20EXPBase, BLSW {
     /**
      * @notice Constructor function to initialize the token contract with specified parameters.

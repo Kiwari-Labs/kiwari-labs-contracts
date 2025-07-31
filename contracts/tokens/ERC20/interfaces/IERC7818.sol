@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
 /**
  * @title ERC-7818 interface
  * @dev Interface for adding expirable functionality to ERC20 tokens.
  * see https://eips.ethereum.org/EIPS/eip-7818
  */
+
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 interface IERC7818 is IERC20 {
     /**
      * @dev This error is triggered when a transfer operation is attempted for a token that is past its validity period.

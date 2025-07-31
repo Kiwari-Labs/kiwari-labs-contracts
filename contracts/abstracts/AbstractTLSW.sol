@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title Abstract Lazy Sliding Window
-/// @author Kiwari Labs
+/**
+ * @title Abstract Lazy Sliding Window on timestamp
+ * @author Kiwari Labs
+ */
 
 import {TLSW as slide} from "../utils/algorithms/TLSW.sol";
 

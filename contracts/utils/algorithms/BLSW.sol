@@ -5,6 +5,7 @@ pragma solidity >=0.8.0 <0.9.0;
  * @title Implementation of a Block-Height-Based Lazy Sliding Window Algorithm.
  * @author Kiwari Labs
  */
+
 library BLSW {
     uint8 private constant MINIMUM_WINDOW_SIZE = 0x01; // 1 epoch
     uint8 private constant MAXIMUM_WINDOW_SIZE = 0x20; // 32 epoch

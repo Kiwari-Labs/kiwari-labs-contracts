@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 /**
- * @title ERC721EXP using Timestamp-Based-Based
+ * @title ERC721EXP using Timestamp-Based
  * @dev ERC721EXP Base contract each token have individual expiration date.
  * @author Kiwari Labs
  */
