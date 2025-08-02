@@ -155,22 +155,6 @@ abstract contract ERC7858EpochBase is Context, ERC165, IERC721, IERC721Errors, I
         return _balances[owner];
     }
 
-    function unexpiredBalanceOf(address owner) public view virtual returns (uint256) {
-        if (owner == address(0)) {
-            revert ERC721InvalidOwner(address(0));
-        }
-        uint256 pointer = _pointerProvider();
-        (uint256 fromEpoch, uint256 toEpoch) = _getWindowRage(pointer);
-        uint256 balance = _computeBalanceAtEpoch(fromEpoch, owner, pointer, _getPointersInWindow());
-        if (fromEpoch == toEpoch) {
-            return balance;
-        } else {
-            fromEpoch += 1;
-        }
-        balance += _computeBalanceOverEpochRange(fromEpoch, toEpoch, owner);
-        return balance;
-    }
-
     /**
      * @dev See {IERC721-ownerOf}.
      */
@@ -402,49 +386,86 @@ abstract contract ERC7858EpochBase is Context, ERC165, IERC721, IERC721Errors, I
         emit ApprovalForAll(owner, operator, approved);
     }
 
-    /// @dev See {IERC7858-unexpiredBalanceOfAtEpoch}.
+    /**
+     * @dev See {IERC7858Epoch.unexpiredBalanceOf}.
+     */
+    function unexpiredBalanceOf(address owner) public view virtual returns (uint256) {
+        if (owner == address(0)) {
+            revert ERC721InvalidOwner(address(0));
+        }
+        uint256 pointer = _pointerProvider();
+        (uint256 fromEpoch, uint256 toEpoch) = _getWindowRage(pointer);
+        uint256 balance = _computeBalanceAtEpoch(fromEpoch, owner, pointer, _getPointersInWindow());
+        if (fromEpoch == toEpoch) {
+            return balance;
+        } else {
+            fromEpoch += 1;
+        }
+        balance += _computeBalanceOverEpochRange(fromEpoch, toEpoch, owner);
+        return balance;
+    }
+
+    /**
+     * @dev See {IERC7858-unexpiredBalanceOfAtEpoch}.
+     */
     function unexpiredBalanceOfAtEpoch(uint256 epoch, address owner) external view override returns (uint256) {
         if (isEpochExpired(epoch)) return 0;
         return _computeBalanceAtEpoch(epoch, owner, _pointerProvider(), _getPointersInWindow());
     }
 
-    /// @dev See {IERC7858-startTime}.
+    /**
+     * @dev See {IERC7858-startTime}.
+     */
     function startTime(uint256 tokenId) external view returns (uint256) {
         _requireOwned(tokenId);
         return _tokenPointers[tokenId];
     }
 
-    /// @dev See {IERC7858-endTime}.
+    /**
+     * @dev See {IERC7858-endTime}.
+     */
     function endTime(uint256 tokenId) external view returns (uint256) {
         _requireOwned(tokenId);
         return _tokenPointers[tokenId] + _getPointersInWindow();
     }
 
-    /// @dev See {IERC7858-isTokenExpired}.
+    /**
+     * @dev See {IERC7858-isTokenExpired}.
+     */
     function isTokenExpired(uint256 tokenId) external view returns (bool) {
         _requireOwned(tokenId);
         return _pointerProvider() >= _tokenPointers[tokenId] + _getPointersInWindow();
     }
 
-    /// @dev See {IERC7858Epoch-currentEpoch}.
+    /**
+     * @dev See {IERC7858Epoch-currentEpoch}.
+     */
     function currentEpoch() public view virtual returns (uint256) {
         return _getEpoch(_pointerProvider());
     }
 
-    /// @dev See {IERC7858Epoch-epochLength}.
+    /**
+     * @dev See {IERC7858Epoch-epochLength}.
+     */
     function epochLength() public view virtual returns (uint256) {
         return _getPointersInEpoch();
     }
 
-    /// @dev See {IERC7858Epoch-epochType}.
+    /**
+     * @dev See {IERC7858Epoch-epochType}.
+     */
     function epochType() public pure virtual returns (EXPIRY_TYPE) {}
 
-    /// @dev See {IERC7858Epoch-validityDuration}.
+    /**
+     * @dev See {IERC7858Epoch-validityDuration}.
+     */
     function validityDuration() public view virtual returns (uint256) {
         return _getWindowSize();
     }
 
-    /// @dev See {IERC7858Epoch-isEpochExpired}.
+    /**
+     * @dev See {IERC7858Epoch-isEpochExpired}.
+     */
     function isEpochExpired(uint256 id) public view virtual returns (bool) {
         return _expired(id);
     }

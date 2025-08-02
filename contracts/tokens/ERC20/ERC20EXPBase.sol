@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/**
+ * @title ERC20EXP Base
+ * @author Kiwari Labs
+ */
+
 import {SortedList} from "../../utils/datastructures/SortedList.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {IERC7818} from "./interfaces/IERC7818.sol";
-
-/**
- * @title ERC20EXP Base
- * @author Kiwari Labs
- */
 
 abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC7818 {
     using SortedList for SortedList.List;
@@ -470,7 +470,9 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
         list = _balances[epoch][account].list.toArray();
     }
 
-    /// @custom:gas-inefficiency if not limit the size of array
+    /**
+     * @custom:gas-inefficiency if not limit the size of array
+     */
     function tokenList(address account, uint256 epoch, uint256 start) external view virtual returns (uint256[] memory list) {
         list = _balances[epoch][account].list.toArray(start);
     }

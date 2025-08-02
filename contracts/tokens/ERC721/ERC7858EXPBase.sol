@@ -85,6 +85,9 @@ abstract contract ERC7858EXPBase is ERC721, ERC721Enumerable, IERC7858 {
         return _validation(tokenId);
     }
 
+    /** 
+     * @dev See {IERC7858-expiryType}. 
+     */
     function expiryType() public view virtual returns (EXPIRY_TYPE) {}
 
     function _pointerProvider() internal view virtual returns (uint256) {}

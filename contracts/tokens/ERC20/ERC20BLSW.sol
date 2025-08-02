@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {AbstractBLSW as BLSW} from "../../abstracts/AbstractBLSW.sol";
-import {ERC20EXPBase} from "./ERC20EXPBase.sol";
-import {IERC7818} from "./interfaces/IERC7818.sol";
-
 /**
  * @title ERC20EXP using Block-Height-Based Lazy Sliding Window (BLSW) Algorithm.
  * @author Kiwari Labs
  */
+
+import {AbstractBLSW as BLSW} from "../../abstracts/AbstractBLSW.sol";
+import {ERC20EXPBase} from "./ERC20EXPBase.sol";
+import {IERC7818} from "./interfaces/IERC7818.sol";
 
 abstract contract ERC20BLSW is IERC7818, ERC20EXPBase, BLSW {
     /**

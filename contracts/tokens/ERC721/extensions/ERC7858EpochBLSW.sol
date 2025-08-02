@@ -19,6 +19,9 @@ abstract contract ERC7858EpochBLSW is ERC7858EpochBase, BLSW {
         bool development_
     ) ERC7858EpochBase(name_, symbol_) BLSW(initialBlockNumber_, blocksPerEpoch_, windowSize_, development_) {}
 
+    /** 
+     * @dev See {IERC7858-expiryType}. 
+     */
     function expiryType() public pure override returns (EXPIRY_TYPE) {
         return EXPIRY_TYPE.BLOCKS_BASED;
     }
