@@ -18,12 +18,8 @@ abstract contract ERC7858EpochTLSW is ERC7858EpochBase, TLSW {
         uint8 windowSize_,
         bool development_
     ) ERC7858EpochBase(name_, symbol_) TLSW(initialBlockTimestamp_, secondsPerEpoch_, windowSize_, development_) {}
-    
+
     function expiryType() public pure override returns (EXPIRY_TYPE) {
-        return EXPIRY_TYPE.TIME_BASED;
-    }
-    
-    function epochType() public pure override returns (EXPIRY_TYPE) {
         return EXPIRY_TYPE.TIME_BASED;
     }
 
