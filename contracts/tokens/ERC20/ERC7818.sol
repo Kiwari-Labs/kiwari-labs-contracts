@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/**
+ * @title ERC7818 with write heavy design
+ * @author Kiwari Labs
+ */
+
 import {SortedList} from "../../utils/datastructures/SortedList.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
@@ -37,7 +42,7 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
     uint8 private constant RESERVED_INDEX = 0;
     uint256 private _issuedSupply;
     uint256 private _lastSeenEpoch;
-    uint256 private constant MAGIC_WIPE_MARK = type(uint256).max;
+    uint256 private constant MAGIC_ZERO = type(uint256).max;
 
     /**
      * @dev Bounded ring buffer storage with finite index domain.
@@ -65,13 +70,10 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
         _epochParams.length = length;
     }
 
-    // @TODO _update(); FIFO at fromIndex toIndex, handle mint / burn
-    // @TODO _updateAtEpoch(); FIFO at given epoch, handle mint / burn
-
     /**
      * @dev it's stateless check index not epoch it's can create fault positive.
      */
-    function _isExpiredIndex(uint256 index, uint256 currentIndex, uint256 lookback, uint256 window) private pure returns (bool) {
+    function isExpiredIndex(uint256 index, uint256 currentIndex, uint256 lookback, uint256 window) private pure returns (bool) {
         if (currentIndex >= index) {
             return (currentIndex - index) >= lookback;
         } else {
@@ -79,7 +81,7 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
         }
     }
 
-    function _computeStartEpochAndIndexRange(
+    function calculateEpochAndIndexRange(
         uint256 initialBlockNumber,
         uint256 blockNumber,
         uint256 length,
@@ -96,7 +98,7 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
     }
 
     //
-    function _computeBalanceOverIndexRange(
+    function totalBalanceOverIndexRange(
         uint256 fromIndex,
         uint256 toIndex,
         address account,
@@ -104,7 +106,7 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
     ) private view returns (uint256 balance) {
         while (fromIndex != RESERVED_INDEX) {
             uint256 value = _balances[fromIndex][account].totalBalance;
-            if (value != MAGIC_WIPE_MARK) {
+            if (value != MAGIC_ZERO) {
                 balance += value;
             }
             if (fromIndex == toIndex) break;
@@ -114,7 +116,7 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
         }
     }
 
-    function _computeBalanceAtIndex(
+    function _activeBalanceAtIndex(
         uint256 index,
         address account,
         uint256 pointer,
@@ -156,6 +158,97 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
         }
     }
 
+    function sweepBuffer(address from, address to, uint256 currentEpoch, uint256 currentIndex, uint256 window, uint256 lookback) internal {
+        uint256 expiredSum;
+        if (currentEpoch >= _lastSeenEpoch + window) {
+            // sweep everything at once
+            expiredSum = _sweepAllIndices(from, to, window);
+        } else {
+            // partial sweep only expired indices
+            expiredSum = _sweepExpiredIndices(from, to, currentIndex, lookback, window);
+        }
+
+        // Update reserved index
+        if (expiredSum > 0) {
+            _indexedTotalSupply[RESERVED_INDEX] += expiredSum;
+        }
+    }
+
+    function _sweepAllIndices(address from, address to, uint256 n) private returns (uint256 expiredSum) {
+        unchecked {
+            while (n > 0) {
+                uint256 val = _indexedTotalSupply[n];
+                if (val != MAGIC_ZERO) {
+                    expiredSum += val;
+                    _indexedTotalSupply[n] = MAGIC_ZERO;
+                }
+
+                // Clean user balances
+                _cleanBalanceOfAtIndex(n, from);
+                if (to != address(0)) {
+                    _cleanBalanceOfAtIndex(n, to);
+                }
+                n--;
+            }
+        }
+    }
+
+    function _sweepExpiredIndices(
+        address from,
+        address to,
+        uint256 currentIndex,
+        uint256 lookback,
+        uint256 window
+    ) private returns (uint256 expiredSum) {
+        unchecked {
+            uint256 i = window;
+            while (i > 0) {
+                if (isExpiredIndex(i, currentIndex, lookback, window)) {
+                    uint256 val = _indexedTotalSupply[i];
+                    if (val != MAGIC_ZERO) {
+                        expiredSum += val;
+                        _indexedTotalSupply[i] = MAGIC_ZERO;
+                    }
+
+                    _cleanBalanceOfAtIndex(i, from);
+                    if (to != address(0)) {
+                        _cleanBalanceOfAtIndex(i, to);
+                    }
+                }
+                i--;
+            }
+        }
+    }
+
+    function _cleanBalanceOfAtIndex(uint256 index, address account) private {
+        if (_balances[index][account].totalBalance != MAGIC_ZERO) {
+            _balances[index][account].totalBalance = MAGIC_ZERO;
+            _balances[index][account].list.clear();
+        }
+    }
+
+    function epochToIndex(uint256 epoch, uint256 window) private pure returns (uint256) {
+        return (epoch % window) + 1;
+    }
+
+    function fetchValidElemetAtIndex(address account, uint256 index, uint256 pointer, uint256 duration) private {
+        Epoch storage _account = _balances[index][account];
+        if (!_account.list.isEmpty()) {
+            uint256 element = _account.list.front();
+            uint256 balance;
+            unchecked {
+                while (pointer - element >= duration) {
+                    balance += _account.balances[element];
+                    element = _account.list.next(element);
+                }
+            }
+            if (balance > 0) {
+                _account.list.shrink(element);
+                _account.totalBalance -= balance;
+            }
+        }
+    }
+
     function _approve(address owner, address spender, uint256 value, bool emitEvent) internal virtual {
         if (owner == address(0)) {
             revert ERC20InvalidApprover(address(0));
@@ -167,6 +260,10 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
         if (emitEvent) {
             emit Approval(owner, spender, value);
         }
+    }
+
+    function _approve(address owner, address spender, uint256 value) internal {
+        _approve(owner, spender, value, true);
     }
 
     function _spendAllowance(address owner, address spender, uint256 value) internal virtual {
@@ -181,108 +278,113 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
         }
     }
 
-    function epochToIndex(uint256 epoch, uint256 window) public pure returns (uint256) {
-        return (epoch % window) + 1;
+    function _update(address from, address to, uint256 value) internal virtual {
+        _update(currentEpoch(), from, to, value);
     }
 
-    function mint(address to, uint256 value) public {
-        uint256 epoch = currentEpoch();
-        uint256 window = _epochParams.window;
-        uint256 index = epochToIndex(epoch, window);
+    function _update(uint256 epoch, address from, address to, uint256 value) internal {
+        if (from == address(0)) {
+            uint256 window = _epochParams.window;
+            uint256 index = epochToIndex(epoch, window);
 
-        // handle both normal expiration and "too long gap" scenarios
-        sweepExpiredBuffers(to, epoch, index, window, _epochParams.lookback);
-
-        _lastSeenEpoch = epoch;
-
-        unchecked {
-            if (_indexedTotalSupply[index] == MAGIC_WIPE_MARK) {
-                _indexedTotalSupply[index] = value;
-                _balances[index][to].totalBalance = value;
-            } else {
-                _indexedTotalSupply[index] += value;
-                _balances[index][to].totalBalance += value;
-            }
-            _balances[index][to].balances[block.number] += value;
-            _balances[index][to].list.insert(block.number, false);
-            _issuedSupply += value;
-        }
-
-        emit Transfer(address(0), to, value);
-    }
-
-    function burn(address from, uint256 value) public {
-        // @TODO MUST handle FIFO
-        uint256 epoch = currentEpoch();
-        uint256 window = _epochParams.window;
-        uint256 index = epochToIndex(epoch, window);
-
-        // handle both normal expiration and "too long gap" scenarios
-        sweepExpiredBuffers(from, epoch, index, window, _epochParams.lookback);
-
-        _lastSeenEpoch = epoch;
-
-        uint256 balance = _balances[index][from].totalBalance;
-        require(balance >= value, "Insufficient points");
-
-        unchecked {
-            _issuedSupply -= value;
-            _balances[index][from].totalBalance -= value;
-            _indexedTotalSupply[index] -= value;
-            _indexedTotalSupply[RESERVED_INDEX] += value;
-        }
-
-        emit Transfer(from, address(0), value);
-    }
-
-    function sweepExpiredBuffers(address account, uint256 currentEpoch, uint256 currentIndex, uint256 window, uint256 lookback) internal {
-        uint256 expiredSum;
-        // check if gap is too large - if so, sweep all index.
-        if (currentEpoch >= _lastSeenEpoch + window) {
-            // sweep all index  to reserve index.
+            // handle both normal expiration and "too long gap" scenarios
+            sweepBuffer(address(0), to, epoch, index, window, _epochParams.lookback);
             unchecked {
-                while (window > 0) {
-                    uint256 val = _indexedTotalSupply[window];
-                    uint256 valUser = _balances[window][account].totalBalance;
-                    if (val != MAGIC_WIPE_MARK) {
-                        // sweep index balance
-                        expiredSum += val;
-                        _indexedTotalSupply[window] = MAGIC_WIPE_MARK;
-                    }
-                    if (valUser != MAGIC_WIPE_MARK) {
-                        // sweep user balance
-                        _balances[window][account].totalBalance = MAGIC_WIPE_MARK;
-                        _balances[window][account].list.clear(); // lazy deletion
-                    }
-                    window--;
+                if (_indexedTotalSupply[index] == MAGIC_ZERO) {
+                    _indexedTotalSupply[index] = value;
+                    _balances[index][to].totalBalance = value;
+                } else {
+                    _indexedTotalSupply[index] += value;
+                    _balances[index][to].totalBalance += value;
                 }
+                _balances[index][to].balances[block.number] += value;
+                _balances[index][to].list.insert(block.number, false);
+                _issuedSupply += value;
             }
         } else {
-            // sweep only eligible expired index to reserve index.
-            unchecked {
-                uint256 i = window;
-                while (i > 0) {
-                    if (_isExpiredIndex(i, currentIndex, lookback, window)) {
-                        uint256 val = _indexedTotalSupply[i];
-                        uint256 valUser = _balances[i][account].totalBalance;
-                        if (val != MAGIC_WIPE_MARK) {
-                            expiredSum += val;
-                            _indexedTotalSupply[i] = MAGIC_WIPE_MARK;
-                        }
-                        if (valUser != MAGIC_WIPE_MARK) {
-                            _balances[i][account].totalBalance = MAGIC_WIPE_MARK;
-                            _balances[i][account].list.clear(); // lazy deletion
-                        }
-                    }
-                    i--;
-                }
+            EpochParams memory epochParams = _epochParams;
+            (uint256 fromIndex, uint256 toIndex, uint256 toEpoch) = calculateEpochAndIndexRange(
+                epochParams.initBlockNumber,
+                block.number,
+                epochParams.length,
+                epochParams.window
+            );
+            sweepBuffer(from, to, toEpoch, toIndex, epochParams.window, epochParams.lookback);
+            fetchValidElemetAtIndex(from, fromIndex, block.number, epochParams.length);
+            uint256 balance = totalBalanceOverIndexRange(fromIndex, toIndex, from, epochParams.window);
+            if (balance < value) {
+                revert ERC20InsufficientBalance(from, balance, value);
+            }
+            if (to == address(0)) {
+                _burnFIFO(from, value, fromIndex, toIndex);
+            } else {
+                _transferFIFO(from, to, value, fromIndex, toIndex);
             }
         }
+        _lastSeenEpoch = epoch;
 
-        if (expiredSum > 0) {
-            // update expired balance
-            _indexedTotalSupply[RESERVED_INDEX] += expiredSum;
+        emit Transfer(from, to, value);
+    }
+
+    function _transfer(address from, address to, uint256 value) internal {
+        if (from == address(0)) {
+            revert ERC20InvalidSender(address(0));
         }
+        if (to == address(0)) {
+            revert ERC20InvalidReceiver(address(0));
+        }
+        _update(from, to, value);
+    }
+
+    function _transferAtEpoch(uint256 epoch, address from, address to, uint256 value) internal {
+        if (from == address(0)) {
+            revert ERC20InvalidSender(address(0));
+        }
+        if (to == address(0)) {
+            revert ERC20InvalidReceiver(address(0));
+        }
+        // _updateAtEpoch(epoch, from, to, value);
+    }
+
+    function _mint(address to, uint256 value) internal {
+        if (to == address(0)) {
+            revert ERC20InvalidReceiver(address(0));
+        }
+        _update(currentEpoch(), address(0), to, value);
+    }
+
+    function _burnFIFO(address from, uint256 burnValue, uint256 fromIndex, uint256 toIndex) private {
+        while (fromIndex <= toIndex && burnValue > 0) {
+            Epoch storage account = _balances[fromIndex][from];
+            uint256 element = account.list.front();
+            while (element > 0 && burnValue > 0) {
+                uint256 balance = account.balances[element];
+                if (balance <= burnValue) {
+                    unchecked {
+                        burnValue -= balance;
+                        account.totalBalance -= balance;
+                        account.balances[element] -= balance;
+                        _indexedTotalSupply[element] -= balance;
+                    }
+                    element = account.list.next(element);
+                    account.list.remove(account.list.previous(element));
+                } else {
+                    unchecked {
+                        account.totalBalance -= burnValue;
+                        account.balances[element] -= burnValue;
+                        _indexedTotalSupply[element] -= burnValue;
+                    }
+                    burnValue = 0;
+                }
+            }
+            if (burnValue > 0) {
+                fromIndex++;
+            }
+        }
+    }
+
+    function _transferFIFO(address from, address to, uint256 burnValue, uint256 fromIndex, uint256 toIndex) private {
+        // @TODO
     }
 
     /**
@@ -304,9 +406,9 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
         uint256 lookback = _epochParams.lookback;
         uint256 index = window;
         while (index > 0) {
-            if (!_isExpiredIndex(index, current, lookback, window)) {
+            if (!isExpiredIndex(index, current, lookback, window)) {
                 uint256 value = _indexedTotalSupply[index];
-                if (value != MAGIC_WIPE_MARK) {
+                if (value != MAGIC_ZERO) {
                     eligibleSum += value;
                 }
             }
@@ -328,7 +430,7 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
             uint256 index = window;
             while (index > 0) {
                 uint256 value = _indexedTotalSupply[index];
-                if (value != MAGIC_WIPE_MARK) {
+                if (value != MAGIC_ZERO) {
                     expired += value;
                 }
                 unchecked {
@@ -340,9 +442,9 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
             uint256 currentIndex = epochToIndex(epoch, window);
             uint256 index = window;
             while (index > 0) {
-                if (_isExpiredIndex(index, currentIndex, lookback, window)) {
+                if (isExpiredIndex(index, currentIndex, lookback, window)) {
                     uint256 value = _indexedTotalSupply[index];
-                    if (value != MAGIC_WIPE_MARK) {
+                    if (value != MAGIC_ZERO) {
                         expired += value;
                     }
                 }
@@ -385,7 +487,7 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
      */
     function approve(address spender, uint256 value) public virtual returns (bool) {
         address owner = _msgSender();
-        // _approve(owner, spender, value);
+        _approve(owner, spender, value);
         return true;
     }
 
@@ -401,21 +503,21 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
      */
     function balanceOf(address account) public view returns (uint256) {
         EpochParams memory epochParams = _epochParams;
-        (uint256 fromIndex, uint256 toIndex, uint256 toEpoch) = _computeStartEpochAndIndexRange(
+        (uint256 fromIndex, uint256 toIndex, uint256 toEpoch) = calculateEpochAndIndexRange(
             epochParams.initBlockNumber,
             block.number,
             epochParams.length,
             epochParams.window
         );
         if (toEpoch >= _lastSeenEpoch + epochParams.window) return 0;
-        uint256 balance = _computeBalanceAtIndex(fromIndex, account, block.number, epochParams.length);
+        uint256 balance = _activeBalanceAtIndex(fromIndex, account, block.number, epochParams.length);
         // fromIndex is buffer then move 1 index.
         if (fromIndex == epochParams.window) {
             fromIndex = 1;
         } else {
             fromIndex++;
         }
-        balance += _computeBalanceOverIndexRange(fromIndex, toIndex, account, epochParams.window);
+        balance += totalBalanceOverIndexRange(fromIndex, toIndex, account, epochParams.window);
 
         return balance;
     }
@@ -435,42 +537,42 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
      */
     function transfer(address to, uint256 value) public returns (bool) {
         address from = _msgSender();
-        // _transfer(from, to, value);
+        _transfer(from, to, value);
         return true;
     }
 
     /**
-     * @dev See {IERC7818.transfeFrom}.
+     * @dev See {IERC7818.transferFrom}.
      */
     function transfeFrom(address from, address to, uint256 value) public returns (bool) {
         address spender = _msgSender();
-        // _spendAllowance(from, spender, value);
-        // _transfer(from, to, value);
+        _spendAllowance(from, spender, value);
+        _transfer(from, to, value);
         return true;
     }
 
     /**
-     * @dev See {IERC7818.transfeAtEpoch}.
+     * @dev See {IERC7818.transferAtEpoch}.
      */
     function transferAtEpoch(uint256 epoch, address to, uint256 value) public returns (bool) {
         if (isEpochExpired(epoch)) {
             revert ERC7818TransferredExpiredToken();
         }
         address owner = _msgSender();
-        // _transferAtEpoch(epoch, owner, to, value);
+        _transferAtEpoch(epoch, owner, to, value);
         return true;
     }
 
     /**
-     * @dev See {IERC7818.transfeFromAtEpoch}.
+     * @dev See {IERC7818.transferFromAtEpoch}.
      */
     function transferFromAtEpoch(uint256 epoch, address from, address to, uint256 value) public returns (bool) {
         if (isEpochExpired(epoch)) {
             revert ERC7818TransferredExpiredToken();
         }
         address spender = _msgSender();
-        // _spendAllowance(from, spender, value);
-        // _transferAtEpoch(epoch, from, to, value);
+        _spendAllowance(from, spender, value);
+        _transferAtEpoch(epoch, from, to, value);
         return true;
     }
 
@@ -518,7 +620,7 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
 
         current = epochToIndex(current, window);
 
-        return _isExpiredIndex(epochToIndex(epoch, window), current, lookback, window);
+        return isExpiredIndex(epochToIndex(epoch, window), current, lookback, window);
     }
 
     /**
@@ -538,6 +640,6 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
         }
         // Get the value from storage
         tmp_uint256 = _indexedTotalSupply[epochToIndex(epoch, window)];
-        return tmp_uint256 == MAGIC_WIPE_MARK ? 0 : tmp_uint256;
+        return tmp_uint256 == MAGIC_ZERO ? 0 : tmp_uint256;
     }
 }
