@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {ERC7818} from "../../../../contracts/tokens/ERC20/ERC7818.sol";
 
-abstract contract MockERC7818V2 is ERC7818 {
+contract MockERC7818V2 is ERC7818 {
     constructor(
         string memory _name,
         string memory _symbol,
@@ -16,6 +16,6 @@ abstract contract MockERC7818V2 is ERC7818 {
     }
 
     function burn(address from, uint256 value) public {
-        // _burn(from, value);
+        _burn(from, value);
     }
 }
