@@ -14,7 +14,7 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import {IERC7818} from "./interfaces/IERC7818.sol";
 
-contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC20Permit, IERC7818 {
+abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC20Permit, IERC7818 {
     bytes32 private constant PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
