@@ -10,5 +10,5 @@ import {EventEmitter} from "events";
 describe("Scenario", async function () {
   EventEmitter.setMaxListeners(1000);
   tokens.run();
-  // utils.run();
+  utils.run();
 });

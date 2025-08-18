@@ -2,8 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 /**
- * @title ERC20EXP bulk expiration.
+ * @title ERC7818 bulk expiration.
  * @author Kiwari Labs
+ * modified from @openzeppelin/contracts v4.9.0 and v5.0.2
  */
 
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -21,7 +22,7 @@ abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC
     struct Window {
         uint256 blockNumber;
         uint8 size;
-        uint40 duration;
+        uint40 indexDuration;
     }
 
     string private m_name;
@@ -34,6 +35,9 @@ abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC
     mapping(uint256 => mapping(address => uint256)) private m_balances;
     mapping(address => mapping(address => uint256)) private m_allowances;
 
+    event Minted(uint256 indexed epoch, uint256 amount);
+    event Burned(uint256 indexed epoch, uint256 amount);
+
     error ERC2612ExpiredSignature(uint256 deadline);
     error ERC2612InvalidSigner(address signer, address owner);
 
@@ -41,42 +45,56 @@ abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC
         m_name = t_name;
         m_symbol = t_symbol;
         m_Window = t_Window;
-        // minimal example
+
         // m_Window.blockNumber = block.number;
         // m_Window.size = 4;
-        // m_Window.duration = 1;
+        // m_Window.indexDuration = 1;
     }
 
-    function getEpoch(uint256 t_initialBlockNumber, uint256 t_blockNumber, uint256 t_duration) private pure returns (uint256 epoch) {
+    function getEpoch(uint256 t_initBlockNumber, uint256 t_blockNumber, uint256 t_duration) internal pure returns (uint256 epoch) {
         assembly ("memory-safe") {
-            if and(gt(t_blockNumber, t_initialBlockNumber), gt(t_initialBlockNumber, 0)) {
-                epoch := div(sub(t_blockNumber, t_initialBlockNumber), t_duration)
+            if and(gt(t_blockNumber, t_initBlockNumber), gt(t_initBlockNumber, 0)) {
+                epoch := div(sub(t_blockNumber, t_initBlockNumber), t_duration)
             }
         }
     }
 
     function getWindow(
-        uint256 t_initialBlockNumber,
+        uint256 t_initBlockNumber,
         uint256 t_blockNumber,
         uint256 t_duration,
         uint256 t_windowSize
     ) private pure returns (uint256 head, uint256 tail) {
         assembly ("memory-safe") {
-            tail := div(sub(t_blockNumber, t_initialBlockNumber), t_duration)
-            head := mul(sub(tail, t_windowSize), iszero(lt(tail, t_windowSize)))
+            if and(gt(t_blockNumber, t_initBlockNumber), gt(t_initBlockNumber, 0)) {
+                tail := div(sub(t_blockNumber, t_initBlockNumber), t_duration)
+                let temp := add(tail, 1)
+                head := mul(sub(temp, t_windowSize), iszero(lt(temp, t_windowSize)))
+            }
         }
     }
 
-    function getBalanceOverIndex(
-        uint256 t_head,
-        uint256 t_tail,
-        uint256 t_window,
-        address t_account
-    ) private view returns (uint256 balance) {
+    function getEpoch(uint256 t_blockNumber) internal view returns (uint256) {
+        Window memory window = m_Window;
+        return getEpoch(window.indexDuration, t_blockNumber, window.indexDuration);
+    }
+
+    function getWindow() internal view returns (uint256, uint256) {
+        Window memory window = m_Window;
+        return getWindow(window.blockNumber, block.number, window.indexDuration, window.size);
+    }
+
+    function getBalanceOverIndex(uint256 t_head, uint256 t_tail, address t_account) internal view returns (uint256 balance) {
         if (t_account == address(0)) {
-            // @TODO loop m_epochBalances[index];
+            while (t_head < t_tail) {
+                balance += m_epochBalances[t_head];
+                t_head++;
+            }
         } else {
-            // @TODO loop m_balance[index][t_account];
+            while (t_head < t_tail) {
+                balance += m_balances[t_head][t_account];
+                t_head++;
+            }
         }
     }
 
@@ -98,7 +116,7 @@ abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC
     function _spendAllowance(address t_owner, address t_spender, uint256 t_amount) internal virtual {
         uint256 currentAllowance = m_allowances[t_owner][t_spender];
         if (currentAllowance != type(uint256).max) {
-            if (currentAllowance <= t_amount) {
+            if (currentAllowance < t_amount) {
                 revert ERC20InsufficientAllowance(t_spender, currentAllowance, t_amount);
             }
             unchecked {
@@ -108,49 +126,92 @@ abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC
     }
 
     function _transfer(address t_from, address t_to, uint256 t_amount) internal {
-        _beforeTransfer(t_from, t_to, t_amount);
-        if (t_from == address(0)) {
-            // @TODO mint
-        } else {
-            if (t_to == address(0)) {
-                // @TODO burn
-            } else {
-                // @TODO transfer
+        _beforeTokenTransfer(t_from, t_to, t_amount);
+
+        (uint256 head, uint256 tail) = getWindow();
+        uint256 fromBalance = getBalanceOverIndex(head, tail, t_from);
+        if (fromBalance < t_amount) {
+            revert ERC20InsufficientBalance(t_from, fromBalance, t_amount);
+        }
+        uint256 amount = t_amount;
+        while (t_amount > 0 && head < tail) {
+            uint256 epochBalance = m_balances[head][t_from];
+
+            if (epochBalance > 0) {
+                uint256 transferFromEpoch = epochBalance < t_amount ? epochBalance : t_amount;
+
+                unchecked {
+                    m_balances[head][t_from] -= transferFromEpoch;
+                    m_balances[head][t_to] += transferFromEpoch;
+                    t_amount -= transferFromEpoch;
+                }
             }
+
+            head++;
         }
 
-        _afterTransfer(t_from, t_to, t_amount);
+        emit Transfer(t_from, t_to, amount);
 
-        emit Transfer(t_from, t_to, t_amount);
+        _afterTokenTransfer(t_from, t_to, amount);
     }
 
     function _transferAtEpoch(uint256 t_epoch, address t_from, address t_to, uint256 t_amount) internal {
-        if (isEpochExpired(t_epoch)) {
-            // revert ();
+        _beforeTokenTransfer(t_from, t_to, t_amount);
+
+        uint256 fromBalance = m_balances[t_epoch][t_from];
+        if (fromBalance < t_amount) {
+            revert ERC20InsufficientBalance(t_from, fromBalance, t_amount);
         }
-        _beforeTransfer(t_from, t_to, t_amount);
-
-        // @TODO
-
-        _afterTransfer(t_from, t_to, t_amount);
+        unchecked {
+            m_balances[t_epoch][t_from] = fromBalance - t_amount;
+            m_balances[t_epoch][t_to] += t_amount;
+        }
 
         emit Transfer(t_from, t_to, t_amount);
+
+        _afterTokenTransfer(t_from, t_to, t_amount);
     }
 
-    function _mint(address t_to, uint256 t_amount) internal {
+    function _mint(uint256 t_epoch, address t_to, uint256 t_amount) internal {
         if (t_to == address(0)) {
             revert ERC20InvalidReceiver(address(0));
         }
+        _beforeTokenTransfer(address(0), t_to, t_amount);
 
-        _transfer(address(0), t_to, t_amount);
+        m_issuedSupply += t_amount;
+        unchecked {
+            m_balances[t_epoch][t_to] += t_amount;
+            m_epochBalances[t_epoch] += t_amount;
+        }
+
+        emit Transfer(address(0), t_to, t_amount);
+
+        emit Minted(t_epoch, t_amount);
+
+        _afterTokenTransfer(address(0), t_to, t_amount);
     }
 
-    function _burn(address t_from, uint256 t_amount) internal {
+    function _burn(uint256 t_epoch, address t_from, uint256 t_amount) internal {
         if (t_from == address(0)) {
             revert ERC20InvalidSender(address(0));
         }
+        _beforeTokenTransfer(t_from, address(0), t_amount);
 
-        _transfer(t_from, address(0), t_amount);
+        uint256 accountBalance = m_balances[t_epoch][t_from];
+        if (accountBalance < t_amount) {
+            revert ERC20InsufficientBalance(t_from, accountBalance, t_amount);
+        }
+        m_issuedSupply -= t_amount;
+        unchecked {
+            m_balances[t_epoch][t_from] = accountBalance - t_amount;
+            m_epochBalances[t_epoch] -= t_amount;
+        }
+
+        emit Transfer(t_from, address(0), t_amount);
+
+        emit Burned(t_epoch, t_amount);
+
+        _afterTokenTransfer(t_from, address(0), t_amount);
     }
 
     /// @dev See {IERC20.allowance}.
@@ -220,14 +281,14 @@ abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC
     /// @custom:override IERC20.totalSupply behavior with IERC7818.totalSupply behavior.
     /// @dev See {IERC7818.totalSupply}.
     function totalSupply() public pure override returns (uint256) {
-        return type(uint256).max;
+        return 0;
     }
 
     /// @custom:override IERC20.balanceOf behavior with IERC7818.balanceOf behavior.
     /// @dev See {IERC7818.balanceOf}.
     function balanceOf(address account) public view override returns (uint256) {
-        // @TODO
-        return 0;
+        (uint256 head, uint256 tail) = getWindow();
+        return getBalanceOverIndex(head, tail, account);
     }
 
     /// @custom:override IERC20.transfer behavior with IERC7818.transfer behavior.
@@ -267,12 +328,12 @@ abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC
 
     /// @dev See {IERC7818.currentEpoch}.
     function currentEpoch() public view override returns (uint256) {
-        return getEpoch(m_Window.blockNumber, block.number, m_Window.duration);
+        return getEpoch(m_Window.blockNumber, block.number, m_Window.indexDuration);
     }
 
     /// @dev See {IERC7818.epochLength}.
     function epochLength() public view override returns (uint256) {
-        return m_Window.duration;
+        return m_Window.indexDuration;
     }
 
     /// @dev See {IERC7818.epochType}.
@@ -289,13 +350,13 @@ abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC
     function isEpochExpired(uint256 epoch) public view override returns (bool) {
         uint256 current = currentEpoch();
 
-        return current > epoch + m_Window.size;
+        return current >= epoch + m_Window.size;
     }
 
     /// @dev See {IERC7818.transferAtEpoch}.
     function transferAtEpoch(uint256 epoch, address to, uint256 amount) public override returns (bool) {
         if (isEpochExpired(epoch)) {
-            // @TODO revert ();
+            revert ERC7818TransferredExpiredToken();
         }
         if (to == address(0)) {
             revert ERC20InvalidReceiver(address(0));
@@ -309,7 +370,7 @@ abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC
     /// @dev See {IERC7818.transferFromAtEpoch}.
     function transferFromAtEpoch(uint256 epoch, address from, address to, uint256 amount) public override returns (bool) {
         if (isEpochExpired(epoch)) {
-            // @TODO revert ();
+            revert ERC7818TransferredExpiredToken();
         }
         if (from == address(0)) {
             revert ERC20InvalidSpender(address(0));
@@ -325,10 +386,8 @@ abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC
     }
 
     function circulateSupply() public view returns (uint256) {
-        Window memory window = m_Window;
-        (uint256 head, uint256 tail) = getWindow(window.blockNumber, block.number, window.duration, window.size);
-
-        return getBalanceOverIndex(head, tail, window.size, address(0));
+        (uint256 head, uint256 tail) = getWindow();
+        return getBalanceOverIndex(head, tail, address(0));
     }
 
     function expiredSupply() public view returns (uint256) {
@@ -339,7 +398,7 @@ abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC
         return m_issuedSupply;
     }
 
-    function _beforeTransfer(address t_from, address t_to, uint256 t_amount) internal virtual {}
+    function _beforeTokenTransfer(address t_from, address t_to, uint256 t_amount) internal virtual {}
 
-    function _afterTransfer(address t_from, address t_to, uint256 t_amount) internal virtual {}
+    function _afterTokenTransfer(address t_from, address t_to, uint256 t_amount) internal virtual {}
 }

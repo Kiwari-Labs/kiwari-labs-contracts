@@ -39,7 +39,7 @@ library BLSW {
      * @return current The calculated epoch.
      */
     function _computeEpoch(uint256 initialBlockNumber, uint256 blockNumber, uint256 blocksPerEpoch) private pure returns (uint256 current) {
-        assembly {
+        assembly ("memory-safe") {
             if and(gt(blockNumber, initialBlockNumber), gt(initialBlockNumber, 0)) {
                 current := div(sub(blockNumber, initialBlockNumber), blocksPerEpoch)
             }
@@ -61,14 +61,10 @@ library BLSW {
         uint256 blocksPerEpoch,
         uint256 windowSize_
     ) private pure returns (uint256 fromEpoch, uint256 toEpoch) {
-        assembly {
+        assembly ("memory-safe") {
             if and(gt(blockNumber, initialBlockNumber), gt(initialBlockNumber, 0)) {
                 toEpoch := div(sub(blockNumber, initialBlockNumber), blocksPerEpoch)
-            }
-
-            let from := sub(toEpoch, windowSize_)
-            if iszero(lt(toEpoch, windowSize_)) {
-                fromEpoch := from
+                fromEpoch := mul(sub(toEpoch, windowSize_), iszero(lt(toEpoch, windowSize_)))
             }
         }
     }

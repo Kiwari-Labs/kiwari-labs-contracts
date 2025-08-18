@@ -39,7 +39,7 @@ library TLSW {
      * @return current The calculated epoch.
      */
     function _computeEpoch(uint256 initialTimestamp, uint256 currentTime, uint256 secondsPerEpoch) private pure returns (uint256 current) {
-        assembly {
+        assembly ("memory-safe") {
             if and(gt(currentTime, initialTimestamp), gt(initialTimestamp, 0)) {
                 current := div(sub(currentTime, initialTimestamp), secondsPerEpoch)
             }
@@ -61,14 +61,10 @@ library TLSW {
         uint256 secondsPerEpoch,
         uint256 windowSize_
     ) private pure returns (uint256 fromEpoch, uint256 toEpoch) {
-        assembly {
+        assembly ("memory-safe") {
             if and(gt(currentTime, initialTimestamp), gt(initialTimestamp, 0)) {
                 toEpoch := div(sub(currentTime, initialTimestamp), secondsPerEpoch)
-            }
-
-            let from := sub(toEpoch, windowSize_)
-            if iszero(lt(toEpoch, windowSize_)) {
-                fromEpoch := from
+                fromEpoch := mul(sub(toEpoch, windowSize_), iszero(lt(toEpoch, windowSize_)))
             }
         }
     }
