@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity >=0.8.0 <0.9.0;
-
 /**
- * @title ERC7818 bulk expiration.
+ * @title ERC-7818 Bulk Expiration
  * @author Kiwari Labs
- * modified from @openzeppelin/contracts v4.9.0 and v5.0.2
  */
+
+pragma solidity >=0.8.0 <0.9.0;
 
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
@@ -13,23 +12,20 @@ import {Nonces} from "@openzeppelin/contracts/utils/Nonces.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
+import {SlidingWindow} from "../../utils/algorithms/SlidingWindow.sol";
 import {IERC7818} from "./interfaces/IERC7818.sol";
 
 abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC20Permit, IERC7818 {
+    using SlidingWindow for SlidingWindow.Window;
+
     bytes32 private constant PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
-
-    struct Window {
-        uint256 blockNumber;
-        uint8 size;
-        uint40 indexDuration;
-    }
 
     string private m_name;
     string private m_symbol;
     uint256 private m_issuedSupply;
 
-    Window private m_Window;
+    SlidingWindow.Window private m_Window;
 
     mapping(uint256 => uint256) private m_epochBalances;
     mapping(uint256 => mapping(address => uint256)) private m_balances;
@@ -41,47 +37,17 @@ abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC
     error ERC2612ExpiredSignature(uint256 deadline);
     error ERC2612InvalidSigner(address signer, address owner);
 
-    constructor(string memory t_name, string memory t_symbol, Window memory t_Window) EIP712(t_name, "1") {
+    constructor(
+        string memory t_name,
+        string memory t_symbol,
+        uint256 t_init,
+        uint40 t_duration,
+        uint8 t_size,
+        bool t_safe
+    ) EIP712(t_name, "1") {
         m_name = t_name;
         m_symbol = t_symbol;
-        m_Window = t_Window;
-
-        // m_Window.blockNumber = block.number;
-        // m_Window.size = 4;
-        // m_Window.indexDuration = 1;
-    }
-
-    function getEpoch(uint256 t_initBlockNumber, uint256 t_blockNumber, uint256 t_duration) internal pure returns (uint256 epoch) {
-        assembly ("memory-safe") {
-            if and(gt(t_blockNumber, t_initBlockNumber), gt(t_initBlockNumber, 0)) {
-                epoch := div(sub(t_blockNumber, t_initBlockNumber), t_duration)
-            }
-        }
-    }
-
-    function getWindow(
-        uint256 t_initBlockNumber,
-        uint256 t_blockNumber,
-        uint256 t_duration,
-        uint256 t_windowSize
-    ) private pure returns (uint256 head, uint256 tail) {
-        assembly ("memory-safe") {
-            if and(gt(t_blockNumber, t_initBlockNumber), gt(t_initBlockNumber, 0)) {
-                tail := div(sub(t_blockNumber, t_initBlockNumber), t_duration)
-                let temp := add(tail, 1)
-                head := mul(sub(temp, t_windowSize), iszero(lt(temp, t_windowSize)))
-            }
-        }
-    }
-
-    function getEpoch(uint256 t_blockNumber) internal view returns (uint256) {
-        Window memory window = m_Window;
-        return getEpoch(window.indexDuration, t_blockNumber, window.indexDuration);
-    }
-
-    function getWindow() internal view returns (uint256, uint256) {
-        Window memory window = m_Window;
-        return getWindow(window.blockNumber, block.number, window.indexDuration, window.size);
+        m_Window.setup(t_init, t_duration, t_size, t_safe);
     }
 
     function getBalanceOverIndex(uint256 t_head, uint256 t_tail, address t_account) internal view returns (uint256 balance) {
@@ -128,7 +94,7 @@ abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC
     function _transfer(address t_from, address t_to, uint256 t_amount) internal {
         _beforeTokenTransfer(t_from, t_to, t_amount);
 
-        (uint256 head, uint256 tail) = getWindow();
+        (uint256 head, uint256 tail) = m_Window.indexRange(block.number);
         uint256 fromBalance = getBalanceOverIndex(head, tail, t_from);
         if (fromBalance < t_amount) {
             revert ERC20InsufficientBalance(t_from, fromBalance, t_amount);
@@ -287,7 +253,7 @@ abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC
     /// @custom:override IERC20.balanceOf behavior with IERC7818.balanceOf behavior.
     /// @dev See {IERC7818.balanceOf}.
     function balanceOf(address account) public view override returns (uint256) {
-        (uint256 head, uint256 tail) = getWindow();
+        (uint256 head, uint256 tail) = m_Window.indexRange(block.number);
         return getBalanceOverIndex(head, tail, account);
     }
 
@@ -328,29 +294,29 @@ abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC
 
     /// @dev See {IERC7818.currentEpoch}.
     function currentEpoch() public view override returns (uint256) {
-        return getEpoch(m_Window.blockNumber, block.number, m_Window.indexDuration);
+        return m_Window.indexFor(block.number);
     }
 
     /// @dev See {IERC7818.epochLength}.
     function epochLength() public view override returns (uint256) {
-        return m_Window.indexDuration;
+        return m_Window.duration();
     }
 
     /// @dev See {IERC7818.epochType}.
     function epochType() public pure override returns (EPOCH_TYPE) {
-        return EPOCH_TYPE.BLOCKS_BASED;
+        return EPOCH_TYPE.BLOCKS_BASED; // default
     }
 
     /// @dev See {IERC7818.validityDuration}.
     function validityDuration() public view override returns (uint256) {
-        return m_Window.size;
+        return m_Window.size();
     }
 
     /// @dev See {IERC7818.isEpochExpired}.
     function isEpochExpired(uint256 epoch) public view override returns (bool) {
         uint256 current = currentEpoch();
 
-        return current >= epoch + m_Window.size;
+        return current >= epoch + m_Window.size();
     }
 
     /// @dev See {IERC7818.transferAtEpoch}.
@@ -386,7 +352,7 @@ abstract contract ERC7818B is EIP712, Nonces, IERC20Errors, IERC20Metadata, IERC
     }
 
     function circulateSupply() public view returns (uint256) {
-        (uint256 head, uint256 tail) = getWindow();
+        (uint256 head, uint256 tail) = m_Window.indexRange(block.number);
         return getBalanceOverIndex(head, tail, address(0));
     }
 

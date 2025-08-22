@@ -13,34 +13,8 @@ contract MockERC7818PermitTLSW is ERC20TLSW, ERC7818Permit {
         uint8 windowSize_
     ) ERC20TLSW(_name, _symbol, block.timestamp, secondsPerEpoch_, windowSize_, false) ERC7818Permit(_name) {}
 
-    function _getInitialPointer() internal view virtual override(ERC20EXPBase, ERC20TLSW) returns (uint256) {
-        return super._getInitialPointer();
-    }
-
-    function _epochType() internal pure virtual override(ERC20EXPBase, ERC20TLSW) returns (EPOCH_TYPE) {
-        return super._epochType();
-    }
-
-    function _getEpoch(uint256 pointer) internal view virtual override(ERC20EXPBase, ERC20TLSW) returns (uint256) {
-        return super._getEpoch(pointer);
-    }
-
-    function _getWindowRage(
-        uint256 pointer
-    ) internal view virtual override(ERC20EXPBase, ERC20TLSW) returns (uint256 fromEpoch, uint256 toEpoch) {
-        return super._getWindowRage(pointer);
-    }
-
-    function _getWindowSize() internal view virtual override(ERC20EXPBase, ERC20TLSW) returns (uint8) {
-        return super._getWindowSize();
-    }
-
-    function _getPointersInEpoch() internal view virtual override(ERC20EXPBase, ERC20TLSW) returns (uint40) {
-        return super._getPointersInEpoch();
-    }
-
-    function _getPointersInWindow() internal view virtual override(ERC20EXPBase, ERC20TLSW) returns (uint40) {
-        return super._getPointersInWindow();
+    function epochType() public pure virtual override(ERC20EXPBase, ERC20TLSW) returns (EPOCH_TYPE) {
+        return super.epochType();
     }
 
     function _pointerProvider() internal view virtual override(ERC20EXPBase, ERC20TLSW) returns (uint256) {

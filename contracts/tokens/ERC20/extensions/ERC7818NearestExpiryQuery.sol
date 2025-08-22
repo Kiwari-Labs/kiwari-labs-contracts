@@ -6,9 +6,12 @@ pragma solidity >=0.8.0 <0.9.0;
  * @author Kiwari Labs
  */
 
+import {SlidingWindow} from "../../../utils/algorithms/SlidingWindow.sol";
 import {ERC20EXPBase} from "../ERC20EXPBase.sol";
 
 abstract contract ERC7818NearestExpiryQuery is ERC20EXPBase {
+    using SlidingWindow for SlidingWindow.Window;
+
     /**
      * @notice Retrieves the nearest expiry token for the specified account.
      * @param account The address of the account to query.
@@ -17,8 +20,8 @@ abstract contract ERC7818NearestExpiryQuery is ERC20EXPBase {
      */
     function getNearestExpiryOf(address account) public view returns (uint256 value, uint256 estimateExpiry) {
         uint256 pointer = _pointerProvider();
-        (uint256 fromEpoch, ) = _getWindowRage(pointer);
-        uint256 duration = _getPointersInWindow();
+        (uint256 fromEpoch, ) = _Window.indexRange(pointer);
+        uint256 duration = _Window.duration() * _Window.size();
         (pointer, value) = _findValidBalance(account, fromEpoch, pointer, duration);
         if (pointer != 0) {
             estimateExpiry = (pointer + duration);

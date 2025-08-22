@@ -6,11 +6,10 @@ pragma solidity >=0.8.0 <0.9.0;
  * @author Kiwari Labs
  */
 
-import {AbstractTLSW as TLSW} from "../../abstracts/AbstractTLSW.sol";
 import {ERC20EXPBase} from "./ERC20EXPBase.sol";
 import {IERC7818} from "./interfaces/IERC7818.sol";
 
-abstract contract ERC20TLSW is IERC7818, ERC20EXPBase, TLSW {
+abstract contract ERC20TLSW is IERC7818, ERC20EXPBase {
     /**
      * @notice Constructor function to initialize the token contract with specified parameters.
      * @dev Initializes the token contract by setting the name, symbol, and initializing the sliding window parameters.
@@ -28,37 +27,13 @@ abstract contract ERC20TLSW is IERC7818, ERC20EXPBase, TLSW {
         uint40 secondsPerEpoch_,
         uint8 windowSize_,
         bool development_
-    ) ERC20EXPBase(name_, symbol_) TLSW(initialBlockTimestamp_, secondsPerEpoch_, windowSize_, development_) {}
+    ) ERC20EXPBase(name_, symbol_, initialBlockTimestamp_, secondsPerEpoch_, windowSize_, development_) {}
 
-    function _getInitialPointer() internal view virtual override returns (uint256) {
-        return _getInitialTimestamp();
-    }
-
-    function _epochType() internal pure virtual override returns (EPOCH_TYPE) {
+    function epochType() public pure virtual override(ERC20EXPBase, IERC7818) returns (EPOCH_TYPE) {
         return EPOCH_TYPE.TIME_BASED;
     }
 
-    function _getEpoch(uint256 pointer) internal view virtual override returns (uint256) {
-        return _epoch(pointer);
-    }
-
-    function _getWindowRage(uint256 pointer) internal view virtual override returns (uint256 fromEpoch, uint256 toEpoch) {
-        return _windowRage(pointer);
-    }
-
-    function _getWindowSize() internal view virtual override returns (uint8) {
-        return _windowSize();
-    }
-
-    function _getPointersInEpoch() internal view virtual override returns (uint40) {
-        return _secondsInEpoch();
-    }
-
-    function _getPointersInWindow() internal view virtual override returns (uint40) {
-        return _secondsInWindow();
-    }
-
-    function _pointerProvider() internal view virtual override returns (uint256) {
-        return _blockTimestampProvider();
+    function _pointerProvider() internal view virtual override(ERC20EXPBase) returns (uint256) {
+        return block.timestamp;
     }
 }
