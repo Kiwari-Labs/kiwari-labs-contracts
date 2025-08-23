@@ -3,7 +3,7 @@ pragma solidity >=0.5.0 <0.9.0;
 
 import {SlidingWindow} from "../../../contracts/utils/algorithms/SlidingWindow.sol";
 
-contract MockBLSW {
+contract MockSlidingWindowBlock {
     using SlidingWindow for SlidingWindow.Window;
     SlidingWindow.Window public window;
 
@@ -15,7 +15,7 @@ contract MockBLSW {
         window.setup(window.initValue(), blocksPerEpoch, windowSize, safe);
     }
 
-    function getInitialBlockNumber() public view returns (uint256) {
+    function getInitValue() public view returns (uint256) {
         return window.initValue();
     }
 

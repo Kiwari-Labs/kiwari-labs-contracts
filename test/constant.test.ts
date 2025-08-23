@@ -270,7 +270,7 @@ export const SlidingWindowLibrary = {
 };
 
 export const BLSWLibrary = {
-  name: "MockBLSW",
+  name: "MockSlidingWindowBlock",
   errors: {},
   events: {},
 };

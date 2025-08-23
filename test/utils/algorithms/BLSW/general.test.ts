@@ -14,10 +14,10 @@ export const run = async () => {
       await hardhat_reset();
     });
 
-    it("[SUCCESS] getInitialBlockNumber", async function () {
+    it("[SUCCESS] getInitValue", async function () {
       const {slidingWindow} = await deployBLSW({});
       const blockNumber = await hardhat_latestBlock();
-      expect(await slidingWindow.getInitialBlockNumber()).to.equal(blockNumber);
+      expect(await slidingWindow.getInitValue()).to.equal(blockNumber);
     });
 
     it("[SUCCESS] blocksInEpoch", async function () {
