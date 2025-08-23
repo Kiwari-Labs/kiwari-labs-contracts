@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0 <0.9.0;
 
-import {ERC7858EXPBase} from "../../../../contracts/tokens/ERC721/ERC7858EXPBase.sol";
+import {ERC7858} from "../../../../contracts/tokens/ERC721/ERC7858.sol";
 
-contract MockERC7858BLSW is ERC7858EXPBase {
-    constructor(string memory _name, string memory _symbol) ERC7858EXPBase(_name, _symbol) {}
+contract MockERC7858BLSW is ERC7858 {
+    constructor(string memory _name, string memory _symbol) ERC7858(_name, _symbol) {}
 
     function expiryType() public pure override returns (EXPIRY_TYPE) {
         return EXPIRY_TYPE.BLOCKS_BASED;

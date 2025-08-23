@@ -18,7 +18,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 
-abstract contract ERC7858EpochBase is Context, ERC165, IERC721, IERC721Errors, IERC721Metadata, IERC7858Epoch {
+abstract contract ERC7858Epoch is Context, ERC165, IERC721, IERC721Errors, IERC721Metadata, IERC7858Epoch {
     using SlidingWindow for SlidingWindow.Window;
     using SortedList for SortedList.List;
     using Strings for uint256;

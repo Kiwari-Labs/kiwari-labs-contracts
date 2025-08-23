@@ -7,9 +7,9 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 
 import {SlidingWindow} from "../../../utils/algorithms/SlidingWindow.sol";
-import {ERC20EXPBase} from "../ERC20EXPBase.sol";
+import {ERC7818} from "../ERC7818.sol";
 
-abstract contract ERC7818NearestExpiryQuery is ERC20EXPBase {
+abstract contract ERC7818NearestExpiryQuery is ERC7818 {
     using SlidingWindow for SlidingWindow.Window;
 
     /**

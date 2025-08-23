@@ -20,28 +20,27 @@ yarn add --dev @kiwarilabs/contracts@stable
 
 ### ERC-7818
 
+> [!IMPORTANT]
+>  Some Layer 2 (L2) use precompiled contract or system contract for current block number instead of `block.number`.
+
 ```solidity
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {ERC20EXPBase} from "@kiwarilabs/contracts/tokens/ERC20/ERC20EXPBase.sol";
+import {ERC7818} from "@kiwarilabs/contracts/tokens/ERC20/ERC20EXPBase.sol";
 
-contract ERC7818 is ERC20EXPBase {
+contract MyToken is ERC7818 {
   constructor(
         string memory _name,
         string memory _symbol,
         uint40 blocksPerEpoch_,
         uint8 windowSize_
-    ) ERC20EXPBase(_name, _symbol, block.number, blocksPerEpoch_, windowSize_, false) {}
+    ) ERC7818(_name, _symbol, block.number, blocksPerEpoch_, windowSize_, false) {}
 
     function epochType() internal pure virtual override returns (EPOCH_TYPE) {
         return EPOCH_TYPE.BLOCKS_BASED;
     }
 
-    /**
-     * @notice In some Layer 2 (L2) use precompiled/system-contract to get block height instead of block.number.
-     * @return uint256 return the current block height.
-     */
     function _pointerProvider() internal view virtual override returns (uint256) {
         return block.number;
     }
@@ -57,12 +56,11 @@ contract ERC7818 is ERC20EXPBase {
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {ERC7858EXPBase} from "@kiwarilabs/contracts/tokens/ERC721/ERC7858EXPBase.sol";
+import {ERC7858} from "@kiwarilabs/contracts/tokens/ERC721/ERC7858.sol";
 
-// Expirable ERC721 with individual expiration
-contract ExpirableERC721 is ERC7858EXPBase {
+contract MyToken is ERC7858 {
 
-    constructor (string memory name_, string memory symbol_) ERC7858EXPBase(name_, symbol) {}
+    constructor (string memory name_, string memory symbol_) ERC7858(name_, symbol) {}
 
     function expiryType() public pure override returns (EXPIRY_TYPE) {
         return EXPIRY_TYPE.BLOCKS_BASED;
@@ -81,10 +79,9 @@ contract ExpirableERC721 is ERC7858EXPBase {
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {ERC7858EXPEpochBase} from "@kiwarilabs/contracts/tokens/ERC721/extensions/ERC7858EXPEpochBase.sol";
+import {ERC7858Epoch} from "@kiwarilabs/contracts/tokens/ERC721/extensions/ERC7858Epoch.sol";
 
-// Expirable ERC721 with epoch expiration
-contract ExpirableERC7858 is ERC7858EXPEpochBase {
+contract MyToken is ERC7858Epoch {
     
     constructor (
         string memory name_, 
@@ -92,7 +89,7 @@ contract ExpirableERC7858 is ERC7858EXPEpochBase {
         uint256 initialBlockNumber_,
         uint40 blocksPerEpoch_,
         uint8 windowSize_)
-        ERC7858EXPEpochBase(
+        ERC7858Epoch(
             name_, 
             symbol_, 
             initialBlockNumber_,
