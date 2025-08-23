@@ -2,23 +2,22 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import {ERC20EXPBase} from "../../../../../../contracts/tokens/ERC20/ERC20EXPBase.sol";
-import {ERC20BLSW} from "../../../../../../contracts/tokens/ERC20/ERC20BLSW.sol";
 import {ERC7818Blacklist} from "../../../../../../contracts/tokens/ERC20/extensions/ERC7818Blacklist.sol";
 
-contract MockERC7818BlacklistBLSW is ERC20BLSW, ERC7818Blacklist {
+contract MockERC7818BlacklistBLSW is ERC20EXPBase, ERC7818Blacklist {
     constructor(
         string memory _name,
         string memory _symbol,
         uint40 blocksPerEpoch_,
         uint8 windowSize_
-    ) ERC20BLSW(_name, _symbol, block.number, blocksPerEpoch_, windowSize_, false) {}
+    ) ERC20EXPBase(_name, _symbol, block.number, blocksPerEpoch_, windowSize_, false) {}
 
-    function epochType() public pure virtual override(ERC20EXPBase, ERC20BLSW) returns (EPOCH_TYPE) {
-        return super.epochType();
+    function epochType() public pure virtual override(ERC20EXPBase) returns (EPOCH_TYPE) {
+        return EPOCH_TYPE.BLOCKS_BASED;
     }
 
-    function _pointerProvider() internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint256) {
-        return super._pointerProvider();
+    function _pointerProvider() internal view virtual override(ERC20EXPBase) returns (uint256) {
+        return block.number;
     }
 
     function _update(address from, address to, uint256 value) internal virtual override(ERC20EXPBase, ERC7818Blacklist) {

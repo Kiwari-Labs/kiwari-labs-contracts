@@ -2,23 +2,22 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import {ERC20EXPBase} from "../../../../../../contracts/tokens/ERC20/ERC20EXPBase.sol";
-import {ERC20BLSW} from "../../../../../../contracts/tokens/ERC20/ERC20BLSW.sol";
 import {ERC7818Permit} from "../../../../../../contracts/tokens/ERC20/extensions/ERC7818Permit.sol";
 
-contract MockERC7818PermitBLSW is ERC20BLSW, ERC7818Permit {
+contract MockERC7818PermitBLSW is ERC20EXPBase, ERC7818Permit {
     constructor(
         string memory _name,
         string memory _symbol,
         uint40 secondsPerEpoch_,
         uint8 windowSize_
-    ) ERC20BLSW(_name, _symbol, block.timestamp, secondsPerEpoch_, windowSize_, false) ERC7818Permit(_name) {}
+    ) ERC20EXPBase(_name, _symbol, block.timestamp, secondsPerEpoch_, windowSize_, false) ERC7818Permit(_name) {}
 
-    function epochType() public pure virtual override(ERC20EXPBase, ERC20BLSW) returns (EPOCH_TYPE) {
-        return super.epochType();
+    function epochType() public pure virtual override(ERC20EXPBase) returns (EPOCH_TYPE) {
+        return EPOCH_TYPE.BLOCKS_BASED;
     }
 
-    function _pointerProvider() internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint256) {
-        return super._pointerProvider();
+    function _pointerProvider() internal view virtual override(ERC20EXPBase) returns (uint256) {
+        return block.number;
     }
 
     function mint(address to, uint256 value) public {

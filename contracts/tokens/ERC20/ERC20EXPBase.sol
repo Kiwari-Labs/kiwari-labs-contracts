@@ -1,11 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/**
- * @title ERC20EXP Base
- * @author Kiwari Labs
- */
-
 import {SlidingWindow} from "../../utils/algorithms/SlidingWindow.sol";
 import {SortedList} from "../../utils/datastructures/SortedList.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
@@ -40,6 +35,33 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     }
 
     /**
+     * @notice Refreshes the balance of an account for a specific epoch.
+     * @dev Updates the balances of the account by removing outdated elements
+     *      based on the duration and pointer. Shrinks the list of elements if necessary.
+     * @param account The address of the account.
+     * @param epoch The epoch for which to refresh the balance.
+     * @param pointer The current pointer value.
+     * @param duration The duration to determine outdated elements.
+     */
+    function _refreshBalanceAtEpoch(address account, uint256 epoch, uint256 pointer, uint256 duration) private {
+        Epoch storage _account = _balances[epoch][account];
+        if (!_account.list.isEmpty()) {
+            uint256 element = _account.list.front();
+            uint256 balance;
+            unchecked {
+                while (pointer - element >= duration) {
+                    balance += _account.balances[element];
+                    element = _account.list.next(element);
+                }
+            }
+            if (balance > 0) {
+                _account.list.shrink(element);
+                _account.totalBalance -= balance;
+            }
+        }
+    }
+
+    /**
      * @notice Computes the total balance of an account over a range of epochs.
      * @dev Iterates through the specified epoch range and sums up the total balance for the account.
      * @param fromEpoch The starting epoch of the range.
@@ -70,7 +92,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
         uint256 pointer,
         uint256 duration
     ) internal view returns (uint256 balance) {
-        (uint256 element, ) = _findValidBalance(account, epoch, pointer, duration);
+        (uint256 element, ) = _getValidKey(account, epoch, pointer, duration);
         Epoch storage _account = _balances[epoch][account];
         unchecked {
             while (element > 0) {
@@ -82,45 +104,12 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     }
 
     /**
-     * @notice Refreshes the balance of an account for a specific epoch.
-     * @dev Updates the balances of the account by removing outdated elements
-     *      based on the duration and pointer. Shrinks the list of elements if necessary.
-     * @param account The address of the account.
-     * @param epoch The epoch for which to refresh the balance.
-     * @param pointer The current pointer value.
-     * @param duration The duration to determine outdated elements.
-     */
-    function _refreshBalanceAtEpoch(address account, uint256 epoch, uint256 pointer, uint256 duration) private {
-        Epoch storage _account = _balances[epoch][account];
-        if (!_account.list.isEmpty()) {
-            uint256 element = _account.list.front();
-            uint256 balance;
-            unchecked {
-                while (pointer - element >= duration) {
-                    balance += _account.balances[element];
-                    element = _account.list.next(element);
-                }
-            }
-            if (balance > 0) {
-                _account.list.shrink(element);
-                _account.totalBalance -= balance;
-            }
-        }
-    }
-
-    /**
      * @notice Checks if a given epoch is expired.
      * @param epoch The epoch to check for expiration.
      * @return True if the epoch is expired, false otherwise.
      */
     function _expired(uint256 epoch) internal view returns (bool) {
-        unchecked {
-            (uint256 fromEpoch, ) = _Window.indexRange(_pointerProvider());
-            if (epoch < fromEpoch) {
-                return true;
-            }
-            return false;
-        }
+        return _Window.indexFor(_pointerProvider()) > epoch + _Window.size();
     }
 
     /**
@@ -219,36 +208,36 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     }
 
     /**
-     * @notice Finds the index of the first valid balance in a sorted list based on a given pointer.
-     * @dev Determines the first valid balance index in a sorted circular doubly linked list.
-     *      A balance index is considered valid if the difference between the current pointer
+     * @notice Retrieve the index of the first valid key in a sorted list based on a given pointer.
+     * @dev Determines the first valid key index in a sorted circular doubly linked list.
+     *      A key index is considered valid if the difference between the current pointer
      *      and the index (key) is less than the specified duration.
      *      Iterates through the list starting from the front until it finds a valid index or reaches the end.
      * @param account The address of the account.
      * @param epoch The epoch number.
      * @param pointer The reference point used for validation.
      * @param duration The maximum allowed difference between the pointer and the key.
-     * @return element The index of the first valid balance.
+     * @return key The index of the first valid key.
      * @return value The balance associated with the valid index.
      */
-    function _findValidBalance(
+    function _getValidKey(
         address account,
         uint256 epoch,
         uint256 pointer,
         uint256 duration
-    ) internal view returns (uint256 element, uint256 value) {
+    ) internal view returns (uint256 key, uint256 value) {
         SortedList.List storage list = _balances[epoch][account].list;
         if (!list.isEmpty()) {
-            element = list.front();
+            key = list.front();
             unchecked {
-                while (pointer - element >= duration) {
-                    if (element == 0) {
+                while (pointer - key >= duration) {
+                    if (key == 0) {
                         break;
                     }
-                    element = list.next(element);
+                    key = list.next(key);
                 }
             }
-            value = _balances[epoch][account].balances[element];
+            value = _balances[epoch][account].balances[key];
         }
     }
 
@@ -274,7 +263,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
      */
     function _updateAtEpoch(uint256 epoch, address from, address to, uint256 value) internal virtual {
         uint256 duration = _Window.duration() * _Window.size();
-        (uint256 element, ) = _findValidBalance(from, epoch, _pointerProvider(), duration);
+        (uint256 element, ) = _getValidKey(from, epoch, _pointerProvider(), duration);
         _refreshBalanceAtEpoch(from, epoch, element, duration);
 
         Epoch storage _spender = _balances[epoch][from];
@@ -617,8 +606,8 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     /**
      * @dev See {IERC7818-isEpochExpired}.
      */
-    function isEpochExpired(uint256 id) public view virtual returns (bool) {
-        return _expired(id);
+    function isEpochExpired(uint256 epoch) public view virtual returns (bool) {
+        return _expired(epoch);
     }
 
     /**

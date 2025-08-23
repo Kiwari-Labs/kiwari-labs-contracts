@@ -19,12 +19,12 @@ abstract contract ERC7818NearestExpiryQuery is ERC20EXPBase {
      * @return estimateExpiry The estimated expiry timestamp or block number for the account's balance.
      */
     function getNearestExpiryOf(address account) public view returns (uint256 value, uint256 estimateExpiry) {
-        uint256 pointer = _pointerProvider();
-        (uint256 fromEpoch, ) = _Window.indexRange(pointer);
+        uint256 temp = _pointerProvider();
+        (uint256 fromEpoch, ) = _Window.indexRange(temp);
         uint256 duration = _Window.duration() * _Window.size();
-        (pointer, value) = _findValidBalance(account, fromEpoch, pointer, duration);
-        if (pointer != 0) {
-            estimateExpiry = (pointer + duration);
+        (temp, value) = _getValidKey(account, fromEpoch, temp, duration);
+        if (temp != 0) {
+            estimateExpiry = (temp + duration);
         }
     }
 }
