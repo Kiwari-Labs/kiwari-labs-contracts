@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 library SlidingWindow {
     uint8 private constant MINIMUM_WINDOW_SIZE = 1;
-    uint8 private constant MAXIMUM_WINDOW_SIZE = 255;
+    uint8 private constant MAXIMUM_WINDOW_SIZE = 254;
     uint40 private constant MINIMUM_DURATION = 1;
     uint40 private constant MAXIMUM_DURATION = 31_556_926; // 1 year in second
 
@@ -70,10 +70,10 @@ library SlidingWindow {
      */
     function setup(Window storage self, uint256 t_init, uint40 t_duration, uint8 t_size, bool t_safe) internal {
         if (t_safe) {
-            if (t_duration < MINIMUM_DURATION || t_duration > MAXIMUM_DURATION) {
+            if (t_duration < MINIMUM_DURATION || t_duration >= MAXIMUM_DURATION) {
                 revert InvalidDuration();
             }
-            if (t_size < MINIMUM_WINDOW_SIZE || t_size > MAXIMUM_WINDOW_SIZE) {
+            if (t_size < MINIMUM_WINDOW_SIZE || t_size >= MAXIMUM_WINDOW_SIZE) {
                 revert InvalidSize();
             }
         }

@@ -72,7 +72,7 @@ export const run = async () => {
       const {slidingWindow} = await deployBLSW({});
       await expect(slidingWindow.updateWindow(constants.DEFAULT_BLOCKS_PER_EPOCH, invalidWidowSize, true)).to.be.revertedWithCustomError(
         slidingWindow,
-        SlidingWindow.errors.InvalidWindowSize,
+        SlidingWindow.errors.InvalidSize,
       );
     });
 
@@ -81,7 +81,7 @@ export const run = async () => {
       const {slidingWindow} = await deployBLSW({});
       await expect(slidingWindow.updateWindow(constants.DEFAULT_BLOCKS_PER_EPOCH, invalidWidowSize, true)).to.be.revertedWithCustomError(
         slidingWindow,
-        SlidingWindow.errors.InvalidWindowSize,
+        SlidingWindow.errors.InvalidSize,
       );
     });
   });
