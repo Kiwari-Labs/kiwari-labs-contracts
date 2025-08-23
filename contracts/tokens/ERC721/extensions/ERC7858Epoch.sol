@@ -1,11 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/**
- * @title ERC721Epoch base
- * @author Kiwari Labs
- */
-
 import {SlidingWindow} from "../../../utils/algorithms/SlidingWindow.sol";
 import {SortedList} from "../../../utils/datastructures/SortedList.sol";
 import {IERC7858} from "../interfaces/IERC7858.sol";

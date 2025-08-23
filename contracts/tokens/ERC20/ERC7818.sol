@@ -594,7 +594,7 @@ abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
     /**
      * @dev See {IERC7818-epochType}.
      */
-    function epochType() public pure virtual returns (EPOCH_TYPE) {}
+    function epochType() public view virtual returns (EPOCH_TYPE) {}
 
     /**
      * @dev See {IERC7818-validityDuration}.

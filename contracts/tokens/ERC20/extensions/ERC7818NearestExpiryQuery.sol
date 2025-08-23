@@ -1,11 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/**
- * @title ERC7818 Nearest Expiry Query
- * @author Kiwari Labs
- */
-
 import {SlidingWindow} from "../../../utils/algorithms/SlidingWindow.sol";
 import {ERC7818} from "../ERC7818.sol";
 

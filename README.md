@@ -16,7 +16,7 @@ Install via `yarn`
 yarn add --dev @kiwarilabs/contracts@stable
 ```
 
-## Usage
+## Example Usage
 
 ### ERC-7818
 
@@ -30,7 +30,7 @@ pragma solidity ^0.8.0;
 import {ERC7818} from "@kiwarilabs/contracts/tokens/ERC20/ERC20EXPBase.sol";
 
 contract MyToken is ERC7818 {
-  constructor(
+    constructor(
         string memory _name,
         string memory _symbol,
         uint40 blocksPerEpoch_,
@@ -44,7 +44,6 @@ contract MyToken is ERC7818 {
     function _pointerProvider() internal view virtual override returns (uint256) {
         return block.number;
     }
-
 }
 ```
 
@@ -59,7 +58,6 @@ pragma solidity ^0.8.0;
 import {ERC7858} from "@kiwarilabs/contracts/tokens/ERC721/ERC7858.sol";
 
 contract MyToken is ERC7858 {
-
     constructor (string memory name_, string memory symbol_) ERC7858(name_, symbol) {}
 
     function expiryType() public pure override returns (EXPIRY_TYPE) {
@@ -69,7 +67,6 @@ contract MyToken is ERC7858 {
     function _pointerProvider() internal view virtual override returns (uint256) {
         return block.number;
     }
-
 }
 ```
 
@@ -82,7 +79,6 @@ pragma solidity ^0.8.0;
 import {ERC7858Epoch} from "@kiwarilabs/contracts/tokens/ERC721/extensions/ERC7858Epoch.sol";
 
 contract MyToken is ERC7858Epoch {
-    
     constructor (
         string memory name_, 
         string memory symbol_, 
@@ -104,9 +100,7 @@ contract MyToken is ERC7858Epoch {
     function _pointerProvider() internal view virtual override returns (uint256) {
         return block.number;
     }
-
 }
-
 ```
 
 ## Contribute

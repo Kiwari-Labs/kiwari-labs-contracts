@@ -1,12 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-/// @author Kirawri Labs
 pragma solidity >=0.8.0 <0.9.0;
 
 import {ERC7818} from "../ERC7818.sol";
 
-/**
- * @dev See https://eips.ethereum.org/EIPS/eip-2980
- */
 abstract contract ERC7818Frozen is ERC7818 {
     /**
      * @dev Custom error for when an account is frozen.
