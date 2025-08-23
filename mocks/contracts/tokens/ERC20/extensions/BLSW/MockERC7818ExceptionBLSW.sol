@@ -14,11 +14,11 @@ contract MockERC7818ExceptionBLSW is ERC20EXPBase, ERC7818Exception {
         uint8 windowSize_
     ) ERC20EXPBase(_name, _symbol, block.number, blocksPerEpoch_, windowSize_, false) {}
 
-    function epochType() public pure virtual override(ERC20EXPBase) returns (EPOCH_TYPE) {
+    function epochType() public pure virtual override returns (EPOCH_TYPE) {
         return EPOCH_TYPE.BLOCKS_BASED;
     }
 
-    function _pointerProvider() internal view virtual override(ERC20EXPBase) returns (uint256) {
+    function _pointerProvider() internal view virtual override returns (uint256) {
         return block.number;
     }
 

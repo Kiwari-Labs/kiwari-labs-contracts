@@ -21,52 +21,31 @@ yarn add --dev @kiwarilabs/contracts@stable
 ### ERC-7818
 
 ```solidity
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 import {ERC20EXPBase} from "@kiwarilabs/contracts/tokens/ERC20/ERC20EXPBase.sol";
-import {ERC20BLSW} from "@kiwarilabs/contracts/tokens/ERC20/ERC20BLSW.sol";
 
-contract ExpirableERC20 is ERC20BLSW {
+contract ERC7818 is ERC20EXPBase {
   constructor(
         string memory _name,
         string memory _symbol,
         uint40 blocksPerEpoch_,
         uint8 windowSize_
-    ) ERC20BLSW(_name, _symbol, block.number, blocksPerEpoch_, windowSize_, false) {}
+    ) ERC20EXPBase(_name, _symbol, block.number, blocksPerEpoch_, windowSize_, false) {}
 
-    function _epochType() internal pure virtual override(ERC20EXPBase, ERC20BLSW) returns (EPOCH_TYPE) {
-        return super._epochType();
+    function epochType() internal pure virtual override returns (EPOCH_TYPE) {
+        return EPOCH_TYPE.BLOCKS_BASED;
     }
 
-    function _getEpoch(uint256 pointer) internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint256) {
-        return super._getEpoch(pointer);
+    /**
+     * @notice In some Layer 2 (L2) use precompiled/system-contract to get block height instead of block.number.
+     * @return uint256 return the current block height.
+     */
+    function _pointerProvider() internal view virtual override returns (uint256) {
+        return block.number;
     }
 
-    function _getWindowRage(
-        uint256 pointer
-    ) internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint256 fromEpoch, uint256 toEpoch) {
-        return super._getWindowRage(pointer);
-    }
-
-    function _getWindowSize() internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint8) {
-        return super._getWindowSize();
-    }
-
-    function _getPointersInEpoch() internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint40) {
-        return super._getPointersInEpoch();
-    }
-
-    function _getPointersInWindow() internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint40) {
-        return super._getPointersInWindow();
-    }
-
-    /// @notice In some Layer 2 (L2) use pre-compiled/system-contract to get block height instead of block.number.
-    /// @dev Retrieve block.number as pointer in block-based lazy sliding window.
-    /// @return uint256 return the current block height.
-    function _pointerProvider() internal view virtual override(ERC20EXPBase, ERC20BLSW) returns (uint256) {
-        return super._pointerProvider();
-    }
 }
 ```
 
@@ -75,16 +54,23 @@ contract ExpirableERC20 is ERC20BLSW {
 #### Individual Expiration
 
 ``` Solidity
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {ERC7858BLSW} from "@kiwarilabs/contracts/tokens/ERC721/ERC7858BLSW.sol";
 import {ERC7858EXPBase} from "@kiwarilabs/contracts/tokens/ERC721/ERC7858EXPBase.sol";
 
 // Expirable ERC721 with individual expiration
-contract ExpirableERC721 is ERC7858BLSW {
+contract ExpirableERC721 is ERC7858EXPBase {
 
-    constructor (string memory name_, string memory symbol_) ERC7858BLSW(name_, symbol) {}
+    constructor (string memory name_, string memory symbol_) ERC7858EXPBase(name_, symbol) {}
+
+    function expiryType() public pure override returns (EXPIRY_TYPE) {
+        return EXPIRY_TYPE.BLOCKS_BASED;
+    }
+
+    function _pointerProvider() internal view virtual override returns (uint256) {
+        return block.number;
+    }
 
 }
 ```
@@ -92,29 +78,35 @@ contract ExpirableERC721 is ERC7858BLSW {
 #### Epoch Expiration
 
 ``` Solidity
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {ERC7858EpochBLSW} from "@kiwarilabs/contracts/tokens/ERC721/extensions/ERC7858EpochBLSW.sol";
 import {ERC7858EXPEpochBase} from "@kiwarilabs/contracts/tokens/ERC721/extensions/ERC7858EXPEpochBase.sol";
 
 // Expirable ERC721 with epoch expiration
-contract ExpirableERC7858 is ERC7858EpochBLSW {
+contract ExpirableERC7858 is ERC7858EXPEpochBase {
     
     constructor (
         string memory name_, 
         string memory symbol_, 
         uint256 initialBlockNumber_,
         uint40 blocksPerEpoch_,
-        uint8 windowSize_,
-        bool development_) 
-        ERC7858EpochBLSW(
+        uint8 windowSize_)
+        ERC7858EXPEpochBase(
             name_, 
             symbol_, 
             initialBlockNumber_,
             blocksPerEpoch_,
             windowSize_,
             development) {}
+
+    function expiryType() public pure override returns (EXPIRY_TYPE) {
+        return EXPIRY_TYPE.BLOCKS_BASED;
+    }
+
+    function _pointerProvider() internal view virtual override returns (uint256) {
+        return block.number;
+    }
 
 }
 
