@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/// @title ERC-7858 Epoch
+/**
+ * @title ERC-7858 interface extension epoch based
+ * @dev Interface extension for adding epoch based expirable functionality to ERC721 and SBT tokens.
+ * see https://eips.ethereum.org/EIPS/eip-7858
+ */
 
 import {IERC7858} from "./IERC7858.sol";
 
@@ -19,12 +23,6 @@ interface IERC7858Epoch is IERC7858 {
      * @notice The unit of the epoch length is determined by the `validityPeriodType` function.
      */
     function epochLength() external view returns (uint256);
-
-    /**
-     * @dev Returns the type of the epoch.
-     * @return EXPIRY_TYPE  Enum value indicating the unit of an epoch.
-     */
-    function epochType() external view returns (EXPIRY_TYPE);
 
     /**
      * @dev Checks whether a specific `epoch` is expired.

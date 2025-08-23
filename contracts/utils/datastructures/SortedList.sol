@@ -125,6 +125,16 @@ library SortedList {
     }
 
     /**
+     * @notice clear is the 'lazy' approach to reset a list without cleaning up nodes.
+     * @dev updates the sentinel to zero without traversing and cleaning up the nodes.
+     * @param self The list to modify.
+     */
+    function clear(List storage self) internal {
+        self._nodes[SENTINEL][NEXT] = SENTINEL; // forced link sentinel to new front
+        self._nodes[SENTINEL][PREVIOUS] = SENTINEL; // forced link previous of element to sentinel
+    }
+
+    /**
      * @notice Check if a node exists in the linked list.
      * @dev This function checks if a node exists in the linked list by the specified element.
      * @param self The linked list.

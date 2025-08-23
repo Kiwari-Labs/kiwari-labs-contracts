@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {ERC20EXPBase} from "../ERC20EXPBase.sol";
+import {ERC7818} from "../ERC7818.sol";
 
-/**
- * @title ERC7818 Exception extension
- * @author Kiwari Labs
- */
-abstract contract ERC7818Exception is ERC20EXPBase {
+abstract contract ERC7818Exception is ERC7818 {
     /**
      * @notice Emitted when an address is added to the exception
      * @param caller Operate by the address

@@ -36,11 +36,6 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
       expect(await erc7858Epoch.expiryType()).to.equal(epochType);
     });
 
-    it("[SUCCESS] epochType", async function () {
-      const {erc7858Epoch} = await deployERC7858EpochSelector({epochType});
-      expect(await erc7858Epoch.epochType()).to.equal(epochType);
-    });
-
     it("[SUCCESS] validityDuration", async function () {
       const {erc7858Epoch} = await deployERC7858EpochSelector({epochType});
       expect(await erc7858Epoch.validityDuration()).to.equal(constants.DEFAULT_WINDOW_SIZE);
@@ -107,7 +102,7 @@ export const run = async ({epochType = constants.EPOCH_TYPE.BLOCKS_BASED}) => {
 
     it("[SUCCESS] supportsInterface ERC-7858Epoch", async function () {
       const {erc7858Epoch} = await deployERC7858EpochSelector({epochType});
-      expect(await erc7858Epoch.supportsInterface("0x8f55b98a")).to.equal(true);
+      expect(await erc7858Epoch.supportsInterface("0xec7ffd66")).to.equal(true);
     });
 
     it("[FAILED] unexpiredBalanceOfAtEpoch expiredEpoch", async function () {

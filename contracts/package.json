@@ -1,7 +1,7 @@
 {
   "private": false,
   "name": "@kiwarilabs/contracts",
-  "version": "1.0.2-rc2",
+  "version": "2.0.0-rc1",
   "license": "Apache-2.0",
   "author": "kiwari-labs <kiwarilabs@protonmail.com> (https://github.com/Kiwari-Labs)",
   "repository": {

@@ -5,7 +5,7 @@
 
 import {ethers} from "hardhat";
 import {BLSWLibrary, constants} from "../../../constant.test";
-import {MockBLSW} from "../../../../typechain-types/mocks/contracts/utils";
+import {MockSlidingWindowBlock} from "../../../../typechain-types/mocks/contracts/utils";
 
 export interface Window {
   _blocksPerEpoch: number;
@@ -40,7 +40,7 @@ export const deployBLSW = async function ({
 }) {
   const [deployer, alice, bob, charlie] = await ethers.getSigners();
   const BLSW = await ethers.getContractFactory(BLSWLibrary.name, deployer);
-  const slidingWindow = (await BLSW.deploy(startBlockNumber, blocksPerEpoch, windowSize, development)) as any as MockBLSW;
+  const slidingWindow = (await BLSW.deploy(startBlockNumber, blocksPerEpoch, windowSize, development)) as any as MockSlidingWindowBlock;
   await slidingWindow.waitForDeployment();
 
   return {
