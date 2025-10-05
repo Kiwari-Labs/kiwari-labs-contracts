@@ -1,26 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/*
- * @title ERC20EXP Base
- * @author Kiwari Labs
- */
-
+import {SlidingWindow} from "../../utils/algorithms/SlidingWindow.sol";
 import {SortedList} from "../../utils/datastructures/SortedList.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {IERC7818} from "./interfaces/IERC7818.sol";
 
-/**
- * @title ERC20EXP Base
- * @author Kiwari Labs
- */
-abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC7818 {
+abstract contract ERC7818 is Context, IERC20Errors, IERC20Metadata, IERC7818 {
+    using SlidingWindow for SlidingWindow.Window;
     using SortedList for SortedList.List;
-
-    string private _name;
-    string private _symbol;
 
     struct Epoch {
         uint256 totalBalance;
@@ -28,13 +18,47 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
         SortedList.List list;
     }
 
+    string private _name;
+    string private _symbol;
+
+    SlidingWindow.Window internal _Window;
+
     mapping(uint256 epoch => mapping(address account => Epoch)) private _balances;
     mapping(address owner => mapping(address spender => uint256 amount)) private _allowances;
     mapping(uint256 pointer => uint256 balance) private _worldStateBalances;
 
-    constructor(string memory name_, string memory symbol_) {
+    constructor(string memory name_, string memory symbol_, uint256 initBlockNumber_, uint40 duration_, uint8 size_, bool development_) {
         _name = name_;
         _symbol = symbol_;
+
+        _Window.setup(initBlockNumber_, duration_, size_, development_);
+    }
+
+    /**
+     * @notice Refreshes the balance of an account for a specific epoch.
+     * @dev Updates the balances of the account by removing outdated elements
+     *      based on the duration and pointer. Shrinks the list of elements if necessary.
+     * @param account The address of the account.
+     * @param epoch The epoch for which to refresh the balance.
+     * @param pointer The current pointer value.
+     * @param duration The duration to determine outdated elements.
+     */
+    function _refreshBalanceAtEpoch(address account, uint256 epoch, uint256 pointer, uint256 duration) private {
+        Epoch storage _account = _balances[epoch][account];
+        if (!_account.list.isEmpty()) {
+            uint256 element = _account.list.front();
+            uint256 balance;
+            unchecked {
+                while (pointer - element >= duration) {
+                    balance += _account.balances[element];
+                    element = _account.list.next(element);
+                }
+            }
+            if (balance > 0) {
+                _account.list.shrink(element);
+                _account.totalBalance -= balance;
+            }
+        }
     }
 
     /**
@@ -68,7 +92,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
         uint256 pointer,
         uint256 duration
     ) internal view returns (uint256 balance) {
-        (uint256 element, ) = _findValidBalance(account, epoch, pointer, duration);
+        (uint256 element, ) = _getValidKey(account, epoch, pointer, duration);
         Epoch storage _account = _balances[epoch][account];
         unchecked {
             while (element > 0) {
@@ -80,45 +104,12 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     }
 
     /**
-     * @notice Refreshes the balance of an account for a specific epoch.
-     * @dev Updates the balances of the account by removing outdated elements
-     *      based on the duration and pointer. Shrinks the list of elements if necessary.
-     * @param account The address of the account.
-     * @param epoch The epoch for which to refresh the balance.
-     * @param pointer The current pointer value.
-     * @param duration The duration to determine outdated elements.
-     */
-    function _refreshBalanceAtEpoch(address account, uint256 epoch, uint256 pointer, uint256 duration) private {
-        Epoch storage _account = _balances[epoch][account];
-        if (!_account.list.isEmpty()) {
-            uint256 element = _account.list.front();
-            uint256 balance;
-            unchecked {
-                while (pointer - element >= duration) {
-                    balance += _account.balances[element];
-                    element = _account.list.next(element);
-                }
-            }
-            if (balance > 0) {
-                _account.list.shrink(element);
-                _account.totalBalance -= balance;
-            }
-        }
-    }
-
-    /**
      * @notice Checks if a given epoch is expired.
      * @param epoch The epoch to check for expiration.
      * @return True if the epoch is expired, false otherwise.
      */
     function _expired(uint256 epoch) internal view returns (bool) {
-        unchecked {
-            (uint256 fromEpoch, ) = _getWindowRage(_pointerProvider());
-            if (epoch < fromEpoch) {
-                return true;
-            }
-            return false;
-        }
+        return _Window.indexFor(_pointerProvider()) > epoch + _Window.size();
     }
 
     /**
@@ -131,7 +122,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     function _update(uint256 pointer, address from, address to, uint256 value) private {
         if (from == address(0)) {
             // mint token to current epoch.
-            uint256 epoch = _getEpoch(pointer);
+            uint256 epoch = _Window.indexFor(pointer);
             Epoch storage _recipient = _balances[epoch][to];
             unchecked {
                 _recipient.totalBalance += value;
@@ -140,9 +131,8 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
             }
             _recipient.list.insert(pointer, false);
         } else {
-            uint256 pointerLengthCache = _getPointersInWindow();
-            (uint256 fromEpoch, uint256 toEpoch) = _getWindowRage(pointer);
-            _refreshBalanceAtEpoch(from, fromEpoch, pointer, pointerLengthCache);
+            (uint256 fromEpoch, uint256 toEpoch) = _Window.indexRange(pointer);
+            _refreshBalanceAtEpoch(from, fromEpoch, pointer, _Window.duration() * _Window.size());
             uint256 balance = _computeBalanceOverEpochRange(fromEpoch, toEpoch, from);
             if (balance < value) {
                 revert ERC20InsufficientBalance(from, balance, value);
@@ -218,36 +208,36 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
     }
 
     /**
-     * @notice Finds the index of the first valid balance in a sorted list based on a given pointer.
-     * @dev Determines the first valid balance index in a sorted circular doubly linked list.
-     *      A balance index is considered valid if the difference between the current pointer
+     * @notice Retrieve the index of the first valid key in a sorted list based on a given pointer.
+     * @dev Determines the first valid key index in a sorted circular doubly linked list.
+     *      A key index is considered valid if the difference between the current pointer
      *      and the index (key) is less than the specified duration.
      *      Iterates through the list starting from the front until it finds a valid index or reaches the end.
      * @param account The address of the account.
      * @param epoch The epoch number.
      * @param pointer The reference point used for validation.
      * @param duration The maximum allowed difference between the pointer and the key.
-     * @return element The index of the first valid balance.
+     * @return key The index of the first valid key.
      * @return value The balance associated with the valid index.
      */
-    function _findValidBalance(
+    function _getValidKey(
         address account,
         uint256 epoch,
         uint256 pointer,
         uint256 duration
-    ) internal view returns (uint256 element, uint256 value) {
+    ) internal view returns (uint256 key, uint256 value) {
         SortedList.List storage list = _balances[epoch][account].list;
         if (!list.isEmpty()) {
-            element = list.front();
+            key = list.front();
             unchecked {
-                while (pointer - element >= duration) {
-                    if (element == 0) {
+                while (pointer - key >= duration) {
+                    if (key == 0) {
                         break;
                     }
-                    element = list.next(element);
+                    key = list.next(key);
                 }
             }
-            value = _balances[epoch][account].balances[element];
+            value = _balances[epoch][account].balances[key];
         }
     }
 
@@ -272,8 +262,8 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
      * @param value The amount to transfer.
      */
     function _updateAtEpoch(uint256 epoch, address from, address to, uint256 value) internal virtual {
-        uint256 duration = _getPointersInWindow();
-        (uint256 element, ) = _findValidBalance(from, epoch, _pointerProvider(), duration);
+        uint256 duration = _Window.duration() * _Window.size();
+        (uint256 element, ) = _getValidKey(from, epoch, _pointerProvider(), duration);
         _refreshBalanceAtEpoch(from, epoch, element, duration);
 
         Epoch storage _spender = _balances[epoch][from];
@@ -474,7 +464,9 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
         list = _balances[epoch][account].list.toArray();
     }
 
-    /// @custom:gas-inefficiency if not limit the size of array
+    /**
+     * @custom:gas-inefficiency if not limit the size of array
+     */
     function tokenList(address account, uint256 epoch, uint256 start) external view virtual returns (uint256[] memory list) {
         list = _balances[epoch][account].list.toArray(start);
     }
@@ -497,7 +489,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
      * @dev See {IERC20Metadata-decimals}.
      */
     function decimals() public view virtual returns (uint8) {
-        return 18;
+        return 18; // default
     }
 
     /**
@@ -516,8 +508,8 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
      */
     function balanceOf(address account) public view virtual returns (uint256) {
         uint256 pointer = _pointerProvider();
-        (uint256 fromEpoch, uint256 toEpoch) = _getWindowRage(pointer);
-        uint256 balance = _computeBalanceAtEpoch(fromEpoch, account, pointer, _getPointersInWindow());
+        (uint256 fromEpoch, uint256 toEpoch) = _Window.indexRange(pointer);
+        uint256 balance = _computeBalanceAtEpoch(fromEpoch, account, pointer, _Window.duration() * _Window.size());
         if (fromEpoch == toEpoch) {
             return balance;
         } else {
@@ -532,7 +524,7 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
      * @return The initial pointer value.
      */
     function getInitialPointer() public view virtual returns (uint256) {
-        return _getInitialPointer();
+        return _Window.initValue();
     }
 
     /**
@@ -575,12 +567,12 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
      */
     function balanceOfAtEpoch(uint256 epoch, address account) external view virtual returns (uint256) {
         uint256 pointer = _pointerProvider();
-        (uint256 fromEpoch, uint256 toEpoch) = _getWindowRage(pointer);
+        (uint256 fromEpoch, uint256 toEpoch) = _Window.indexRange(pointer);
         if (epoch < fromEpoch || epoch > toEpoch) {
             return 0;
         }
         if (epoch == fromEpoch) {
-            return _computeBalanceAtEpoch(epoch, account, pointer, _getPointersInWindow());
+            return _computeBalanceAtEpoch(epoch, account, pointer, _Window.duration() * _Window.size());
         }
         return _balances[epoch][account].totalBalance;
     }
@@ -589,35 +581,33 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
      * @dev See {IERC7818-currentEpoch}.
      */
     function currentEpoch() public view virtual returns (uint256) {
-        return _getEpoch(_pointerProvider());
+        return _Window.indexFor(_pointerProvider());
     }
 
     /**
      * @dev See {IERC7818-epochLength}.
      */
     function epochLength() public view virtual returns (uint256) {
-        return _getPointersInEpoch();
+        return _Window.duration();
     }
 
     /**
      * @dev See {IERC7818-epochType}.
      */
-    function epochType() public pure virtual returns (EPOCH_TYPE) {
-        return _epochType();
-    }
+    function epochType() public view virtual returns (EPOCH_TYPE) {}
 
     /**
      * @dev See {IERC7818-validityDuration}.
      */
     function validityDuration() public view virtual returns (uint256) {
-        return _getWindowSize();
+        return _Window.size();
     }
 
     /**
      * @dev See {IERC7818-isEpochExpired}.
      */
-    function isEpochExpired(uint256 id) public view virtual returns (bool) {
-        return _expired(id);
+    function isEpochExpired(uint256 epoch) public view virtual returns (bool) {
+        return _expired(epoch);
     }
 
     /**
@@ -644,20 +634,6 @@ abstract contract ERC20EXPBase is Context, IERC20Errors, IERC20Metadata, IERC781
         _transferAtEpoch(epoch, from, to, value);
         return true;
     }
-
-    function _getInitialPointer() internal view virtual returns (uint256) {}
-
-    function _epochType() internal pure virtual returns (EPOCH_TYPE) {}
-
-    function _getEpoch(uint256 pointer) internal view virtual returns (uint256) {}
-
-    function _getWindowRage(uint256 pointer) internal view virtual returns (uint256 fromEpoch, uint256 toEpoch) {}
-
-    function _getWindowSize() internal view virtual returns (uint8) {}
-
-    function _getPointersInEpoch() internal view virtual returns (uint40) {}
-
-    function _getPointersInWindow() internal view virtual returns (uint40) {}
 
     function _pointerProvider() internal view virtual returns (uint256) {}
 }

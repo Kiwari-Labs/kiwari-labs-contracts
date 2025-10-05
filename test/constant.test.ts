@@ -16,9 +16,9 @@ export const constants = {
   DEFAULT_BLOCKS_PER_EPOCH: 300,
   DEFAULT_WINDOW_SIZE: 2,
   MIN_WINDOW_SIZE: 1,
-  MAX_WINDOW_SIZE: 32,
-  MIN_BLOCKS_PER_EPOCH: 300,
-  MAX_BLOCKS_PER_EPOCH: 2_629_744,
+  MAX_WINDOW_SIZE: 254,
+  MIN_BLOCKS_PER_EPOCH: 1,
+  MAX_BLOCKS_PER_EPOCH: 31_556_926_000,
   YEAR_IN_MILLISECONDS: 31_556_926_000,
 };
 
@@ -26,7 +26,7 @@ export const SlidingWindow = {
   name: "MockSlidingWindow",
   errors: {
     InvalidDuration: "InvalidDuration",
-    InvalidWindowSize: "InvalidWindowSize",
+    InvalidSize: "InvalidSize",
   },
   events: {},
 };
@@ -270,7 +270,7 @@ export const SlidingWindowLibrary = {
 };
 
 export const BLSWLibrary = {
-  name: "MockBLSW",
+  name: "MockSlidingWindowBlock",
   errors: {},
   events: {},
 };

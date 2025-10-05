@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0 <0.9.0;
 
-import {ERC7858EpochTLSW as ERC7858} from "../../../../../../contracts/tokens/ERC721/extensions/ERC7858EpochTLSW.sol";
+import {ERC7858Epoch as ERC7858} from "../../../../../../contracts/tokens/ERC721/extensions/ERC7858Epoch.sol";
 
 contract MockERC7858EpochTLSW is ERC7858 {
     constructor(
@@ -10,6 +10,14 @@ contract MockERC7858EpochTLSW is ERC7858 {
         uint40 secondsPerEpoch_,
         uint8 windowSize_
     ) ERC7858(name_, symbol_, block.timestamp, secondsPerEpoch_, windowSize_, false) {}
+
+    function expiryType() public pure override returns (EXPIRY_TYPE) {
+        return EXPIRY_TYPE.TIME_BASED;
+    }
+
+    function _pointerProvider() internal view virtual override returns (uint256) {
+        return block.timestamp;
+    }
 
     function mint(address to, uint256 tokenId) public {
         _mint(to, tokenId);

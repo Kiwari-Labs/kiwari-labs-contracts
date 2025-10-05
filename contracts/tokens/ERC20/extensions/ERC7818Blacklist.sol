@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {ERC20EXPBase} from "../ERC20EXPBase.sol";
+import {ERC7818} from "../ERC7818.sol";
 
-/**
- * @title ERC7818 Blacklist extension
- * @author Kiwari Labs
- */
-abstract contract ERC7818Blacklist is ERC20EXPBase {
+abstract contract ERC7818Blacklist is ERC7818 {
     /**
      * @notice Emitted when an account is added to the blacklist.
      * @dev This event is triggered when an account is successfully added to the blacklist.

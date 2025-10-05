@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {ERC20EXPBase} from "../ERC20EXPBase.sol";
+import {ERC7818} from "../ERC7818.sol";
 
-/**
- * @title ERC7818 Frozen extension
- * @author Kiwari Labs
- */
-abstract contract ERC7818Frozen is ERC20EXPBase {
+abstract contract ERC7818Frozen is ERC7818 {
     /**
      * @dev Custom error for when an account is frozen.
      * @param account The address of the account.

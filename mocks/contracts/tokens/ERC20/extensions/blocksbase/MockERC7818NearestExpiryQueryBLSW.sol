@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0 <0.9.0;
 
-import {ERC7818} from "../../../../contracts/tokens/ERC20/ERC7818.sol";
+import {ERC7818} from "../../../../../../contracts/tokens/ERC20/ERC7818.sol";
+import {ERC7818NearestExpiryQuery} from "../../../../../../contracts/tokens/ERC20/extensions/ERC7818NearestExpiryQuery.sol";
 
-contract MockERC20BLSW is ERC7818 {
+contract MockERC7818NearestExpiryQueryBLSW is ERC7818, ERC7818NearestExpiryQuery {
     constructor(
         string memory _name,
         string memory _symbol,
@@ -21,9 +22,5 @@ contract MockERC20BLSW is ERC7818 {
 
     function mint(address to, uint256 value) public {
         _mint(to, value);
-    }
-
-    function burn(address from, uint256 value) public {
-        _burn(from, value);
     }
 }

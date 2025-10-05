@@ -1,18 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-/**
- * @title ERC721EXP Base
- * @dev ERC721EXP Base contract each token have individual expiration date.
- * @author Kiwari Labs
- */
-
 import {IERC7858} from "./interfaces/IERC7858.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
-abstract contract ERC7858EXPBase is ERC721, ERC721Enumerable, IERC7858 {
+abstract contract ERC7858 is ERC721, ERC721Enumerable, IERC7858 {
     struct AssetTimeStamp {
         uint256 start;
         uint256 end;
@@ -85,6 +79,9 @@ abstract contract ERC7858EXPBase is ERC721, ERC721Enumerable, IERC7858 {
         return _validation(tokenId);
     }
 
+    /**
+     * @dev See {IERC7858-expiryType}.
+     */
     function expiryType() public view virtual returns (EXPIRY_TYPE) {}
 
     function _pointerProvider() internal view virtual returns (uint256) {}
